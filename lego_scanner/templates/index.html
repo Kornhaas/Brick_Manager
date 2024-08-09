@@ -17,8 +17,8 @@
         </div>
       {% endif %}
     {% endwith %}
-    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="text-center mt-4">
-        <input type="file" name="file" accept="image/*" class="form-control mb-3" required>
+    <form action="{{ url_for('upload.upload') }}" method="post" enctype="multipart/form-data" class="text-center mt-4">
+      <input type="file" name="file" accept="image/*" class="form-control mb-3" required>
         <button type="submit" class="btn btn-primary">Upload and Scan</button>
     </form>
 </body>

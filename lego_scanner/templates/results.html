@@ -18,31 +18,21 @@
                     <p class="card-text">Category: {{ item['category'] }}</p>
                     <p class="card-text">Score: {{ "%.6f" % item['score'] }}</p>
                     {% if item['lookup_info'] %}
-                        <p class="card-text">Location: {{ item['lookup_info']['location'] }}</p>
-                        <p class="card-text">Level: {{ item['lookup_info']['level'] }}</p>
+                        <p class="card-text">Schrank: {{ item['lookup_info']['location'] }}</p>
+                        <p class="card-text">Fach: {{ item['lookup_info']['level'] }}</p>
                         <p class="card-text">Box: {{ item['lookup_info']['box'] }}</p>
                     {% endif %}
+                    
+                    <!-- Add to Storage Button -->
+                    <a href="{{ url_for('storage.add_to_storage', id=item['id']) }}" class="btn btn-success">Add to Storage</a>
+                    
+                    <!-- Create Label Button -->
+                    <a href="{{ url_for('label.create_label', id=item['id']) }}" class="btn btn-primary">Create Label</a>
                 </div>
             </div>
         {% endfor %}
     {% else %}
         <p>No results found.</p>
     {% endif %}
-    <form action="{{ url_for('add_to_storage') }}" method="post" class="text-center mt-4">
-        <h3>Add to Storage</h3>
-        <div class="mb-3">
-            <label for="location" class="form-label">Schrank:</label>
-            <input type="number" name="location" id="location" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="level" class="form-label">Fach:</label>
-            <input type="number" name="level" id="level" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="box" class="form-label">Box:</label>
-            <input type="number" name="box" id="box" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-success">Save</button>
-    </form>
 </body>
 </html>
