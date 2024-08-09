@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "lego_scanner"
+version = "0.0.1"
+description = "Tool for managing my Lego collection"
+authors = ["Holger Kornhaas <Holger@Kornhaas.net>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "^3.0.3"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
