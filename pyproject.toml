@@ -11,6 +11,8 @@ flask = "^3.0.3"
 requests = "^2.32.3"
 pillow = "^10.4.0"
 reportlab = "^4.2.2"
+pywin32 = "^306"
+pylint = "^3.2.6"
 
 
 [build-system]

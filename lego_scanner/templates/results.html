@@ -27,7 +27,7 @@
                     <a href="{{ url_for('storage.add_to_storage', id=item['id']) }}" class="btn btn-success">Add to Storage</a>
                     
                     <!-- Create Label Button -->
-                    <a href="{{ url_for('label.create_label', id=item['id']) }}" class="btn btn-primary">Create Label</a>
+                    <a href="{{ url_for('label.create_label_route', part_id=item['id']) }}" class="btn btn-primary">Create Label</a>
                 </div>
             </div>
         {% endfor %}

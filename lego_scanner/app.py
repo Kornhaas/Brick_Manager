@@ -1,4 +1,5 @@
 from flask import Flask
+from config import Config
 from routes.upload import upload_bp
 from routes.label import label_bp
 from routes.main import main_bp
@@ -6,6 +7,7 @@ from routes.storage import storage_bp
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Set your secret key here
+app.config.from_object(Config)  # Load the configuration
 
 # Register blueprints
 app.register_blueprint(upload_bp)
