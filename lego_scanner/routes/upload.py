@@ -5,12 +5,12 @@ from services.lookup_service import load_master_lookup
 from services.rebrickable_service import get_predictions
 from config import Config
 
-master_lookup = load_master_lookup()  # This should correctly call the function
-
 upload_bp = Blueprint('upload', __name__)
 
 @upload_bp.route('/upload', methods=['POST'])
 def upload():
+    master_lookup = load_master_lookup()  # This should correctly call the function
+
     if 'file' not in request.files:
         flash('No file part')
         return redirect(url_for('main.index'))
@@ -39,6 +39,7 @@ def upload():
     else:
         flash('Allowed file types are png, jpg, jpeg, gif')
         return redirect(url_for('main.index'))
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS

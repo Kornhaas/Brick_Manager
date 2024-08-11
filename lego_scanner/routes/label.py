@@ -20,7 +20,6 @@ from services.lookup_service import load_master_lookup
 
 # Create a Blueprint for the label routes
 label_bp = Blueprint('label', __name__)
-master_lookup = load_master_lookup()
 
 def secure_filename(filename):
     """
@@ -33,6 +32,7 @@ def secure_filename(filename):
         str: The sanitized filename.
     """
     return filename.replace("/", "").replace("\\", "").replace("..", "").replace(" ", "_")
+
 
 def print_pdf(pdf_path):
     """
@@ -51,12 +51,13 @@ def print_pdf(pdf_path):
             return
 
         # Command to print the PDF
-        command = f'"{acrobat_path}" /t "{pdf_path}"'
-        subprocess.run(command, shell=True, check=True)
+        command = [acrobat_path, '/t', pdf_path]
+        subprocess.run(command, check=True)
         print(f"Sent {pdf_path} to the printer using Adobe Acrobat Reader.")
     except subprocess.CalledProcessError as e:
         print(f"Failed to print {pdf_path}: {e}")
         flash(f"Failed to print the label. Error: {e}")
+
 
 def get_absolute_path(relative_path):
     """
@@ -70,6 +71,7 @@ def get_absolute_path(relative_path):
     """
     return os.path.abspath(relative_path)
 
+
 @label_bp.route('/create_label/<part_id>')
 def create_label_route(part_id):
     """
@@ -81,6 +83,9 @@ def create_label_route(part_id):
     Returns:
         Response: Redirects to the main index page.
     """
+    master_lookup = load_master_lookup()
+
+
     part_details = get_part_details(part_id)
 
     if not part_details:
@@ -90,10 +95,12 @@ def create_label_route(part_id):
     name = part_details.get('name', 'Unknown Item')
     img_url = part_details.get('part_img_url', '')
     part_cat_id = part_details.get('part_cat_id', None)
-    category = get_category_name(part_cat_id) if part_cat_id else 'Unknown Category'
+    category = get_category_name(
+        part_cat_id) if part_cat_id else 'Unknown Category'
     box = master_lookup.get(part_id, {}).get('box', 'Unknown Box')
 
-    label_image_path = create_label_image(name, img_url, part_id, box, category)
+    label_image_path = create_label_image(
+        name, img_url, part_id, box, category)
     pdf_path = os.path.join(Config.UPLOAD_FOLDER, f'label_{part_id}.pdf')
     save_image_as_pdf(label_image_path, pdf_path)
     absolute_pdf_path = get_absolute_path(pdf_path)

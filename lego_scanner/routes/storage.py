@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, curren
 
 storage_bp = Blueprint('storage', __name__)
 
+
 def load_master_lookup():
     """Load the master_lookup.json file."""
     try:
@@ -13,11 +14,13 @@ def load_master_lookup():
         print("master_lookup.json not found, returning empty dictionary.")
         return {}
 
+
 def save_master_lookup(data):
     """Save the updated master_lookup.json file."""
     with open(current_app.config['MASTER_LOOKUP_PATH'], 'w') as file:
         json.dump(data, file, indent=4)
         print("master_lookup.json updated successfully.")
+
 
 @storage_bp.route('/add_to_storage/<id>', methods=['GET', 'POST'])
 def add_to_storage(id):
@@ -25,7 +28,7 @@ def add_to_storage(id):
         location = request.form.get('location')
         level = request.form.get('level')
         box = request.form.get('box')
-        
+
         # Load the current master_lookup.json data
         master_lookup = load_master_lookup()
 
@@ -42,8 +45,9 @@ def add_to_storage(id):
         # Update the in-memory data in the application if needed
         current_app.config['MASTER_LOOKUP'] = master_lookup
 
-        print(f"Stored item {id} at Location: {location}, Level: {level}, Box: {box}")
+        print(f"Stored item {id} at Location: {
+              location}, Level: {level}, Box: {box}")
 
         return redirect(url_for('main.index'))
-    
+
     return render_template('storage.html', item_id=id)

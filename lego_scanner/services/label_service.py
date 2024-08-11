@@ -6,6 +6,7 @@ import requests
 
 cm = 28.35  # 1 cm in points
 
+
 def wrap_text(text, font, max_width):
     lines = []
     words = text.split()
@@ -17,6 +18,7 @@ def wrap_text(text, font, max_width):
             line += (words.pop(0) + ' ')
         lines.append(line)
     return lines
+
 
 def create_label_image(name, img_url, item_id, box, category):
     width, height = int(12 * cm), int(8 * cm)
@@ -49,14 +51,17 @@ def create_label_image(name, img_url, item_id, box, category):
         draw.text((20, y_text), line, font=font2, fill="black")
         y_text += draw.textbbox((0, 0), line, font=font3)[3]
 
-    draw.text((15, height - 60), f"Category: {category}", font=font, fill="black")
+    draw.text((15, height - 60),
+              f"Category: {category}", font=font, fill="black")
     draw.text((15, height - 40), f"ID: {item_id}", font=font2, fill="black")
-    draw.text((width - 120, height - 40), f"Box: {box}", font=font3, fill="black")
+    draw.text((width - 120, height - 40),
+              f"Box: {box}", font=font3, fill="black")
 
     temp_image_path = os.path.join('uploads', f'label_{item_id}.png')
     image.save(temp_image_path, dpi=(300, 300))
 
     return temp_image_path
+
 
 def save_image_as_pdf(image_path, pdf_path):
     img = Image.open(image_path)
@@ -65,7 +70,8 @@ def save_image_as_pdf(image_path, pdf_path):
     c = canvas.Canvas(pdf_path, pagesize=(img_width, img_height))
 
     img_reader = ImageReader(image_path)
-    c.drawImage(img_reader, 0, 0, width=img_width, height=img_height, preserveAspectRatio=True)
+    c.drawImage(img_reader, 0, 0, width=img_width,
+                height=img_height, preserveAspectRatio=True)
 
     c.save()
     print(f"Saved PDF as {pdf_path}")
