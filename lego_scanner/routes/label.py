@@ -1,5 +1,6 @@
 """
-This module defines the routes and logic for creating and printing labels in the LEGO Scanner application.
+This module defines the routes and logic for creating and 
+printing labels in the LEGO Scanner application.
 
 It includes functionalities to:
 - Fetch part details from the Rebrickable API.
@@ -20,6 +21,7 @@ from services.lookup_service import load_master_lookup
 
 # Create a Blueprint for the label routes
 label_bp = Blueprint('label', __name__)
+
 
 def secure_filename(filename):
     """
@@ -85,7 +87,6 @@ def create_label_route(part_id):
     """
     master_lookup = load_master_lookup()
 
-
     part_details = get_part_details(part_id)
 
     if not part_details:
@@ -99,8 +100,17 @@ def create_label_route(part_id):
         part_cat_id) if part_cat_id else 'Unknown Category'
     box = master_lookup.get(part_id, {}).get('box', 'Unknown Box')
 
-    label_image_path = create_label_image(
-        name, img_url, part_id, box, category)
+    # Prepare the label_info dictionary
+    label_info = {
+        'name': name,
+        'img_url': img_url,
+        'item_id': part_id,
+        'box': box,
+        'category': category
+    }
+
+    # Create the label image
+    label_image_path = create_label_image(label_info)
     pdf_path = os.path.join(Config.UPLOAD_FOLDER, f'label_{part_id}.pdf')
     save_image_as_pdf(label_image_path, pdf_path)
     absolute_pdf_path = get_absolute_path(pdf_path)

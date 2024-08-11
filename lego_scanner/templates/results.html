@@ -1,38 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan Results</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="container mt-5">
+    <!-- Include the navigation bar -->
+    {% include 'navbar.html' %}
+
     <h1 class="text-center">Scan Results</h1>
     {% if result and 'items' in result %}
-        {% for item in result['items'] %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">{{ item['name'] }}</h5>
-                    <img src="{{ item['img_url'] }}" alt="{{ item['name'] }}" class="img-fluid">
-                    <p class="card-text">ID: {{ item['id'] }}</p>
-                    <p class="card-text">Category: {{ item['category'] }}</p>
-                    <p class="card-text">Score: {{ "%.6f" % item['score'] }}</p>
-                    {% if item['lookup_info'] %}
-                        <p class="card-text">Schrank: {{ item['lookup_info']['location'] }}</p>
-                        <p class="card-text">Fach: {{ item['lookup_info']['level'] }}</p>
-                        <p class="card-text">Box: {{ item['lookup_info']['box'] }}</p>
-                    {% endif %}
-                    
-                    <!-- Add to Storage Button -->
-                    <a href="{{ url_for('storage.add_to_storage', id=item['id']) }}" class="btn btn-success">Add to Storage</a>
-                    
-                    <!-- Create Label Button -->
-                    <a href="{{ url_for('label.create_label_route', part_id=item['id']) }}" class="btn btn-primary">Create Label</a>
-                </div>
-            </div>
-        {% endfor %}
+    {% for item in result['items'] %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ item['name'] }}</h5>
+            <img src="{{ item['img_url'] }}" alt="{{ item['name'] }}" class="img-fluid">
+            <p class="card-text">ID: {{ item['id'] }}</p>
+            <p class="card-text">Category: {{ item['category'] }}</p>
+            <p class="card-text">Score: {{ "%.6f" % item['score'] }}</p>
+            {% if item['lookup_info'] %}
+            <p class="card-text">Schrank: {{ item['lookup_info']['location'] }}</p>
+            <p class="card-text">Fach: {{ item['lookup_info']['level'] }}</p>
+            <p class="card-text">Box: {{ item['lookup_info']['box'] }}</p>
+            {% endif %}
+
+            <!-- Add to Storage Button -->
+            <a href="{{ url_for('storage.add_to_storage', part_id=item['id']) }}" class="btn btn-success">Add to Storage</a>
+
+            <!-- Create Label Button -->
+            <a href="{{ url_for('label.create_label_route', part_id=item['id']) }}" class="btn btn-primary">Create
+                Label</a>
+        </div>
+    </div>
+    {% endfor %}
     {% else %}
-        <p>No results found.</p>
+    <p>No results found.</p>
     {% endif %}
 </body>
+
 </html>

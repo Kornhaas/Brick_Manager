@@ -1,35 +1,56 @@
-<!-- manual_entry.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
+    <!-- Meta tags and other head elements -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual Data Entry</title>
+    <title>Manual Entry</title>
+
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>Enter Data Manually</h1>
-        <form action="{{ url_for('manual_entry.manual_entry') }}" method="post">
-            <div class="form-group">
-                <label for="id">Part ID</label>
-                <input type="text" name="id" id="id" class="form-control" required>
+        <!-- Include the navigation bar -->
+        {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form -->
+        <form method="post">
+            <div class="mb-3">
+                <label for="id" class="form-label">Part ID:</label>
+                <input type="text" id="id" name="id" class="form-control" value="{{ part_id }}">
             </div>
-            <div class="form-group">
-                <label for="schrank">Schrank</label>
-                <input type="text" name="schrank" id="schrank" class="form-control" required>
+            <div class="mb-3">
+                <label for="schrank" class="form-label">Schrank:</label>
+                <input type="text" id="schrank" name="schrank" class="form-control" value="{{ schrank }}">
             </div>
-            <div class="form-group">
-                <label for="fach">Fach</label>
-                <input type="text" name="fach" id="fach" class="form-control" required>
+            <div class="mb-3">
+                <label for="fach" class="form-label">Fach:</label>
+                <input type="text" id="fach" name="fach" class="form-control" value="{{ fach }}">
             </div>
-            <div class="form-group">
-                <label for="box">Box</label>
-                <input type="text" name="box" id="box" class="form-control" required>
+            <div class="mb-3">
+                <label for="box" class="form-label">Box:</label>
+                <input type="text" id="box" name="box" class="form-control" value="{{ box }}">
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
-        <a href="{{ url_for('main.index') }}" class="btn btn-secondary mt-3">Back to Main Page</a>
     </div>
+
+    <!-- Bootstrap JS and dependencies (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
