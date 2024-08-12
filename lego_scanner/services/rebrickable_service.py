@@ -34,8 +34,7 @@ def get_part_details(part_num):
     if response.status_code == 200:
         return response.json()
 
-    print(f"Failed to fetch part details for {
-          part_num}: {response.status_code}")
+    print(f"Failed to fetch part details for {part_num}: {response.status_code}")
     return None
 
 
