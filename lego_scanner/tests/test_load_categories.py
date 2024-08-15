@@ -23,7 +23,11 @@ class TestLoadCategories(TestCase):
         app.config['SECRET_KEY'] = 'supersecretkey'
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        return app
+        
+        
+        # Mock the load_master_lookup function to avoid file access during tests
+        with patch('app.load_master_lookup', return_value={}):
+            return app
 
     def setUp(self):
         """
