@@ -4,7 +4,7 @@ This module defines the database models for the LEGO Scanner Flask application.
 It includes the Category model, which represents a category of LEGO parts.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
