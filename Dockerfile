@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.12-slim
+FROM python:latest
 
 # Set the working directory in the container
 WORKDIR /app
@@ -20,8 +20,23 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false \
     && poetry install --no-dev --no-interaction --no-ansi
 
-# Copy the rest of your application's code to the container
-COPY . .
+# Copy the entire project to the working directory
+COPY . /app
+
+# Change directory to lego_scanner
+WORKDIR /app/lego_scanner
+
+# Install dependencies
+RUN poetry config virtualenvs.create false && poetry install --no-dev
+
+# Set environment variables
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+
+# create the database and run the migrations
+RUN poetry run flask db init
+RUN poetry run flask db migrate -m "Initial migration."
+RUN poetry run flask db upgrade
 
 # Expose the port the app runs on
 EXPOSE 5000
