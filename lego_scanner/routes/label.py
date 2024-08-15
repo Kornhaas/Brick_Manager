@@ -16,7 +16,7 @@ import subprocess
 from flask import Blueprint, redirect, url_for, flash
 from config import Config
 from services.label_service import create_label_image, save_image_as_pdf
-from services.rebrickable_service import get_part_details, get_category_name
+from services.rebrickable_service import get_part_details, get_category_name_from_db
 from services.lookup_service import load_master_lookup
 
 # Create a Blueprint for the label routes
@@ -96,7 +96,7 @@ def create_label_route(part_id):
     name = part_details.get('name', 'Unknown Item')
     img_url = part_details.get('part_img_url', '')
     part_cat_id = part_details.get('part_cat_id', None)
-    category = get_category_name(
+    category = get_category_name_from_db(
         part_cat_id) if part_cat_id else 'Unknown Category'
     box = master_lookup.get(part_id, {}).get('box', 'Unknown Box')
 

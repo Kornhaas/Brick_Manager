@@ -23,6 +23,8 @@ class Config:  # pylint: disable=R0903
     REBRICKABLE_TOKEN = os.getenv('REBRICKABLE_TOKEN')
     MASTER_LOOKUP_PATH = os.path.join(
         os.getcwd(), 'lookup/master_lookup.json')  # Ensure this path is correct
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///lego_scanner.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Ensure the upload directory exists
     if not os.path.exists(UPLOAD_FOLDER):
