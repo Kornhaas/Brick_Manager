@@ -27,8 +27,8 @@ jobs:
 
     # Build the Docker image
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag kornhaas/Lego_Manager:latest 
+      run: docker build . --file Dockerfile --tag kornhaas/lego_manager:latest 
 
     # Push the Docker image to Docker Hub or your container registry
     - name: Push the Docker image
-      run: docker push kornhaas/Lego_Manager:latest 
+      run: docker push kornhaas/lego_manager:latest 
