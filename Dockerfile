@@ -34,12 +34,13 @@ ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 
 # create the database and run the migrations
-RUN poetry run flask db init
-RUN poetry run flask db migrate -m "Initial migration."
-RUN poetry run flask db upgrade
+RUN poetry run flask db init || true
+RUN poetry run flask db migrate -m "Initial migration." || true
+RUN poetry run flask db upgrade || true
 
 # Expose the port the app runs on
 EXPOSE 5000
 
+USER nonroot
 # Command to run your application
 CMD ["poetry", "run", "flask", "run", "--host=0.0.0.0", "--port=5000"]
