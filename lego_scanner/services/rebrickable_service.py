@@ -64,8 +64,7 @@ def get_part_details(part_num):
     if response.status_code == 200:
         return response.json()
 
-    print(f"Failed to fetch part details for {
-          part_num}: {response.status_code}")
+    print(f"Failed to fetch part details for {part_num}: {response.status_code}")
     return None
 
 
@@ -110,8 +109,7 @@ def get_category_name(part_cat_id):
             print(f"Rate limit hit. Retrying after {retry_after} seconds...")
             time.sleep(retry_after)
         else:
-            print(f"Failed to fetch category name for {
-                  part_cat_id}: {response.status_code}")
+            print(f"Failed to fetch category name for {part_cat_id}: {response.status_code}")
             return 'Unknown Category'
     return 'Unknown Category'
 

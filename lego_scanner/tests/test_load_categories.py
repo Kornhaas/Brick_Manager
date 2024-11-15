@@ -10,6 +10,7 @@ import requests
 from sqlalchemy.exc import SQLAlchemyError
 from app import app, db
 
+
 class TestLoadCategories(TestCase):
     """
     Test cases for loading and updating LEGO part categories.
@@ -23,8 +24,9 @@ class TestLoadCategories(TestCase):
         app.config['SECRET_KEY'] = 'supersecretkey'
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        
-        app.config['MASTER_LOOKUP_PATH'] = 'fake_master_lookup.json'  # Set to a dummy path
+
+        # Set to a dummy path
+        app.config['MASTER_LOOKUP_PATH'] = 'fake_master_lookup.json'
         return app
 
     def setUp(self):
@@ -45,7 +47,8 @@ class TestLoadCategories(TestCase):
         """
         Test handling of a RequestException during category loading.
         """
-        mock_get_categories.side_effect = requests.exceptions.RequestException('Network error')
+        mock_get_categories.side_effect = requests.exceptions.RequestException(
+            'Network error')
 
         with self.client:
             response = self.client.post(
@@ -58,7 +61,8 @@ class TestLoadCategories(TestCase):
         """
         Test handling of an SQLAlchemyError during database commit.
         """
-        mock_get_categories.return_value = [(1, 'Category 1'), (2, 'Category 2')]
+        mock_get_categories.return_value = [
+            (1, 'Category 1'), (2, 'Category 2')]
         mock_db_commit.side_effect = SQLAlchemyError('Database error')
 
         with self.client:
@@ -71,7 +75,8 @@ class TestLoadCategories(TestCase):
         """
         Test successful loading and updating of categories.
         """
-        mock_get_categories.return_value = [(1, 'Category 1'), (2, 'Category 2')]
+        mock_get_categories.return_value = [
+            (1, 'Category 1'), (2, 'Category 2')]
 
         with self.client:
             response = self.client.post(
@@ -84,13 +89,15 @@ class TestLoadCategories(TestCase):
         """
         Test handling of an unexpected exception during database commit.
         """
-        mock_get_categories.return_value = [(1, 'Category 1'), (2, 'Category 2')]
+        mock_get_categories.return_value = [
+            (1, 'Category 1'), (2, 'Category 2')]
         mock_db_commit.side_effect = Exception('Unexpected error')
 
         with self.client:
             response = self.client.post(
                 url_for('load_categories.load_categories'), follow_redirects=True)
             self.assertIn(b'<!-- index.html -->', response.data)
+
 
 if __name__ == '__main__':
     unittest.main()

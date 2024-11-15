@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: "1000:1000"  # Specify the user by UID:GID
+    ports:
+      - "5000:5000"  # Map port 5000 of the container to port 5000 on the host
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: production
+      REBRICKABLE_TOKEN: ${REBRICKABLE_TOKEN}

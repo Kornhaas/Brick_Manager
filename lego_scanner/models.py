@@ -24,3 +24,24 @@ class Category(db.Model):  # pylint: disable=too-few-public-methods
 
     def __repr__(self):
         return f'<Category {self.name}>'
+
+
+class Set(db.Model):
+    __tablename__ = 'sets'  # Use plural for table names to avoid conflicts with SQL reserved words.
+    id = db.Column(db.Integer, primary_key=True)
+    set_number = db.Column(db.String(50), unique=True, nullable=False)
+
+    parts = db.relationship('Part', backref='set', lazy=True)
+
+
+class Part(db.Model):
+    __tablename__ = 'parts'
+    id = db.Column(db.Integer, primary_key=True)
+    part_num = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(100))
+    color = db.Column(db.String(50))
+    color_rgb = db.Column(db.String(6))
+    quantity = db.Column(db.Integer, nullable=False)
+    location = db.Column(db.String(100))
+    set_id = db.Column(db.Integer, db.ForeignKey('sets.id'), nullable=False)

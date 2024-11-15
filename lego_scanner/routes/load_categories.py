@@ -31,17 +31,14 @@ def load_categories():
             categories = get_all_category_ids_from_api()
             print(f"Fetched categories: {categories}")  # Debugging print
             for cat_id, category_name in categories:
-                print(f"Processing category {cat_id}: {
-                      category_name}")  # Debugging print
+                print(f"Processing category {cat_id}: {category_name}")  # Debugging print
                 existing_category = Category.query.filter_by(id=cat_id).first()
                 if existing_category:
-                    print(f"Updating category {cat_id}: {
-                          category_name}")  # Debugging print
+                    print(f"Updating category {cat_id}: {category_name}")  # Debugging print
                     existing_category.name = category_name
                     existing_category.last_updated = datetime.utcnow()
                 else:
-                    print(f"Adding new category {cat_id}: {
-                          category_name}")  # Debugging print
+                    print(f"Adding new category {cat_id}: {category_name}")  # Debugging print
                     new_category = Category(id=cat_id, name=category_name)
                     db.session.add(new_category)
             print("Committing changes to the database...")  # Debugging print

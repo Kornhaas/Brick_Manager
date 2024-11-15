@@ -6,14 +6,13 @@ It includes functionalities to:
 - Fetch part details from the Rebrickable API.
 - Generate labels with part information, including name, image, category, and box number.
 - Convert the generated label to a PDF.
-- Send the PDF directly to a printer using Adobe Acrobat Reader.
-
-The module uses Flask Blueprints to define routes related to label creation.
+- Send the PDF directly to a printer using Adobe Acrobat Reader (if available).
+- Provide an alternative download link for the PDF if Adobe Acrobat is not available.
 """
 
 import os
 import subprocess
-from flask import Blueprint, redirect, url_for, flash
+from flask import Blueprint, redirect, url_for, flash, send_file
 from config import Config
 from services.label_service import create_label_image, save_image_as_pdf
 from services.rebrickable_service import get_part_details, get_category_name_from_db
@@ -50,15 +49,17 @@ def print_pdf(pdf_path):
         if not os.path.exists(acrobat_path):
             print(f"Adobe Acrobat Reader not found at {acrobat_path}")
             flash("Adobe Acrobat Reader not found.")
-            return
+            return False
 
         # Command to print the PDF
         command = [acrobat_path, '/t', pdf_path]
         subprocess.run(command, check=True)
         print(f"Sent {pdf_path} to the printer using Adobe Acrobat Reader.")
+        return True
     except subprocess.CalledProcessError as e:
         print(f"Failed to print {pdf_path}: {e}")
         flash(f"Failed to print the label. Error: {e}")
+        return False
 
 
 def get_absolute_path(relative_path):
@@ -83,7 +84,7 @@ def create_label_route(part_id):
         part_id (str): The ID of the part for which the label is to be created.
 
     Returns:
-        Response: Redirects to the main index page.
+        Response: Redirects to the main index page or provides a PDF download.
     """
     master_lookup = load_master_lookup()
 
@@ -115,7 +116,11 @@ def create_label_route(part_id):
     save_image_as_pdf(label_image_path, pdf_path)
     absolute_pdf_path = get_absolute_path(pdf_path)
 
-    # Send the PDF directly to the printer
-    print_pdf(absolute_pdf_path)
+    # Check if the system is running on Windows (where Adobe Acrobat might be available)
+    if os.name == 'nt':
+        printed = print_pdf(absolute_pdf_path)
+        if printed:
+            return redirect(url_for('main.index'))
 
-    return redirect(url_for('main.index'))
+    # Provide a download link as an alternative
+    return send_file(absolute_pdf_path, as_attachment=True, download_name=f'label_{part_id}.pdf')

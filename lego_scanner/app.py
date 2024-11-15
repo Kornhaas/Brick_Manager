@@ -28,11 +28,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize the db instance with the app
 db.init_app(app)
 
+# Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
+# Ensure database tables are created
 with app.app_context():
-    # Code here can safely use current_app, g, and other context-specific functions
-    master_lookup = load_master_lookup()
+    db.create_all()  # Ensure tables are created
+    master_lookup = load_master_lookup()  # Load master lookup data
 
 # Register blueprints
 app.register_blueprint(upload_bp)
@@ -45,4 +47,4 @@ app.register_blueprint(set_search_bp)
 app.register_blueprint(load_categories_bp)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)

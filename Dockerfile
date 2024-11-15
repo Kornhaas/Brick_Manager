@@ -1,46 +1,44 @@
-# Use an official Python runtime as a parent image
-FROM python:latest
+# Stage 1: Build
+FROM python:3.12-slim AS builder
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Install system dependencies (e.g., for building some Python packages)
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && apt-get clean \
+# Install build dependencies, combining steps to reduce layers and clean up after installation
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
+# Install Poetry for dependency management
 RUN pip install --no-cache-dir poetry
 
-# Copy the pyproject.toml and poetry.lock files to the container
+# Copy dependency files first for layer caching optimization
 COPY pyproject.toml poetry.lock ./
 
-# Install Python dependencies using Poetry
+# Configure Poetry to avoid creating virtual environments and install dependencies
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction --no-ansi
+    && poetry install --only main --no-interaction --no-ansi
 
-# Copy the entire project to the working directory
-COPY . /app
+# Copy the application code
+COPY . .
 
-# Change directory to lego_scanner
-WORKDIR /app/lego_scanner
+# Stage 2: Production (distroless approach with minimal Python runtime)
+# Use Google's distroless image for improved security and reduced image size
+FROM python:3.12-slim
 
-# Install dependencies
-RUN poetry config virtualenvs.create false && poetry install --no-dev
+# Copy only the necessary files from the builder stage
+COPY --from=builder /app /app
 
-# Set environment variables
+# Switch to non-root user to enhance security
+USER 1000
+
+# Set the working directory and expose the necessary port
+WORKDIR /app
+EXPOSE 5000
+
+# Set environment variables for Flask
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 
-# create the database and run the migrations
-RUN poetry run flask db init || true
-RUN poetry run flask db migrate -m "Initial migration." || true
-RUN poetry run flask db upgrade || true
-
-# Expose the port the app runs on
-EXPOSE 5000
-
-USER nonroot
-# Command to run your application
-CMD ["poetry", "run", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+# Use entrypoint to run the application, focusing on minimal executable setup
+ENTRYPOINT ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
