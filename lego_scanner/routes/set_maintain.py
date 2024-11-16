@@ -15,7 +15,40 @@ def set_maintain():
         joinedload(UserSet.parts),
         joinedload(UserSet.minifigures)
     ).all()
-    return render_template('set_maintain.html', user_sets=user_sets)
+
+    # Add completeness percentage to each user set
+    sets_with_completeness = []
+    for user_set in user_sets:
+        total_quantity = 0
+        total_have_quantity = 0
+
+        # Calculate parts completeness
+        for part in user_set.parts:
+            total_quantity += part.quantity
+            total_have_quantity += part.have_quantity
+
+        # Calculate minifigures completeness
+        for minifig in user_set.minifigures:
+            total_quantity += minifig.quantity
+            total_have_quantity += minifig.have_quantity
+
+        # Calculate user minifigure parts completeness
+        user_minifigure_parts = UserMinifigurePart.query.filter_by(user_set_id=user_set.id).all()
+        for part in user_minifigure_parts:
+            total_quantity += part.quantity
+            total_have_quantity += part.have_quantity
+
+        # Compute completeness percentage
+        completeness_percentage = 0
+        if total_quantity > 0:
+            completeness_percentage = (total_have_quantity / total_quantity) * 100
+
+        sets_with_completeness.append({
+            'user_set': user_set,
+            'completeness_percentage': round(completeness_percentage, 2)
+        })
+
+    return render_template('set_maintain.html', sets_with_completeness=sets_with_completeness)
 
 @set_maintain_bp.route('/set_maintain/<int:user_set_id>', methods=['GET'])
 def get_user_set_details(user_set_id):
@@ -27,6 +60,29 @@ def get_user_set_details(user_set_id):
         joinedload(UserSet.parts),
         joinedload(UserSet.minifigures)
     ).get_or_404(user_set_id)
+
+    # Fetch user_minifigure_parts based on user_set_id
+    user_minifigure_parts = UserMinifigurePart.query.filter_by(user_set_id=user_set_id).all()
+
+    # Calculate completeness
+    total_quantity = 0
+    total_have_quantity = 0
+
+    for part in user_set.parts:
+        total_quantity += part.quantity
+        total_have_quantity += part.have_quantity
+
+    for minifig in user_set.minifigures:
+        total_quantity += minifig.quantity
+        total_have_quantity += minifig.have_quantity
+
+    for part in user_minifigure_parts:
+        total_quantity += part.quantity
+        total_have_quantity += part.have_quantity
+
+    completeness_percentage = 0
+    if total_quantity > 0:
+        completeness_percentage = (total_have_quantity / total_quantity) * 100
 
     # Helper function for location and status
     def enrich_item(item, master_lookup):
@@ -44,10 +100,7 @@ def get_user_set_details(user_set_id):
             'status': "Available" if part_data else "Not Available"
         }
 
-    # Add parts details
     parts = [enrich_item(part, master_lookup) for part in user_set.parts]
-
-    # Add minifigure details
     minifigs = [
         {
             'id': minifig.id,
@@ -63,9 +116,6 @@ def get_user_set_details(user_set_id):
         }
         for minifig in user_set.minifigures
     ]
-
-    # Add user minifigure parts details
-    user_minifigure_parts = UserMinifigurePart.query.filter_by(user_set_id=user_set_id).all()
     minifigure_parts = [enrich_item(part, master_lookup) for part in user_minifigure_parts]
 
     return jsonify({
@@ -73,7 +123,8 @@ def get_user_set_details(user_set_id):
         'parts': parts,
         'minifigs': minifigs,
         'minifigure_parts': minifigure_parts,
-        'status': user_set.status
+        'status': user_set.status,
+        'completeness_percentage': round(completeness_percentage, 2)
     })
 
 @set_maintain_bp.route('/set_maintain/update', methods=['POST'])
@@ -127,15 +178,20 @@ def delete_user_set(user_set_id):
     """
     Deletes a specific UserSet from the database.
     """
-    user_set = UserSet.query.get_or_404(user_set_id)
-
     try:
+        # Query the UserSet instance with its related template_set to avoid lazy loading issues
+        user_set = UserSet.query.options(joinedload(UserSet.template_set)).get_or_404(user_set_id)
+
+        # Log the template set number for confirmation
+        template_set_number = user_set.template_set.set_number
         db.session.delete(user_set)
         db.session.commit()
-        flash(f"User Set for {user_set.template_set.set_number} deleted successfully.", "success")
+
+        flash(f"User Set for {template_set_number} deleted successfully.", "success")
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error deleting UserSet: {e}")
         flash("Failed to delete User Set.", "danger")
 
     return redirect(url_for('set_maintain.set_maintain'))
+

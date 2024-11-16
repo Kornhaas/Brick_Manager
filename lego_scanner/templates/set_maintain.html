@@ -10,6 +10,7 @@
     <style>
         .status-badge {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 0.5rem;
@@ -34,6 +35,10 @@
 
         .status-missingparts {
             background-color: #dc3545;
+        }
+
+        .progress-container {
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -63,26 +68,33 @@
                 </tr>
             </thead>
             <tbody>
-                {% for user_set in user_sets %}
+                {% for entry in sets_with_completeness %}
                 <tr>
-                    <td><img src="{{ user_set.template_set.set_img_url }}" alt="{{ user_set.template_set.set_number }}" width="100"></td>
-                    <td>{{ user_set.template_set.set_number }}</td>
+                    <td><img src="{{ entry.user_set.template_set.set_img_url }}" alt="{{ entry.user_set.template_set.set_number }}" width="100"></td>
+                    <td>{{ entry.user_set.template_set.set_number }}</td>
                     <td>
-                        <div class="status-badge status-{{ user_set.status }}">
-                            {% if user_set.status == "unknown" %}
+                        <div class="status-badge status-{{ entry.user_set.status }}">
+                            {% if entry.user_set.status == "unknown" %}
                             <i class="fas fa-question-circle"></i> Unknown
-                            {% elif user_set.status == "assembled" %}
+                            {% elif entry.user_set.status == "assembled" %}
                             <i class="fas fa-tools"></i> Assembled
-                            {% elif user_set.status == "complete" %}
+                            {% elif entry.user_set.status == "complete" %}
                             <i class="fas fa-check-circle"></i> Complete
-                            {% elif user_set.status == "missingparts" %}
+                            {% elif entry.user_set.status == "missingparts" %}
                             <i class="fas fa-exclamation-triangle"></i> Missing Parts
                             {% endif %}
                         </div>
+                        <div class="progress-container">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: {{ entry.completeness_percentage }}%;" aria-valuenow="{{ entry.completeness_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ entry.completeness_percentage }}%
+                                </div>
+                            </div>
+                        </div>
                     </td>
                     <td>
-                        <button class="btn btn-info btn-sm view-details" data-user-set-id="{{ user_set.id }}">View</button>
-                        <form method="post" action="{{ url_for('set_maintain.delete_user_set', user_set_id=user_set.id) }}" class="d-inline">
+                        <button class="btn btn-info btn-sm view-details" data-user-set-id="{{ entry.user_set.id }}">View</button>
+                        <form method="post" action="{{ url_for('set_maintain.delete_user_set', user_set_id=entry.user_set.id) }}" class="d-inline">
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>
                     </td>
