@@ -27,10 +27,7 @@ def set_maintain():
             total_quantity += part.quantity
             total_have_quantity += part.have_quantity
 
-        # Calculate minifigures completeness
-        for minifig in user_set.minifigures:
-            total_quantity += minifig.quantity
-            total_have_quantity += minifig.have_quantity
+        # Exclude minifigures from the completeness calculation
 
         # Calculate user minifigure parts completeness
         user_minifigure_parts = UserMinifigurePart.query.filter_by(user_set_id=user_set.id).all()
@@ -49,6 +46,7 @@ def set_maintain():
         })
 
     return render_template('set_maintain.html', sets_with_completeness=sets_with_completeness)
+
 
 @set_maintain_bp.route('/set_maintain/<int:user_set_id>', methods=['GET'])
 def get_user_set_details(user_set_id):
@@ -72,9 +70,7 @@ def get_user_set_details(user_set_id):
         total_quantity += part.quantity
         total_have_quantity += part.have_quantity
 
-    for minifig in user_set.minifigures:
-        total_quantity += minifig.quantity
-        total_have_quantity += minifig.have_quantity
+    # Exclude minifigures from the completeness calculation
 
     for part in user_minifigure_parts:
         total_quantity += part.quantity
@@ -93,6 +89,7 @@ def get_user_set_details(user_set_id):
             'name': item.name,
             'quantity': item.quantity,
             'have_quantity': item.have_quantity,
+            'color': item.color,  # Add color
             'part_img_url': item.part_img_url,
             'location': f"Location: {part_data.get('location', 'Unknown')}, "
                         f"Level: {part_data.get('level', 'Unknown')}, "
