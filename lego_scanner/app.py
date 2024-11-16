@@ -18,6 +18,7 @@ from routes.part_lookup import part_lookup_bp
 from routes.set_search import set_search_bp
 from routes.load_categories import load_categories_bp
 from routes.set_maintain import set_maintain_bp
+from routes.missing_parts import missing_parts_bp
 from services.lookup_service import load_master_lookup
 
 # Initialize the Flask application
@@ -59,6 +60,8 @@ app.register_blueprint(part_lookup_bp)
 app.register_blueprint(set_search_bp)
 app.register_blueprint(load_categories_bp)
 app.register_blueprint(set_maintain_bp)
+app.register_blueprint(missing_parts_bp)
+
 
 if __name__ == '__main__':
     import os
