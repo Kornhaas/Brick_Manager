@@ -30,7 +30,8 @@
         <form id="set-search-form" method="post" action="{{ url_for('set_search.set_search') }}">
             <div class="mb-3">
                 <label for="set-number" class="form-label">Enter Set Number:</label>
-                <input type="text" id="set-number" name="set_number" class="form-control" required>
+                <input type="text" id="set-number" name="set_number" class="form-control"
+                       value="{{ set_number or '' }}" required>
             </div>
             <div class="form-check mb-3">
                 <input class="form-check-input" type="checkbox" id="save-to-db" name="save_to_db">
@@ -46,42 +47,55 @@
 
         <!-- Display parts table if parts_info exists -->
         {% if parts_info %}
-        <h2>Parts in Set</h2>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Part Number</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Color</th>
-                    <th>Quantity</th>
-                    <th>Location</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for part in parts_info %}
-                <tr>
-                    <td>{{ part.part_num }}</td>
-                    <td>{{ part.name }}</td>
-                    <td>{{ part.category }}</td>
-                    <td style="background-color: #{{ part.color_rgb }}; color: {% if part.color_rgb|int(base=16) > 0x888888 %}black{% else %}white{% endif %};">
-                        {{ part.color }}
-                    </td>
-                    <td>{{ part.quantity }}</td>
-                    <td>{{ part.location }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Save to database button -->
-        {% if set_number %}
-        <form id="save-set-form" method="post" action="{{ url_for('set_search.set_search') }}">
+        <h2 class="mt-4">Parts in Set</h2>
+        <form method="post" action="{{ url_for('set_search.set_checklist') }}">
             <input type="hidden" name="set_number" value="{{ set_number }}">
-            <input type="hidden" name="save_to_db" value="on">
-            <button type="submit" class="btn btn-success">Save Set to Database</button>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Part Number</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Color</th>
+                        <th>Quantity Required</th>
+                        <th>Quantity Owned</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for part in parts_info %}
+                    <tr class="{% if part.have_quantity < part.quantity %}table-danger{% else %}table-success{% endif %}">
+                        <td>{{ part.part_num }}</td>
+                        <td>{{ part.name }}</td>
+                        <td>{{ part.category }}</td>
+                        <td style="background-color: #{{ part.color_rgb }};">
+                            {{ part.color }}
+                        </td>
+                        <td>{{ part.quantity }}</td>
+                        <td>
+                            <input type="hidden" name="part_id" value="{{ part.id }}">
+                            <input type="number" name="have_quantity" value="{{ part.have_quantity or 0 }}"
+                                class="form-control" min="0">
+                        </td>
+                        <td>{{ part.location }}</td>
+                        <td>
+                            {% if part.have_quantity < part.quantity %}
+                            <span class="badge bg-danger">Missing</span>
+                            {% else %}
+                            <span class="badge bg-success">Complete</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-success">Save Checklist</button>
         </form>
-        {% endif %}
+        <form method="post" action="{{ url_for('set_search.add_set') }}">
+            <input type="hidden" name="set_number" value="{{ set_number }}">
+            <button type="submit" class="btn btn-secondary mt-3">Add Set to Database</button>
+        </form>
         {% endif %}
     </div>
 
