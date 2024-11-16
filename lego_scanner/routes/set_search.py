@@ -173,7 +173,7 @@ def fetch_set_parts_info(set_number):
 
     try:
         response = requests.get(
-            f'https://rebrickable.com/api/v3/lego/sets/{set_number}/parts/',
+            f'https://rebrickable.com/api/v3/lego/sets/{set_number}/parts/?page_size=1000',
             headers={
                 'Accept': 'application/json',
                 'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
@@ -222,7 +222,7 @@ def fetch_minifigs_info(set_number):
 
     try:
         response = requests.get(
-            f'https://rebrickable.com/api/v3/lego/sets/{set_number}/minifigs/',
+            f'https://rebrickable.com/api/v3/lego/sets/{set_number}/minifigs/?page_size=1000',
             headers={
                 'Accept': 'application/json',
                 'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
@@ -265,7 +265,7 @@ def fetch_minifigure_parts(fig_num):
     try:
         current_app.logger.debug(f"Fetching parts for minifigure: {fig_num}")
         response = requests.get(
-            f'https://rebrickable.com/api/v3/lego/minifigs/{fig_num}/parts/',
+            f'https://rebrickable.com/api/v3/lego/minifigs/{fig_num}/parts/?page_size=1000',
             headers={
                 'Accept': 'application/json',
                 'Authorization': f'key {Config.REBRICKABLE_TOKEN}'

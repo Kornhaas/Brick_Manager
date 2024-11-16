@@ -14,7 +14,7 @@ def set_maintain():
         joinedload(UserSet.template_set),
         joinedload(UserSet.parts),
         joinedload(UserSet.minifigures)
-    ).all()
+    ).order_by(UserSet.id.desc()).all()
 
     # Add completeness percentage to each user set
     sets_with_completeness = []
