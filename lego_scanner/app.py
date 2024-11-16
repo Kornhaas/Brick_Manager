@@ -6,6 +6,7 @@ It configures the application, registers blueprints, and loads the master lookup
 
 from flask import Flask
 from flask_migrate import Migrate
+import logging
 from config import Config
 from models import db  # Import the db instance from models
 from routes.upload import upload_bp
@@ -16,6 +17,7 @@ from routes.manual_entry import manual_entry_bp
 from routes.part_lookup import part_lookup_bp
 from routes.set_search import set_search_bp
 from routes.load_categories import load_categories_bp
+from routes.set_maintain import set_maintain_bp
 from services.lookup_service import load_master_lookup
 
 # Initialize the Flask application
@@ -31,10 +33,21 @@ db.init_app(app)
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
+# Configure Logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+app.logger.setLevel(logging.DEBUG)
+
 # Ensure database tables are created
 with app.app_context():
     db.create_all()  # Ensure tables are created
-    master_lookup = load_master_lookup()  # Load master lookup data
+    try:
+        master_lookup = load_master_lookup()
+        app.logger.debug("Master lookup data loaded successfully.")
+    except Exception as e:
+        app.logger.error(f"Failed to load master lookup data: {e}")
 
 # Register blueprints
 app.register_blueprint(upload_bp)
@@ -45,6 +58,9 @@ app.register_blueprint(manual_entry_bp)
 app.register_blueprint(part_lookup_bp)
 app.register_blueprint(set_search_bp)
 app.register_blueprint(load_categories_bp)
+app.register_blueprint(set_maintain_bp)
 
 if __name__ == '__main__':
+    import os
+    
     app.run(host='0.0.0.0', port=5000, debug=True)
