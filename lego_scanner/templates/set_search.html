@@ -9,7 +9,6 @@
 </head>
 
 <body>
-    <!-- Include the navigation bar -->
     {% include 'navbar.html' %}
 
     <div class="container mt-5">
@@ -30,58 +29,148 @@
         <form id="set-search-form" method="post" action="{{ url_for('set_search.set_search') }}">
             <div class="mb-3">
                 <label for="set-number" class="form-label">Enter Set Number:</label>
-                <input type="text" id="set-number" name="set_number" class="form-control" required>
-            </div>
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="save-to-db" name="save_to_db">
-                <label class="form-check-label" for="save-to-db">Save this set to the database</label>
+                <input type="text" id="set-number" name="set_number" class="form-control" value="{{ set_number or '' }}"
+                    required>
             </div>
             <button type="submit" class="btn btn-primary" id="search-button">Search</button>
-
-            <!-- Spinner, initially hidden -->
             <div id="loading-spinner" class="spinner-border" role="status" style="display:none;">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </form>
 
-        <!-- Display parts table if parts_info exists -->
+        {% if set_info %}
+        <!-- Set Info -->
+        <div class="card mb-4">
+            <img src="{{ set_info['set_img_url'] }}" class="card-img-top" alt="{{ set_info['name'] }}"
+                style="max-width: 600px; max-height: 600px; margin: auto;">
+            <div class="card-body">
+                <h5 class="card-title">{{ set_info['name'] }}</h5>
+                <p class="card-text"><strong>Set Number:</strong> {{ set_info['set_num'] }}</p>
+                <p class="card-text"><strong>Year:</strong> {{ set_info['year'] }}</p>
+                <a href="{{ set_info['set_url'] }}" target="_blank" class="btn btn-primary">View on Rebrickable</a>
+            </div>
+        </div>
+        <form id="save-set-form" method="post" action="{{ url_for('set_search.add_set') }}">
+            <input type="hidden" name="set_number" value="{{ set_info['set_num'] }}">
+            <button type="submit" class="btn btn-success mt-4">Save Set</button>
+        </form>
+        {% endif %}
+
         {% if parts_info %}
-        <h2>Parts in Set</h2>
+        <!-- Parts Table -->
+        <h2 class="mt-4">Parts in Set</h2>
+        {% if parts_info|length == 0 %}
+        <p class="text-muted">No parts found for this set.</p>
+        {% else %}
         <table class="table table-bordered">
             <thead>
                 <tr>
+                    <th>Image</th>
                     <th>Part Number</th>
                     <th>Name</th>
                     <th>Category</th>
                     <th>Color</th>
-                    <th>Quantity</th>
+                    <th>Quantity Required</th>
                     <th>Location</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 {% for part in parts_info %}
-                <tr>
-                    <td>{{ part.part_num }}</td>
-                    <td>{{ part.name }}</td>
-                    <td>{{ part.category }}</td>
-                    <td style="background-color: #{{ part.color_rgb }}; color: {% if part.color_rgb|int(base=16) > 0x888888 %}black{% else %}white{% endif %};">
-                        {{ part.color }}
+                <tr class="{% if part['status'] == 'Not Available' %}table-danger{% else %}table-success{% endif %}">
+                    <td><img src="{{ part['part_img_url'] }}" alt="{{ part['name'] }}" class="img-thumbnail" width="50">
                     </td>
-                    <td>{{ part.quantity }}</td>
-                    <td>{{ part.location }}</td>
+                    <td>{{ part['part_num'] }}</td>
+                    <td><a href="{{ part['part_url'] }}" target="_blank">{{ part['name'] }}</a></td>
+                    <td>{{ part['category'] }}</td>
+                    <td
+                        style="background-color: #{{ part['color_rgb'] }}; color: {% if part['color_rgb']|int(base=16) > 0x888888 %}black{% else %}white{% endif %};">
+                        {{ part['color'] }}</td>
+                    <td>{{ part['quantity'] }}</td>
+                    <td>{{ part['location'] or 'Not Specified' }}</td>
+                    <td><span
+                            class="badge {% if part['status'] == 'Available' %}bg-success{% else %}bg-danger{% endif %}">{{
+                            part['status'] }}</span></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Save to database button -->
-        {% if set_number %}
-        <form id="save-set-form" method="post" action="{{ url_for('set_search.set_search') }}">
-            <input type="hidden" name="set_number" value="{{ set_number }}">
-            <input type="hidden" name="save_to_db" value="on">
-            <button type="submit" class="btn btn-success">Save Set to Database</button>
-        </form>
         {% endif %}
+        {% endif %}
+
+        {% if minifigs_info %}
+        <!-- Minifigures Table -->
+        <h2 class="mt-4">Minifigures in Set</h2>
+        {% if minifigs_info|length == 0 %}
+        <p class="text-muted">No minifigures found for this set.</p>
+        {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Minifigure Number</th>
+                    <th>Name</th>
+                    <th>Quantity Required</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for minifig in minifigs_info %}
+                <tr class="{% if minifig['status'] == 'Not Available' %}table-danger{% else %}table-success{% endif %}">
+                    <td><img src="{{ minifig['img_url'] }}" alt="{{ minifig['name'] }}" class="img-thumbnail"
+                            width="50"></td>
+                    <td>{{ minifig['fig_num'] }}</td>
+                    <td>{{ minifig['name'] }}</td>
+                    <td>{{ minifig['quantity'] }}</td>
+                    <td>{{ minifig['location'] or 'Not Specified' }}</td>
+                    <td><span
+                            class="badge {% if minifig['status'] == 'Available' %}bg-success{% else %}bg-danger{% endif %}">{{
+                            minifig['status'] }}</span></td>
+                </tr>
+                {% if minifig.parts %}
+                <tr>
+                    <td colspan="6">
+                        <h5>Parts for Minifigure</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Part Number</th>
+                                    <th>Name</th>
+                                    <th>Color</th>
+                                    <th>Quantity Required</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for part in minifig['parts'] %}
+                                <tr
+                                    class="{% if part['status'] == 'Not Available' %}table-danger{% else %}table-success{% endif %}">
+                                    <td><img src="{{ part['part_img_url'] }}" alt="{{ part['name'] }}" width="50"></td>
+                                    <td>{{ part['part_num'] }}</td>
+                                    <td>{{ part['name'] }}</td>
+                                    <td
+                                        style="background-color: #{{ part['color_rgb'] }}; color: {% if part['color_rgb']|int(base=16) > 0x888888 %}black{% else %}white{% endif %};">
+                                        {{ part['color'] }}</td>
+                                    <td>{{ part['quantity'] }}</td>
+                                    <td>{{ part['location'] or 'Not Specified' }}</td>
+                                    <td><span
+                                            class="badge {% if part['status'] == 'Available' %}bg-success{% else %}bg-danger{% endif %}">{{
+                                            part['status'] }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
         {% endif %}
     </div>
 
@@ -90,6 +179,11 @@
         document.getElementById('set-search-form').addEventListener('submit', function () {
             document.getElementById('search-button').disabled = true;
             document.getElementById('loading-spinner').style.display = 'inline-block';
+
+            setTimeout(() => {
+                document.getElementById('search-button').disabled = false;
+                document.getElementById('loading-spinner').style.display = 'none';
+            }, 15000);
         });
     </script>
 </body>
