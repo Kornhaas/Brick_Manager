@@ -3,6 +3,11 @@ This module sets up and runs the LEGO Scanner Flask application.
 
 It configures the application, registers blueprints, and loads the master lookup data.
 """
+import os
+from datetime import datetime
+import shutil
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from flask import Flask
 from flask_migrate import Migrate
@@ -20,6 +25,14 @@ from routes.load_categories import load_categories_bp
 from routes.set_maintain import set_maintain_bp
 from routes.missing_parts import missing_parts_bp
 from services.lookup_service import load_master_lookup
+
+def backup_database():
+    db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
+    backup_path = f"{db_path}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup"
+    shutil.copyfile(db_path, backup_path)
+    app.logger.info(f"Database backed up to {backup_path}")
+
+
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -62,8 +75,14 @@ app.register_blueprint(load_categories_bp)
 app.register_blueprint(set_maintain_bp)
 app.register_blueprint(missing_parts_bp)
 
+# Set up the scheduler for database backup
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=backup_database, trigger="interval", hours=24)  # Backup every 24 hours
+scheduler.start()
+
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == '__main__':
-    import os
-    
+   
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
 from models import db, UserSet, Part, Minifigure, UserMinifigurePart
 from services.lookup_service import load_master_lookup
 from sqlalchemy.orm import joinedload
+import os
 
 set_maintain_bp = Blueprint('set_maintain', __name__)
 
@@ -192,3 +193,50 @@ def delete_user_set(user_set_id):
 
     return redirect(url_for('set_maintain.set_maintain'))
 
+
+@set_maintain_bp.route('/set_maintain/generate_label', methods=['POST'])
+def generate_label():
+    """
+    Generate a DrawIO file for a LEGO set label and provide it for download.
+    """
+    set_id = request.json.get('set_id')
+    box_size = request.json.get('box_size')
+    current_app.logger.info(f"Generating label for set {set_id} with box size {box_size}")
+    try:
+        lego_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
+        if not lego_set:
+            return jsonify({'error': 'Set not found in the database'}), 404
+
+        lego_data = {
+            "set_num": lego_set.template_set.set_number,
+            "name": lego_set.template_set.name,
+            "set_img_url": lego_set.template_set.set_img_url,
+            "box_id": str(lego_set.template_set.id)
+
+        }
+
+        drawio_template = f"templates/{box_size}.drawio"
+        if not os.path.exists(drawio_template):
+            return jsonify({'error': f'DrawIO template {box_size} not found'}), 400
+
+        replacements = {
+            "BOX_LONG_TITLE": f"LEGO SET - {lego_data['set_num']} - {lego_data['name'].replace('&', 'and')}",
+            "BOX_SHORT_TITLE": lego_data['set_num'],
+            "IMAGE_CONTEXT": lego_data['set_img_url'],
+            "BOX_ID": lego_data['box_id'],
+        }
+
+        with open(drawio_template, 'r', encoding='utf-8') as file:
+            content = file.read()
+            for key, value in replacements.items():
+                content = content.replace(key, value)
+
+        output_file = f"output/{set_id}_{box_size}.drawio"
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        with open(output_file, 'w', encoding='utf-8') as file:
+            file.write(content)
+
+        return send_file(output_file, as_attachment=True)
+    except Exception as e:
+        current_app.logger.error(f"Error generating label: {e}")
+        return jsonify({'error': 'Failed to generate label'}), 500

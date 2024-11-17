@@ -116,6 +116,12 @@
                                 class="d-inline delete-form">
                                 <button type="submit" class="btn btn-danger btn-sm delete-button">Delete</button>
                             </form>
+                            <!-- Small Box Label -->
+                            <button class="btn btn-success btn-sm generate-label"
+                                data-user-set-id="{{ entry.user_set.id }}" data-box-size="MB-1">Small Box</button>
+                            <!-- Big Box Label -->
+                            <button class="btn btn-primary btn-sm generate-label"
+                                data-user-set-id="{{ entry.user_set.id }}" data-box-size="MB-4">Big Box</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -221,7 +227,7 @@
                                         <td>${part.location || 'Not Specified'}</td>
                                     </tr>`;
                             });
-
+                            
                             // Populate Minifigures Table
                             const minifigsTableBody = document.getElementById('minifigs-table-body');
                             minifigsTableBody.innerHTML = '';
@@ -271,6 +277,39 @@
                     if (!confirmDeletion) {
                         event.preventDefault();
                     }
+                });
+            });
+
+            // Handle Generate Label
+            document.querySelectorAll('.generate-label').forEach(button => {
+                button.addEventListener('click', () => {
+                    const userSetId = button.getAttribute('data-user-set-id');
+                    const boxSize = button.getAttribute('data-box-size');
+
+                    fetch('/set_maintain/generate_label', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ set_id: userSetId, box_size: boxSize })
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.blob();
+                            }
+                            throw new Error('Failed to generate label');
+                        })
+                        .then(blob => {
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = `${userSetId}_${boxSize}.drawio`;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                        })
+                        .catch(error => console.error('Error generating label:', error));
                 });
             });
         });
