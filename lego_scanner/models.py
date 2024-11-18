@@ -54,6 +54,7 @@ class Part(db.Model):
     color = db.Column(String, nullable=False)
     color_rgb = db.Column(String, nullable=True)
     quantity = db.Column(Integer, nullable=False)
+    is_spare = db.Column(db.Boolean, default=False, nullable=False)
     have_quantity = db.Column(Integer, default=0)
     part_img_url = db.Column(String, nullable=True)
     part_url = db.Column(String, nullable=True)
@@ -64,6 +65,7 @@ class Part(db.Model):
 
     def __repr__(self):
         return f'<Part {self.part_num} - {self.name}>'
+        
 
 
 class Minifigure(db.Model):

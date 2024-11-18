@@ -1,319 +1,427 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Set Maintenance</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-        .status-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            color: #fff;
-            font-weight: bold;
-            text-transform: capitalize;
-        }
+      .status-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        color: #fff;
+        font-weight: bold;
+        text-transform: capitalize;
+      }
 
-        .status-unknown {
-            background-color: #6c757d;
-        }
+      .status-unknown {
+        background-color: #6c757d;
+      }
 
-        .status-assembled {
-            background-color: #0d6efd;
-        }
+      .status-assembled {
+        background-color: #0d6efd;
+      }
 
-        .status-complete {
-            background-color: #198754;
-        }
+      .status-complete {
+        background-color: #198754;
+      }
+      .status-completenospareparts{
+        background-color: #198754;
+      }
+      .status-missingparts {
+        background-color: #dc3545;
+      }
 
-        .status-missingparts {
-            background-color: #dc3545;
-        }
+      .progress-container {
+        margin-top: 5px;
+      }
 
-        .progress-container {
-            margin-top: 5px;
-        }
+      .table-warning {
+        background-color: #fff3cd !important;
+      }
 
-        .table-warning {
-            background-color: #fff3cd !important;
-        }
-
-        .hidden {
-            display: none;
-        }
+      .hidden {
+        display: none;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     {% include 'navbar.html' %}
 
     <div class="container mt-5">
-        <h1>Set Maintenance</h1>
+      <h1>Set Maintenance</h1>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        <div>
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endwith %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      <div>
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endwith %}
 
-        <!-- Sets Table -->
-        <div id="sets-table">
-            <h2>Your User Sets</h2>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Set Number</th>
-                        <th>Box Number</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in sets_with_completeness %}
-                    <tr>
-                        <td><img src="{{ entry.user_set.template_set.set_img_url }}"
-                                alt="{{ entry.user_set.template_set.set_number }}" width="100"></td>
-                        <td>{{ entry.user_set.template_set.set_number }}</td>
-                        <td>{{ entry.user_set.id }}</td>
-                        <td>
-                            <div class="status-badge status-{{ entry.user_set.status }}">
-                                {% if entry.user_set.status == "unknown" %}
-                                <i class="fas fa-question-circle"></i> Unknown
-                                {% elif entry.user_set.status == "assembled" %}
-                                <i class="fas fa-tools"></i> Assembled
-                                {% elif entry.user_set.status == "complete" %}
-                                <i class="fas fa-check-circle"></i> Complete
-                                {% elif entry.user_set.status == "missingparts" %}
-                                <i class="fas fa-exclamation-triangle"></i> Missing Parts
-                                {% endif %}
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress">
-                                    <div class="progress-bar" role="progressbar"
-                                        style="width: {{ entry.completeness_percentage }}%;"
-                                        aria-valuenow="{{ entry.completeness_percentage }}" aria-valuemin="0"
-                                        aria-valuemax="100">
-                                        {{ entry.completeness_percentage }}%
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <button class="btn btn-info btn-sm view-details"
-                                data-user-set-id="{{ entry.user_set.id }}">View</button>
-                            <form method="post"
-                                action="{{ url_for('set_maintain.delete_user_set', user_set_id=entry.user_set.id) }}"
-                                class="d-inline delete-form">
-                                <button type="submit" class="btn btn-danger btn-sm delete-button">Delete</button>
-                            </form>
-                            <!-- Small Box Label -->
-                            <button class="btn btn-success btn-sm generate-label"
-                                data-user-set-id="{{ entry.user_set.id }}" data-box-size="MB-1">Small Box</button>
-                            <!-- Big Box Label -->
-                            <button class="btn btn-primary btn-sm generate-label"
-                                data-user-set-id="{{ entry.user_set.id }}" data-box-size="MB-4">Big Box</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Set Details -->
-        <div id="set-details" class="hidden">
-            <button class="btn btn-secondary mb-3" id="back-to-sets">Back to Sets</button>
-            <h3>Set Details</h3>
-            <form method="post" action="{{ url_for('set_maintain.update_user_set') }}">
-                <input type="hidden" name="user_set_id" id="user-set-id">
-
-                <h5>Parts</h5>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Color</th>
-                            <th>Quantity</th>
-                            <th>Owned</th>
-                            <th>Location</th>
-                        </tr>
-                    </thead>
-                    <tbody id="parts-table-body"></tbody>
-                </table>
-
-                <h5>Minifigures</h5>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody id="minifigs-table-body"></tbody>
-                </table>
-
-                <h5>Minifigure Parts</h5>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Part Number</th>
-                            <th>Name</th>
-                            <th>Quantity</th>
-                            <th>Owned</th>
-                            <th>Location</th>
-                        </tr>
-                    </thead>
-                    <tbody id="minifig-parts-table-body"></tbody>
-                </table>
-
-                <div class="form-group">
-                    <label for="status">Set Status</label>
-                    <select name="status" id="status" class="form-control">
-                        <option value="unknown">Unknown</option>
-                        <option value="assembled">Assembled</option>
-                        <option value="complete">Complete</option>
-                        <option value="missingparts">Missing Parts</option>
-                    </select>
+      <!-- Sets Table -->
+      <div id="sets-table">
+        <h2>Your User Sets</h2>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Set Number</th>
+              <th>Box Number</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in sets_with_completeness %}
+            <tr>
+              <td>
+                <img
+                  src="{{ entry.user_set.template_set.set_img_url }}"
+                  alt="{{ entry.user_set.template_set.set_number }}"
+                  width="100"
+                />
+              </td>
+              <td>{{ entry.user_set.template_set.set_number }}</td>
+              <td>{{ entry.user_set.id }}</td>
+              <td>
+                <div class="status-badge status-{{ entry.user_set.status }}">
+                  {% if entry.user_set.status == "unknown" %}
+                  <i class="fas fa-question-circle"></i> Unknown {% elif
+                  entry.user_set.status == "assembled" %}
+                  <i class="fas fa-tools"></i> Assembled {% elif
+                  entry.user_set.status == "complete" %}
+                  <i class="fas fa-check-circle"></i> Complete {% elif
+                  entry.user_set.status == "completenospareparts" %}
+                  <i class="fas fa-check-circle"></i> Complete - missing spare parts {% elif
+                  entry.user_set.status == "missingparts" %}
+                  <i class="fas fa-exclamation-triangle"></i> Missing Parts {%
+                  endif %}
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
-            </form>
-        </div>
+                <div class="progress-container">
+                  <div class="progress">
+                    <div
+                      class="progress-bar"
+                      role="progressbar"
+                      style="width: {{ entry.completeness_percentage }}%;"
+                      aria-valuenow="{{ entry.completeness_percentage }}"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      {{ entry.completeness_percentage }}%
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <button
+                  class="btn btn-info btn-sm view-details"
+                  data-user-set-id="{{ entry.user_set.id }}"
+                >
+                  View
+                </button>
+                <!-- Small Box Label -->
+                <button
+                  class="btn btn-success btn-sm generate-label"
+                  data-user-set-id="{{ entry.user_set.id }}"
+                  data-box-size="MB-1"
+                >
+                  Small Box
+                </button>
+                <!-- Big Box Label -->
+                <button
+                  class="btn btn-primary btn-sm generate-label"
+                  data-user-set-id="{{ entry.user_set.id }}"
+                  data-box-size="MB-4"
+                >
+                  Big Box
+                </button>
+                <!-- Delete Button-->
+                <form
+                method="post"
+                action="{{ url_for('set_maintain.delete_user_set', user_set_id=entry.user_set.id) }}"
+                class="d-inline delete-form"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-danger btn-sm delete-button"
+                >
+                  Delete
+                </button>
+              </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Set Details -->
+      <div id="set-details" class="hidden">
+        <button class="btn btn-secondary mb-3" id="back-to-sets">
+          Back to Sets
+        </button>
+        <h3>Set Details</h3>
+        <form
+          method="post"
+          action="{{ url_for('set_maintain.update_user_set') }}"
+        >
+          <input type="hidden" name="user_set_id" id="user-set-id" />
+
+          <h5>Parts</h5>
+
+          <!-- Non-Spare Parts Table -->
+          <h6>Non-Spare Parts</h6>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Color</th>
+                <th>Quantity</th>
+                <th>Owned</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody id="non-spare-parts-table-body">
+              <!-- Non-spare parts will be populated here -->
+            </tbody>
+          </table>
+
+          <!-- Spare Parts Table -->
+          <h6>Spare Parts</h6>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Color</th>
+                <th>Quantity</th>
+                <th>Owned</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody id="spare-parts-table-body">
+              <!-- Spare parts will be populated here -->
+            </tbody>
+          </table>
+
+          <h5>Minifigures</h5>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody id="minifigs-table-body"></tbody>
+          </table>
+
+          <h5>Minifigure Parts</h5>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Part Number</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Owned</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody id="minifig-parts-table-body"></tbody>
+          </table>
+
+          <div class="form-group">
+            <label for="status">Set Status</label>
+            <select name="status" id="status" class="form-control">
+              <option value="unknown">Unknown</option>
+              <option value="assembled">Assembled</option>
+              <option value="complete">Complete</option>
+              <option value="missingparts">Missing Parts</option>
+              <option value="completenospareparts">Complete (missing spare parts)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary mt-3">
+            Save Changes
+          </button>
+        </form>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const setsTable = document.getElementById('sets-table');
-            const setDetails = document.getElementById('set-details');
-            const backToSetsButton = document.getElementById('back-to-sets');
+      document.addEventListener("DOMContentLoaded", function () {
+        const setsTable = document.getElementById("sets-table");
+        const setDetails = document.getElementById("set-details");
+        const backToSetsButton = document.getElementById("back-to-sets");
 
-            // Handle view details
-            document.querySelectorAll('.view-details').forEach(button => {
-                button.addEventListener('click', () => {
-                    const userSetId = button.getAttribute('data-user-set-id');
-                    fetch(`/set_maintain/${userSetId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            setDetails.classList.remove('hidden');
-                            setsTable.classList.add('hidden');
-                            document.getElementById('user-set-id').value = userSetId;
+        // Handle view details
+        document.querySelectorAll(".view-details").forEach((button) => {
+          button.addEventListener("click", () => {
+            const userSetId = button.getAttribute("data-user-set-id");
+            fetch(`/set_maintain/${userSetId}`)
+              .then((response) => response.json())
+              .then((data) => {
+                setDetails.classList.remove("hidden");
+                setsTable.classList.add("hidden");
+                document.getElementById("user-set-id").value = userSetId;
 
-                            // Populate Parts Table
-                            const partsTableBody = document.getElementById('parts-table-body');
-                            partsTableBody.innerHTML = '';
-                            data.parts.forEach(part => {
-                                const mismatchClass = part.quantity !== part.have_quantity ? 'table-warning' : '';
-                                partsTableBody.innerHTML += `
-                                    <tr class="${mismatchClass}">
-                                        <td><img src="${part.part_img_url}" alt="${part.name}" width="50"></td>
-                                        <td>${part.name}</td>
-                                        <td>${part.color || 'Not Specified'}</td>
-                                        <td>${part.quantity}</td>
-                                        <td>
-                                            <input type="number" name="part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control">
-                                        </td>
-                                        <td>${part.location || 'Not Specified'}</td>
-                                    </tr>`;
-                            });
-                            
-                            // Populate Minifigures Table
-                            const minifigsTableBody = document.getElementById('minifigs-table-body');
-                            minifigsTableBody.innerHTML = '';
-                            data.minifigs.forEach(minifig => {
-                                minifigsTableBody.innerHTML += `
+                // Populate Parts Table (Split into Non-Spare and Spare Parts)
+                const nonSparePartsTableBody = document.getElementById(
+                  "non-spare-parts-table-body"
+                );
+                const sparePartsTableBody = document.getElementById(
+                  "spare-parts-table-body"
+                );
+
+                nonSparePartsTableBody.innerHTML = "";
+                sparePartsTableBody.innerHTML = "";
+
+                data.parts.forEach((part) => {
+                  const mismatchClass =
+                    part.quantity !== part.have_quantity ? "table-warning" : "";
+                  const partRow = `
+                        <tr class="${mismatchClass}">
+                            <td><img src="${part.part_img_url}" alt="${
+                                    part.name
+                                }" width="50"></td>
+                            <td>${part.name}</td>
+                            <td>${part.color || "Not Specified"}</td>
+                            <td>${part.quantity}</td>
+                            <td>
+                                <input type="number" name="part_id_${part.id}" value="${
+                                    part.have_quantity
+                                }" min="0" max="${part.quantity}" class="form-control">
+                            </td>
+                            <td>${part.location || "Not Specified"}</td>
+                        </tr>`;
+
+                  if (part.is_spare) {
+                    sparePartsTableBody.innerHTML += partRow;
+                  } else {
+                    nonSparePartsTableBody.innerHTML += partRow;
+                  }
+                });
+
+                // Populate Minifigures Table
+                const minifigsTableBody = document.getElementById(
+                  "minifigs-table-body"
+                );
+                minifigsTableBody.innerHTML = "";
+                data.minifigs.forEach((minifig) => {
+                  minifigsTableBody.innerHTML += `
                                     <tr>
                                         <td><img src="${minifig.img_url}" alt="${minifig.name}" width="50"></td>
                                         <td>${minifig.name}</td>
                                         <td>${minifig.quantity}</td>
                                     </tr>`;
-                            });
+                });
 
-                            // Populate Minifigure Parts Table
-                            const minifigPartsTableBody = document.getElementById('minifig-parts-table-body');
-                            minifigPartsTableBody.innerHTML = '';
-                            data.minifigure_parts.forEach(part => {
-                                const mismatchClass = part.quantity !== part.have_quantity ? 'table-warning' : '';
-                                minifigPartsTableBody.innerHTML += `
+                // Populate Minifigure Parts Table
+                const minifigPartsTableBody = document.getElementById(
+                  "minifig-parts-table-body"
+                );
+                minifigPartsTableBody.innerHTML = "";
+                data.minifigure_parts.forEach((part) => {
+                  const mismatchClass =
+                    part.quantity !== part.have_quantity ? "table-warning" : "";
+                  minifigPartsTableBody.innerHTML += `
                                     <tr class="${mismatchClass}">
-                                        <td><img src="${part.part_img_url}" alt="${part.name}" width="50"></td>
+                                        <td><img src="${
+                                          part.part_img_url
+                                        }" alt="${part.name}" width="50"></td>
                                         <td>${part.part_num}</td>
                                         <td>${part.name}</td>
                                         <td>${part.quantity}</td>
                                         <td>
-                                            <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control">
+                                            <input type="number" name="minifig_part_id_${
+                                              part.id
+                                            }" value="${
+                    part.have_quantity
+                  }" min="0" max="${part.quantity}" class="form-control">
                                         </td>
-                                        <td>${part.location || 'Not Specified'}</td>
+                                        <td>${
+                                          part.location || "Not Specified"
+                                        }</td>
                                     </tr>`;
-                            });
-
-                            document.getElementById('status').value = data.status;
-                        })
-                        .catch(error => console.error('Error fetching UserSet details:', error));
                 });
-            });
 
-            // Handle back to sets button
-            backToSetsButton.addEventListener('click', () => {
-                setDetails.classList.add('hidden');
-                setsTable.classList.remove('hidden');
-            });
-
-            // Confirmation dialog for delete
-            document.querySelectorAll('.delete-form').forEach(form => {
-                form.addEventListener('submit', function (event) {
-                    const confirmDeletion = confirm("Are you sure you want to delete this set? This action cannot be undone.");
-                    if (!confirmDeletion) {
-                        event.preventDefault();
-                    }
-                });
-            });
-
-            // Handle Generate Label
-            document.querySelectorAll('.generate-label').forEach(button => {
-                button.addEventListener('click', () => {
-                    const userSetId = button.getAttribute('data-user-set-id');
-                    const boxSize = button.getAttribute('data-box-size');
-
-                    fetch('/set_maintain/generate_label', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ set_id: userSetId, box_size: boxSize })
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                return response.blob();
-                            }
-                            throw new Error('Failed to generate label');
-                        })
-                        .then(blob => {
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.style.display = 'none';
-                            a.href = url;
-                            a.download = `${userSetId}_${boxSize}.drawio`;
-                            document.body.appendChild(a);
-                            a.click();
-                            window.URL.revokeObjectURL(url);
-                        })
-                        .catch(error => console.error('Error generating label:', error));
-                });
-            });
+                document.getElementById("status").value = data.status;
+              })
+              .catch((error) =>
+                console.error("Error fetching UserSet details:", error)
+              );
+          });
         });
-    </script>
-</body>
 
+        // Handle back to sets button
+        backToSetsButton.addEventListener("click", () => {
+          setDetails.classList.add("hidden");
+          setsTable.classList.remove("hidden");
+        });
+
+        // Confirmation dialog for delete
+        document.querySelectorAll(".delete-form").forEach((form) => {
+          form.addEventListener("submit", function (event) {
+            const confirmDeletion = confirm(
+              "Are you sure you want to delete this set? This action cannot be undone."
+            );
+            if (!confirmDeletion) {
+              event.preventDefault();
+            }
+          });
+        });
+
+        // Handle Generate Label
+        document.querySelectorAll(".generate-label").forEach((button) => {
+          button.addEventListener("click", () => {
+            const userSetId = button.getAttribute("data-user-set-id");
+            const boxSize = button.getAttribute("data-box-size");
+
+            fetch("/set_maintain/generate_label", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ set_id: userSetId, box_size: boxSize }),
+            })
+              .then((response) => {
+                if (response.ok) {
+                  return response.blob();
+                }
+                throw new Error("Failed to generate label");
+              })
+              .then((blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.style.display = "none";
+                a.href = url;
+                a.download = `${userSetId}_${boxSize}.drawio`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+              })
+              .catch((error) =>
+                console.error("Error generating label:", error)
+              );
+          });
+        });
+      });
+    </script>
+  </body>
 </html>

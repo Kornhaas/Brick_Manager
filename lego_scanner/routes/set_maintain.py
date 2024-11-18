@@ -89,6 +89,7 @@ def get_user_set_details(user_set_id):
             'part_num': item.part_num,
             'name': item.name,
             'quantity': item.quantity,
+            'is_spare': item.is_spare,
             'have_quantity': item.have_quantity,
             'color': item.color,  # Add color
             'part_img_url': item.part_img_url,
@@ -203,6 +204,7 @@ def generate_label():
     box_size = request.json.get('box_size')
     current_app.logger.info(f"Generating label for set {set_id} with box size {box_size}")
     try:
+        #lego_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
         lego_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
         if not lego_set:
             return jsonify({'error': 'Set not found in the database'}), 404
@@ -211,7 +213,7 @@ def generate_label():
             "set_num": lego_set.template_set.set_number,
             "name": lego_set.template_set.name,
             "set_img_url": lego_set.template_set.set_img_url,
-            "box_id": str(lego_set.template_set.id)
+            "box_id": str(lego_set.id)#"box_id": str(lego_set.template_set.id)
 
         }
 

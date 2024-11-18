@@ -1,4 +1,5 @@
 **/__pycache__/
 lego_scanner/uploads/*
+lego_scanner/output/*
 lego_scanner/migrations/*
 lego_scanner/instance/*

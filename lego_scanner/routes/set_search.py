@@ -94,6 +94,7 @@ def add_set():
                 color=part['color'],
                 color_rgb=part['color_rgb'],
                 quantity=part['quantity'],
+                is_spare=part['is_spare'],
                 have_quantity=0,
                 part_img_url=part['part_img_url'],
                 user_set_id=user_set.id
@@ -200,6 +201,7 @@ def fetch_set_parts_info(set_number):
                     'color': item['color'].get('name', 'Unknown'),
                     'color_rgb': item['color'].get('rgb', 'FFFFFF'),
                     'quantity': item['quantity'],
+                    'is_spare': item['is_spare'],
                     'part_img_url': item['part'].get('part_img_url', ''),
                     'part_url': item['part'].get('part_url', ''),
                     'location': location,

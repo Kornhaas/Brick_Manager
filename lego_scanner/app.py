@@ -77,7 +77,7 @@ app.register_blueprint(missing_parts_bp)
 
 # Set up the scheduler for database backup
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=backup_database, trigger="interval", hours=24)  # Backup every 24 hours
+scheduler.add_job(func=backup_database, trigger="cron", hour=0, minute=0)  # Backup every day at midnight
 scheduler.start()
 
 # Shut down the scheduler when exiting the app
