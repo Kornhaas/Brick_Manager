@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Missing Parts</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        th.sortable {
+            cursor: pointer;
+        }
+
+        th.sortable:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 
 <body>
@@ -14,24 +23,33 @@
     <div class="container mt-5">
         <h1>Missing Items</h1>
 
+        <!-- Spare Parts Toggle -->
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="toggle-spare-parts" checked>
+            <label class="form-check-label" for="toggle-spare-parts">
+                Include Spare Parts
+            </label>
+        </div>
+
         {% if missing_items %}
-        <table class="table table-bordered mt-3">
+        <table id="missing-parts-table" class="table table-bordered mt-3">
             <thead>
                 <tr>
-                    <th>Type</th>
-                    <th>Set ID</th>
-                    <th>Internal ID</th>
-                    <th>Item ID</th>
+                    <th class="sortable" data-column="type">Type</th>
+                    <th class="sortable" data-column="set_id">Set ID</th>
+                    <th class="sortable" data-column="internal_id">Internal ID</th>
+                    <th class="sortable" data-column="item_id">Item ID</th>
                     <th>Name</th>
                     <th>Color</th>
-                    <th>Missing Quantity</th>
+                    <th class="sortable" data-column="missing_quantity">Missing Quantity</th>
                     <th>Location</th>
                     <th>Image</th>
+                    <th class="sortable" data-column="is_spare">Spare Part</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in missing_items %}
-                <tr>
+                <tr class="missing-item {% if item.is_spare %}spare-part{% endif %}">
                     <td>{{ item.type }}</td>
                     <td>{{ item.set_id }}</td>
                     <td>{{ item.internal_id }}</td>
@@ -43,6 +61,7 @@
                     <td>
                         <img src="{{ item.img_url }}" alt="{{ item.name }}" width="50">
                     </td>
+                    <td>{{ 'Yes' if item.is_spare else 'No' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -57,6 +76,48 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.getElementById('missing-parts-table');
+            const toggleSpareParts = document.getElementById('toggle-spare-parts');
+
+            // Spare Parts Toggle
+            toggleSpareParts.addEventListener('change', function () {
+                const showSpareParts = toggleSpareParts.checked;
+                const sparePartRows = table.querySelectorAll('tr.spare-part');
+
+                sparePartRows.forEach(row => {
+                    row.style.display = showSpareParts ? '' : 'none';
+                });
+            });
+
+            // Sorting Logic
+            const headers = table.querySelectorAll('th.sortable');
+            headers.forEach(header => {
+                header.addEventListener('click', function () {
+                    const column = header.getAttribute('data-column');
+                    const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
+                    const isNumericColumn = ['set_id', 'internal_id', 'item_id', 'missing_quantity'].includes(column);
+
+                    const sortedRows = rows.sort((a, b) => {
+                        const aValue = a.querySelector(`td:nth-child(${header.cellIndex + 1})`).innerText.trim();
+                        const bValue = b.querySelector(`td:nth-child(${header.cellIndex + 1})`).innerText.trim();
+
+                        if (isNumericColumn) {
+                            return parseFloat(aValue) - parseFloat(bValue);
+                        }
+
+                        return aValue.localeCompare(bValue);
+                    });
+
+                    // Append sorted rows
+                    const tbody = table.querySelector('tbody');
+                    tbody.innerHTML = '';
+                    sortedRows.forEach(row => tbody.appendChild(row));
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

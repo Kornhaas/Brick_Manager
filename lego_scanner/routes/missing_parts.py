@@ -32,6 +32,7 @@ def missing_parts():
                     'item_id': part.part_num,
                     'name': part.name,
                     'color': part.color,
+                    'is_spare': part.is_spare,
                     'missing_quantity': part.quantity - part.have_quantity,
                     'img_url': part.part_img_url,
                     'location': f"Location: {part_data.get('location', 'Unknown')}, "
@@ -51,6 +52,7 @@ def missing_parts():
                 'item_id': minifig_part.part_num,
                 'name': minifig_part.name,
                 'color': minifig_part.color,
+                'is_spare': minifig_part.is_spare,
                 'missing_quantity': minifig_part.quantity - minifig_part.have_quantity,
                 'img_url': minifig_part.part_img_url,
                 'location': f"Location: {part_data.get('location', 'Unknown')}, "

@@ -94,6 +94,7 @@ class MinifigurePart(db.Model):
     color = db.Column(String, nullable=True)
     color_rgb = db.Column(String, nullable=True)
     quantity = db.Column(Integer, nullable=False)
+    is_spare = db.Column(db.Boolean, default=False, nullable=False)
     part_img_url = db.Column(String, nullable=True)
     part_url = db.Column(String, nullable=True)
     minifigure_id = db.Column(Integer, ForeignKey('minifigures.id'), nullable=False)
@@ -113,6 +114,7 @@ class UserMinifigurePart(db.Model):
     color = db.Column(String, nullable=True)
     color_rgb = db.Column(String, nullable=True)
     quantity = db.Column(Integer, nullable=False)
+    is_spare = db.Column(db.Boolean, default=False, nullable=False)
     have_quantity = db.Column(Integer, default=0)  # Track ownership
     part_img_url = db.Column(String, nullable=True)
     part_url = db.Column(String, nullable=True)

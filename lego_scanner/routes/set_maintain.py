@@ -68,8 +68,9 @@ def get_user_set_details(user_set_id):
     total_have_quantity = 0
 
     for part in user_set.parts:
-        total_quantity += part.quantity
-        total_have_quantity += part.have_quantity
+        if not part.is_spare:  # Exclude spare parts
+            total_quantity += part.quantity
+            total_have_quantity += part.have_quantity
 
     # Exclude minifigures from the completeness calculation
 
