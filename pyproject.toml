@@ -6,7 +6,7 @@ authors = ["Holger Kornhaas <Holger@Kornhaas.net>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.13"
 flask = "^3.0.3"
 requests = "^2.32.3"
 pillow = "^10.4.0"

@@ -4,3 +4,4 @@ lego_scanner/output/*
 lego_scanner/migrations/*
 lego_scanner/instance/*
 lego_scanner/__pycache__/*
+lego_scanner/static/cache/*

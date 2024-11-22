@@ -24,6 +24,7 @@ from routes.set_search import set_search_bp
 from routes.load_categories import load_categories_bp
 from routes.set_maintain import set_maintain_bp
 from routes.missing_parts import missing_parts_bp
+from routes.dashboard import dashboard_bp
 from services.lookup_service import load_master_lookup
 
 def backup_database():
@@ -74,6 +75,7 @@ app.register_blueprint(set_search_bp)
 app.register_blueprint(load_categories_bp)
 app.register_blueprint(set_maintain_bp)
 app.register_blueprint(missing_parts_bp)
+app.register_blueprint(dashboard_bp)
 
 # Set up the scheduler for database backup
 scheduler = BackgroundScheduler()

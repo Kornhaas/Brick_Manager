@@ -50,22 +50,23 @@ class Part(db.Model):
     id = db.Column(Integer, primary_key=True)
     part_num = db.Column(String, nullable=False)
     name = db.Column(String, nullable=False)
-    category = db.Column(String, nullable=True)
+    category_id = db.Column(Integer, db.ForeignKey('categories.id'), nullable=True)
     color = db.Column(String, nullable=False)
     color_rgb = db.Column(String, nullable=True)
     quantity = db.Column(Integer, nullable=False)
-    is_spare = db.Column(db.Boolean, default=False, nullable=False)
     have_quantity = db.Column(Integer, default=0)
     part_img_url = db.Column(String, nullable=True)
     part_url = db.Column(String, nullable=True)
     user_set_id = db.Column(Integer, ForeignKey('user_sets.id'), nullable=False)
+    is_spare = db.Column(db.Boolean, default=False, nullable=False)
 
     # Relationships
     user_set = db.relationship("UserSet", back_populates="parts")
+    category = db.relationship('Category', backref='parts', lazy='joined')  # Proper relationship
 
     def __repr__(self):
         return f'<Part {self.part_num} - {self.name}>'
-        
+
 
 
 class Minifigure(db.Model):
@@ -94,10 +95,10 @@ class MinifigurePart(db.Model):
     color = db.Column(String, nullable=True)
     color_rgb = db.Column(String, nullable=True)
     quantity = db.Column(Integer, nullable=False)
-    is_spare = db.Column(db.Boolean, default=False, nullable=False)
     part_img_url = db.Column(String, nullable=True)
     part_url = db.Column(String, nullable=True)
     minifigure_id = db.Column(Integer, ForeignKey('minifigures.id'), nullable=False)
+    is_spare = db.Column(db.Boolean, default=False, nullable=False)
 
     # Relationships
     minifigure = db.relationship("Minifigure", back_populates="parts")
@@ -114,11 +115,11 @@ class UserMinifigurePart(db.Model):
     color = db.Column(String, nullable=True)
     color_rgb = db.Column(String, nullable=True)
     quantity = db.Column(Integer, nullable=False)
-    is_spare = db.Column(db.Boolean, default=False, nullable=False)
     have_quantity = db.Column(Integer, default=0)  # Track ownership
     part_img_url = db.Column(String, nullable=True)
     part_url = db.Column(String, nullable=True)
     user_set_id = db.Column(Integer, ForeignKey('user_sets.id'), nullable=False)
+    is_spare = db.Column(db.Boolean, default=False, nullable=False)
 
     # Relationships
     user_set = db.relationship("UserSet", back_populates="minifigure_parts")

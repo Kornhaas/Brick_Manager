@@ -1,10 +1,24 @@
 from flask import Blueprint, render_template, request, flash, current_app, redirect, url_for
 import requests
-from models import db, Set, UserSet, Part, Minifigure, UserMinifigurePart
+from models import db, Set, UserSet, Part, Minifigure, UserMinifigurePart, Category
 from config import Config
 from services.lookup_service import load_master_lookup
 
 set_search_bp = Blueprint('set_search', __name__)
+
+def get_or_create(session, model, defaults=None, **kwargs):
+    """
+    Utility function to fetch or create a database entry.
+    """
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance, False
+    else:
+        params = {**kwargs, **(defaults or {})}
+        instance = model(**params)
+        session.add(instance)
+        session.flush()
+        return instance, True
 
 @set_search_bp.route('/set_search', methods=['GET', 'POST'])
 def set_search():
@@ -52,7 +66,6 @@ def set_search():
     )
 
 
-
 @set_search_bp.route('/add_set', methods=['POST'])
 def add_set():
     """
@@ -62,80 +75,71 @@ def add_set():
     current_app.logger.debug(f"Adding set {set_number} to the database.")
 
     try:
-        # Fetch or create the template set
+        # Fetch or get the template set
         set_info = fetch_set_info(set_number)
         if not set_info:
-            flash(f"Failed to fetch set {set_number}.", category="danger")
+            flash(f"Set {set_number} not found.", category="danger")
             return redirect(url_for('set_search.set_search'))
 
-        template_set = Set.query.filter_by(set_number=set_number).first()
-        if not template_set:
-            template_set = Set(
-                set_number=set_info['set_num'],
-                name=set_info['name'],
-                set_img_url=set_info['set_img_url']
-            )
-            db.session.add(template_set)
-            db.session.flush()
+        template_set, created = get_or_create(db.session, Set, set_number=set_number, defaults={
+            'name': set_info['name'],
+            'set_img_url': set_info['set_img_url']
+        })
+
+        # Prevent duplicate UserSets
+        if UserSet.query.filter_by(set_id=template_set.id).first():
+            flash(f"Set {template_set.name} already exists.", category="info")
+            return redirect(url_for('set_search.set_search'))
 
         # Create UserSet
-        user_set = UserSet(set_id=template_set.id, status='unknown')
+        user_set = UserSet(template_set=template_set, status='new')
         db.session.add(user_set)
         db.session.flush()
-        current_app.logger.debug(f"UserSet created: {user_set}")
 
-        # Fetch and save parts
+        # Add parts
         parts_info = fetch_set_parts_info(set_number)
         for part in parts_info:
-            db_part = Part(
+            category, _ = get_or_create(db.session, Category, id=part['category'], defaults={'name': 'Unknown'})
+            db.session.add(Part(
                 part_num=part['part_num'],
                 name=part['name'],
-                category=part['category'],
+                category_id=category.id,
                 color=part['color'],
                 color_rgb=part['color_rgb'],
                 quantity=part['quantity'],
                 is_spare=part['is_spare'],
-                have_quantity=0,
                 part_img_url=part['part_img_url'],
                 user_set_id=user_set.id
-            )
-            db.session.add(db_part)
+            ))
 
-        # Fetch and save minifigures and their parts
+        # Add minifigures and parts
         minifigs_info = fetch_minifigs_info(set_number)
         for minifig in minifigs_info:
             db_minifig = Minifigure(
                 fig_num=minifig['fig_num'],
                 name=minifig['name'],
                 quantity=minifig['quantity'],
-                have_quantity=0,
                 img_url=minifig['img_url'],
                 user_set_id=user_set.id
             )
             db.session.add(db_minifig)
             db.session.flush()
-            current_app.logger.debug(f"Minifigure added: {db_minifig}")
 
-            # Fetch minifigure parts
+            # Add minifigure parts
             minifig_parts = fetch_minifigure_parts(minifig['fig_num'])
-            current_app.logger.debug(f"Parts for minifigure {minifig['fig_num']}: {len(minifig_parts)} parts found.")
             for part in minifig_parts:
-                db_user_minifigure_part = UserMinifigurePart(
+                db.session.add(UserMinifigurePart(
                     part_num=part['part_num'],
                     name=part['name'],
                     color=part['color'],
                     color_rgb=part['color_rgb'],
                     quantity=part['quantity'],
-                    have_quantity=0,  # Default ownership
                     part_img_url=part['part_img_url'],
-                    part_url=part['part_url'],
                     user_set_id=user_set.id
-                )
-                db.session.add(db_user_minifigure_part)
+                ))
 
         db.session.commit()
-        flash(f"Set {set_info['name']} added successfully.", category="success")
-        current_app.logger.debug(f"Set {set_number} added successfully.")
+        flash(f"Set {template_set.name} added successfully!", category="success")
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error adding set {set_number}: {e}")
@@ -191,9 +195,6 @@ def fetch_set_parts_info(set_number):
                            f"Level: {location_data.get('level', 'Unknown')}, " \
                            f"Box: {location_data.get('box', 'Unknown')}" if location_data else "Not Specified"
 
-                # Determine the status based on the location
-                status = "Available" if location_data else "Not Available"
-
                 part = {
                     'part_num': part_num,
                     'name': item['part'].get('name', 'Unknown'),
@@ -203,9 +204,7 @@ def fetch_set_parts_info(set_number):
                     'quantity': item['quantity'],
                     'is_spare': item['is_spare'],
                     'part_img_url': item['part'].get('part_img_url', ''),
-                    'part_url': item['part'].get('part_url', ''),
                     'location': location,
-                    'status': status  # Add the status here
                 }
                 parts_info.append(part)
             return parts_info
@@ -214,7 +213,6 @@ def fetch_set_parts_info(set_number):
     except requests.exceptions.RequestException as e:
         current_app.logger.error(f"Error fetching parts for set {set_number}: {e}")
         return []
-
 
 def fetch_minifigs_info(set_number):
     """

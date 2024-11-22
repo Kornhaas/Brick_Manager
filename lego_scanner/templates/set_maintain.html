@@ -9,7 +9,7 @@
       rel="stylesheet"
     />
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
       rel="stylesheet"
     />
     <style>
@@ -30,6 +30,10 @@
         background-color: #6c757d;
       }
 
+      .status-konvolut {
+        background-color: #cbe472;
+      }
+
       .status-assembled {
         background-color: #0d6efd;
       }
@@ -37,9 +41,11 @@
       .status-complete {
         background-color: #198754;
       }
-      .status-completenospareparts{
+
+      .status-completenospareparts {
         background-color: #198754;
       }
+
       .status-missingparts {
         background-color: #dc3545;
       }
@@ -100,15 +106,17 @@
               <td>
                 <div class="status-badge status-{{ entry.user_set.status }}">
                   {% if entry.user_set.status == "unknown" %}
-                  <i class="fas fa-question-circle"></i> Unknown {% elif
+                  <i class="bi bi-question-circle-fill"></i> Unknown {% elif
+                  entry.user_set.status == "konvolut" %}
+                  <i class="bi bi-box-seam"></i> Konvolut {% elif
                   entry.user_set.status == "assembled" %}
-                  <i class="fas fa-tools"></i> Assembled {% elif
+                  <i class="bi bi-tools"></i> Assembled {% elif
                   entry.user_set.status == "complete" %}
-                  <i class="fas fa-check-circle"></i> Complete {% elif
+                  <i class="bi bi-check-circle-fill"></i> Complete {% elif
                   entry.user_set.status == "completenospareparts" %}
-                  <i class="fas fa-check-circle"></i> Complete - missing spare parts {% elif
+                  <i class="bi bi-check-circle-fill"></i> Complete - missing spare parts {% elif
                   entry.user_set.status == "missingparts" %}
-                  <i class="fas fa-exclamation-triangle"></i> Missing Parts {%
+                  <i class="bi bi-exclamation-triangle-fill"></i> Missing Parts {%
                   endif %}
                 </div>
                 <div class="progress-container">
@@ -151,17 +159,17 @@
                 </button>
                 <!-- Delete Button-->
                 <form
-                method="post"
-                action="{{ url_for('set_maintain.delete_user_set', user_set_id=entry.user_set.id) }}"
-                class="d-inline delete-form"
-              >
-                <button
-                  type="submit"
-                  class="btn btn-danger btn-sm delete-button"
+                  method="post"
+                  action="{{ url_for('set_maintain.delete_user_set', user_set_id=entry.user_set.id) }}"
+                  class="d-inline delete-form"
                 >
-                  Delete
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    class="btn btn-danger btn-sm delete-button"
+                  >
+                    Delete
+                  </button>
+                </form>
               </td>
             </tr>
             {% endfor %}
@@ -251,8 +259,9 @@
             <select name="status" id="status" class="form-control">
               <option value="unknown">Unknown</option>
               <option value="assembled">Assembled</option>
-              <option value="complete">Complete</option>
+              <option value="konvolut">Konvolut</option>
               <option value="missingparts">Missing Parts</option>
+              <option value="complete">Complete</option>
               <option value="completenospareparts">Complete (missing spare parts)</option>
             </select>
           </div>
