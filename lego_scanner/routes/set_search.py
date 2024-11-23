@@ -72,7 +72,8 @@ def add_set():
     Add a LEGO set instance (UserSet) to the database, including its parts, minifigures, and minifigure parts.
     """
     set_number = request.form.get('set_number')
-    current_app.logger.debug(f"Adding set {set_number} to the database.")
+    status = request.form.get('status', 'unknown')  # Default to 'unknown'
+    current_app.logger.debug(f"Adding set {set_number} to the database with status {status}.")
 
     try:
         # Fetch or get the template set
@@ -91,8 +92,8 @@ def add_set():
             flash(f"Set {template_set.name} already exists.", category="info")
             return redirect(url_for('set_search.set_search'))
 
-        # Create UserSet
-        user_set = UserSet(template_set=template_set, status='new')
+        # Create UserSet with the provided status
+        user_set = UserSet(template_set=template_set, status=status)
         db.session.add(user_set)
         db.session.flush()
 
@@ -139,7 +140,7 @@ def add_set():
                 ))
 
         db.session.commit()
-        flash(f"Set {template_set.name} added successfully!", category="success")
+        flash(f"Set {template_set.name} added successfully as {status}!", category="success")
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error adding set {set_number}: {e}")
