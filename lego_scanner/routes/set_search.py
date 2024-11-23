@@ -88,9 +88,9 @@ def add_set():
         })
 
         # Prevent duplicate UserSets
-        if UserSet.query.filter_by(set_id=template_set.id).first():
-            flash(f"Set {template_set.name} already exists.", category="info")
-            return redirect(url_for('set_search.set_search'))
+        #if UserSet.query.filter_by(set_id=template_set.id).first():
+        #    flash(f"Set {template_set.name} already exists.", category="info")
+        #    return redirect(url_for('set_search.set_search'))
 
         # Create UserSet with the provided status
         user_set = UserSet(template_set=template_set, status=status)

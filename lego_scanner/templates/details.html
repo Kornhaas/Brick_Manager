@@ -97,6 +97,10 @@
             searching: true,
             ordering: true,
             lengthMenu: [10, 25, 50, 100],
+            order: [
+                [2, "asc"], // Sort by `part_num` (3rd column, index 2)
+                [5, "asc"]  // Then sort by `color` (5th column, index 4)
+            ],
         });
     
         // Array to track changes
@@ -196,8 +200,13 @@
         // Category Filter
         $("#categoryFilter").on("change", function () {
             const selectedCategory = $(this).val();
-            table.column(4).search(selectedCategory || "").draw();
+            if (selectedCategory) {
+                table.column(4).search(`^${selectedCategory}$`, true, false).draw(); // Exact match using regex
+            } else {
+                table.column(4).search("").draw(); // Clear filter if no category selected
+            }
         });
+        
     });
     
     </script>
