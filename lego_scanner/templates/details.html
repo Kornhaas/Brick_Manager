@@ -35,6 +35,14 @@
                 {% endfor %}
             </select>
         </div>
+        
+        <div class="mb-3">
+            <label for="nameFilter" class="form-label">Filter by Name:</label>
+            <select id="nameFilter" class="form-select" aria-label="Filter by Name" disabled>
+                <option value="">All Names</option>
+                <!-- Options will be dynamically populated -->
+            </select>
+        </div>
         {% endif %}
 
         <table id="detailsTable" class="table table-bordered">
@@ -80,135 +88,163 @@
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Save Changes Button -->
-        <button id="saveChanges" class="btn btn-primary mt-3" disabled>Save Changes</button>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script>
-      $(document).ready(function () {
-        console.log("Script loaded successfully!");
-    
-        const table = $("#detailsTable").DataTable({
-            paging: true,
-            searching: true,
-            ordering: true,
-            lengthMenu: [10, 25, 50, 100],
-            order: [
-                [2, "asc"], // Sort by `part_num` (3rd column, index 2)
-                [5, "asc"]  // Then sort by `color` (5th column, index 4)
-            ],
-        });
-    
-        // Array to track changes
-        let changes = [];
-    
-        // Function to attach change listeners to quantity inputs
-        function attachChangeListeners() {
-            $(".update-quantity").off("input").on("input", function () {
-                const $input = $(this);
-                const newQuantity = parseInt($input.val(), 10);
-                const originalQuantity = parseInt($input.attr("data-original"), 10);
-                const partId = $input.data("id");
-    
-                console.log("Input changed. Part ID:", partId, "New Quantity:", newQuantity);
-    
-                // Validate the input
-                if (isNaN(newQuantity) || newQuantity < 0) {
-                    alert("Invalid quantity! Please enter a value greater than or equal to 0.");
-                    $input.val(originalQuantity); // Revert to the original value
+        $(document).ready(function () {
+            console.log("Script loaded successfully!");
+
+            // Initialize DataTable with default sorting
+            const table = $("#detailsTable").DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                lengthMenu: [10, 25, 50, 100],
+                order: [
+                    [2, "asc"], // Sort by `part_num` (3rd column, index 2)
+                    [5, "asc"]  // Then sort by `color` (5th column, index 5)
+                ],
+            });
+
+            // Array to track changes
+            let changes = [];
+
+            // Function to attach change listeners to quantity inputs
+            function attachChangeListeners() {
+                $(".update-quantity").off("input").on("input", function () {
+                    const $input = $(this);
+                    const newQuantity = parseInt($input.val(), 10);
+                    const originalQuantity = parseInt($input.attr("data-original"), 10);
+                    const partId = $input.data("id");
+
+                    console.log("Input changed. Part ID:", partId, "New Quantity:", newQuantity);
+
+                    // Validate the input
+                    if (isNaN(newQuantity) || newQuantity < 0) {
+                        alert("Invalid quantity! Please enter a value greater than or equal to 0.");
+                        $input.val(originalQuantity); // Revert to the original value
+                        return;
+                    }
+
+                    // Check if there's a change
+                    if (newQuantity !== originalQuantity) {
+                        const existingChangeIndex = changes.findIndex(
+                            (change) => change.part_id === partId
+                        );
+
+                        if (existingChangeIndex > -1) {
+                            // Update existing change
+                            changes[existingChangeIndex].new_quantity = newQuantity;
+                        } else {
+                            // Add new change
+                            changes.push({ part_id: partId, new_quantity: newQuantity });
+                        }
+                    } else {
+                        // Remove the change if reverted to the original value
+                        changes = changes.filter((change) => change.part_id !== partId);
+                    }
+
+                    // Send changes automatically
+                    saveChanges();
+                });
+            }
+
+            // Save changes to the server
+            function saveChanges() {
+                if (changes.length === 0) {
+                    console.log("No changes to save.");
                     return;
                 }
-    
-                // Check if there's a change
-                if (newQuantity !== originalQuantity) {
-                    const existingChangeIndex = changes.findIndex(
-                        (change) => change.part_id === partId
-                    );
-    
-                    if (existingChangeIndex > -1) {
-                        // Update existing change
-                        changes[existingChangeIndex].new_quantity = newQuantity;
-                    } else {
-                        // Add new change
-                        changes.push({ part_id: partId, new_quantity: newQuantity });
-                    }
-                } else {
-                    // Remove the change if reverted to the original value
-                    changes = changes.filter((change) => change.part_id !== partId);
-                }
-    
-                // Enable or disable the Save Changes button
-                const saveButtonState = changes.length > 0;
-                console.log("Changes Array:", changes);
-                console.log("Save Changes Button Enabled:", saveButtonState);
-    
-                $("#saveChanges").prop("disabled", !saveButtonState);
-            });
-        }
-    
-        // Initial attachment of listeners
-        attachChangeListeners();
-    
-        // Reattach listeners on table redraw
-        table.on("draw", function () {
-            console.log("Table redrawn. Reattaching listeners...");
-            attachChangeListeners();
-        });
-    
-        // Save changes on button click
-        $("#saveChanges").on("click", function () {
-            console.log("Save button clicked. Changes to save:", changes);
-    
-            if (changes.length === 0) {
-                alert("No changes to save!");
-                return;
+
+                // Send changes to the server
+                $.ajax({
+                    url: "/update_quantity",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ changes }),
+                    success: function () {
+                        const feedback = $("#feedback");
+                        feedback
+                            .removeClass("d-none")
+                            .text("Changes saved successfully!");
+                        setTimeout(() => feedback.addClass("d-none"), 3000);
+
+                        // Update the original data attributes and clear changes
+                        changes.forEach((change) => {
+                            $(`[data-id="${change.part_id}"]`).attr(
+                                "data-original",
+                                change.new_quantity
+                            );
+                        });
+                        changes = [];
+                    },
+                    error: function () {
+                        alert("Failed to save changes. Please try again.");
+                    },
+                });
             }
-    
-            // Send changes to the server
-            $.ajax({
-                url: "/update_quantity",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({ changes }),
-                success: function () {
-                    const feedback = $("#feedback");
-                    feedback
-                        .removeClass("d-none")
-                        .text("Changes saved successfully!");
-                    setTimeout(() => feedback.addClass("d-none"), 3000);
-    
-                    // Update the original data attributes and clear changes
-                    changes.forEach((change) => {
-                        $(`[data-id="${change.part_id}"]`).attr(
-                            "data-original",
-                            change.new_quantity
-                        );
+
+            // Populate name dropdown based on selected category
+            function populateNameDropdown(selectedCategory) {
+                const nameDropdown = $("#nameFilter");
+                nameDropdown.empty().append('<option value="">All Names</option>');
+
+                if (selectedCategory) {
+                    // Get unique names for the selected category
+                    const names = new Set();
+                    table.rows({ search: "applied" }).every(function () {
+                        const data = this.data();
+                        if (data[4] === selectedCategory) {
+                            names.add(data[3]); // Assuming name is in the 4th column
+                        }
                     });
-                    changes = [];
-                    $("#saveChanges").prop("disabled", true);
-                },
-                error: function () {
-                    alert("Failed to save changes. Please try again.");
-                },
+
+                    // Populate the name dropdown
+                    Array.from(names).sort().forEach((name) => {
+                        nameDropdown.append(`<option value="${name}">${name}</option>`);
+                    });
+
+                    nameDropdown.prop("disabled", false);
+                } else {
+                    nameDropdown.prop("disabled", true);
+                }
+            }
+
+            // Category Filter
+            $("#categoryFilter").on("change", function () {
+                const selectedCategory = $(this).val();
+                if (selectedCategory) {
+                    table.column(4).search(`^${selectedCategory}$`, true, false).draw(); // Exact match using regex
+                } else {
+                    table.column(4).search("").draw(); // Clear filter if no category selected
+                }
+
+                // Populate the name dropdown
+                populateNameDropdown(selectedCategory);
+            });
+
+            // Name Filter
+            $("#nameFilter").on("change", function () {
+                const selectedName = $(this).val();
+                if (selectedName) {
+                    table.column(3).search(`^${selectedName}$`, true, false).draw(); // Exact match using regex
+                } else {
+                    table.column(3).search("").draw(); // Clear filter if no name selected
+                }
+            });
+
+            // Initial attachment of listeners
+            attachChangeListeners();
+
+            // Reattach listeners on table redraw
+            table.on("draw", function () {
+                console.log("Table redrawn. Reattaching listeners...");
+                attachChangeListeners();
             });
         });
-    
-        // Category Filter
-        $("#categoryFilter").on("change", function () {
-            const selectedCategory = $(this).val();
-            if (selectedCategory) {
-                table.column(4).search(`^${selectedCategory}$`, true, false).draw(); // Exact match using regex
-            } else {
-                table.column(4).search("").draw(); // Clear filter if no category selected
-            }
-        });
-        
-    });
-    
     </script>
 </body>
 </html>
