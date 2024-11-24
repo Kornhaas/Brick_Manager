@@ -61,6 +61,7 @@
             </thead>
             <tbody>
                 {% for item in data %}
+                {% if item.total_quantity != item.have_quantity %}
                 <tr>
                     <td>{{ item.set_id }}</td>
                     <td>{{ item.internal_id }}</td>
@@ -85,6 +86,7 @@
                         <img src="{{ item.image_url }}" alt="{{ item.name }}" class="img-fluid" width="50" />
                     </td>
                 </tr>
+                {% endif %}
                 {% endfor %}
             </tbody>
         </table>
@@ -147,7 +149,7 @@
                         changes = changes.filter((change) => change.part_id !== partId);
                     }
 
-                    // Send changes automatically
+                    // Save changes automatically
                     saveChanges();
                 });
             }

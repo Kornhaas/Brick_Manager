@@ -29,7 +29,7 @@ from services.lookup_service import load_master_lookup
 
 def backup_database():
     db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
-    backup_path = f"{db_path}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup"
+    backup_path = f"{db_path}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
     shutil.copyfile(db_path, backup_path)
     app.logger.info(f"Database backed up to {backup_path}")
 
@@ -39,9 +39,18 @@ def backup_database():
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Set your secret key here
 app.config.from_object(Config)  # Load the configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lego_scanner.db'
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Ensure the 'instances' directory exists
+instances_dir = os.path.join(basedir, 'instance')
+if not os.path.exists(instances_dir):
+    os.makedirs(instances_dir)
+
+# Update the database URI to use the 'instances' directory
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instances_dir, "lego_scanner.db")}'
+print(f'sqlite:///{os.path.join(instances_dir, "lego_scanner.db")}')
 # Initialize the db instance with the app
 db.init_app(app)
 
@@ -79,7 +88,8 @@ app.register_blueprint(dashboard_bp)
 
 # Set up the scheduler for database backup
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=backup_database, trigger="cron", hour=0, minute=0)  # Backup every day at midnight
+#scheduler.add_job(func=backup_database, trigger="interval", hours=24)  # Backup every 24 hours
+scheduler.add_job(func=backup_database, trigger="interval", hours=1)  # Backup every 24 hours
 scheduler.start()
 
 # Shut down the scheduler when exiting the app

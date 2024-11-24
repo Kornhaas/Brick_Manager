@@ -182,6 +182,7 @@
         <button class="btn btn-secondary mb-3" id="back-to-sets">
           Back to Sets
         </button>
+        <button id="mark-all-existing" class="btn btn-success mb-3">Mark All Parts as Existing</button>
         <h3>Set Details</h3>
         <form
           method="post"
@@ -278,6 +279,35 @@
         const setsTable = document.getElementById("sets-table");
         const setDetails = document.getElementById("set-details");
         const backToSetsButton = document.getElementById("back-to-sets");
+
+          // Mark all parts as existing
+  const markAllExistingButton = document.getElementById("mark-all-existing");
+
+  markAllExistingButton.addEventListener("click", () => {
+    // Get all input fields in the Non-Spare Parts and Spare Parts tables
+    const partsTables = [
+      document.getElementById("non-spare-parts-table-body")
+    ];
+
+    partsTables.forEach((tableBody) => {
+      if (tableBody) {
+        const rows = tableBody.querySelectorAll("tr");
+        rows.forEach((row) => {
+          const quantityCell = row.querySelector("td:nth-child(4)"); // Quantity cell
+          const ownedInput = row.querySelector("input[type='number']"); // Owned input field
+
+          if (quantityCell && ownedInput) {
+            const quantity = parseInt(quantityCell.textContent.trim(), 10);
+            if (!isNaN(quantity)) {
+              ownedInput.value = quantity; // Set Owned to Quantity
+            }
+          }
+        });
+      }
+    });
+
+    alert("All parts marked as existing!");
+  });
 
         // Handle view details
         document.querySelectorAll(".view-details").forEach((button) => {
