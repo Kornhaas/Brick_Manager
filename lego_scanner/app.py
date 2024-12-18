@@ -28,10 +28,21 @@ from routes.dashboard import dashboard_bp
 from services.lookup_service import load_master_lookup
 
 def backup_database():
+    # Backup the database
     db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
-    backup_path = f"{db_path}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
-    shutil.copyfile(db_path, backup_path)
-    app.logger.info(f"Database backed up to {backup_path}")
+    backup_db_path = f"{db_path}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
+    shutil.copyfile(db_path, backup_db_path)
+    app.logger.info(f"Database backed up to {backup_db_path}")
+
+    # Backup the master_lookup.json
+    lookup_dir = os.path.join(basedir, 'lookup')
+    master_lookup_file = os.path.join(lookup_dir, 'master_lookup.json')
+    if os.path.exists(master_lookup_file):
+        backup_lookup_path = f"{master_lookup_file}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.json"
+        shutil.copyfile(master_lookup_file, backup_lookup_path)
+        app.logger.info(f"Master lookup backed up to {backup_lookup_path}")
+    else:
+        app.logger.warning(f"Master lookup file {master_lookup_file} does not exist.")
 
 
 

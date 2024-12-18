@@ -22,7 +22,7 @@
         {% if messages %}
         <div class="alert-container">
             {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            <div class="alert alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'danger' }} alert-dismissible fade show" role="alert">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -34,20 +34,20 @@
         <!-- Form -->
         <form method="post">
             <div class="mb-3">
-                <label for="id" class="form-label">Part ID:</label>
-                <input type="text" id="id" name="id" class="form-control" value="{{ part_id }}">
+                <label for="id" class="form-label">Part ID: <span class="text-danger">*</span></label>
+                <input type="text" id="id" name="id" class="form-control" placeholder="Enter Part ID" value="{{ part_id }}" required>
             </div>
             <div class="mb-3">
-                <label for="schrank" class="form-label">Schrank:</label>
-                <input type="text" id="schrank" name="schrank" class="form-control" value="{{ schrank }}">
+                <label for="schrank" class="form-label">Schrank: <span class="text-danger">*</span></label>
+                <input type="number" id="schrank" name="schrank" class="form-control" placeholder="Enter Schrank (numeric)" value="{{ schrank }}" required>
             </div>
             <div class="mb-3">
-                <label for="fach" class="form-label">Fach:</label>
-                <input type="text" id="fach" name="fach" class="form-control" value="{{ fach }}">
+                <label for="fach" class="form-label">Fach: <span class="text-danger">*</span></label>
+                <input type="number" id="fach" name="fach" class="form-control" placeholder="Enter Fach (numeric)" value="{{ fach }}" required>
             </div>
             <div class="mb-3">
-                <label for="box" class="form-label">Box:</label>
-                <input type="text" id="box" name="box" class="form-control" value="{{ box }}">
+                <label for="box" class="form-label">Box: <span class="text-danger">*</span></label>
+                <input type="number" id="box" name="box" class="form-control" placeholder="Enter Box (numeric)" value="{{ box }}" required>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>

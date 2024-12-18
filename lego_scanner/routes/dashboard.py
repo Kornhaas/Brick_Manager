@@ -55,7 +55,9 @@ def dashboard():
         .join(UserSet, UserSet.id == Part.user_set_id)
         .filter(~UserSet.status.in_(['assembled', 'konvolut']))
         .all())
+    
     missing_spare_parts = sum(part.quantity - part.have_quantity for part in parts if part.is_spare and part.quantity > part.have_quantity)
+    
     missing_minifigure_parts = sum(
         minifigure_part.quantity - minifigure_part.have_quantity
         for minifigure_part in minifigure_parts
@@ -79,6 +81,15 @@ def dashboard():
         .filter(UserSet.status == 'konvolut')
         .all())
 
+     # Calculate missing parts in Konvolut
+    missing_konvolut_parts = sum(
+        part.quantity - part.have_quantity
+        for part in Part.query.options(selectinload(Part.user_set))
+        .join(UserSet, UserSet.id == Part.user_set_id)
+        .filter(UserSet.status == 'konvolut', Part.quantity > Part.have_quantity)
+        .all()
+    )
+    
     # Render the dashboard template with counts
     return render_template(
         'dashboard.html',
@@ -86,7 +97,7 @@ def dashboard():
         missing_parts=missing_parts,
         missing_spare_parts=missing_spare_parts,
         missing_minifigure_parts=missing_minifigure_parts,
-        konvolut_parts=konvolut_parts,
+        konvolut_parts=missing_konvolut_parts,
         konvolut_minifigure_parts=konvolut_minifigure_parts,
     )
 
@@ -192,7 +203,7 @@ def details(category):
             "category": item.category.name if include_category and item.category else None,
             "have_quantity": item.have_quantity,
             "total_quantity": item.quantity,
-            "image_url": item.part_img_url or "/static/default_image.png",
+            "image_url": cache_image(item.part_img_url or "/static/default_image.png"),
         }
         for item in data
     ]
