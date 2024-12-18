@@ -3414,12 +3414,7 @@
         "level": "7",
         "box": "2"
     },
-    "31^58": {
-        "location": "4",
-        "level": "7",
-        "box": "1"
-    },
-    "3158": {
+     "3158": {
         "location": "4",
         "level": "7",
         "box": "1"
@@ -3963,5 +3958,330 @@
         "location": "6",
         "level": "8",
         "box": "4"
+    },
+    "11153": {
+        "location": "6",
+        "level": "8",
+        "box": "5"
+    },
+    "61678": {
+        "location": "6",
+        "level": "8",
+        "box": "5"
+    },
+    "15068": {
+        "location": "6",
+        "level": "8",
+        "box": "6"
+    },
+    "42022": {
+        "location": "6",
+        "level": "8",
+        "box": "7"
+    },
+    "30272": {
+        "location": "6",
+        "level": "8",
+        "box": "8"
+    },
+    "93606": {
+        "location": "6",
+        "level": "8",
+        "box": "9"
+    },
+    "3307": {
+        "location": "6",
+        "level": "8",
+        "box": "10"
+    },
+    "12939": {
+        "location": "6",
+        "level": "8",
+        "box": "10"
+    },
+    "15254": {
+        "location": "6",
+        "level": "8",
+        "box": "10"
+    },
+    "50950": {
+        "location": "6",
+        "level": "8",
+        "box": "11"
+    },
+    "3659": {
+        "location": "6",
+        "level": "8",
+        "box": "12"
+    },
+    "6091": {
+        "location": "6",
+        "level": "8",
+        "box": "13"
+    },
+    "6091-gray": {
+        "location": "6",
+        "level": "8",
+        "box": "14"
+    },
+    "93273": {
+        "location": "6",
+        "level": "8",
+        "box": "15"
+    },
+    "88292": {
+        "location": "6",
+        "level": "8",
+        "box": "16"
+    },
+    "45677": {
+        "location": "6",
+        "level": "8",
+        "box": "18"
+    },
+    "6183": {
+        "location": "6",
+        "level": "8",
+        "box": "19"
+    },
+    "18653": {
+        "location": "6",
+        "level": "8",
+        "box": "20"
+    },
+    "37352": {
+        "location": "6",
+        "level": "8",
+        "box": "21"
+    },
+    "14707": {
+        "location": "6",
+        "level": "8",
+        "box": "22"
+    },
+    "13731": {
+        "location": "6",
+        "level": "8",
+        "box": "23"
+    },
+    "85970": {
+        "location": "6",
+        "level": "8",
+        "box": "23"
+    },
+    "6060": {
+        "location": "6",
+        "level": "8",
+        "box": "24"
+    },
+    "44675": {
+        "location": "6",
+        "level": "8",
+        "box": "25"
+    },
+    "30099": {
+        "location": "6",
+        "level": "8",
+        "box": "26"
+    },
+    "6215": {
+        "location": "6",
+        "level": "8",
+        "box": "27"
+    },
+    "11290": {
+        "location": "6",
+        "level": "8",
+        "box": "28"
+    },
+    "6216": {
+        "location": "6",
+        "level": "8",
+        "box": "29"
+    },
+    "61068": {
+        "location": "6",
+        "level": "8",
+        "box": "30"
+    },
+    "15625": {
+        "location": "6",
+        "level": "8",
+        "box": "31"
+    },
+    "41766": {
+        "location": "6",
+        "level": "8",
+        "box": "32"
+    },
+    "24309": {
+        "location": "6",
+        "level": "8",
+        "box": "33"
+    },
+    "93604": {
+        "location": "6",
+        "level": "8",
+        "box": "34"
+    },
+    "41855": {
+        "location": "6",
+        "level": "8",
+        "box": "35"
+    },
+    "47457": {
+        "location": "6",
+        "level": "8",
+        "box": "36"
+    },
+    "42023": {
+        "location": "6",
+        "level": "8",
+        "box": "37"
+    },
+    "13965": {
+        "location": "6",
+        "level": "8",
+        "box": "38"
+    },
+    "33243": {
+        "location": "6",
+        "level": "8",
+        "box": "39"
+    },
+    "6191": {
+        "location": "6",
+        "level": "8",
+        "box": "40"
+    },
+    "10314": {
+        "location": "6",
+        "level": "8",
+        "box": "40"
+    },
+    "52031": {
+        "location": "6",
+        "level": "8",
+        "box": "41"
+    },
+    "6005": {
+        "location": "6",
+        "level": "8",
+        "box": "42"
+    },
+    "32803": {
+        "location": "6",
+        "level": "8",
+        "box": "43"
+    },
+    "44126": {
+        "location": "6",
+        "level": "8",
+        "box": "44"
+    },
+    "fabupn0038": {
+        "location": "6",
+        "level": "8",
+        "box": "45"
+    },
+    "50967": {
+        "location": "6",
+        "level": "8",
+        "box": "46"
+    },
+    "30528": {
+        "location": "6",
+        "level": "8",
+        "box": "47"
+    },
+    "13547": {
+        "location": "7",
+        "level": "8",
+        "box": "1"
+    },
+    "6192": {
+        "location": "7",
+        "level": "8",
+        "box": "2"
+    },
+    "24201": {
+        "location": "7",
+        "level": "8",
+        "box": "3"
+    },
+    "30602": {
+        "location": "7",
+        "level": "8",
+        "box": "4"
+    },
+    "29119": {
+        "location": "7",
+        "level": "8",
+        "box": "5"
+    },
+    "29120": {
+        "location": "7",
+        "level": "8",
+        "box": "5"
+    },
+    "49307": {
+        "location": "7",
+        "level": "8",
+        "box": "6"
+    },
+    "66956": {
+        "location": "7",
+        "level": "8",
+        "box": "7"
+    },
+    "6081": {
+        "location": "7",
+        "level": "8",
+        "box": "8"
+    },
+    "98281": {
+        "location": "7",
+        "level": "8",
+        "box": "9"
+    },
+    "11477": {
+        "location": "7",
+        "level": "8",
+        "box": "10"
+    },
+    "4490": {
+        "location": "7",
+        "level": "8",
+        "box": "11"
+    },
+    "30165": {
+        "location": "7",
+        "level": "8",
+        "box": "12"
+    },
+    "40996": {
+        "location": "7",
+        "level": "8",
+        "box": "13"
+    },
+    "6182": {
+        "location": "7",
+        "level": "8",
+        "box": "14"
+    },
+    "3455": {
+        "location": "7",
+        "level": "8",
+        "box": "15"
+    },
+    "92950": {
+        "location": "7",
+        "level": "8",
+        "box": "15"
+    },
+    "4744": {
+        "location": "7",
+        "level": "8",
+        "box": "16"
     }
 }
