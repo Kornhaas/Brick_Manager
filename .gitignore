@@ -5,3 +5,4 @@ lego_scanner/migrations/*
 lego_scanner/instance/*
 lego_scanner/__pycache__/*
 lego_scanner/static/cache/*
+lego_scanner/lookup/master_lookup.*.backup.json
