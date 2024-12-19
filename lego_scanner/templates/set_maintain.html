@@ -114,10 +114,10 @@
                   entry.user_set.status == "complete" %}
                   <i class="bi bi-check-circle-fill"></i> Complete {% elif
                   entry.user_set.status == "completenospareparts" %}
-                  <i class="bi bi-check-circle-fill"></i> Complete - missing spare parts {% elif
-                  entry.user_set.status == "missingparts" %}
-                  <i class="bi bi-exclamation-triangle-fill"></i> Missing Parts {%
-                  endif %}
+                  <i class="bi bi-check-circle-fill"></i> Complete - missing
+                  spare parts {% elif entry.user_set.status == "missingparts" %}
+                  <i class="bi bi-exclamation-triangle-fill"></i> Missing Parts
+                  {% endif %}
                 </div>
                 <div class="progress-container">
                   <div class="progress">
@@ -182,7 +182,9 @@
         <button class="btn btn-secondary mb-3" id="back-to-sets">
           Back to Sets
         </button>
-        <button id="mark-all-existing" class="btn btn-success mb-3">Mark All Parts as Existing</button>
+        <button id="mark-all-existing" class="btn btn-success mb-3">
+          Mark All Parts as Existing
+        </button>
         <h3>Set Details</h3>
         <form
           method="post"
@@ -192,9 +194,21 @@
 
           <h5>Parts</h5>
 
+          <!-- Checkbox to filter mismatched parts -->
+          <div class="form-check mb-3">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="filter-mismatched-parts"
+            />
+            <label class="form-check-label" for="filter-mismatched-parts">
+              Show only mismatched parts
+            </label>
+          </div>
+
           <!-- Non-Spare Parts Table -->
           <h6>Non-Spare Parts</h6>
-          <table class="table">
+          <table class="table" id="non-spare-parts-table">
             <thead>
               <tr>
                 <th>Image</th>
@@ -212,7 +226,7 @@
 
           <!-- Spare Parts Table -->
           <h6>Spare Parts</h6>
-          <table class="table">
+          <table class="table" id="spare-parts-table">
             <thead>
               <tr>
                 <th>Image</th>
@@ -263,7 +277,9 @@
               <option value="konvolut">Konvolut</option>
               <option value="missingparts">Missing Parts</option>
               <option value="complete">Complete</option>
-              <option value="completenospareparts">Complete (missing spare parts)</option>
+              <option value="completenospareparts">
+                Complete (missing spare parts)
+              </option>
             </select>
           </div>
           <button type="submit" class="btn btn-primary mt-3">
@@ -280,34 +296,98 @@
         const setDetails = document.getElementById("set-details");
         const backToSetsButton = document.getElementById("back-to-sets");
 
-          // Mark all parts as existing
-  const markAllExistingButton = document.getElementById("mark-all-existing");
+        // Mark all parts as existing
+        const markAllExistingButton =
+          document.getElementById("mark-all-existing");
 
-  markAllExistingButton.addEventListener("click", () => {
-    // Get all input fields in the Non-Spare Parts and Spare Parts tables
-    const partsTables = [
-      document.getElementById("non-spare-parts-table-body")
-    ];
+        markAllExistingButton.addEventListener("click", () => {
+          // Get all input fields in the Non-Spare Parts and Spare Parts tables
+          const partsTables = [
+            document.getElementById("non-spare-parts-table-body"),
+          ];
 
-    partsTables.forEach((tableBody) => {
-      if (tableBody) {
-        const rows = tableBody.querySelectorAll("tr");
-        rows.forEach((row) => {
-          const quantityCell = row.querySelector("td:nth-child(4)"); // Quantity cell
-          const ownedInput = row.querySelector("input[type='number']"); // Owned input field
+          partsTables.forEach((tableBody) => {
+            if (tableBody) {
+              const rows = tableBody.querySelectorAll("tr");
+              rows.forEach((row) => {
+                const quantityCell = row.querySelector("td:nth-child(4)"); // Quantity cell
+                const ownedInput = row.querySelector("input[type='number']"); // Owned input field
 
-          if (quantityCell && ownedInput) {
-            const quantity = parseInt(quantityCell.textContent.trim(), 10);
-            if (!isNaN(quantity)) {
-              ownedInput.value = quantity; // Set Owned to Quantity
+                if (quantityCell && ownedInput) {
+                  const quantity = parseInt(
+                    quantityCell.textContent.trim(),
+                    10
+                  );
+                  if (!isNaN(quantity)) {
+                    ownedInput.value = quantity; // Set Owned to Quantity
+                  }
+                }
+              });
             }
-          }
-        });
-      }
-    });
+          });
 
-    alert("All parts marked as existing!");
-  });
+          alert("All parts marked as existing!");
+        });
+
+        // Add event listener for mismatched parts filter
+        const filterCheckbox = document.getElementById(
+          "filter-mismatched-parts"
+        );
+
+        filterCheckbox.addEventListener("change", () => {
+          const filterRows = (rows) => {
+            rows.forEach((row) => {
+              const quantityCell = row.querySelector("td:nth-child(4)");
+              const ownedInput = row.querySelector("input[type='number']");
+              if (quantityCell && ownedInput) {
+                const quantity = parseInt(quantityCell.textContent.trim(), 10);
+                const owned = parseInt(ownedInput.value.trim(), 10);
+                if (filterCheckbox.checked && quantity === owned) {
+                  row.style.display = "none"; // Hide rows with matching quantities
+                } else {
+                  row.style.display = ""; // Show all rows
+                }
+              }
+            });
+          };
+
+          const nonSparePartsRows = document.querySelectorAll(
+            "#non-spare-parts-table-body tr"
+          );
+          const sparePartsRows = document.querySelectorAll(
+            "#spare-parts-table-body tr"
+          );
+
+          filterRows(nonSparePartsRows);
+          filterRows(sparePartsRows);
+        });
+
+        // Handle back to sets button
+        backToSetsButton.addEventListener("click", () => {
+          // Hide the set details and show the master table
+          setDetails.classList.add("hidden");
+          setsTable.classList.remove("hidden");
+
+          // Reset the mismatched filter checkbox to unchecked
+          filterCheckbox.checked = false;
+
+          // Show all rows (reset filtering)
+          const resetFilter = (rows) => {
+            rows.forEach((row) => {
+              row.style.display = ""; // Show all rows
+            });
+          };
+
+          const nonSparePartsRows = document.querySelectorAll(
+            "#non-spare-parts-table-body tr"
+          );
+          const sparePartsRows = document.querySelectorAll(
+            "#spare-parts-table-body tr"
+          );
+
+          resetFilter(nonSparePartsRows);
+          resetFilter(sparePartsRows);
+        });
 
         // Handle view details
         document.querySelectorAll(".view-details").forEach((button) => {
@@ -337,15 +417,17 @@
                   const partRow = `
                         <tr class="${mismatchClass}">
                             <td><img src="${part.part_img_url}" alt="${
-                                    part.name
-                                }" width="50"></td>
+                    part.name
+                  }" width="50"></td>
                             <td>${part.name}</td>
                             <td>${part.color || "Not Specified"}</td>
                             <td>${part.quantity}</td>
                             <td>
-                                <input type="number" name="part_id_${part.id}" value="${
-                                    part.have_quantity
-                                }" min="0" max="${part.quantity}" class="form-control">
+                                <input type="number" name="part_id_${
+                                  part.id
+                                }" value="${part.have_quantity}" min="0" max="${
+                    part.quantity
+                  }" class="form-control">
                             </td>
                             <td>${part.location || "Not Specified"}</td>
                         </tr>`;

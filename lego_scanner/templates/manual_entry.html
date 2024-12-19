@@ -1,68 +1,129 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <!-- Meta tags and other head elements -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Manual Entry</title>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
 
-<body>
-    <!-- Include the navigation bar -->
+  <body>
     {% include 'navbar.html' %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <div class="container mt-5">
-        <!-- Flash messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div class="alert-container">
-            {% for category, message in messages %}
-            <div class="alert alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'danger' }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="alert-container">
+        {% for category, message in messages %}
+        <div
+          class="alert alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'danger' }} alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
         </div>
-        {% endif %}
-        {% endwith %}
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
 
-        <!-- Form -->
-        <form method="post" id="manual-entry-form">
-            <div class="mb-3">
-                <label for="id" class="form-label">Part ID: <span class="text-danger">*</span></label>
-                <input type="text" id="id" name="id" class="form-control" placeholder="Enter Part ID" value="{{ part_id }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="schrank" class="form-label">Schrank: <span class="text-danger">*</span></label>
-                <input type="number" id="schrank" name="schrank" class="form-control" placeholder="Enter Schrank (numeric)" value="{{ schrank }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="fach" class="form-label">Fach: <span class="text-danger">*</span></label>
-                <input type="number" id="fach" name="fach" class="form-control" placeholder="Enter Fach (numeric)" value="{{ fach }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="box" class="form-label">Box: <span class="text-danger">*</span></label>
-                <input type="number" id="box" name="box" class="form-control" placeholder="Enter Box (numeric)" value="{{ box }}" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+      <!-- Form -->
+      <form
+        method="post"
+        id="manual-entry-form"
+        onsubmit="return confirmOverwrite()"
+      >
+        <div class="mb-3">
+          <label for="id" class="form-label"
+            >Part ID: <span class="text-danger">*</span></label
+          >
+          <input
+            type="text"
+            id="id"
+            name="id"
+            class="form-control"
+            placeholder="Enter Part ID"
+            value="{{ part_id }}"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="schrank" class="form-label"
+            >Schrank: <span class="text-danger">*</span></label
+          >
+          <input
+            type="number"
+            id="schrank"
+            name="schrank"
+            class="form-control"
+            placeholder="Enter Schrank (numeric)"
+            value="{{ schrank }}"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="fach" class="form-label"
+            >Fach: <span class="text-danger">*</span></label
+          >
+          <input
+            type="number"
+            id="fach"
+            name="fach"
+            class="form-control"
+            placeholder="Enter Fach (numeric)"
+            value="{{ fach }}"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="box" class="form-label"
+            >Box: <span class="text-danger">*</span></label
+          >
+          <input
+            type="number"
+            id="box"
+            name="box"
+            class="form-control"
+            placeholder="Enter Box (numeric)"
+            value="{{ box }}"
+            required
+          />
+        </div>
+        <!-- Hidden field to track confirmation -->
+        <input type="hidden" id="confirmed" name="confirmed" value="" />
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
     </div>
 
-    <!-- JavaScript to focus on the part_id field after reload -->
     <script>
-        // Automatically focus on the Part ID field after submission
-        window.onload = function () {
-            document.getElementById('id').focus();
-        };
+          // Confirm overwrite if existing entry is found
+          function confirmOverwrite() {
+              const existingEntry = {{ existing_entry | tojson | safe }};
+              if (existingEntry) {
+                  const confirmMessage = `The Part ID already exists with the following details:\n
+      Location: ${existingEntry.location}, Level: ${existingEntry.level}, Box: ${existingEntry.box}\n
+      Do you want to overwrite it?`;
+                  if (!confirm(confirmMessage)) {
+                      return false; // Cancel submission
+                  }
+                  document.getElementById('confirmed').value = 'yes'; // Set confirmation flag
+              }
+              return true; // Proceed with submission
+          }
     </script>
-
-    <!-- Bootstrap JS and dependencies (optional) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
+    <script>
+      // Automatically focus on the Part ID field after reload
+      window.onload = function () {
+        document.getElementById("id").focus();
+      };
+    </script>
+  </body>
 </html>
