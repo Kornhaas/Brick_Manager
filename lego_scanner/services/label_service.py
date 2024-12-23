@@ -8,6 +8,7 @@ It includes functionalities to:
 - Convert the generated label image to a PDF and save it.
 """
 
+import logging
 import os
 from PIL import Image, ImageDraw, ImageFont
 from reportlab.pdfgen import canvas
@@ -115,17 +116,36 @@ def create_label_image(label_info):
     Returns:
         str: The path to the saved label image.
     """
+    logging.info(f"Creating label for item {label_info['item_id']}")
+    logging.debug(f"Label info: {label_info}")
+
     width, height = int(12 * CM), int(8 * CM)
     image = Image.new('RGB', (width, height), color='white')
     draw = ImageDraw.Draw(image)
 
     font, font2, font3 = load_fonts()
-    item_image = download_image(label_info['img_url'])
+
+    # Load the image
+    item_image = None
+    img_url = label_info['img_url']
+    if img_url.startswith('/static/'):
+        # Handle local cached image path
+        local_path = img_url.lstrip('/')
+        if os.path.exists(local_path):
+            item_image = Image.open(local_path)
+        else:
+            logging.warning(f"Cached image not found at {local_path}")
+    else:
+        # Try downloading the image if it's a URL
+        item_image = download_image(img_url)
 
     if item_image:
         item_image.thumbnail((width // 2, height // 2))
         image.paste(item_image, (width // 4, height // 4))
+    else:
+        logging.warning("No image available for this part")
 
+    # Draw text on the label
     draw_text(draw, {
         'text': label_info['name'],
         'position': (20, 10),
@@ -134,12 +154,14 @@ def create_label_image(label_info):
     })
 
     draw.text((15, height - 60),
-              f"Category: {label_info['category']}", font=font, fill="black")
-    draw.text((15, height - 40),
-              f"ID: {label_info['item_id']}", font=font2, fill="black")
-    draw.text((width - 120, height - 40),
+              f"{label_info['item_id']}", font=font2, fill="black")
+    draw.text((width - 120, height - 60),
               f"Box: {label_info['box']}", font=font3, fill="black")
 
+    draw.text((50, height - 30),
+              f"{label_info['category']}", font=font, fill="blue")
+
+    # Save the label as an image
     temp_image_path = os.path.join(
         'uploads', f'label_{label_info["item_id"]}.png')
     image.save(temp_image_path, dpi=(300, 300))

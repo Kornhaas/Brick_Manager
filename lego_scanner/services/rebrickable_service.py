@@ -140,3 +140,55 @@ def get_predictions(file_path, filename):
     except ValueError:
         print("Error decoding JSON response from the API")
         return None
+
+
+def get_parts_by_category(part_cat_id, page_size=1000, page=1):
+    """
+    Fetch parts from the Rebrickable API for a given category.
+
+    Args:
+        part_cat_id (int): The category ID.
+        page_size (int): The number of parts to fetch per page.
+        page (int): The page number to fetch.
+
+    Returns:
+        dict: A dictionary with parts data and pagination info.
+    """
+    url = f'https://rebrickable.com/api/v3/lego/parts/'
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
+    }
+    params = {
+        'part_cat_id': part_cat_id,
+        'page_size': page_size,
+        'page': page
+    }
+
+    response = requests.get(url, headers=headers, params=params, timeout=10)
+    if response.status_code == 200:
+        return response.json()
+
+    raise RebrickableAPIException(
+        f"Failed to fetch parts for category {part_cat_id}: {response.status_code}")
+
+
+def save_part_locations(locations):
+    """
+    Save part location data to the database or a file.
+
+    Args:
+        locations (dict): A dictionary containing part numbers as keys and location data as values.
+
+    Returns:
+        bool: True if saving was successful, False otherwise.
+    """
+    try:
+        # Example: Save locations to a JSON file
+        import json
+        with open('part_locations.json', 'w') as file:
+            json.dump(locations, file)
+        return True
+    except Exception as e:
+        print(f"Error saving part locations: {e}")
+        return False
