@@ -1,4 +1,3 @@
-<!-- templates/navbar.html -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ url_for('main.index') }}">LEGO Scanner</a>
@@ -10,31 +9,33 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
                 </li>
-                <li class="nav-item">
-                    <!-- Dashboard Link -->
-                    <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
+                <!-- Dropdown for Dashboard and related items -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dashboardDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Dashboard
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dashboardDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('dashboard.dashboard') }}">Dashboard</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('manual_entry.manual_entry') }}">Manual Entry</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('part_location.part_location') }}">Part Location</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('manual_entry.manual_entry') }}">Manual Entry</a>
+                <!-- Dropdown for Part Management -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="partManagementDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Part Management
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="partManagementDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('part_lookup.lookup_part') }}">Part Lookup</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('set_search.set_search') }}">Set Search</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('set_maintain.set_maintain') }}">Set Maintenance</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('missing_parts.missing_parts') }}">Missing Parts</a></li>
+                    </ul>
                 </li>
+                <!-- Separate Link for Load/Update Categories -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('part_location.part_location') }}">Part Location</a>
+                    <a class="nav-link" href="{{ url_for('load_categories.load_categories') }}">Load/Update Categories</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('part_lookup.lookup_part') }}">Part Lookup</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('set_search.set_search') }}">Set Search</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('set_maintain.set_maintain') }}">Set Maintenance</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('missing_parts.missing_parts') }}">Missing Parts</a>
-                </li>
-                
-                <a class="nav-link" href="{{ url_for('load_categories.load_categories') }}">Load/Update Categories</a>
-
             </ul>
         </div>
     </div>
