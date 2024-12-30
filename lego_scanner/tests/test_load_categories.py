@@ -26,7 +26,6 @@ class TestLoadCategories(TestCase):
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
         # Set to a dummy path
-        app.config['MASTER_LOOKUP_PATH'] = 'fake_master_lookup.json'
         return app
 
     def setUp(self):

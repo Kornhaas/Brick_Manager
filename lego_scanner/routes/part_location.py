@@ -1,7 +1,7 @@
 import logging
 from flask import Blueprint, render_template, request, jsonify
 from services.rebrickable_service import get_all_category_ids_from_api, get_parts_by_category
-from services.lookup_service import load_master_lookup, save_master_lookup
+from services.part_lookup_service import load_part_lookup, save_part_lookup
 # Import the centralized cache_image function
 from services.cache_service import cache_image
 from services.label_service import create_label_image
@@ -16,7 +16,7 @@ def part_location():
     """
     categories = get_all_category_ids_from_api()
     categories.sort(key=lambda category: category[1])  # Alphabetically sort categories
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     if request.method == 'POST':
         selected_category_id = request.form.get('category_id')
@@ -75,7 +75,7 @@ def save_locations():
     """
     try:
         locations_data = request.json  # Expecting a JSON payload with part locations
-        master_lookup = load_master_lookup()  # Load current master lookup
+        master_lookup = load_part_lookup()  # Load current master lookup
 
         # Update the master lookup with new location data
         for part_num, location_data in locations_data.items():
@@ -83,7 +83,7 @@ def save_locations():
                 master_lookup[part_num] = {}
             master_lookup[part_num].update(location_data)
 
-        save_master_lookup(master_lookup)  # Save updated master lookup
+        save_part_lookup(master_lookup)  # Save updated master lookup
         return jsonify({"message": "Locations saved successfully!"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template
 from models import UserSet, UserMinifigurePart
 from sqlalchemy.orm import joinedload
-from services.lookup_service import load_master_lookup
+from services.part_lookup_service import load_part_lookup
 
 # Define a new Blueprint for missing parts
 missing_parts_bp = Blueprint('missing_parts', __name__)
@@ -12,7 +12,7 @@ def missing_parts():
     Displays all missing parts and missing minifigure parts across all sets.
     """
     missing_items = []
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     # Query all UserSets
     user_sets = UserSet.query.options(

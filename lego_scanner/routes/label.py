@@ -16,7 +16,7 @@ from flask import Blueprint, redirect, url_for, flash, send_file
 from config import Config
 from services.label_service import create_label_image, save_image_as_pdf
 from services.rebrickable_service import get_part_details, get_category_name_from_db
-from services.lookup_service import load_master_lookup
+from services.part_lookup_service import load_part_lookup
 
 # Create a Blueprint for the label routes
 label_bp = Blueprint('label', __name__)
@@ -86,7 +86,7 @@ def create_label_route(part_id):
     Returns:
         Response: Redirects to the main index page or provides a PDF download.
     """
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     part_details = get_part_details(part_id)
 

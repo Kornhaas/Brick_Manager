@@ -15,14 +15,11 @@ class Config:  # pylint: disable=R0903
         UPLOAD_FOLDER (str): The directory where uploaded files are stored.
         ALLOWED_EXTENSIONS (set): A set of allowed file extensions for uploads.
         REBRICKABLE_TOKEN (str): The API token for accessing the Rebrickable service.
-        MASTER_LOOKUP_PATH (str): The path to the master lookup JSON file.
     """
 
     UPLOAD_FOLDER = 'uploads/'
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     REBRICKABLE_TOKEN = os.getenv('REBRICKABLE_TOKEN')
-    MASTER_LOOKUP_PATH = os.path.join(
-        os.getcwd(), 'lookup/master_lookup.json')  # Ensure this path is correct
     SQLALCHEMY_DATABASE_URI = 'sqlite:///lego_scanner.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

@@ -7,7 +7,7 @@ It includes:
 """
 
 from flask import Blueprint, render_template, request, flash
-from services.lookup_service import load_master_lookup
+from services.part_lookup_service import load_part_lookup
 from services.rebrickable_service import get_part_details
 
 part_lookup_bp = Blueprint('part_lookup', __name__)
@@ -30,7 +30,7 @@ def lookup_part():
 
     if request.method == 'POST':
         part_id = request.form.get('part_id')
-        master_lookup = load_master_lookup()
+        master_lookup = load_part_lookup()
 
         if part_id in master_lookup:
             schrank = master_lookup[part_id].get('location')

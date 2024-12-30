@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, current_app, redir
 import requests
 from models import db, Set, UserSet, Part, Minifigure, UserMinifigurePart, Category
 from config import Config
-from services.lookup_service import load_master_lookup
+from services.part_lookup_service import load_part_lookup
 
 set_search_bp = Blueprint('set_search', __name__)
 
@@ -175,7 +175,7 @@ def fetch_set_parts_info(set_number):
     """
     Fetches the parts information for a given set number from the Rebrickable API.
     """
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     try:
         response = requests.get(
@@ -219,7 +219,7 @@ def fetch_minifigs_info(set_number):
     """
     Fetches the minifigures information for a given set number from the Rebrickable API.
     """
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     try:
         response = requests.get(
@@ -261,7 +261,7 @@ def fetch_minifigure_parts(fig_num):
     """
     Fetches parts information for a specific minifigure from the Rebrickable API.
     """
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     try:
         current_app.logger.debug(f"Fetching parts for minifigure: {fig_num}")

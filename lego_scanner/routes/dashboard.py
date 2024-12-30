@@ -206,7 +206,7 @@ def api_missing_parts():
     """
     API endpoint to retrieve missing parts with enriched data, excluding parts from assembled sets.
     """
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     # Query missing parts and their associated user sets and categories
     missing_parts = (
@@ -248,7 +248,7 @@ def api_missing_minifigure_parts():
     """
     API endpoint to retrieve missing minifigure parts with enriched data, excluding specific set statuses.
     """
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     # Query missing minifigure parts and their associated user sets
     missing_minifigure_parts = (

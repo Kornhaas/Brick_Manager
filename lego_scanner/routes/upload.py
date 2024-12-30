@@ -12,7 +12,7 @@ import os  # Standard library import
 # Third-party imports
 from flask import Blueprint, request, redirect, url_for, flash, render_template
 from werkzeug.utils import secure_filename
-from services.lookup_service import load_master_lookup  # Local imports
+from services.part_lookup_service import load_part_lookup  # Local imports
 from services.rebrickable_service import get_predictions
 from config import Config
 
@@ -27,7 +27,7 @@ def upload():
     Returns:
         Response: Renders the results template if successful, otherwise redirects to the main index.
     """
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
 
     if 'file' not in request.files:
         flash('No file part')

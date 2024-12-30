@@ -5,7 +5,7 @@ The data is either added to or updated in the master lookup.
 """
 
 from flask import Blueprint, render_template, request, flash
-from services.lookup_service import load_master_lookup, save_master_lookup
+from services.part_lookup_service import load_part_lookup, save_part_lookup
 
 manual_entry_bp = Blueprint('manual_entry', __name__)
 
@@ -17,7 +17,7 @@ def manual_entry():
     it shows a confirmation dialog before overwriting the entry.
     """
     try:
-        master_lookup = load_master_lookup()
+        master_lookup = load_part_lookup()
     except Exception as e:
         flash(f"Error loading master lookup: {str(e)}", "danger")
         return render_template('manual_entry.html', existing_entry=None)
@@ -73,7 +73,7 @@ def manual_entry():
 
         # Save the changes to the file
         try:
-            save_master_lookup(master_lookup)
+            save_part_lookup(master_lookup)
         except Exception as e:
             flash(f"Error saving master lookup: {str(e)}", "danger")
             return render_template('manual_entry.html', existing_entry=None)

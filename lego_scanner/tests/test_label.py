@@ -27,7 +27,7 @@ class TestLabelRoutes(TestCase):
         db.drop_all()
 
     @patch('routes.label.get_part_details')
-    @patch('routes.label.load_master_lookup')
+    @patch('routes.label.load_part_lookup')
     @patch('routes.label.create_label_image')
     @patch('routes.label.save_image_as_pdf')
     @patch('routes.label.print_pdf')
@@ -36,7 +36,7 @@ class TestLabelRoutes(TestCase):
                                         mock_print_pdf,
                                         mock_save_image_as_pdf,
                                         mock_create_label_image,
-                                        mock_load_master_lookup,
+                                        mock_load_part_lookup,
                                         mock_get_part_details):
         """Test successful label creation and printing."""
         mock_get_part_details.return_value = {
@@ -44,7 +44,7 @@ class TestLabelRoutes(TestCase):
             'part_img_url': 'http://example.com/image.jpg',
             'part_cat_id': 1
         }
-        mock_load_master_lookup.return_value = {'123': {'box': 'Test Box'}}
+        mock_load_part_lookup.return_value = {'123': {'box': 'Test Box'}}
         mock_create_label_image.return_value = 'fake_image_path'
         mock_save_image_as_pdf.return_value = 'fake_pdf_path'
         mock_print_pdf.return_value = True
@@ -80,13 +80,13 @@ class TestLabelRoutes(TestCase):
         self.assertEqual(result, 'someunsafefilename_with_spaces.pdf')
 
     @patch('routes.label.get_part_details')
-    @patch('routes.label.load_master_lookup')
+    @patch('routes.label.load_part_lookup')
     def test_create_label_route_no_part_details(self,
-                                                mock_load_master_lookup,
+                                                mock_load_part_lookup,
                                                 mock_get_part_details):
         """Test create_label_route when no part details are returned."""
         mock_get_part_details.return_value = None
-        mock_load_master_lookup.return_value = {}
+        mock_load_part_lookup.return_value = {}
 
         with self.client:
             response = self.client.get(
@@ -94,16 +94,16 @@ class TestLabelRoutes(TestCase):
             self.assertEqual(response.status_code, 302)
             # self.assertEqual(response.location, url_for('main.index'))
 
-    @patch('routes.label.load_master_lookup')
+    @patch('routes.label.load_part_lookup')
     @patch('routes.label.get_part_details')
-    def test_create_label_route_no_image_url(self, mock_get_part_details, mock_load_master_lookup):
+    def test_create_label_route_no_image_url(self, mock_get_part_details, mock_load_part_lookup):
         """Test create_label_route when part details do not include an image URL."""
         mock_get_part_details.return_value = {
             'name': 'Test Part',
             'part_img_url': None,
             'part_cat_id': 1
         }
-        mock_load_master_lookup.return_value = {'123': {'box': 'Test Box'}}
+        mock_load_part_lookup.return_value = {'123': {'box': 'Test Box'}}
 
         with self.client:
             response = self.client.get(
@@ -111,16 +111,16 @@ class TestLabelRoutes(TestCase):
             self.assertEqual(response.status_code, 200)
             # self.assertEqual(response.location, url_for('main.index'))
 
-    @patch('routes.label.load_master_lookup')
+    @patch('routes.label.load_part_lookup')
     @patch('routes.label.get_part_details')
-    def test_create_label_route_no_box_info(self, mock_get_part_details, mock_load_master_lookup):
+    def test_create_label_route_no_box_info(self, mock_get_part_details, mock_load_part_lookup):
         """Test create_label_route when the box information is missing."""
         mock_get_part_details.return_value = {
             'name': 'Test Part',
             'part_img_url': 'http://example.com/image.jpg',
             'part_cat_id': 1
         }
-        mock_load_master_lookup.return_value = {}  # No box info
+        mock_load_part_lookup.return_value = {}  # No box info
 
         with self.client:
             response = self.client.get(

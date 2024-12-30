@@ -8,37 +8,10 @@ It includes:
 - Rendering the storage template for user interaction.
 """
 
-import json
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
+from services.part_lookup_service import load_part_lookup, save_part_lookup
 
 storage_bp = Blueprint('storage', __name__)
-
-
-def load_master_lookup():
-    """
-    Load the `master_lookup.json` file.
-
-    Returns:
-        dict: The content of the `master_lookup.json` file as a dictionary.
-    """
-    try:
-        with open(current_app.config['MASTER_LOOKUP_PATH'], 'r', encoding='utf-8') as file:
-            return json.load(file)
-    except FileNotFoundError:
-        print("master_lookup.json not found, returning empty dictionary.")
-        return {}
-
-
-def save_master_lookup(data):
-    """
-    Save the updated `master_lookup.json` file.
-
-    Args:
-        data (dict): The data to be saved to `master_lookup.json`.
-    """
-    with open(current_app.config['MASTER_LOOKUP_PATH'], 'w', encoding='utf-8') as file:
-        json.dump(data, file, indent=4)
-        print("master_lookup.json updated successfully.")
 
 
 @storage_bp.route('/add_to_storage/<part_id>', methods=['GET', 'POST'])
@@ -58,7 +31,7 @@ def add_to_storage(part_id):
         box = request.form.get('box')
 
         # Load the current master_lookup.json data
-        master_lookup = load_master_lookup()
+        master_lookup = load_part_lookup()
 
         # Update the entry for the given part_id
         master_lookup[part_id] = {
@@ -68,7 +41,7 @@ def add_to_storage(part_id):
         }
 
         # Save the updated data back to master_lookup.json
-        save_master_lookup(master_lookup)
+        save_part_lookup(master_lookup)
 
         # Update the in-memory data in the application if needed
         current_app.config['MASTER_LOOKUP'] = master_lookup

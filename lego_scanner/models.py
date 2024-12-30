@@ -126,3 +126,15 @@ class UserMinifigurePart(db.Model):
 
     def __repr__(self):
         return f'<UserMinifigurePart {self.part_num} - {self.name}>'
+
+
+class PartStorage(db.Model):
+    __tablename__ = 'part_storage'
+    id = db.Column(Integer, primary_key=True)
+    part_id = db.Column(String, nullable=False)
+    location = db.Column(String, nullable=False)
+    level = db.Column(String, nullable=False)
+    box = db.Column(String, nullable=False)
+
+    def __repr__(self):
+        return f'<PartStorage {self.part_id} - Location: {self.location}, Level: {self.level}, Box: {self.box}>'

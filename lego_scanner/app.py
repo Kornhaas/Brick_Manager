@@ -26,7 +26,7 @@ from routes.set_maintain import set_maintain_bp
 from routes.missing_parts import missing_parts_bp
 from routes.dashboard import dashboard_bp
 from routes.part_location import part_location_bp
-from services.lookup_service import load_master_lookup
+from services.part_lookup_service import load_part_lookup
 
 
 def backup_database():
@@ -35,17 +35,6 @@ def backup_database():
     backup_db_path = f"{db_path}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
     shutil.copyfile(db_path, backup_db_path)
     app.logger.info(f"Database backed up to {backup_db_path}")
-
-    # Backup the master_lookup.json
-    lookup_dir = os.path.join(basedir, 'lookup')
-    master_lookup_file = os.path.join(lookup_dir, 'master_lookup.json')
-    if os.path.exists(master_lookup_file):
-        backup_lookup_path = f"{master_lookup_file}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.json"
-        shutil.copyfile(master_lookup_file, backup_lookup_path)
-        app.logger.info(f"Master lookup backed up to {backup_lookup_path}")
-    else:
-        app.logger.warning(f"Master lookup file {master_lookup_file} does not exist.")
-
 
 
 # Initialize the Flask application
@@ -81,7 +70,7 @@ app.logger.setLevel(logging.DEBUG)
 with app.app_context():
     db.create_all()  # Ensure tables are created
     try:
-        master_lookup = load_master_lookup()
+        master_lookup = load_part_lookup()
         app.logger.debug("Master lookup data loaded successfully.")
     except Exception as e:
         app.logger.error(f"Failed to load master lookup data: {e}")

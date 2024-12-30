@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
 from models import db, UserSet, Part, Minifigure, UserMinifigurePart
-from services.lookup_service import load_master_lookup
+from services.part_lookup_service import load_part_lookup
 from sqlalchemy.orm import joinedload
 import os
 
@@ -54,7 +54,7 @@ def get_user_set_details(user_set_id):
     """
     Returns the details of a specific UserSet, including its parts, minifigures, and user minifigure parts.
     """
-    master_lookup = load_master_lookup()
+    master_lookup = load_part_lookup()
     user_set = UserSet.query.options(
         joinedload(UserSet.parts),
         joinedload(UserSet.minifigures)
