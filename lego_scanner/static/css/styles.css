@@ -158,3 +158,52 @@ footer.dark-mode {
     background-color: #1f1f1f;
     color: #e0e0e0;
 }
+
+.status-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    color: #fff;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.status-unknown {
+    background-color: #6c757d;
+}
+
+.status-konvolut {
+    background-color: #cbe472;
+}
+
+.status-assembled {
+    background-color: #0d6efd;
+}
+
+.status-complete,
+.status-completenospareparts {
+    background-color: #198754;
+}
+
+.status-missingparts {
+    background-color: #dc3545;
+}
+
+.progress-container {
+    margin-top: 5px;
+}
+
+.table-warning {
+    background-color: #fff3cd !important;
+}
+
+#set-details.hidden {
+    display: none; /* Scoped to #set-details only */
+}
+.hidden {
+    display: none;
+}

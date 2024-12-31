@@ -61,10 +61,17 @@
               </li>
             </ul>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('load_categories.load_categories') }}">Load/Update Categories</a>
-          </li>
-        </ul>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="AdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Administration
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="AdminDropdown">
+                <li>
+                    <a class="nav-link" href="{{ url_for('load_categories.load_categories') }}">Load/Update Categories</a>
+                </li>
+            </li>
+            </ul>
+        </li>
         <!-- Dark Mode Toggle -->
         <div class="form-check form-switch text-end">
           <input class="form-check-input" type="checkbox" id="darkModeToggle" />
