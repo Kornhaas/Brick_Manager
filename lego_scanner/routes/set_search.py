@@ -36,6 +36,11 @@ def set_search():
         if not set_number:
             flash("Please enter a set number.", category="danger")
         else:
+            # Append -1 if not present
+            if not set_number.endswith('-1'):
+                set_number += '-1'
+                current_app.logger.debug(f"Set number corrected to: {set_number}")
+                
             set_info = fetch_set_info(set_number)
             if set_info:
                 current_app.logger.debug(f"Set info fetched: {set_info}")
@@ -76,6 +81,11 @@ def add_set():
     current_app.logger.debug(f"Adding set {set_number} to the database with status {status}.")
 
     try:
+        # Append -1 if not present
+        if not set_number.endswith('-1'):
+            set_number += '-1'
+            current_app.logger.debug(f"Set number corrected to: {set_number}")
+                
         # Fetch or get the template set
         set_info = fetch_set_info(set_number)
         if not set_info:

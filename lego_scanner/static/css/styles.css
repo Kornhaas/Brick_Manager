@@ -1,0 +1,160 @@
+/* General Styles */
+body {
+    background-color: #f8f9fa; /* Light gray background */
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    color: #343a40; /* Default text color */
+}
+
+h1, h2 {
+    color: #0d6efd; /* Bootstrap primary color */
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+h3, h4, h5 {
+    color: #495057; /* Darker gray for subtitles */
+}
+
+.container {
+    padding: 1rem;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #0d6efd !important;
+}
+
+/* Links */
+a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+/* Tables */
+.table {
+    border-collapse: collapse;
+    background-color: #fff;
+    color: #343a40;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.table th, .table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+.table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Forms */
+input[type="text"], input[type="number"], select, textarea {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+    outline: none;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.navbar.dark-mode {
+    background-color: #1f1f1f;
+    border-bottom: 1px solid #343a40;
+}
+
+.navbar-brand.dark-mode {
+    color: #bb86fc !important; /* Soft purple for branding */
+}
+
+.table.dark-mode {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+    border: 1px solid #343a40;
+}
+
+.table th.dark-mode {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+.table tr:hover.dark-mode {
+    background-color: #2c2c2c;
+}
+
+.btn.dark-mode {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+.btn:hover.dark-mode {
+    background-color: #444;
+}
+
+input.dark-mode, textarea.dark-mode, select.dark-mode {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+input:focus.dark-mode, textarea:focus.dark-mode, select:focus.dark-mode {
+    border-color: #bb86fc;
+    box-shadow: 0 0 5px rgba(187, 134, 252, 0.5);
+}
+
+a.dark-mode {
+    color: #bb86fc;
+}
+
+a:hover.dark-mode {
+    color: #e0e0e0;
+}
+
+/* Footer */
+footer {
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+
+footer.dark-mode {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
