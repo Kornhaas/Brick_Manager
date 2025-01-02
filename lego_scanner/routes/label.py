@@ -15,7 +15,9 @@ import subprocess
 from flask import Blueprint, redirect, url_for, flash, send_file
 from config import Config
 from services.label_service import create_label_image, save_image_as_pdf
-from services.rebrickable_service import get_part_details, get_category_name_from_db
+from services.rebrickable_service import get_part_details
+from services.sqlite_service import get_category_name_from_db
+
 from services.part_lookup_service import load_part_lookup
 
 # Create a Blueprint for the label routes

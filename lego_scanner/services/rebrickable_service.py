@@ -1,11 +1,9 @@
 """
-This module provides services for interacting with the Rebrickable API 
-and the Brickognize API.
+This module provides services for interacting with the Rebrickable API.
 
 It includes functions to:
 - Fetch part details from the Rebrickable API.
 - Fetch category names based on part category IDs.
-- Get part predictions from the Brickognize API based on an uploaded image.
 """
 import time
 import requests
@@ -67,21 +65,6 @@ def get_part_details(part_num):
     print(f"Failed to fetch part details for {part_num}: {response.status_code}")
     return None
 
-
-def get_category_name_from_db(part_cat_id):
-    """
-    Fetch the category name from the local database based on the category ID.
-
-    Args:
-        part_cat_id (int): The category ID.
-
-    Returns:
-        str: The category name if found in the database, 'Unknown Category' otherwise.
-    """
-    category = Category.query.filter_by(id=part_cat_id).first()
-    return category.name if category else 'Unknown Category'
-
-
 def get_category_name(part_cat_id):
     """
     Fetch the name of a category from the Rebrickable API based on the part category ID.
@@ -114,34 +97,6 @@ def get_category_name(part_cat_id):
     return 'Unknown Category'
 
 
-def get_predictions(file_path, filename):
-    """
-    Get part predictions from the Brickognize API based on an uploaded image.
-
-    Args:
-        file_path (str): The file path to the image.
-        filename (str): The name of the file.
-
-    Returns:
-        dict: The JSON response containing predictions if successful.
-        None: If the request fails.
-    """
-    api_url = "https://api.brickognize.com/predict/"
-    headers = {'accept': 'application/json'}
-
-    # Use 'with' statement to ensure the file is properly closed after use
-    with open(file_path, 'rb') as file:
-        files = {'query_image': (filename, file, 'image/jpeg')}
-        response = requests.post(
-            api_url, headers=headers, files=files, timeout=10)
-
-    try:
-        return response.json()
-    except ValueError:
-        print("Error decoding JSON response from the API")
-        return None
-
-
 def get_parts_by_category(part_cat_id, page_size=1000, page=1):
     """
     Fetch parts from the Rebrickable API for a given category.
@@ -172,23 +127,3 @@ def get_parts_by_category(part_cat_id, page_size=1000, page=1):
     raise RebrickableAPIException(
         f"Failed to fetch parts for category {part_cat_id}: {response.status_code}")
 
-
-def save_part_locations(locations):
-    """
-    Save part location data to the database or a file.
-
-    Args:
-        locations (dict): A dictionary containing part numbers as keys and location data as values.
-
-    Returns:
-        bool: True if saving was successful, False otherwise.
-    """
-    try:
-        # Example: Save locations to a JSON file
-        import json
-        with open('part_locations.json', 'w') as file:
-            json.dump(locations, file)
-        return True
-    except Exception as e:
-        print(f"Error saving part locations: {e}")
-        return False

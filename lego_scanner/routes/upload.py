@@ -13,7 +13,7 @@ import os  # Standard library import
 from flask import Blueprint, request, redirect, url_for, flash, render_template
 from werkzeug.utils import secure_filename
 from services.part_lookup_service import load_part_lookup  # Local imports
-from services.rebrickable_service import get_predictions
+from services.brickognize_service import get_predictions
 from config import Config
 
 upload_bp = Blueprint('upload', __name__)
