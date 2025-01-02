@@ -71,7 +71,7 @@ class Part(db.Model):
 
 class PartInfo(db.Model):
     __tablename__ = 'part_info'
-    part_num = db.Column(Integer, primary_key=True)
+    part_num = db.Column(db.String, primary_key=True)  # Ensure this is String
     name = db.Column(String, nullable=False)
     category_id = db.Column(Integer, db.ForeignKey('categories.id'), nullable=True)
     part_img_url = db.Column(String, nullable=True)
@@ -83,6 +83,25 @@ class PartInfo(db.Model):
     def __repr__(self):
         return f'<PartInfo {self.part_num} - {self.name}>'
 
+class Color(db.Model):
+    __tablename__ = 'colors'
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String, nullable=False)
+    rgb = db.Column(String, nullable=False)
+    is_trans = db.Column(db.Boolean, nullable=False)
+
+    def __repr__(self):
+        return f"<Color {self.name} (ID: {self.id})>"
+
+
+class Theme(db.Model):
+    __tablename__ = 'themes'
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String, nullable=False)
+    parent_id = db.Column(Integer, nullable=True)
+
+    def __repr__(self):
+        return f"<Theme {self.name} (ID: {self.id}, Parent: {self.parent_id})>"
 
 class PartInSet(db.Model):
     __tablename__ = 'parts_in_set'

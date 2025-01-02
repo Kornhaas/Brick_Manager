@@ -8,7 +8,7 @@ It includes:
 
 from flask import Blueprint, render_template, request, flash
 from services.part_lookup_service import load_part_lookup
-from services.rebrickable_service import get_part_details
+from services.rebrickable_service import RebrickableService
 
 part_lookup_bp = Blueprint('part_lookup', __name__)
 
@@ -36,7 +36,7 @@ def lookup_part():
             schrank = master_lookup[part_id].get('location')
             fach = master_lookup[part_id].get('level')
             box = master_lookup[part_id].get('box')
-            part_details = get_part_details(part_id)
+            part_details = RebrickableService.get_part_details(part_id)
         else:
             flash(f"Part ID {part_id} not found in master lookup.")
 

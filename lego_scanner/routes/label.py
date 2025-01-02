@@ -15,7 +15,7 @@ import subprocess
 from flask import Blueprint, redirect, url_for, flash, send_file
 from config import Config
 from services.label_service import create_label_image, save_image_as_pdf
-from services.rebrickable_service import get_part_details
+from services.rebrickable_service import RebrickableService
 from services.sqlite_service import get_category_name_from_db
 
 from services.part_lookup_service import load_part_lookup
@@ -90,7 +90,7 @@ def create_label_route(part_id):
     """
     master_lookup = load_part_lookup()
 
-    part_details = get_part_details(part_id)
+    part_details = RebrickableService.get_part_details(part_id)
 
     if not part_details:
         flash(f"Failed to retrieve details for part {part_id}")

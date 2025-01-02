@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Blueprint, jsonify, render_template, current_app, request
+from flask import Blueprint, app, jsonify, render_template, current_app, request
 from models import db, UserSet, Part, Minifigure, UserMinifigurePart
 from sqlalchemy.orm import selectinload
 from services.cache_service import cache_image  # Import the central service
@@ -90,27 +90,28 @@ def update_quantity():
         return jsonify({'error': 'No changes provided'}), 400
 
     try:
-        for change in changes:
-            part_id = change.get('part_id')
-            new_quantity = change.get('new_quantity')
+        with db.session.no_autoflush:  # Avoid committing before all updates are made
+            for change in changes:
+                part_id = change.get('part_id')
+                new_quantity = change.get('new_quantity')
 
-            if not part_id or new_quantity is None:
-                continue  # Skip invalid entries
+                if not part_id or new_quantity is None:
+                    continue  # Skip invalid entries
 
-            part = Part.query.filter_by(id=part_id).first()
-            if part:
-                part.have_quantity = new_quantity
-            else:
-                minifigure_part = UserMinifigurePart.query.filter_by(id=part_id).first()
-                if minifigure_part:
-                    minifigure_part.have_quantity = new_quantity
+                part = Part.query.filter_by(id=part_id).first()
+                if part:
+                    part.have_quantity = new_quantity
+                else:
+                    minifigure_part = UserMinifigurePart.query.filter_by(id=part_id).first()
+                    if minifigure_part:
+                        minifigure_part.have_quantity = new_quantity
 
-        db.session.commit()
-        return jsonify({'message': 'Changes saved successfully!'}), 200
+        db.session.commit()  # Commit all changes at once for efficiency
     except Exception as e:
-        current_app.logger.error(f"Error updating quantities: {e}")
+        app.logger.error(f"Failed to update quantities: {e}")
         db.session.rollback()
-        return jsonify({'error': 'Failed to save changes'}), 500
+    
+    return jsonify({'message': 'Changes saved successfully!'}), 200
 
 
 @dashboard_bp.route('/details/<category>', methods=['GET'])

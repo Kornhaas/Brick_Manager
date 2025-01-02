@@ -1,6 +1,6 @@
 import logging
 from flask import Blueprint, render_template, request, jsonify
-from services.rebrickable_service import get_all_category_ids_from_api, get_parts_by_category
+from services.rebrickable_service import RebrickableService
 from services.part_lookup_service import load_part_lookup, save_part_lookup
 # Import the centralized cache_image function
 from services.cache_service import cache_image
@@ -14,7 +14,7 @@ def part_location():
     """
     Page to manage part locations. Fetches categories and allows the user to input locations.
     """
-    categories = get_all_category_ids_from_api()
+    categories = RebrickableService.get_all_category_ids()
     categories.sort(key=lambda category: category[1])  # Alphabetically sort categories
     master_lookup = load_part_lookup()
 
@@ -30,7 +30,7 @@ def part_location():
                 (category[1] for category in categories if category[0] == int(selected_category_id)), 
                 None
             )
-            parts_data = get_parts_by_category(selected_category_id, page_size=5000, page=page)
+            parts_data = RebrickableService.get_parts_by_category(selected_category_id, page_size=5000, page=page)
             parts = parts_data.get('results', [])
 
             # Enrich parts with master lookup and cached images

@@ -21,7 +21,7 @@ from routes.storage import storage_bp
 from routes.manual_entry import manual_entry_bp
 from routes.part_lookup import part_lookup_bp
 from routes.set_search import set_search_bp
-from routes.load_categories import load_categories_bp
+from routes.import_rebrickable_data import import_rebrickable_data_bp
 from routes.set_maintain import set_maintain_bp
 from routes.missing_parts import missing_parts_bp
 from routes.dashboard import dashboard_bp
@@ -51,20 +51,21 @@ if not os.path.exists(instances_dir):
     os.makedirs(instances_dir)
 
 # Update the database URI to use the 'instances' directory
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instances_dir, "lego_scanner.db")}'
-print(f'sqlite:///{os.path.join(instances_dir, "lego_scanner.db")}')
+db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance/lego_scanner.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 # Initialize the db instance with the app
 db.init_app(app)
 
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
-# Configure Logging
+# Update Logging Configuration to use env vars for log level
+LOG_LEVEL = os.getenv('LOGGING_LEVEL', 'DEBUG')
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.getLevelName(LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-app.logger.setLevel(logging.DEBUG)
+app.logger.setLevel(logging.DEBUG)  # Ensure logging is set to debug if not overridden by env var
 
 # Ensure database tables are created
 with app.app_context():
@@ -83,7 +84,7 @@ app.register_blueprint(storage_bp)
 app.register_blueprint(manual_entry_bp)
 app.register_blueprint(part_lookup_bp)
 app.register_blueprint(set_search_bp)
-app.register_blueprint(load_categories_bp)
+app.register_blueprint(import_rebrickable_data_bp)
 app.register_blueprint(set_maintain_bp)
 app.register_blueprint(missing_parts_bp)
 app.register_blueprint(dashboard_bp)
