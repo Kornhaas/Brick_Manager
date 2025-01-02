@@ -183,10 +183,14 @@ class UserMinifigurePart(db.Model):
 class PartStorage(db.Model):
     __tablename__ = 'part_storage'
     id = db.Column(Integer, primary_key=True)
-    part_id = db.Column(String, nullable=False)
-    location = db.Column(String, nullable=False)
-    level = db.Column(String, nullable=False)
-    box = db.Column(String, nullable=False)
+    part_num = db.Column(String, db.ForeignKey('part_info.part_num'), nullable=False)  # Updated and added relationship
+    location = db.Column(String)
+    level = db.Column(String)
+    box = db.Column(String)
+
+    # Relationship
+    part_info = db.relationship('PartInfo', backref='part_storage', lazy='joined')
 
     def __repr__(self):
-        return f'<PartStorage {self.part_id} - Location: {self.location}, Level: {self.level}, Box: {self.box}>'
+        return f'<PartStorage {self.part_num} - Location: {self.location}, Level: {self.level}, Box: {self.box}>'
+

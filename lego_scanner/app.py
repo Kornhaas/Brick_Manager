@@ -12,6 +12,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
 from flask_migrate import Migrate
 import logging
+from logging.handlers import RotatingFileHandler
+
 from config import Config
 from models import db  # Import the db instance from models
 from routes.upload import upload_bp
@@ -62,12 +64,24 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 # Update Logging Configuration to use env vars for log level
-LOG_LEVEL = os.getenv('LOGGING_LEVEL', 'DEBUG')
+# Configure logging
 logging.basicConfig(
-    level=logging.getLevelName(LOG_LEVEL),
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-app.logger.setLevel(logging.DEBUG)  # Ensure logging is set to debug if not overridden by env var
+
+# Create a rotating file handler
+log_path = os.path.join(basedir, 'lego_scanner.log')
+rotating_file_handler = RotatingFileHandler(log_path, maxBytes=1024 * 1024 * 5, backupCount=3)
+rotating_file_handler.setLevel(logging.DEBUG)
+
+# Create a logging formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+rotating_file_handler.setFormatter(formatter)
+
+# Add the rotating file handler to the application's logger
+app.logger.addHandler(rotating_file_handler)
+
 
 # Ensure database tables are created
 with app.app_context():

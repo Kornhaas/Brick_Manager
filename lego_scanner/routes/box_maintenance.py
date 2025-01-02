@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, render_template, request, current_app
-from models import db, PartStorage, Part
+from models import db, PartStorage, PartInfo, Category
 from services.cache_service import cache_image
 
 box_maintenance_bp = Blueprint('box_maintenance', __name__)
@@ -10,6 +10,7 @@ def box_maintenance_page():
     Renders the Box Maintenance page.
     """
     return render_template('box_maintenance.html')
+
 
 @box_maintenance_bp.route('/box_maintenance/filter', methods=['POST'])
 def filter_box_data():
@@ -33,7 +34,9 @@ def filter_box_data():
 
         return jsonify({"error": "Invalid parameters"}), 400
     except Exception as e:
+        current_app.logger.error(f"Error in filter_box_data: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 @box_maintenance_bp.route('/box_maintenance/data', methods=['GET'])
 def get_box_data():
@@ -51,7 +54,9 @@ def get_box_data():
             "boxes": sorted([box[0] for box in boxes]),
         })
     except Exception as e:
+        current_app.logger.error(f"Error in get_box_data: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 @box_maintenance_bp.route('/box_contents', methods=['POST'])
 def get_box_contents():
@@ -70,8 +75,10 @@ def get_box_contents():
         # Debug log: Input parameters
         current_app.logger.debug(f"Fetching contents for Location: {location}, Level: {level}, Box: {box}")
 
-        # Fetch parts stored in the specific box
-        contents = db.session.query(Part).join(PartStorage, Part.part_num == PartStorage.part_num).filter(
+        # Fetch part info based on PartStorage
+        contents = db.session.query(PartInfo).join(
+            PartStorage, PartInfo.part_num == PartStorage.part_id
+        ).filter(
             PartStorage.location == location,
             PartStorage.level == level,
             PartStorage.box == box
