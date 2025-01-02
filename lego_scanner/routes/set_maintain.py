@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
-from models import db, UserSet, PartInSet, Minifigure, UserMinifigurePart, PartInfo
+from models import db, UserSet, PartInSet, Minifigure, UserMinifigurePart, PartInfo, PartStorage
 from services.part_lookup_service import load_part_lookup
 from sqlalchemy.orm import joinedload
 import os
@@ -81,6 +81,7 @@ def get_user_set_details(user_set_id):
     def enrich_item(part, master_lookup):
         part_data = master_lookup.get(part.part_num, {})
         part_info = PartInfo.query.filter_by(part_num=part.part_num).first()
+        storage_data = db.session.query(PartStorage).filter_by(part_num=part.part_num).first()  # Fetch PartStorage
         return {
             'id': part.id,
             'part_num': part.part_num,
@@ -90,10 +91,10 @@ def get_user_set_details(user_set_id):
             'color': part.color,
             'color_rgb': part.color_rgb,
             'part_img_url': part_info.part_img_url if part_info else '',
-            'location': f"Location: {part_data.get('location', 'Unknown')}, "
-                        f"Level: {part_data.get('level', 'Unknown')}, "
-                        f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified",
-            'status': "Available" if part_data else "Not Available"
+            'location': f"Location: {storage_data.location if storage_data else 'Unknown'}, "
+                        f"Level: {storage_data.level if storage_data else 'Unknown'}, "
+                        f"Box: {storage_data.box if storage_data else 'Unknown'}",
+            'status': "Available" if storage_data else "Not Available"
         }
 
     parts = [enrich_item(part, master_lookup) for part in user_set.parts_in_set]
@@ -122,7 +123,6 @@ def get_user_set_details(user_set_id):
         'status': user_set.status,
         'completeness_percentage': round(completeness_percentage, 2)
     })
-
 
 @set_maintain_bp.route('/set_maintain/update', methods=['POST'])
 def update_user_set():

@@ -159,3 +159,13 @@ FROM part_storage LEFT OUTER JOIN part_info AS part_info_1 ON part_info_1.part_n
 2025-01-02 21:25:20,451 - app - DEBUG - Master lookup data loaded successfully.
 2025-01-02 21:25:21,343 - app - DEBUG - Master lookup data loaded successfully.
 2025-01-02 21:27:17,200 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-02 22:02:09,329 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-02 22:02:47,006 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-02 22:03:12,595 - app - DEBUG - Set search initiated for: 40700
+2025-01-02 22:03:12,596 - app - DEBUG - Set number corrected to: 40700-1
+2025-01-02 22:03:12,866 - app - DEBUG - Set info fetched: {'set_num': '40700-1', 'name': 'Winter Holiday Train', 'year': 2024, 'theme_id': 227, 'num_parts': 294, 'set_img_url': 'https://cdn.rebrickable.com/media/sets/40700-1/148134.jpg', 'set_url': 'https://rebrickable.com/sets/40700-1/winter-holiday-train/', 'last_modified_dt': '2024-11-19T05:26:41.756405Z'}
+2025-01-02 22:03:14,675 - app - DEBUG - Parts info fetched: 107 parts found.
+2025-01-02 22:03:14,824 - app - DEBUG - Minifigs info fetched: 0 minifigs found.
+2025-01-02 22:03:17,889 - app - DEBUG - Adding set 40700-1 to the database with status unknown.
+2025-01-02 22:04:14,933 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-02 22:04:14,934 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
