@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <div class="card-body">
                                 <h5 class="card-title">${item.name}</h5>
                                 <p class="card-text"><strong>Category:</strong> ${item.category}</p>
-                                <p class="card-text"><strong>ID:</strong> ${item.id}</p>
+                                <p class="card-text"><strong>Part Number:</strong> ${item.part_num}</p>
                             </div>
                         </div>`;
                     contentsContainer.appendChild(card);

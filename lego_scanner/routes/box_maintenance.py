@@ -77,7 +77,7 @@ def get_box_contents():
 
         # Fetch part info based on PartStorage
         contents = db.session.query(PartInfo).join(
-            PartStorage, PartInfo.part_num == PartStorage.part_id
+            PartStorage, PartInfo.part_num == PartStorage.part_num
         ).filter(
             PartStorage.location == location,
             PartStorage.level == level,

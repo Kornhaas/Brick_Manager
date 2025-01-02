@@ -99,3 +99,23 @@ FROM part_storage LEFT OUTER JOIN part_info AS part_info_1 ON part_info_1.part_n
 2025-01-02 20:42:45,256 - app - ERROR - Failed to load master lookup data: 'PartStorage' object has no attribute 'part_id'
 2025-01-02 20:42:58,191 - app - ERROR - Failed to load master lookup data: 'PartStorage' object has no attribute 'part_id'
 2025-01-02 20:42:59,075 - app - ERROR - Failed to load master lookup data: 'PartStorage' object has no attribute 'part_id'
+2025-01-02 20:48:02,732 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-02 20:48:02,733 - app - ERROR - Error fetching box contents: type object 'PartStorage' has no attribute 'part_id'
+2025-01-02 20:48:31,427 - app - ERROR - Failed to load master lookup data: 'PartStorage' object has no attribute 'part_id'
+2025-01-02 20:48:31,479 - app - ERROR - Failed to load master lookup data: 'PartStorage' object has no attribute 'part_id'
+2025-01-02 20:48:36,872 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-02 20:48:36,874 - app - DEBUG - Found 3 parts in the box.
+2025-01-02 20:50:08,511 - app - DEBUG - Fetching contents for Location: 2, Level: 4, Box: 13
+2025-01-02 20:50:08,512 - app - DEBUG - Found 1 parts in the box.
+2025-01-02 20:52:01,496 - app - DEBUG - Fetching contents for Location: 3, Level: 5, Box: 12
+2025-01-02 20:52:01,497 - app - DEBUG - Found 1 parts in the box.
+2025-01-02 20:52:08,044 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-02 20:52:08,045 - app - DEBUG - Found 3 parts in the box.
+2025-01-02 20:52:15,906 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 11
+2025-01-02 20:52:15,907 - app - DEBUG - Found 2 parts in the box.
+2025-01-02 20:52:18,090 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 13
+2025-01-02 20:52:18,091 - app - DEBUG - Found 2 parts in the box.
+2025-01-02 20:52:20,616 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 14
+2025-01-02 20:52:20,617 - app - DEBUG - Found 3 parts in the box.
+2025-01-02 20:52:25,003 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 16
+2025-01-02 20:52:25,004 - app - DEBUG - Found 4 parts in the box.
