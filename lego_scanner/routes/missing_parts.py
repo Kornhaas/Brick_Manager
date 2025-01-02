@@ -16,13 +16,13 @@ def missing_parts():
 
     # Query all UserSets
     user_sets = UserSet.query.options(
-        joinedload(UserSet.parts),
+        joinedload(UserSet.parts_in_set),  # Correct relationship name
         joinedload(UserSet.template_set)
     ).all()
 
     # Collect missing regular parts
     for user_set in user_sets:
-        for part in user_set.parts:
+        for part in user_set.parts_in_set:  # Correct relationship name
             if part.quantity > part.have_quantity:
                 part_data = master_lookup.get(part.part_num, {})
                 missing_items.append({
@@ -30,11 +30,11 @@ def missing_parts():
                     'set_id': user_set.template_set.set_number,
                     'internal_id': user_set.id,
                     'item_id': part.part_num,
-                    'name': part.name,
+                    'name': part.part_info.name if part.part_info else "Unknown",  # Using part_info for details
                     'color': part.color,
                     'is_spare': part.is_spare,
                     'missing_quantity': part.quantity - part.have_quantity,
-                    'img_url': part.part_img_url,
+                    'img_url': part.part_info.part_img_url if part.part_info else "/static/default_image.png",  # Using part_info for image
                     'location': f"Location: {part_data.get('location', 'Unknown')}, "
                                 f"Level: {part_data.get('level', 'Unknown')}, "
                                 f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified"
@@ -54,7 +54,7 @@ def missing_parts():
                 'color': minifig_part.color,
                 'is_spare': minifig_part.is_spare,
                 'missing_quantity': minifig_part.quantity - minifig_part.have_quantity,
-                'img_url': minifig_part.part_img_url,
+                'img_url': minifig_part.part_img_url or "/static/default_image.png",
                 'location': f"Location: {part_data.get('location', 'Unknown')}, "
                             f"Level: {part_data.get('level', 'Unknown')}, "
                             f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified"

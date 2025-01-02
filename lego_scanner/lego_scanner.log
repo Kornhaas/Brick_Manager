@@ -157,3 +157,5 @@ FROM part_storage LEFT OUTER JOIN part_info AS part_info_1 ON part_info_1.part_n
 2025-01-02 21:24:39,307 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 11
 2025-01-02 21:24:39,312 - app - DEBUG - Found 2 parts in the box.
 2025-01-02 21:25:20,451 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-02 21:25:21,343 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-02 21:27:17,200 - app - DEBUG - Master lookup data loaded successfully.
