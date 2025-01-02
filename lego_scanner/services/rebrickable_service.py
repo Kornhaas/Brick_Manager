@@ -1,194 +1,190 @@
 """
 This module provides services for interacting with the Rebrickable API 
-and the Brickognize API.
-
-It includes functions to:
-- Fetch part details from the Rebrickable API.
-- Fetch category names based on part category IDs.
-- Get part predictions from the Brickognize API based on an uploaded image.
+and populating the local database.
 """
+
 import time
 import requests
+import logging
 from config import Config
-from models import Category
+from models import db, PartCategory, Part, Color, Set
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class RebrickableAPIException(Exception):
     """Custom exception for errors interacting with the Rebrickable API."""
 
 
-def get_all_category_ids_from_api():
+def fetch_paginated_data(api_url, retries=3, **filters):
     """
-    Fetches all category IDs and names from the Rebrickable API.
+    Fetch paginated data from the Rebrickable API.
+    Handles rate limiting and retries.
 
-    Returns:
-        list: A list of tuples containing category IDs and names.
+    Args:
+        api_url (str): The API endpoint URL.
+        retries (int): Number of retries for rate-limiting.
+        **filters: Additional query parameters.
 
-    Raises:
-        RebrickableAPIException: If the API request fails.
+    Yields:
+        dict: Paginated results from the API.
     """
-    url = 'https://rebrickable.com/api/v3/lego/part_categories/'
+    page = 1
     headers = {
         'Accept': 'application/json',
         'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
     }
-    response = requests.get(url, headers=headers, timeout=10)
-    if response.status_code == 200:
-        data = response.json()
-        return [(category['id'], category['name']) for category in data['results']]
+    while True:
+        params = {'page': page, **filters}
+        try:
+            response = requests.get(api_url, headers=headers, params=params, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                yield data.get('results', [])
+                if not data.get('next'):  # Stop if no more pages
+                    break
+                page += 1
+            elif response.status_code == 429:
+                if retries > 0:
+                    retry_after = int(response.headers.get("Retry-After", 2))
+                    logger.warning(f"Rate limit hit. Retrying after {retry_after} seconds...")
+                    time.sleep(retry_after)
+                    continue
+                else:
+                    raise RebrickableAPIException("Rate limit retries exhausted.")
+            else:
+                raise RebrickableAPIException(
+                    f"Failed to fetch data: {response.status_code} - {response.text}"
+                )
+        except requests.RequestException as e:
+            raise RebrickableAPIException(f"Error fetching data from API: {e}")
 
-    raise RebrickableAPIException(
-        f"Failed to fetch category IDs: {response.status_code}")
 
-
-def get_part_details(part_num):
+def populate_colors():
     """
-    Fetch part details from the Rebrickable API based on the part number.
-
-    Args:
-        part_num (str): The part number to fetch details for.
-
-    Returns:
-        dict: The JSON response containing part details if successful.
-        None: If the request fails.
+    Fetch all colors from the Rebrickable API and populate the colors table.
     """
-    print(f"Fetching part details for {part_num}")
-    url = f'https://rebrickable.com/api/v3/lego/parts/{part_num}/'
-    headers = {
-        'Accept': 'application/json',
-        'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
-    }
-
-    response = requests.get(url, headers=headers, timeout=10)
-
-    if response.status_code == 200:
-        return response.json()
-
-    print(f"Failed to fetch part details for {part_num}: {response.status_code}")
-    return None
-
-
-def get_category_name_from_db(part_cat_id):
-    """
-    Fetch the category name from the local database based on the category ID.
-
-    Args:
-        part_cat_id (int): The category ID.
-
-    Returns:
-        str: The category name if found in the database, 'Unknown Category' otherwise.
-    """
-    category = Category.query.filter_by(id=part_cat_id).first()
-    return category.name if category else 'Unknown Category'
-
-
-def get_category_name(part_cat_id):
-    """
-    Fetch the name of a category from the Rebrickable API based on the part category ID.
-
-    Args:
-        part_cat_id (str): The ID of the part category.
-
-    Returns:
-        str: The name of the category if successful, 'Unknown Category' otherwise.
-    """
-    url = f'https://rebrickable.com/api/v3/lego/part_categories/{part_cat_id}/'
-    headers = {
-        'Accept': 'application/json',
-        'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
-    }
-
-    retries = 3
-
-    for _ in range(retries):
-        response = requests.get(url, headers=headers, timeout=10)
-        if response.status_code == 200:
-            return response.json().get('name', 'Unknown Category')
-        if response.status_code == 429:
-            retry_after = int(response.headers.get("Retry-After", 2))
-            print(f"Rate limit hit. Retrying after {retry_after} seconds...")
-            time.sleep(retry_after)
-        else:
-            print(f"Failed to fetch category name for {part_cat_id}: {response.status_code}")
-            return 'Unknown Category'
-    return 'Unknown Category'
-
-
-def get_predictions(file_path, filename):
-    """
-    Get part predictions from the Brickognize API based on an uploaded image.
-
-    Args:
-        file_path (str): The file path to the image.
-        filename (str): The name of the file.
-
-    Returns:
-        dict: The JSON response containing predictions if successful.
-        None: If the request fails.
-    """
-    api_url = "https://api.brickognize.com/predict/"
-    headers = {'accept': 'application/json'}
-
-    # Use 'with' statement to ensure the file is properly closed after use
-    with open(file_path, 'rb') as file:
-        files = {'query_image': (filename, file, 'image/jpeg')}
-        response = requests.post(
-            api_url, headers=headers, files=files, timeout=10)
-
+    logger.info("Starting color population.")
     try:
-        return response.json()
-    except ValueError:
-        print("Error decoding JSON response from the API")
-        return None
+        for results in fetch_paginated_data('https://rebrickable.com/api/v3/lego/colors/'):
+            for color in results:
+                color_id = color.get('id')
+                if color_id is None:
+                    continue
 
-
-def get_parts_by_category(part_cat_id, page_size=1000, page=1):
-    """
-    Fetch parts from the Rebrickable API for a given category.
-
-    Args:
-        part_cat_id (int): The category ID.
-        page_size (int): The number of parts to fetch per page.
-        page (int): The page number to fetch.
-
-    Returns:
-        dict: A dictionary with parts data and pagination info.
-    """
-    url = f'https://rebrickable.com/api/v3/lego/parts/'
-    headers = {
-        'Accept': 'application/json',
-        'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
-    }
-    params = {
-        'part_cat_id': part_cat_id,
-        'page_size': page_size,
-        'page': page
-    }
-
-    response = requests.get(url, headers=headers, params=params, timeout=10)
-    if response.status_code == 200:
-        return response.json()
-
-    raise RebrickableAPIException(
-        f"Failed to fetch parts for category {part_cat_id}: {response.status_code}")
-
-
-def save_part_locations(locations):
-    """
-    Save part location data to the database or a file.
-
-    Args:
-        locations (dict): A dictionary containing part numbers as keys and location data as values.
-
-    Returns:
-        bool: True if saving was successful, False otherwise.
-    """
-    try:
-        # Example: Save locations to a JSON file
-        import json
-        with open('part_locations.json', 'w') as file:
-            json.dump(locations, file)
-        return True
+                existing_color = Color.query.filter_by(id=color_id).first()
+                if existing_color:
+                    existing_color.name = color.get('name', 'Unknown')
+                    existing_color.rgb = color.get('rgb')
+                    existing_color.is_trans = color.get('is_trans', False)
+                else:
+                    db.session.add(Color(
+                        id=color_id,
+                        name=color.get('name', 'Unknown'),
+                        rgb=color.get('rgb'),
+                        is_trans=color.get('is_trans', False)
+                    ))
+        db.session.commit()
+        logger.info("Colors populated successfully.")
     except Exception as e:
-        print(f"Error saving part locations: {e}")
-        return False
+        db.session.rollback()
+        logger.error(f"Error populating colors: {e}")
+
+
+def populate_themes():
+    """
+    Fetch all themes from the Rebrickable API and populate the themes table.
+    """
+    logger.info("Starting theme population.")
+    try:
+        for results in fetch_paginated_data('https://rebrickable.com/api/v3/lego/themes/'):
+            for theme in results:
+                theme_id = theme.get('id')
+                if theme_id is None:
+                    continue
+
+                existing_theme = PartCategory.query.filter_by(id=theme_id).first()
+                if existing_theme:
+                    existing_theme.name = theme.get('name', 'Unknown')
+                    existing_theme.parent_id = theme.get('parent_id')
+                else:
+                    db.session.add(PartCategory(
+                        id=theme_id,
+                        name=theme.get('name', 'Unknown'),
+                        parent_id=theme.get('parent_id')
+                    ))
+        db.session.commit()
+        logger.info("Themes populated successfully.")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error populating themes: {e}")
+
+
+def populate_sets(theme_id=None):
+    """
+    Fetch all sets from the Rebrickable API and populate the sets table.
+
+    Args:
+        theme_id (int, optional): Filter sets by theme ID.
+    """
+    logger.info("Starting set population.")
+    try:
+        for results in fetch_paginated_data('https://rebrickable.com/api/v3/lego/sets/', theme_id=theme_id):
+            for set_data in results:
+                set_num = set_data.get('set_num')
+                if not set_num:
+                    continue
+
+                existing_set = Set.query.filter_by(set_num=set_num).first()
+                if existing_set:
+                    existing_set.name = set_data.get('name', 'Unknown')
+                    existing_set.year = set_data.get('year')
+                    existing_set.theme_id = set_data.get('theme_id')
+                    existing_set.num_parts = set_data.get('num_parts')
+                    existing_set.set_img_url = set_data.get('set_img_url')
+                    existing_set.set_url = set_data.get('set_url')
+                else:
+                    db.session.add(Set(
+                        set_num=set_num,
+                        name=set_data.get('name', 'Unknown'),
+                        year=set_data.get('year'),
+                        theme_id=set_data.get('theme_id'),
+                        num_parts=set_data.get('num_parts'),
+                        set_img_url=set_data.get('set_img_url'),
+                        set_url=set_data.get('set_url')
+                    ))
+        db.session.commit()
+        logger.info("Sets populated successfully.")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error populating sets: {e}")
+
+
+def populate_part_categories():
+    """
+    Fetch and populate part categories from the Rebrickable API.
+    """
+    logger.info("Starting part category population.")
+    try:
+        for results in fetch_paginated_data('https://rebrickable.com/api/v3/lego/part_categories/'):
+            for category in results:
+                category_id = category.get('id')
+                if category_id is None:
+                    continue
+
+                existing_category = PartCategory.query.filter_by(id=category_id).first()
+                if existing_category:
+                    existing_category.name = category.get('name', 'Unknown')
+                else:
+                    db.session.add(PartCategory(
+                        id=category_id,
+                        name=category.get('name', 'Unknown')
+                    ))
+        db.session.commit()
+        logger.info("Part categories populated successfully.")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error populating part categories: {e}")
+

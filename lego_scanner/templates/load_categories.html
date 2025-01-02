@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Load Categories</title>
+    <title>Data Population</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
@@ -13,24 +13,80 @@
     <!-- Include the navigation bar -->
     {% include 'navbar.html' %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <div class="container mt-5">
-        <h1>Load/Update Categories</h1>
-        <form id="loadCategoriesForm" method="post">
-            <button id="submitButton" type="submit" class="btn btn-primary">Load/Update Categories</button>
-            <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display: none;">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+        <h1>Populate Rebrickable Data</h1>
+        <div id="feedbackMessage" class="alert d-none" role="alert"></div>
+
+        <!-- Populate Categories -->
+        <form id="loadCategoriesForm" method="post" action="{{ url_for('populate_data.populate_categories') }}">
+            <button id="loadCategoriesButton" type="submit" class="btn btn-primary mb-3">Load/Update Categories</button>
+        </form>
+
+        <!-- Populate Parts -->
+        <form id="loadPartsForm" method="post" action="{{ url_for('populate_data.populate_parts') }}">
+            <button id="loadPartsButton" type="submit" class="btn btn-primary mb-3">Load/Update Parts</button>
+        </form>
+
+        <!-- Populate Colors -->
+        <form id="loadColorsForm" method="post" action="{{ url_for('populate_data.populate_colors') }}">
+            <button id="loadColorsButton" type="submit" class="btn btn-primary mb-3">Load/Update Colors</button>
+        </form>
+
+        <!-- Populate Themes -->
+        <form id="loadThemesForm" method="post" action="{{ url_for('populate_data.populate_themes') }}">
+            <button id="loadThemesButton" type="submit" class="btn btn-primary mb-3">Load/Update Themes</button>
+        </form>
+
+        <!-- Populate Sets -->
+        <form id="loadSetsForm" method="post" action="{{ url_for('populate_data.populate_sets') }}">
+            <button id="loadSetsButton" type="submit" class="btn btn-primary mb-3">Load/Update Sets</button>
         </form>
     </div>
 
     <script>
-        const form = document.getElementById('loadCategoriesForm');
-        const submitButton = document.getElementById('submitButton');
-        const loadingSpinner = document.getElementById('loadingSpinner');
+        const forms = [
+            { id: 'loadCategoriesForm', buttonId: 'loadCategoriesButton' },
+            { id: 'loadPartsForm', buttonId: 'loadPartsButton' },
+            { id: 'loadColorsForm', buttonId: 'loadColorsButton' },
+            { id: 'loadThemesForm', buttonId: 'loadThemesButton' },
+            { id: 'loadSetsForm', buttonId: 'loadSetsButton' }
+        ];
 
-        form.addEventListener('submit', function () {
-            submitButton.style.display = 'none';
-            loadingSpinner.style.display = 'inline-block';
+        forms.forEach(formConfig => {
+            const form = document.getElementById(formConfig.id);
+            const button = document.getElementById(formConfig.buttonId);
+            const feedbackMessage = document.getElementById('feedbackMessage');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Prevent the default form submission
+                button.disabled = true;
+                button.innerText = 'Loading...';
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token() }}' } // Include CSRF token if applicable
+                })
+                .then(response => {
+                    if (response.ok) {
+                        feedbackMessage.className = 'alert alert-success';
+                        feedbackMessage.innerText = 'Data successfully loaded!';
+                    } else {
+                        feedbackMessage.className = 'alert alert-danger';
+                        feedbackMessage.innerText = 'An error occurred while loading data.';
+                    }
+                    feedbackMessage.classList.remove('d-none');
+                })
+                .catch(() => {
+                    feedbackMessage.className = 'alert alert-danger';
+                    feedbackMessage.innerText = 'An unexpected error occurred.';
+                    feedbackMessage.classList.remove('d-none');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerText = button.innerText.replace('Loading...', 'Load/Update');
+                });
+            });
         });
     </script>
 </body>

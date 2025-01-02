@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, current_app, redirect, url_for
 import requests
-from models import db, Set, UserSet, Part, Minifigure, UserMinifigurePart, Category
+from models import db, Set, UserSet, Part, UserMinifigure, UserMinifigurePart, PartCategory 
 from config import Config
 from services.part_lookup_service import load_part_lookup
 
@@ -70,7 +70,6 @@ def set_search():
         minifigs_info=minifigs_info
     )
 
-
 @set_search_bp.route('/add_set', methods=['POST'])
 def add_set():
     """
@@ -85,52 +84,42 @@ def add_set():
         if not set_number.endswith('-1'):
             set_number += '-1'
             current_app.logger.debug(f"Set number corrected to: {set_number}")
-                
-        # Fetch or get the template set
+
+        # Fetch set details
         set_info = fetch_set_info(set_number)
         if not set_info:
             flash(f"Set {set_number} not found.", category="danger")
             return redirect(url_for('set_search.set_search'))
 
-        template_set, created = get_or_create(db.session, Set, set_number=set_number, defaults={
+        # Fetch or create the Set record
+        template_set, created = get_or_create(db.session, Set, defaults={
             'name': set_info['name'],
-            'set_img_url': set_info['set_img_url']
-        })
+            'year': set_info.get('year'),
+            'num_parts': set_info.get('num_parts')
+        }, set_num=set_number)
 
-        # Prevent duplicate UserSets
-        #if UserSet.query.filter_by(set_id=template_set.id).first():
-        #    flash(f"Set {template_set.name} already exists.", category="info")
-        #    return redirect(url_for('set_search.set_search'))
-
-        # Create UserSet with the provided status
-        user_set = UserSet(template_set=template_set, status=status)
+        # Create UserSet record
+        user_set = UserSet(set_num=set_number, status=status)
         db.session.add(user_set)
         db.session.flush()
 
         # Add parts
         parts_info = fetch_set_parts_info(set_number)
         for part in parts_info:
-            category, _ = get_or_create(db.session, Category, id=part['category'], defaults={'name': 'Unknown'})
+            category, _ = get_or_create(db.session, Category, defaults={'name': 'Unknown'}, id=part['category'])
             db.session.add(Part(
                 part_num=part['part_num'],
                 name=part['name'],
-                category_id=category.id,
-                color=part['color'],
-                color_rgb=part['color_rgb'],
-                quantity=part['quantity'],
-                is_spare=part['is_spare'],
-                part_img_url=part['part_img_url'],
-                user_set_id=user_set.id
+                part_cat_id=category.id
             ))
 
         # Add minifigures and parts
         minifigs_info = fetch_minifigs_info(set_number)
         for minifig in minifigs_info:
-            db_minifig = Minifigure(
+            db_minifig = UserMinifigure(
                 fig_num=minifig['fig_num'],
                 name=minifig['name'],
                 quantity=minifig['quantity'],
-                img_url=minifig['img_url'],
                 user_set_id=user_set.id
             )
             db.session.add(db_minifig)
@@ -141,11 +130,7 @@ def add_set():
             for part in minifig_parts:
                 db.session.add(UserMinifigurePart(
                     part_num=part['part_num'],
-                    name=part['name'],
-                    color=part['color'],
-                    color_rgb=part['color_rgb'],
                     quantity=part['quantity'],
-                    part_img_url=part['part_img_url'],
                     user_set_id=user_set.id
                 ))
 
@@ -157,7 +142,6 @@ def add_set():
         flash("An error occurred while adding the set.", category="danger")
 
     return redirect(url_for('set_search.set_search'))
-
 
 def fetch_set_info(set_number):
     """

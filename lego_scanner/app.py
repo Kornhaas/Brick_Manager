@@ -17,11 +17,13 @@ from models import db  # Import the db instance from models
 from routes.upload import upload_bp
 from routes.label import label_bp
 from routes.main import main_bp
+from routes.box_maintenance import box_maintenance_bp  # Import the blueprint
 from routes.storage import storage_bp
 from routes.manual_entry import manual_entry_bp
 from routes.part_lookup import part_lookup_bp
 from routes.set_search import set_search_bp
 from routes.load_categories import load_categories_bp
+from routes.load_parts import load_parts_bp
 from routes.set_maintain import set_maintain_bp
 from routes.missing_parts import missing_parts_bp
 from routes.dashboard import dashboard_bp
@@ -84,10 +86,12 @@ app.register_blueprint(manual_entry_bp)
 app.register_blueprint(part_lookup_bp)
 app.register_blueprint(set_search_bp)
 app.register_blueprint(load_categories_bp)
+app.register_blueprint(load_parts_bp)
 app.register_blueprint(set_maintain_bp)
 app.register_blueprint(missing_parts_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(part_location_bp)
+app.register_blueprint(box_maintenance_bp)
 
 # Set up the scheduler for database backup
 scheduler = BackgroundScheduler()

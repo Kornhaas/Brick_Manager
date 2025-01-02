@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Box Maintenance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h1>Box Maintenance</h1>
+
+        <!-- Dropdowns for Location, Level, and Box -->
+        <form id="box-selection-form" class="row g-3">
+            <div class="col-md-4">
+                <label for="location" class="form-label">Location</label>
+                <select id="location" class="form-select" aria-label="Select a location" required>
+                    <option value="" disabled selected>Select Location</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="level" class="form-label">Level</label>
+                <select id="level" class="form-select" aria-label="Select a level" required>
+                    <option value="" disabled selected>Select Level</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="box" class="form-label">Box</label>
+                <select id="box" class="form-select" aria-label="Select a box" required>
+                    <option value="" disabled selected>Select Box</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">View Box Contents</button>
+            </div>
+        </form>
+
+        <!-- Box Contents -->
+        <div id="box-contents" class="mt-5">
+            <h2>Box Contents</h2>
+            <div id="contents-container" class="row">
+                <p class="text-muted">Please select a box to view its contents.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/box_maintenance.js') }}"></script>
+</body>
+</html>

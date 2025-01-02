@@ -1,7 +1,7 @@
 import os
 import requests
 from flask import Blueprint, jsonify, render_template, current_app, request
-from models import db, UserSet, Part, Minifigure, UserMinifigurePart
+from models import db, UserSet, PartSetMapping, UserMinifigurePart
 from sqlalchemy.orm import selectinload
 from services.cache_service import cache_image  # Import the central service
 
@@ -13,7 +13,7 @@ def dashboard():
     Dashboard route to display an overview of total and missing parts/minifigure parts.
     """
     # Query parts and user minifigure parts, excluding specific set statuses
-    parts = Part.query.join(UserSet).filter(~UserSet.status.in_(['assembled', 'konvolut'])).all()
+    parts = PartSetMapping.query.join(UserSet).filter(~UserSet.status.in_(['assembled', 'konvolut'])).all()
     minifigure_parts = (
         UserMinifigurePart.query.options(
             selectinload(UserMinifigurePart.user_set)
@@ -26,17 +26,16 @@ def dashboard():
 
     # Calculate totals and missing counts
     total_parts = sum(part.have_quantity for part in parts)
-    missing_parts = len(Part.query.options(
-            selectinload(Part.user_set),
-            selectinload(Part.category)
+    missing_parts = len(PartSetMapping.query.options(
+            selectinload(PartSetMapping.user_set)
         )
-        .filter(Part.quantity > Part.have_quantity)
-        .join(UserSet, UserSet.id == Part.user_set_id)
+        .filter(PartSetMapping.quantity > PartSetMapping.have_quantity)
+        .join(UserSet, UserSet.id == PartSetMapping.user_set_id)
         .filter(~UserSet.status.in_(['assembled', 'konvolut']))
         .all())
-    
+
     missing_spare_parts = sum(part.quantity - part.have_quantity for part in parts if part.is_spare and part.quantity > part.have_quantity)
-    
+
     missing_minifigure_parts = sum(
         minifigure_part.quantity - minifigure_part.have_quantity
         for minifigure_part in minifigure_parts
@@ -44,14 +43,14 @@ def dashboard():
     )
 
     # Calculate konvolut-specific data
-    konvolut_parts = len(Part.query.options(
-            selectinload(Part.user_set),
-            selectinload(Part.category)
-        )
-        .filter(Part.quantity > Part.have_quantity)
-        .join(UserSet, UserSet.id == Part.user_set_id)
-        .filter(UserSet.status == 'konvolut')
-        .all())
+    missing_konvolut_parts = sum(
+        part.quantity - part.have_quantity
+        for part in PartSetMapping.query.options(selectinload(PartSetMapping.user_set))
+        .join(UserSet, UserSet.id == PartSetMapping.user_set_id)
+        .filter(UserSet.status == 'konvolut', PartSetMapping.quantity > PartSetMapping.have_quantity)
+        .all()
+    )
+
     konvolut_minifigure_parts = len(UserMinifigurePart.query.options(
             selectinload(UserMinifigurePart.user_set)
         )
@@ -60,15 +59,6 @@ def dashboard():
         .filter(UserSet.status == 'konvolut')
         .all())
 
-     # Calculate missing parts in Konvolut
-    missing_konvolut_parts = sum(
-        part.quantity - part.have_quantity
-        for part in Part.query.options(selectinload(Part.user_set))
-        .join(UserSet, UserSet.id == Part.user_set_id)
-        .filter(UserSet.status == 'konvolut', Part.quantity > Part.have_quantity)
-        .all()
-    )
-    
     # Render the dashboard template with counts
     return render_template(
         'dashboard.html',
@@ -79,6 +69,7 @@ def dashboard():
         konvolut_parts=missing_konvolut_parts,
         konvolut_minifigure_parts=konvolut_minifigure_parts,
     )
+
 
 @dashboard_bp.route('/update_quantity', methods=['POST'])
 def update_quantity():
@@ -97,7 +88,7 @@ def update_quantity():
             if not part_id or new_quantity is None:
                 continue  # Skip invalid entries
 
-            part = Part.query.filter_by(id=part_id).first()
+            part = PartSetMapping.query.filter_by(id=part_id).first()
             if part:
                 part.have_quantity = new_quantity
             else:
@@ -121,17 +112,15 @@ def details(category):
     # Define category-specific queries
     if category == 'missing_parts':
         data = (
-            Part.query.options(
-                selectinload(Part.user_set),
-                selectinload(Part.category)
+            PartSetMapping.query.options(
+                selectinload(PartSetMapping.user_set),
             )
-            .filter(Part.quantity > Part.have_quantity)
-            .join(UserSet, UserSet.id == Part.user_set_id)
+            .filter(PartSetMapping.quantity > PartSetMapping.have_quantity)
+            .join(UserSet, UserSet.id == PartSetMapping.user_set_id)
             .filter(~UserSet.status.in_(['assembled', 'konvolut']))
             .all()
         )
         title = "Missing Parts"
-        include_category = True
     elif category == 'missing_minifigure_parts':
         data = (
             UserMinifigurePart.query.options(
@@ -143,30 +132,6 @@ def details(category):
             .all()
         )
         title = "Missing Minifigure Parts"
-        include_category = False
-    elif category == 'konvolut_parts':
-        data = (
-            Part.query.options(
-                selectinload(Part.user_set),
-                selectinload(Part.category)
-            )
-            .join(UserSet, UserSet.id == Part.user_set_id)
-            .filter(UserSet.status == 'konvolut')
-            .all()
-        )
-        title = "Konvolut Parts"
-        include_category = True
-    elif category == 'konvolut_minifigure_parts':
-        data = (
-            UserMinifigurePart.query.options(
-                selectinload(UserMinifigurePart.user_set)
-            )
-            .join(UserSet, UserSet.id == UserMinifigurePart.user_set_id)
-            .filter(UserSet.status == 'konvolut')
-            .all()
-        )
-        title = "Konvolut Minifigure Parts"
-        include_category = False
     else:
         return "Invalid category", 400
 
@@ -174,30 +139,21 @@ def details(category):
     enriched_data = [
         {
             "part_id": item.id,
-            "set_id": item.user_set.template_set.set_number if hasattr(item, "user_set") else None,
-            "internal_id": item.user_set.id if hasattr(item, "user_set") else None,
-            "part_num": getattr(item, "part_num", None),
-            "name": item.name,
-            "color": getattr(item, "color", "Unknown"),
-            "category": item.category.name if include_category and item.category else None,
+            "set_id": item.user_set.set.set_num if hasattr(item, "user_set") else None,
+            "part_num": item.part_num,
+            "name": getattr(item, "name", None),
             "have_quantity": item.have_quantity,
             "total_quantity": item.quantity,
-            "image_url": cache_image(item.part_img_url or "/static/default_image.png"),
+            "image_url": cache_image(item.part.part_img_url or "/static/default_image.png"),
         }
         for item in data
     ]
-
-    # Get unique categories for dropdown if applicable
-    categories = []
-    if include_category:
-        categories = sorted({item.category.name for item in data if item.category})
 
     return render_template(
         'details.html',
         title=title,
         data=enriched_data,
         category=category,
-        categories=categories,
     )
 
 
@@ -208,40 +164,31 @@ def api_missing_parts():
     """
     master_lookup = load_part_lookup()
 
-    # Query missing parts and their associated user sets and categories
     missing_parts = (
-        Part.query.options(
-            selectinload(Part.user_set),
-            selectinload(Part.category)
+        PartSetMapping.query.options(
+            selectinload(PartSetMapping.user_set),
         )
-        .filter(Part.quantity > Part.have_quantity)
-        .join(UserSet, UserSet.id == Part.user_set_id)
+        .filter(PartSetMapping.quantity > PartSetMapping.have_quantity)
+        .join(UserSet, UserSet.id == PartSetMapping.user_set_id)
         .filter(~UserSet.status.in_(['assembled', 'konvolut']))
         .all()
     )
 
-    # Helper function for enriching part data
     def enrich_item(item):
         part_data = master_lookup.get(item.part_num, {})
-        img_url = cache_image(item.part_img_url or "/static/default_image.png")
+        img_url = cache_image(item.part.part_img_url or "/static/default_image.png")
         return {
-            'set_id': item.user_set.template_set.set_number,
-            'internal_id': item.user_set.id,
+            'set_id': item.user_set.set.set_num,
             'item_id': item.part_num,
-            'name': item.name,
-            'color': item.color or "Unknown",
+            'name': getattr(item.part, "name", "Unknown"),
             'total_quantity': item.quantity,
             'missing_quantity': item.quantity - item.have_quantity,
-            'category': item.category.name if item.category else "No Category",
-            'location': f"Location: {part_data.get('location', 'Unknown')}, "
-                        f"Level: {part_data.get('level', 'Unknown')}, "
-                        f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified",
             'img_url': img_url,
         }
 
-    # Enrich and return missing parts data
     missing_parts_data = [enrich_item(part) for part in missing_parts]
     return jsonify(missing_parts_data)
+
 
 @dashboard_bp.route('/api/missing_minifigure_parts', methods=['GET'])
 def api_missing_minifigure_parts():
@@ -250,36 +197,27 @@ def api_missing_minifigure_parts():
     """
     master_lookup = load_part_lookup()
 
-    # Query missing minifigure parts and their associated user sets
     missing_minifigure_parts = (
         UserMinifigurePart.query.options(
-            selectinload(UserMinifigurePart.user_set)  # Load associated user sets
+            selectinload(UserMinifigurePart.user_set)
         )
-        .filter(UserMinifigurePart.quantity > UserMinifigurePart.have_quantity)  # Missing parts
+        .filter(UserMinifigurePart.quantity > UserMinifigurePart.have_quantity)
         .join(UserSet, UserSet.id == UserMinifigurePart.user_set_id)
-        .filter(~UserSet.status.in_(['assembled', 'konvolut']))  # Exclude specific statuses
+        .filter(~UserSet.status.in_(['assembled', 'konvolut']))
         .all()
     )
 
-    # Helper function for enriching minifigure part data
     def enrich_minifigure_part(item):
         part_data = master_lookup.get(item.part_num, {})
         img_url = cache_image(item.part_img_url or "/static/default_image.png")
         return {
-            'set_id': item.user_set.template_set.set_number,
-            'internal_id': item.user_set.id,
-            'part_num': item.part_num,
+            'set_id': item.user_set.set.set_num,
+            'item_id': item.part_num,
             'name': item.name,
-            'color': item.color or "Unknown",  # Include color
             'total_quantity': item.quantity,
             'missing_quantity': item.quantity - item.have_quantity,
-            'location': f"Location: {part_data.get('location', 'Unknown')}, "
-                        f"Level: {part_data.get('level', 'Unknown')}, "
-                        f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified",
             'img_url': img_url,
         }
 
-    # Enrich and return missing minifigure parts data
     missing_minifigure_parts_data = [enrich_minifigure_part(part) for part in missing_minifigure_parts]
     return jsonify(missing_minifigure_parts_data)
-
