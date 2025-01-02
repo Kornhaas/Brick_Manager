@@ -31,47 +31,25 @@ class Set(db.Model):
 
 class UserSet(db.Model):
     __tablename__ = 'user_sets'
+
     id = db.Column(Integer, primary_key=True)
     set_id = db.Column(Integer, ForeignKey('sets.id'), nullable=False)
     status = db.Column(String, default='unknown', nullable=False)
 
     # Relationships
     template_set = db.relationship('Set', back_populates='user_sets')
-    parts = db.relationship("Part", back_populates="user_set", cascade="all, delete-orphan", lazy=True)
-    minifigures = db.relationship("Minifigure", back_populates="user_set", cascade="all, delete-orphan", lazy=True)
-    minifigure_parts = db.relationship("UserMinifigurePart", back_populates="user_set", cascade="all, delete-orphan", lazy=True)
-    parts_in_set = db.relationship("PartInSet", back_populates="user_set", cascade="all, delete-orphan", lazy=True)
+    parts_in_set = db.relationship('PartInSet', back_populates='user_set', cascade='all, delete-orphan', lazy=True)
+    minifigures = db.relationship('Minifigure', back_populates='user_set', cascade='all, delete-orphan', lazy=True)
+    user_minifigure_parts = db.relationship('UserMinifigurePart', back_populates='user_set', cascade='all, delete-orphan', lazy=True)
 
     def __repr__(self):
-        return f'<UserSet {self.id} for Set {self.set_id}>'
-
-
-class Part(db.Model):
-    __tablename__ = 'parts'
-    id = db.Column(Integer, primary_key=True)
-    part_num = db.Column(String, nullable=False)
-    name = db.Column(String, nullable=False)
-    category_id = db.Column(Integer, db.ForeignKey('categories.id'), nullable=True)
-    color = db.Column(String, nullable=False)
-    color_rgb = db.Column(String, nullable=True)
-    quantity = db.Column(Integer, nullable=False)
-    have_quantity = db.Column(Integer, default=0)
-    part_img_url = db.Column(String, nullable=True)
-    part_url = db.Column(String, nullable=True)
-    user_set_id = db.Column(Integer, ForeignKey('user_sets.id'), nullable=False)
-    is_spare = db.Column(db.Boolean, default=False, nullable=False)
-
-    # Relationships
-    user_set = db.relationship("UserSet", back_populates="parts")
-    category = db.relationship('Category', backref='parts', lazy='joined')  # Proper relationship
-
-    def __repr__(self):
-        return f'<Part {self.part_num} - {self.name}>'
+        return f'<UserSet {self.id} - {self.template_set.set_number}>'
 
 
 class PartInfo(db.Model):
     __tablename__ = 'part_info'
-    part_num = db.Column(db.String, primary_key=True)  # Ensure this is String
+
+    part_num = db.Column(String, primary_key=True)
     name = db.Column(String, nullable=False)
     category_id = db.Column(Integer, db.ForeignKey('categories.id'), nullable=True)
     part_img_url = db.Column(String, nullable=True)
@@ -79,9 +57,7 @@ class PartInfo(db.Model):
 
     # Relationships
     category = db.relationship('Category', lazy='joined')
-
-    def __repr__(self):
-        return f'<PartInfo {self.part_num} - {self.name}>'
+    parts_in_sets = db.relationship('PartInSet', back_populates='part_info', lazy='dynamic')
 
 class Color(db.Model):
     __tablename__ = 'colors'
@@ -105,20 +81,19 @@ class Theme(db.Model):
 
 class PartInSet(db.Model):
     __tablename__ = 'parts_in_set'
+
     id = db.Column(Integer, primary_key=True)
-    part_num = db.Column(Integer, db.ForeignKey('part_info.part_num'), nullable=False)
+    part_num = db.Column(String, db.ForeignKey('part_info.part_num'), nullable=False)
     color = db.Column(String, nullable=False)
     color_rgb = db.Column(String, nullable=True)
     quantity = db.Column(Integer, nullable=False)
     have_quantity = db.Column(Integer, default=0)
-    user_set_id = db.Column(Integer, ForeignKey('user_sets.id'), nullable=False)
+    user_set_id = db.Column(Integer, db.ForeignKey('user_sets.id'), nullable=False)
     is_spare = db.Column(db.Boolean, default=False, nullable=False)
 
     # Relationships
-    user_set = db.relationship("UserSet", back_populates="parts_in_set")
-
-    def __repr__(self):
-        return f'<PartInSet {self.part_num} - Quantity: {self.quantity}>'
+    user_set = db.relationship('UserSet', back_populates='parts_in_set')
+    part_info = db.relationship('PartInfo', back_populates='parts_in_sets')
 
 
 class Minifigure(db.Model):
@@ -174,10 +149,11 @@ class UserMinifigurePart(db.Model):
     is_spare = db.Column(db.Boolean, default=False, nullable=False)
 
     # Relationships
-    user_set = db.relationship("UserSet", back_populates="minifigure_parts")
+    user_set = db.relationship("UserSet", back_populates="user_minifigure_parts")  # Match relationship name
 
     def __repr__(self):
         return f'<UserMinifigurePart {self.part_num} - {self.name}>'
+
 
 
 class PartStorage(db.Model):

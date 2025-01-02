@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, current_app, redirect, url_for
 import requests
-from models import db, Set, UserSet, Part, Minifigure, UserMinifigurePart, Category
+from models import db, Set, UserSet, PartInSet, Minifigure, UserMinifigurePart, Category, PartInfo
 from config import Config
 from services.part_lookup_service import load_part_lookup
 
@@ -110,18 +110,22 @@ def add_set():
         # Add parts
         parts_info = fetch_set_parts_info(set_number)
         for part in parts_info:
-            category, _ = get_or_create(db.session, Category, id=part['category'], defaults={'name': 'Unknown'})
-            db.session.add(Part(
-                part_num=part['part_num'],
-                name=part['name'],
-                category_id=category.id,
-                color=part['color'],
-                color_rgb=part['color_rgb'],
-                quantity=part['quantity'],
-                is_spare=part['is_spare'],
-                part_img_url=part['part_img_url'],
-                user_set_id=user_set.id
-            ))
+                    # Ensure the part exists in `part_info`
+                    part_info, _ = get_or_create(db.session, PartInfo, part_num=part['part_num'], defaults={
+                        'name': part['name'],
+                        'category_id': part['category'],
+                        'part_img_url': part['part_img_url'],
+                        'part_url': part.get('part_url', ''),
+                    })
+
+                    db.session.add(PartInSet(
+                        part_num=part_info.part_num,
+                        color=part['color'],
+                        color_rgb=part['color_rgb'],
+                        quantity=part['quantity'],
+                        is_spare=part['is_spare'],
+                        user_set_id=user_set.id
+                    ))
 
         # Add minifigures and parts
         minifigs_info = fetch_minifigs_info(set_number)
@@ -139,16 +143,22 @@ def add_set():
             # Add minifigure parts
             minifig_parts = fetch_minifigure_parts(minifig['fig_num'])
             for part in minifig_parts:
+                part_info, _ = get_or_create(db.session, PartInfo, part_num=part['part_num'], defaults={
+                    'name': part['name'],
+                    'category_id': part.get('category_id'),
+                    'part_img_url': part['part_img_url'],
+                    'part_url': part.get('part_url', ''),
+                })
+
                 db.session.add(UserMinifigurePart(
-                    part_num=part['part_num'],
-                    name=part['name'],
+                    part_num=part_info.part_num,
+                    name=part_info.name,
                     color=part['color'],
                     color_rgb=part['color_rgb'],
                     quantity=part['quantity'],
                     part_img_url=part['part_img_url'],
                     user_set_id=user_set.id
                 ))
-
         db.session.commit()
         flash(f"Set {template_set.name} added successfully as {status}!", category="success")
     except Exception as e:

@@ -40,16 +40,16 @@
         onsubmit="return confirmOverwrite()"
       >
         <div class="mb-3">
-          <label for="id" class="form-label"
-            >Part ID: <span class="text-danger">*</span></label
+          <label for="part_num" class="form-label"
+            >Part Number: <span class="text-danger">*</span></label
           >
           <input
             type="text"
-            id="id"
-            name="id"
+            id="part_num"
+            name="part_num"
             class="form-control"
-            placeholder="Enter Part ID"
-            value="{{ part_id }}"
+            placeholder="Enter Part Number"
+            value="{{ part_num }}"
             required
           />
         </div>
@@ -106,7 +106,7 @@
           function confirmOverwrite() {
               const existingEntry = {{ existing_entry | tojson | safe }};
               if (existingEntry) {
-                  const confirmMessage = `The Part ID already exists with the following details:\n
+                  const confirmMessage = `The Part Number already exists with the following details:\n
       Location: ${existingEntry.location}, Level: ${existingEntry.level}, Box: ${existingEntry.box}\n
       Do you want to overwrite it?`;
                   if (!confirm(confirmMessage)) {
@@ -120,7 +120,7 @@
     <script>
       // Automatically focus on the Part ID field after reload
       window.onload = function () {
-        document.getElementById("id").focus();
+        document.getElementById("part_num").focus();
       };
     </script>
   </body>

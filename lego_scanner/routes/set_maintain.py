@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
-from models import db, UserSet, Part, Minifigure, UserMinifigurePart
+from models import db, UserSet, PartInSet, Minifigure, UserMinifigurePart, PartInfo
 from services.part_lookup_service import load_part_lookup
 from sqlalchemy.orm import joinedload
 import os
@@ -13,7 +13,7 @@ def set_maintain():
     """
     user_sets = UserSet.query.options(
         joinedload(UserSet.template_set),
-        joinedload(UserSet.parts),
+        joinedload(UserSet.parts_in_set),
         joinedload(UserSet.minifigures)
     ).order_by(UserSet.id.desc()).all()
 
@@ -24,11 +24,9 @@ def set_maintain():
         total_have_quantity = 0
 
         # Calculate parts completeness
-        for part in user_set.parts:
+        for part in user_set.parts_in_set:
             total_quantity += part.quantity
             total_have_quantity += part.have_quantity
-
-        # Exclude minifigures from the completeness calculation
 
         # Calculate user minifigure parts completeness
         user_minifigure_parts = UserMinifigurePart.query.filter_by(user_set_id=user_set.id).all()
@@ -56,7 +54,7 @@ def get_user_set_details(user_set_id):
     """
     master_lookup = load_part_lookup()
     user_set = UserSet.query.options(
-        joinedload(UserSet.parts),
+        joinedload(UserSet.parts_in_set),
         joinedload(UserSet.minifigures)
     ).get_or_404(user_set_id)
 
@@ -67,12 +65,9 @@ def get_user_set_details(user_set_id):
     total_quantity = 0
     total_have_quantity = 0
 
-    for part in user_set.parts:
-        if not part.is_spare:  # Exclude spare parts
-            total_quantity += part.quantity
-            total_have_quantity += part.have_quantity
-
-    # Exclude minifigures from the completeness calculation
+    for part in user_set.parts_in_set:
+        total_quantity += part.quantity
+        total_have_quantity += part.have_quantity
 
     for part in user_minifigure_parts:
         total_quantity += part.quantity
@@ -83,24 +78,25 @@ def get_user_set_details(user_set_id):
         completeness_percentage = (total_have_quantity / total_quantity) * 100
 
     # Helper function for location and status
-    def enrich_item(item, master_lookup):
-        part_data = master_lookup.get(item.part_num, {})
+    def enrich_item(part, master_lookup):
+        part_data = master_lookup.get(part.part_num, {})
+        part_info = PartInfo.query.filter_by(part_num=part.part_num).first()
         return {
-            'id': item.id,
-            'part_num': item.part_num,
-            'name': item.name,
-            'quantity': item.quantity,
-            'is_spare': item.is_spare,
-            'have_quantity': item.have_quantity,
-            'color': item.color,  # Add color
-            'part_img_url': item.part_img_url,
+            'id': part.id,
+            'part_num': part.part_num,
+            'name': part_info.name if part_info else "Unknown",
+            'quantity': part.quantity,
+            'have_quantity': part.have_quantity,
+            'color': part.color,
+            'color_rgb': part.color_rgb,
+            'part_img_url': part_info.part_img_url if part_info else '',
             'location': f"Location: {part_data.get('location', 'Unknown')}, "
                         f"Level: {part_data.get('level', 'Unknown')}, "
                         f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified",
             'status': "Available" if part_data else "Not Available"
         }
 
-    parts = [enrich_item(part, master_lookup) for part in user_set.parts]
+    parts = [enrich_item(part, master_lookup) for part in user_set.parts_in_set]
     minifigs = [
         {
             'id': minifig.id,
@@ -127,6 +123,7 @@ def get_user_set_details(user_set_id):
         'completeness_percentage': round(completeness_percentage, 2)
     })
 
+
 @set_maintain_bp.route('/set_maintain/update', methods=['POST'])
 def update_user_set():
     """
@@ -137,8 +134,8 @@ def update_user_set():
     user_set = UserSet.query.get_or_404(user_set_id)
 
     try:
-        # Update parts
-        for part in user_set.parts:
+        # Update parts in `parts_in_set`
+        for part in user_set.parts_in_set:
             have_quantity = request.form.get(f'part_id_{part.id}')
             if have_quantity is not None:
                 part.have_quantity = max(0, min(part.quantity, int(have_quantity)))
@@ -179,14 +176,10 @@ def delete_user_set(user_set_id):
     Deletes a specific UserSet from the database.
     """
     try:
-        # Query the UserSet instance with its related template_set to avoid lazy loading issues
         user_set = UserSet.query.options(joinedload(UserSet.template_set)).get_or_404(user_set_id)
-
-        # Log the template set number for confirmation
         template_set_number = user_set.template_set.set_number
         db.session.delete(user_set)
         db.session.commit()
-
         flash(f"User Set for {template_set_number} deleted successfully.", "success")
     except Exception as e:
         db.session.rollback()
