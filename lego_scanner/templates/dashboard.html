@@ -40,12 +40,22 @@
                     </div>
                 </a>
             </div>
+        </div>
+        <!-- New Row for Line Break -->
+        <div class="row mt-4">
+            <!-- Total Konvolut Parts -->
+            <div class="col-md-3">
+                <div class="dashboard-card bg-light">
+                    <h2>{{ konvolut_parts }}</h2>
+                    <p>Total Konvolut Parts Owned</p>
+                </div>
+            </div>
             <!-- Konvolut Parts -->
             <div class="col-md-3">
                 <a href="{{ url_for('dashboard.details', category='konvolut_parts') }}" class="text-decoration-none">
                     <div class="dashboard-card bg-info text-white">
-                        <h2>{{ konvolut_parts }}</h2>
-                        <p>Konvolut Parts</p>
+                        <h2>{{ missing_konvolut_parts }}</h2>
+                        <p>Missing Konvolut Parts</p>
                     </div>
                 </a>
             </div>
@@ -53,8 +63,8 @@
             <div class="col-md-3">
                 <a href="{{ url_for('dashboard.details', category='konvolut_minifigure_parts') }}" class="text-decoration-none">
                     <div class="dashboard-card bg-primary text-white">
-                        <h2>{{ konvolut_minifigure_parts }}</h2>
-                        <p>Konvolut Minifigure Parts</p>
+                        <h2 style="color: white;">{{ missing_konvolut_minifigure_parts }}</h2>
+                        <p style="color: white;">Missing Konvolut Minifigure Parts</p>
                     </div>
                 </a>
             </div>

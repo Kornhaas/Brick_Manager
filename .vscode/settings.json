@@ -3,5 +3,8 @@
         "lego_scanner"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.analysis.extraPaths": [
+        "./lego_scanner"
+    ]
 }

@@ -169,3 +169,112 @@ FROM part_storage LEFT OUTER JOIN part_info AS part_info_1 ON part_info_1.part_n
 2025-01-02 22:03:17,889 - app - DEBUG - Adding set 40700-1 to the database with status unknown.
 2025-01-02 22:04:14,933 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
 2025-01-02 22:04:14,934 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 07:50:30,133 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 07:50:31,154 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:05:01,390 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:05:48,384 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:05:59,993 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:08:12,392 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:10:34,098 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:11:19,005 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:14:07,871 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:22:47,444 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:24:40,780 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 08:24:55,173 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 08:25:35,398 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 08:25:42,368 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 08:25:48,442 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 08:25:49,416 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 08:25:59,175 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 08:25:59,530 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 08:50:30,173 - app - INFO - Database backed up to C:\Users\Holge\OneDrive\python\Lego_Manager\lego_scanner\instance/lego_scanner.db.20250103_085030.backup.db
+2025-01-03 09:24:40,804 - app - INFO - Database backed up to C:\Users\Holge\OneDrive\python\Lego_Manager\lego_scanner\instance/lego_scanner.db.20250103_092440.backup.db
+2025-01-03 12:43:25,298 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:43:58,714 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:44:58,206 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:45:36,789 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:45:46,259 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:46:33,280 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:46:34,010 - app - ERROR - Error downloading image /static/default_image.png: Invalid URL '/static/default_image.png': No scheme supplied. Perhaps you meant https:///static/default_image.png?
+2025-01-03 12:47:14,992 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:49:15,996 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:49:35,891 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:50:30,181 - app - INFO - Database backed up to C:\Users\Holge\OneDrive\python\Lego_Manager\lego_scanner\instance/lego_scanner.db.20250103_125030.backup.db
+2025-01-03 12:50:38,537 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:50:56,266 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:50:58,321 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:52:27,620 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:52:28,495 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:52:48,350 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:54:06,291 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:55:23,149 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 12:55:24,035 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:03:44,529 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:07:36,974 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:07:37,851 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:07:39,714 - app - DEBUG - Konvolut parts: []
+2025-01-03 13:07:39,714 - app - DEBUG - Missing Konvolut Parts Sum: 0
+2025-01-03 13:50:57,062 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:50:59,217 - app - DEBUG - Konvolut parts: []
+2025-01-03 13:50:59,217 - app - DEBUG - Missing Konvolut Parts Sum: 0
+2025-01-03 13:51:00,442 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:51:02,223 - app - DEBUG - Konvolut parts: []
+2025-01-03 13:51:02,223 - app - DEBUG - Missing Konvolut Parts Sum: 0
+2025-01-03 13:51:17,077 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:52:36,369 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:52:45,711 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:52:56,887 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:53:03,915 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:53:04,142 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:53:04,396 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:53:04,472 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:53:04,908 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:53:04,935 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:53:20,940 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:54:14,258 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:54:28,888 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 13:54:31,323 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:54:36,919 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 13:54:59,591 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:07:36,994 - app - INFO - Database backed up to C:\Users\Holge\OneDrive\python\Lego_Manager\lego_scanner\instance/lego_scanner.db.20250103_140736.backup.db
+2025-01-03 14:17:47,838 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:17:51,721 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:17:54,478 - app - DEBUG - Updating PartInSet ID 8964 to quantity 1
+2025-01-03 14:17:54,479 - app - INFO - Successfully updated 1 records.
+2025-01-03 14:17:58,521 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:18:16,328 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:21:00,184 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:21:35,732 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:21:54,533 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:22:03,178 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:22:05,896 - app - DEBUG - Updating PartInSet ID 8964 to quantity 0
+2025-01-03 14:22:05,907 - app - INFO - Successfully updated 1 records.
+2025-01-03 14:40:10,170 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:05,057 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:41:07,969 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:08,200 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:08,464 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:08,538 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:08,963 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:08,990 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:55,962 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:56,192 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:56,442 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:56,521 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:56,961 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:41:56,992 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:42:55,342 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:43:04,735 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:43:22,496 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:43:26,702 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:45:25,686 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:45:52,857 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:48:04,391 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:48:14,395 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:48:14,632 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:48:14,902 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:48:14,984 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:48:15,431 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:48:15,459 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 14:48:33,354 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 14:48:33,357 - app - DEBUG - Found 3 parts in the box.
