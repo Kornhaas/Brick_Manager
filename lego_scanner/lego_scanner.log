@@ -278,3 +278,239 @@ FROM part_storage LEFT OUTER JOIN part_info AS part_info_1 ON part_info_1.part_n
 2025-01-03 14:48:15,459 - app - WARNING - Invalid or missing image URL. Using fallback image.
 2025-01-03 14:48:33,354 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
 2025-01-03 14:48:33,357 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 14:55:19,923 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:56:56,948 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 14:57:13,525 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 14:57:13,528 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 14:58:30,445 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 14:58:30,446 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 14:59:20,733 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 14:59:20,734 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:00:06,903 - app - DEBUG - Fetching contents for Location: 1, Level: 2, Box: 100
+2025-01-03 15:00:06,905 - app - DEBUG - Found 1 parts in the box.
+2025-01-03 15:01:28,251 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:01:37,123 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:01:37,125 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:03:03,339 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:03:13,402 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:03:13,405 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:07:25,427 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:07:26,372 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:07:37,954 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:07:37,957 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:10:29,970 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:10:45,633 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:10:53,764 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:10:53,766 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:11:45,278 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:11:46,284 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:12:16,487 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:12:23,919 - app - DEBUG - Fetching contents for Location: 3, Level: 5, Box: 15
+2025-01-03 15:12:23,922 - app - DEBUG - Found 1 parts in the box.
+2025-01-03 15:12:47,792 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:12:47,793 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:14:18,127 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:14:18,267 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:14:19,643 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:14:42,585 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:14:42,726 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:14:44,165 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:15:10,764 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:15:11,692 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:15:17,868 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:15:17,871 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:17:18,729 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:17:22,042 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:17:22,044 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:18:11,387 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:18:12,858 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:18:12,861 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:21:44,861 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:21:45,724 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:21:53,459 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:21:53,461 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:23:36,483 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:23:36,825 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:23:49,831 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:23:50,808 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:24:00,303 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:24:00,306 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:24:37,646 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:24:38,555 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:24:40,008 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:24:40,011 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:24:41,426 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:24:41,427 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:26:44,022 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:26:48,298 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:26:48,301 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:28:14,780 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:28:15,646 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:28:15,800 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:28:15,803 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:30:05,509 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:30:05,649 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:30:11,896 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:30:26,703 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:30:27,772 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:30:28,742 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:30:28,745 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:32:00,180 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:32:00,397 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:32:02,570 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:32:25,564 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:32:46,523 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:33:21,058 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:33:27,674 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:33:27,677 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:33:28,240 - app - ERROR - Error generating box label: 'max_width'
+2025-01-03 15:34:04,960 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:34:11,586 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:34:11,589 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:34:27,634 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 11
+2025-01-03 15:34:27,636 - app - DEBUG - Found 2 parts in the box.
+2025-01-03 15:34:37,888 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 13
+2025-01-03 15:34:37,889 - app - DEBUG - Found 2 parts in the box.
+2025-01-03 15:34:41,483 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 14
+2025-01-03 15:34:41,484 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:34:44,495 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 16
+2025-01-03 15:34:44,496 - app - DEBUG - Found 4 parts in the box.
+2025-01-03 15:36:21,898 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:36:25,033 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:36:34,514 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:36:42,712 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:36:42,715 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:37:40,600 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 17
+2025-01-03 15:37:40,603 - app - DEBUG - Found 5 parts in the box.
+2025-01-03 15:39:47,106 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:39:47,967 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:39:53,943 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:39:53,946 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:41:57,450 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:42:42,447 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:42:42,449 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:43:37,787 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:43:46,129 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:43:46,132 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:44:13,386 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:44:19,581 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 15:44:19,583 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 15:44:42,863 - app - DEBUG - Fetching contents for Location: 1, Level: 1, Box: 10
+2025-01-03 15:44:42,864 - app - DEBUG - Found 1 parts in the box.
+2025-01-03 15:58:29,425 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:58:33,657 - app - DEBUG - Fetching contents for Location: 1, Level: 1, Box: 10
+2025-01-03 15:58:33,660 - app - DEBUG - Found 1 parts in the box.
+2025-01-03 15:58:46,070 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:58:47,121 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 15:58:51,233 - app - DEBUG - Fetching contents for Location: 1, Level: 3, Box: 13
+2025-01-03 15:58:51,236 - app - DEBUG - Found 1 parts in the box.
+2025-01-03 15:59:03,899 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 19
+2025-01-03 15:59:03,901 - app - DEBUG - Found 1 parts in the box.
+2025-01-03 15:59:06,534 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 18
+2025-01-03 15:59:06,535 - app - DEBUG - Found 2 parts in the box.
+2025-01-03 15:59:15,823 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 19
+2025-01-03 15:59:15,825 - app - DEBUG - Found 1 parts in the box.
+2025-01-03 16:15:14,633 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:15:23,804 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 16:15:23,807 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 16:16:07,942 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:18:46,670 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:18:50,145 - app - ERROR - Error generating box label: [WinError 2] Das System kann die angegebene Datei nicht finden: 'C:\\Users\\Holge\\OneDrive\\python\\Lego_Manager\\lego_scanner\\uploads\\9_3_10_label.jpg'
+2025-01-03 16:19:41,997 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:28:31,780 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:28:32,666 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:32:16,126 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:32:47,054 - app - ERROR - Error generating labels: division by zero
+2025-01-03 16:34:14,059 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:34:51,703 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:35:41,853 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:36:04,620 - app - ERROR - Error generating labels: division by zero
+2025-01-03 16:36:22,452 - app - DEBUG - Fetching contents for Location: 1, Level: 4, Box: 1-2
+2025-01-03 16:36:22,453 - app - DEBUG - Found 0 parts in the box.
+2025-01-03 16:38:12,055 - app - ERROR - Error generating labels: division by zero
+2025-01-03 16:39:49,228 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:40:02,954 - app - ERROR - Error generating labels: 'PartInfo' object has no attribute 'part_info'
+2025-01-03 16:41:21,157 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:41:41,053 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:41:43,188 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:42:30,002 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 16:42:30,011 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 16:42:52,560 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 16:42:52,575 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 16:44:53,803 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:44:54,731 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:45:11,516 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:45:11,610 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 30374pr0001 - Location: , Level: , Box: >
+2025-01-03 16:45:11,610 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 200 - Location: , Level: , Box: >
+2025-01-03 16:45:11,610 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 202 - Location: , Level: , Box: >
+2025-01-03 16:45:11,611 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 570 - Location: , Level: , Box: >
+2025-01-03 16:45:11,611 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 572 - Location: , Level: , Box: >
+2025-01-03 16:45:11,611 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 741 - Location: , Level: , Box: >
+2025-01-03 16:45:11,611 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 742 - Location: , Level: , Box: >
+2025-01-03 16:45:11,612 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 743 - Location: , Level: , Box: >
+2025-01-03 16:45:11,612 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 744 - Location: , Level: , Box: >
+2025-01-03 16:45:11,612 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2428 - Location: , Level: , Box: >
+2025-01-03 16:45:11,612 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2471 - Location: , Level: , Box: >
+2025-01-03 16:45:11,612 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2473 - Location: , Level: , Box: >
+2025-01-03 16:45:11,613 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2474 - Location: , Level: , Box: >
+2025-01-03 16:45:11,613 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2855 - Location: , Level: , Box: >
+2025-01-03 16:45:11,613 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2856 - Location: , Level: , Box: >
+2025-01-03 16:45:11,613 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 3584 - Location: , Level: , Box: >
+2025-01-03 16:45:11,613 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 3590 - Location: , Level: , Box: >
+2025-01-03 16:45:11,613 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 4158 - Location: , Level: , Box: >
+2025-01-03 16:45:11,613 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 4159 - Location: , Level: , Box: >
+2025-01-03 16:45:11,614 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 5405 - Location: , Level: , Box: >
+2025-01-03 16:45:11,614 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 6574 - Location: , Level: , Box: >
+2025-01-03 16:45:11,614 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 6592 - Location: , Level: , Box: >
+2025-01-03 16:45:11,614 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 15457 - Location: , Level: , Box: >
+2025-01-03 16:45:11,616 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 18938 - Location: , Level: , Box: >
+2025-01-03 16:45:11,616 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 18939 - Location: , Level: , Box: >
+2025-01-03 16:45:11,616 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 18940 - Location: , Level: , Box: >
+2025-01-03 16:45:11,616 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 18942 - Location: , Level: , Box: >
+2025-01-03 16:45:11,616 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 24121 - Location: , Level: , Box: >
+2025-01-03 16:45:11,616 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 32060 - Location: , Level: , Box: >
+2025-01-03 16:45:11,616 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 32132 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 32170 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 32185 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 32311 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 32498 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 32905 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 41666 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 41667 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 42529 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 44556 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 46372 - Location: , Level: , Box: >
+2025-01-03 16:45:11,617 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 48168 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 48452 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 50163 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 57519 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 64781 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 65413 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 65414 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 69761 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 69762 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 69778 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 69779 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 73071 - Location: , Level: , Box: >
+2025-01-03 16:45:11,618 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 73763 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 78442 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 81346 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 88738 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 99009 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 99010 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2856c01 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2856c02 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 2856c03 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 41680 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 49731 - Location: , Level: , Box: >
+2025-01-03 16:45:11,619 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 65826 - Location: , Level: , Box: >
+2025-01-03 16:45:11,620 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 77765 - Location: , Level: , Box: >
+2025-01-03 16:45:11,620 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 80477 - Location: , Level: , Box: >
+2025-01-03 16:45:26,314 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 16:45:26,321 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 16:45:34,679 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 16:45:34,686 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 16:52:57,572 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-03 16:53:12,856 - app - DEBUG - Fetching contents for Location: 9, Level: 3, Box: 10
+2025-01-03 16:53:12,858 - app - DEBUG - Found 3 parts in the box.
+2025-01-03 16:53:56,168 - app - DEBUG - Master lookup data loaded successfully.

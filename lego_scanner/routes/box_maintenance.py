@@ -1,6 +1,7 @@
-from flask import Blueprint, jsonify, render_template, request, current_app
+from flask import Blueprint, jsonify, render_template, request, current_app, send_file
 from models import db, PartStorage, PartInfo, Category
 from services.cache_service import cache_image
+from services.label_service import create_box_label_jpg
 
 box_maintenance_bp = Blueprint('box_maintenance', __name__)
 
@@ -98,4 +99,115 @@ def get_box_contents():
         ])
     except Exception as e:
         current_app.logger.error(f"Error fetching box contents: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@box_maintenance_bp.route('/box_maintenance/label', methods=['POST'])
+def generate_box_label():
+    """
+    Generates a label for a specific box containing its contents.
+    """
+    data = request.json
+    location = data.get("location")
+    level = data.get("level")
+    box = data.get("box")
+
+    if not (location and level and box):
+        return jsonify({"error": "All fields are required"}), 400
+
+    try:
+        # Fetch box contents
+        contents = db.session.query(PartInfo).join(
+            PartStorage, PartInfo.part_num == PartStorage.part_num
+        ).filter(
+            PartStorage.location == location,
+            PartStorage.level == level,
+            PartStorage.box == box
+        ).all()
+
+        if not contents:
+            return jsonify({"error": "No items found in the specified box"}), 404
+
+        # Prepare box info for label creation
+        box_info = {
+            "location": location,
+            "level": level,
+            "box": box,
+            "items": [
+                {
+                    "part_num": part.part_num,
+                    "name": part.name,
+                    "category": part.category.name if part.category else "Unknown",
+                    "img_url": part.part_img_url
+                }
+                for part in contents
+            ]
+        }
+
+        # Create label PDF
+        pdf_path = create_box_label_jpg(box_info)
+        return send_file(pdf_path, as_attachment=True, download_name=f"box_label_{box}.pdf", mimetype="application/pdf")
+
+    except Exception as e:
+        current_app.logger.error(f"Error generating box label: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+    
+@box_maintenance_bp.route('/box_maintenance/generate_labels', methods=['POST'])
+def generate_labels():
+    """
+    Generate labels for all boxes, skipping boxes with empty location, level, or box values.
+    """
+    try:
+        # Query database for all PartStorage entries
+        query = db.session.query(PartStorage).join(PartInfo)
+
+        # Get all matching entries
+        storage_parts = query.all()
+        if not storage_parts:
+            return jsonify({"message": "No matching labels to generate."}), 404
+
+        # Group parts by box
+        boxes = {}
+        for storage in storage_parts:
+            if not storage.location or not storage.level or not storage.box:
+                # Skip entries with empty location, level, or box
+                current_app.logger.warning(f"Skipping entry with incomplete box info: {storage}")
+                continue
+
+            box_key = (storage.location, storage.level, storage.box)
+            if box_key not in boxes:
+                boxes[box_key] = []
+            boxes[box_key].append({
+                "part_num": storage.part_num,
+                "name": storage.part_info.name,
+                "category": storage.part_info.category.name if storage.part_info.category else "Unknown",
+                "img_url": storage.part_info.part_img_url
+            })
+
+        generated_labels = []
+
+        # Generate labels for each box
+        for (location, level, box), items in boxes.items():
+            box_info = {
+                "location": location,
+                "level": level,
+                "box": box,
+                "items": items
+            }
+
+            if not items:
+                # Skip boxes without any items
+                current_app.logger.warning(f"Skipping label generation for empty box: {box_info}")
+                continue
+
+            label_path = create_box_label_jpg(box_info)
+            generated_labels.append(label_path)
+
+        if not generated_labels:
+            return jsonify({"message": "No labels generated."}), 404
+
+        return jsonify({"message": "Labels generated successfully.", "labels": generated_labels}), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error generating labels: {e}")
         return jsonify({"error": str(e)}), 500

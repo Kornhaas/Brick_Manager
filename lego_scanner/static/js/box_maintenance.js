@@ -4,12 +4,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const boxDropdown = document.getElementById("box");
     const contentsContainer = document.getElementById("contents-container");
     const boxForm = document.getElementById("box-selection-form");
+    const labelButton = document.getElementById("generate-label");
 
     // Fetch and populate initial dropdown options
     fetch("/box_maintenance/data")
         .then((response) => {
             if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status}`);
+                throw new Error(`Failed to fetch dropdown data: ${response.status}`);
             }
             return response.json();
         })
@@ -57,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
+                    throw new Error(`Failed to fetch levels: ${response.status}`);
                 }
                 return response.json();
             })
@@ -90,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
+                    throw new Error(`Failed to fetch boxes: ${response.status}`);
                 }
                 return response.json();
             })
@@ -133,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
+                    throw new Error(`Failed to fetch box contents: ${response.status}`);
                 }
                 return response.json();
             })
@@ -171,5 +172,46 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error("Error fetching box contents:", error);
                 contentsContainer.innerHTML = '<p class="text-danger">Failed to load box contents.</p>';
             });
+    });
+
+    // Handle label generation
+    labelButton.addEventListener("click", function () {
+        const location = locationDropdown.value;
+        const level = levelDropdown.value;
+        const box = boxDropdown.value;
+
+        if (!location || !level || !box) {
+            alert("Please select location, level, and box.");
+            return;
+        }
+
+        fetch("/box_maintenance/label", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ location, level, box }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    return response.text().then((text) => {
+                        throw new Error(`Error: ${text}`);
+                    });
+                }
+                return response.blob();
+            })
+            .then((blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${location}_${level}_${box}_label.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch((error) => {
+                console.error("Error generating label:", error);
+                alert(`Failed to generate label: ${error.message}`);
+            });
+        
     });
 });
