@@ -327,8 +327,16 @@ def create_box_label_image(box_info):
             fill="blue"
         )
 
-    # Add debug border around the label
-    draw.rectangle([0, 0, width - 1, height - 1], outline="red")
+    # Add the box number in bold in the bottom-right corner
+    box_number_text = f"{box_info['box']}"
+    box_number_width = draw.textbbox((0, 0), box_number_text, font=font3)[2]
+    box_x = width - box_number_width - 10  # Bottom-right corner with padding
+    box_y = height - 30
+
+    # Simulate bold text by drawing the same text multiple times with slight offsets
+    for offset in [(0, 0), (1, 0), (0, 1), (1, 1)]:
+        draw.text((box_x + offset[0], box_y + offset[1]), box_number_text, font=font3, fill="red")
+
 
     # Construct the filename dynamically
     location = box_info.get('location', 'unknown').replace(' ', '_')
