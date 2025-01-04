@@ -27,8 +27,8 @@ jobs:
 
     # Build the Docker image
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag kornhaas/lego_manager:${{ github.ref_name }}
+      run: docker build . --file Dockerfile --tag kornhaas/brick_manager:${{ github.ref_name }}
 
     # Push the Docker image to Docker Hub or your container registry
     - name: Push the Docker image
-      run: docker push kornhaas/lego_manager:${{ github.ref_name }}
+      run: docker push kornhaas/brick_manager:${{ github.ref_name }}

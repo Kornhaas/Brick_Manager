@@ -1,6 +1,6 @@
 """
 This module provides functions to create label images and save them as PDFs
-for the LEGO Scanner application.
+for the Brick Manager application.
 
 It includes functionalities to:
 - Wrap text to fit within a specified width.

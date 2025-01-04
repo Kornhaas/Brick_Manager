@@ -1,8 +1,8 @@
 **/__pycache__/
-lego_scanner/uploads/*
-lego_scanner/output/*
-lego_scanner/migrations/*
-lego_scanner/instance/*
-lego_scanner/__pycache__/*
-lego_scanner/static/cache/*
-lego_scanner/lego_scanner.log
+brick_manager/uploads/*
+brick_manager/output/*
+brick_manager/migrations/*
+brick_manager/instance/*
+brick_manager/__pycache__/*
+brick_manager/static/cache/*
+brick_manager/brick_manager.log

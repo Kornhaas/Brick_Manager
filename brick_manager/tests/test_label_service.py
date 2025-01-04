@@ -1,5 +1,5 @@
 """
-Unit tests for the label service functions in the LEGO Scanner application.
+Unit tests for the label service functions in the Brick Manager application.
 
 This module includes tests for the following functions:
 - save_image_as_pdf
@@ -10,15 +10,15 @@ processing and PDF generation.
 
 import unittest
 from unittest.mock import patch, MagicMock
-from lego_scanner.services.label_service import save_image_as_pdf
+from brick_manager.services.label_service import save_image_as_pdf
 
 
 class TestLabelService(unittest.TestCase):
     """Unit tests for the label service functions."""
 
-    @patch("lego_scanner.services.label_service.Image.open")
-    @patch("lego_scanner.services.label_service.canvas.Canvas")
-    @patch("lego_scanner.services.label_service.ImageReader")
+    @patch("brick_manager.services.label_service.Image.open")
+    @patch("brick_manager.services.label_service.canvas.Canvas")
+    @patch("brick_manager.services.label_service.ImageReader")
     def test_save_image_as_pdf(self, mock_image_reader, mock_canvas, mock_image_open):
         """Test saving an image as a PDF."""
         mock_image = MagicMock()

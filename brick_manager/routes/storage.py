@@ -1,6 +1,6 @@
 """
 This module provides routes and logic for managing storage
-operations in the LEGO Scanner application.
+operations in the Brick Manager application.
 
 It includes:
 - Loading and saving the `master_lookup.json` file.

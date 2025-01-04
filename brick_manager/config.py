@@ -1,5 +1,5 @@
 """
-This module defines the configuration settings for the LEGO Scanner application.
+This module defines the configuration settings for the Brick Manager application.
 
 It includes paths for file uploads, allowed file types, and tokens for external APIs.
 """
@@ -9,7 +9,7 @@ import os
 
 class Config:  # pylint: disable=R0903
     """
-    Configuration settings for the LEGO Scanner application.
+    Configuration settings for the Brick Manager application.
 
     Attributes:
         UPLOAD_FOLDER (str): The directory where uploaded files are stored.
@@ -20,7 +20,7 @@ class Config:  # pylint: disable=R0903
     UPLOAD_FOLDER = 'uploads/'
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     REBRICKABLE_TOKEN = os.getenv('REBRICKABLE_TOKEN')
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///lego_scanner.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///brick_manager.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Ensure the upload directory exists

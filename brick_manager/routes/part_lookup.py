@@ -1,5 +1,5 @@
 """
-This module provides a route for looking up part information in the LEGO Scanner application.
+This module provides a route for looking up part information in the Brick Manager application.
 
 It includes:
 - Loading and displaying part details from the Rebrickable API.

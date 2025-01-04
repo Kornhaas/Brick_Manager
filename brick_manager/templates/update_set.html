@@ -13,7 +13,7 @@
     {% include 'navbar.html' %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <div class="container mt-5">
-        <h1>Update Set: {{ lego_set.set_number }} (ID: {{ lego_set.id }})</h1>
+        <h1>Update Set: {{ Brick_set.set_number }} (ID: {{ Brick_set.id }})</h1>
 
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -24,7 +24,7 @@
         </div>
         {% endwith %}
 
-        <form method="post" action="{{ url_for('set_search.update_set', set_id=lego_set.id) }}">
+        <form method="post" action="{{ url_for('set_search.update_set', set_id=Brick_set.id) }}">
             <table class="table table-bordered">
                 <thead>
                     <tr>

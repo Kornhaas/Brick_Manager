@@ -192,22 +192,22 @@ def delete_user_set(user_set_id):
 @set_maintain_bp.route('/set_maintain/generate_label', methods=['POST'])
 def generate_label():
     """
-    Generate a DrawIO file for a LEGO set label and provide it for download.
+    Generate a DrawIO file for a Brick set label and provide it for download.
     """
     set_id = request.json.get('set_id')
     box_size = request.json.get('box_size')
     current_app.logger.info(f"Generating label for set {set_id} with box size {box_size}")
     try:
-        #lego_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
-        lego_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
-        if not lego_set:
+        #Brick_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
+        Brick_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
+        if not Brick_set:
             return jsonify({'error': 'Set not found in the database'}), 404
 
-        lego_data = {
-            "set_num": lego_set.template_set.set_number,
-            "name": lego_set.template_set.name,
-            "set_img_url": lego_set.template_set.set_img_url,
-            "box_id": str(lego_set.id)#"box_id": str(lego_set.template_set.id)
+        Brick_data = {
+            "set_num": Brick_set.template_set.set_number,
+            "name": Brick_set.template_set.name,
+            "set_img_url": Brick_set.template_set.set_img_url,
+            "box_id": str(Brick_set.id)#"box_id": str(Brick_set.template_set.id)
 
         }
 
@@ -216,10 +216,10 @@ def generate_label():
             return jsonify({'error': f'DrawIO template {box_size} not found'}), 400
 
         replacements = {
-            "BOX_LONG_TITLE": f"LEGO SET - {lego_data['set_num']} - {lego_data['name'].replace('&', 'and')}",
-            "BOX_SHORT_TITLE": lego_data['set_num'],
-            "IMAGE_CONTEXT": lego_data['set_img_url'],
-            "BOX_ID": lego_data['box_id'],
+            "BOX_LONG_TITLE": f"Brick SET - {Brick_data['set_num']} - {Brick_data['name'].replace('&', 'and')}",
+            "BOX_SHORT_TITLE": Brick_data['set_num'],
+            "IMAGE_CONTEXT": Brick_data['set_img_url'],
+            "BOX_ID": Brick_data['box_id'],
         }
 
         with open(drawio_template, 'r', encoding='utf-8') as file:

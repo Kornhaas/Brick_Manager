@@ -11,7 +11,7 @@ These tests use the unittest framework and mock file operations using the unitte
 import unittest
 from unittest.mock import patch, mock_open
 from flask import Flask
-from lego_scanner.services.part_lookup_service import load_part_lookup
+from brick_manager.services.part_lookup_service import load_part_lookup
 
 
 class TestLookupService(unittest.TestCase):

@@ -653,3 +653,12 @@ FROM part_storage LEFT OUTER JOIN part_info AS part_info_1 ON part_info_1.part_n
 2025-01-03 17:29:06,674 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 65826 - Location: , Level: , Box: >
 2025-01-03 17:29:06,674 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 77765 - Location: , Level: , Box: >
 2025-01-03 17:29:06,674 - app - WARNING - Skipping entry with incomplete box info: <PartStorage 80477 - Location: , Level: , Box: >
+2025-01-03 17:29:24,102 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 17:29:24,111 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 17:29:33,939 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-03 17:29:33,946 - app - WARNING - Invalid or missing image URL. Using fallback image.
+2025-01-04 15:09:37,014 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-04 15:09:37,903 - app - DEBUG - Master lookup data loaded successfully.
+2025-01-04 16:09:37,061 - app - INFO - Database backed up to C:\Users\Holge\OneDrive\python\Lego_Manager\lego_scanner\instance/lego_scanner.db.20250104_160937.backup.db
+2025-01-04 16:09:37,924 - app - INFO - Database backed up to C:\Users\Holge\OneDrive\python\Lego_Manager\lego_scanner\instance/lego_scanner.db.20250104_160937.backup.db
+2025-01-04 16:10:41,983 - app - DEBUG - Master lookup data loaded successfully.

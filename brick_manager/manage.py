@@ -1,5 +1,5 @@
 """
-This script runs the LEGO Scanner Flask application with database migration support.
+This script runs the Brick Manager Flask application with database migration support.
 
 It imports the app and db instances and sets up Flask-Migrate for database migrations.
 """

@@ -1,5 +1,5 @@
 """
-This module handles the file upload functionality for the LEGO Scanner application.
+This module handles the file upload functionality for the Brick Manager application.
 
 It includes:
 - Uploading and saving files to the server.

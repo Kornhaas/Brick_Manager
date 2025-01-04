@@ -1,5 +1,5 @@
 """
-This module sets up and runs the LEGO Scanner Flask application.
+This module sets up and runs the Brick Manager Flask application.
 
 It configures the application, registers blueprints, and loads the master lookup data.
 """
@@ -55,7 +55,7 @@ if not os.path.exists(instances_dir):
     os.makedirs(instances_dir)
 
 # Update the database URI to use the 'instances' directory
-db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance/lego_scanner.db')
+db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance/brick_manager.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 # Initialize the db instance with the app
 db.init_app(app)
@@ -71,7 +71,7 @@ logging.basicConfig(
 )
 
 # Create a rotating file handler
-log_path = os.path.join(basedir, 'lego_scanner.log')
+log_path = os.path.join(basedir, 'brick_manager.log')
 rotating_file_handler = RotatingFileHandler(log_path, maxBytes=1024 * 1024 * 5, backupCount=3)
 rotating_file_handler.setLevel(logging.DEBUG)
 
@@ -110,7 +110,7 @@ app.register_blueprint(box_maintenance_bp)
 # Set up the scheduler for database backup
 scheduler = BackgroundScheduler()
 #scheduler.add_job(func=backup_database, trigger="interval", hours=24)  # Backup every 24 hours
-scheduler.add_job(func=backup_database, trigger="interval", hours=1)  # Backup every 24 hours
+scheduler.add_job(func=backup_database, trigger="interval", hours=6)  # Backup every 24 hours
 scheduler.start()
 
 # Shut down the scheduler when exiting the app

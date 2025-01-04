@@ -1,6 +1,6 @@
 """
 This module defines the routes and logic for creating and 
-printing labels in the LEGO Scanner application.
+printing labels in the Brick Manager application.
 
 It includes functionalities to:
 - Fetch part details from the Rebrickable API.

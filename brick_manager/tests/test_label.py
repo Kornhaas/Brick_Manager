@@ -1,4 +1,4 @@
-"""Unit tests for label-related routes in the LEGO Scanner application."""
+"""Unit tests for label-related routes in the Brick Manager application."""
 
 import subprocess  # Standard library import
 import unittest  # Standard library import

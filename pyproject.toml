@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "lego_scanner"
+name = "brick_manager"
 version = "0.0.1"
-description = "Tool for managing my Lego collection"
+description = "Tool for managing my Brick Collection"
 authors = ["Holger Kornhaas <Holger@Kornhaas.net>"]
 readme = "README.md"
 

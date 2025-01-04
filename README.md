@@ -1,6 +1,6 @@
-# LEGO Scanner
+# Brick Manager
 
-LEGO Scanner is a Flask-based web application designed to help users manage LEGO parts and sets. This application allows users to manually enter parts, look up part details, search for parts by set number, and print labels. It leverages the Rebrickable API to fetch part details and uses a SQLite database to manage categories locally, helping to avoid hitting API rate limits.
+Brick Manager is a Flask-based web application designed to help users manage Brick parts and sets. This application allows users to manually enter parts, look up part details, search for parts by set number, and print labels. It leverages the Rebrickable API to fetch part details and uses a SQLite database to manage categories locally, helping to avoid hitting API rate limits.
 
 ## Table of Contents
 
@@ -27,10 +27,10 @@ LEGO Scanner is a Flask-based web application designed to help users manage LEGO
 
 ## Features
 
-- **Manual Part Entry**: Add or update LEGO parts in the local database.
+- **Manual Part Entry**: Add or update Brick parts in the local database.
 - **Part Lookup**: Search for parts by their ID and view details including location and category.
-- **Set Search**: Enter a LEGO set number to retrieve a list of all parts in the set.
-- **Print Labels**: Generate and print labels for LEGO parts with details like part number, name, category, and location.
+- **Set Search**: Enter a Brick set number to retrieve a list of all parts in the set.
+- **Print Labels**: Generate and print labels for Brick parts with details like part number, name, category, and location.
 - **Category Management**: Load and update part categories from Rebrickable to avoid hitting API rate limits.
 
 ## Prerequisites
@@ -44,8 +44,8 @@ LEGO Scanner is a Flask-based web application designed to help users manage LEGO
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/lego-scanner.git
-cd lego-scanner
+git clone https://github.com/yourusername/Brick-scanner.git
+cd Brick-scanner
 ```
 
 ### 2. Install Dependencies
@@ -90,10 +90,10 @@ Navigate to the "Manual Entry" page from the menu to manually add or update part
 Use the "Part Lookup" feature to search for parts by their ID. The application will display details such as part number, name, category, color, quantity, and location.
 
 ### Set Search
-Enter a LEGO set number on the "Set Search" page to retrieve a list of all parts in that set. The list includes part numbers, names, categories, colors, quantities, and locations.
+Enter a Brick set number on the "Set Search" page to retrieve a list of all parts in that set. The list includes part numbers, names, categories, colors, quantities, and locations.
 
 ### Print Labels
-Labels can be generated and printed for LEGO parts. The label will include details like part number, name, category, and box location.
+Labels can be generated and printed for Brick parts. The label will include details like part number, name, category, and box location.
 
 ### Load Categories
 To avoid hitting the Rebrickable API rate limits, use the "Load Categories" page to preload or update part categories in the local database. This will save the categories in the database, so subsequent requests will not need to hit the API.
@@ -104,14 +104,14 @@ To build the Docker image:
 
 ```bash
 
-docker build -t lego-scanner .
+docker build -t Brick-scanner .
 ```
 
 ### 2. Run the Docker Container
 To run the Docker container:
 
 ```bash
-docker run -p 5000:5000 lego-scanner
+docker run -p 5000:5000 Brick-scanner
 ```
 The application should now be accessible at http://localhost:5000.
 

@@ -1,5 +1,5 @@
 """
-Unit tests for the load_categories route in the LEGO Scanner Flask application.
+Unit tests for the load_categories route in the Brick Manager Flask application.
 """
 
 import unittest
@@ -13,7 +13,7 @@ from app import app, db
 
 class TestLoadCategories(TestCase):
     """
-    Test cases for loading and updating LEGO part categories.
+    Test cases for loading and updating Brick part categories.
     """
 
     def create_app(self):

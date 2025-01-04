@@ -1,5 +1,5 @@
 """
-This module handles the manual entry of LEGO parts into the master lookup.
+This module handles the manual entry of Brick parts into the master lookup.
 Users can manually enter part details such as part ID, location (schrank), level (fach), and box.
 The data is either added to or updated in the master lookup.
 """

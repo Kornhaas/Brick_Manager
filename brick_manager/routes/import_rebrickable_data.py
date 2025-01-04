@@ -1,5 +1,5 @@
 """
-This module handles the loading and updating of LEGO data (categories, parts, colors, and themes)
+This module handles the loading and updating of Brick data (categories, parts, colors, and themes)
 from the Rebrickable API into the local database.
 """
 from datetime import datetime
@@ -14,7 +14,7 @@ import_rebrickable_data_bp = Blueprint('import_rebrickable_data', __name__)
 @import_rebrickable_data_bp.route('/import_data', methods=['GET', 'POST'])
 def import_data():
     """
-    Load and update LEGO data (categories, parts, colors, and themes) from the Rebrickable API into the local database.
+    Load and update Brick data (categories, parts, colors, and themes) from the Rebrickable API into the local database.
 
     Handles POST requests to fetch and store categories, parts, colors, and themes in the database.
     """
@@ -41,7 +41,7 @@ def import_data():
 
 def _load_categories():
     """
-    Fetch and load LEGO part categories into the local database.
+    Fetch and load Brick part categories into the local database.
     """
     categories = RebrickableService.get_all_category_ids()
     for cat_id, category_name in categories:
@@ -55,7 +55,7 @@ def _load_categories():
 
 def _load_parts():
     """
-    Fetch and load LEGO parts into the local database.
+    Fetch and load Brick parts into the local database.
     """
     print("Loading parts...")
     page = 1

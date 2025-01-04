@@ -1,10 +1,10 @@
 {
     "python.testing.pytestArgs": [
-        "lego_scanner"
+        "brick_manager"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
-        "./lego_scanner"
+        "./brick_manager"
     ]
 }
