@@ -121,43 +121,36 @@ class RebrickableService:
         return RebrickableService._make_request(endpoint)
 
     @staticmethod
-    def get_category_name(part_cat_id: int) -> str:
-        """
-        Fetch the name of a category from the Rebrickable API.
-
-        Args:
-            part_cat_id (int): The ID of the part category.
-
-        Returns:
-            str: The name of the category or 'Unknown Category' if not found.
-        """
-        logging.info("Fetching category name for category ID: %d", part_cat_id)
-        try:
-            endpoint = f'part_categories/{part_cat_id}/'
-            data = RebrickableService._make_request(endpoint)
-            return data.get('name', 'Unknown Category')
-        except RebrickableAPIException:
-            return 'Unknown Category'
-
-    @staticmethod
-    def get_parts_by_category(part_cat_id: int, page_size: int = 1000, page: int = 1) -> Optional[Dict]:
+    def get_parts_by_category(part_cat_id: Union[int, str], page_size: int = 1000, page: int = 1) -> Optional[Dict]:
         """
         Fetch parts for a given category from the Rebrickable API.
 
         Args:
-            part_cat_id (int): The category ID.
+            part_cat_id (Union[int, str]): The category ID (can be string or integer).
             page_size (int): Number of parts to fetch per page.
             page (int): The page number to fetch.
 
         Returns:
             dict: A dictionary with parts data and pagination info.
         """
-        logging.info(
-            "Fetching parts for category ID: %d, Page: %d", part_cat_id, page)
+        try:
+            # Ensure part_cat_id is an integer for consistent logging
+            part_cat_id = int(part_cat_id)
+            logging.info(
+                "Fetching parts for category ID: %d, Page: %d", part_cat_id, page
+            )
+        except ValueError as exc:
+            logging.error(
+                "Invalid category ID: %s. Unable to convert to integer.", part_cat_id
+            )
+            raise ValueError("Category ID must be an integer.") from exc
+
         endpoint = 'parts/'
         params = {'part_cat_id': part_cat_id,
-                  'page_size': page_size, 'page': page}
+                'page_size': page_size, 'page': page}
         return RebrickableService._make_request(endpoint, params=params)
+
+
 
     @staticmethod
     def get_parts(filters: Optional[Dict] = None, page: int = 1, page_size: int = 1000, inc_part_details: bool = False) -> Dict:

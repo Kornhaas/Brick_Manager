@@ -954,6 +954,17 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
+name = "vulture"
+version = "2.14"
+description = "Find dead code"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "vulture-2.14-py2.py3-none-any.whl", hash = "sha256:d9a90dba89607489548a49d557f8bac8112bd25d3cbc8aeef23e860811bd5ed9"},
+    {file = "vulture-2.14.tar.gz", hash = "sha256:cb8277902a1138deeab796ec5bef7076a6e0248ca3607a3f3dee0b6d9e9b8415"},
+]
+
+[[package]]
 name = "werkzeug"
 version = "3.1.3"
 description = "The comprehensive WSGI web application library."
@@ -973,4 +984,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "7630a310423e17702e9cb65bf096f27dfd9d89fb284da57bb88012a09f44d458"
+content-hash = "47ad22ffcef67585e035f8cd06eedaa6c65b8c338cc4810ad5d4034f2a37b1cb"
