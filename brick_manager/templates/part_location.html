@@ -71,7 +71,6 @@
                         <th>Level</th>
                         <th>Box</th>
                         <th>Print Of</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -98,16 +97,6 @@
                                    data-part-num="{{ part.part_num }}">
                         </td>
                         <td>{{ part.print_of if part.print_of else 'None' }}</td>
-                        <td>
-                            <button class="btn btn-primary create-label-btn" 
-                                    data-part-id="{{ part.part_num }}" 
-                                    data-part-name="{{ part.name }}" 
-                                    data-part-box="{{ part.box }}" 
-                                    data-part-category="{{ part.category }}" 
-                                    data-part-img="{{ part.cached_img_url }}">
-                                Create Label
-                            </button>
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

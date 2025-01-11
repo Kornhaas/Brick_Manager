@@ -18,7 +18,6 @@ from flask_migrate import Migrate
 from config import Config
 from models import db  # Import the db instance from models
 from routes.upload import upload_bp
-from routes.label import label_bp
 from routes.main import main_bp
 from routes.storage import storage_bp
 from routes.manual_entry import manual_entry_bp
@@ -101,7 +100,6 @@ with app.app_context():
 
 # Register blueprints
 app.register_blueprint(upload_bp)
-app.register_blueprint(label_bp)
 app.register_blueprint(main_bp)
 app.register_blueprint(storage_bp)
 app.register_blueprint(manual_entry_bp)
@@ -124,4 +122,4 @@ scheduler.start()
 atexit.register(scheduler.shutdown)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -373,18 +373,37 @@ def create_box_label_jpg(box_info):
     Returns:
         str: The path to the saved JPG file.
     """
-    logging.info("Generating JPG label for box %s.",
-                 box_info.get('box', 'unknown'))
-    image_path = create_box_label_image(box_info)  # Create the label image
+    logging.info("Generating JPG label for box %s.", box_info.get('box', 'unknown'))
 
-    # Convert the PNG image to a JPG image
+    # Generate the PNG image for the label
+    image_path = create_box_label_image(box_info)
+    if not os.path.exists(image_path):
+        logging.error("Failed to create PNG label image. Path does not exist: %s", image_path)
+        raise FileNotFoundError(f"Label image not created: {image_path}")
+
+    # Prepare JPG file path
     jpg_path = os.path.splitext(image_path)[0] + '.jpg'
-    with Image.open(image_path) as img:
-        rgb_image = img.convert("RGB")  # Ensure RGB format for JPG
-        # Save as JPG with high quality
-        rgb_image.save(jpg_path, "JPEG", quality=95)
 
-    logging.info("Box label saved as JPG: %s", jpg_path)
-    os.remove(image_path)  # Remove the temporary PNG file
+    # Convert PNG to JPG
+    try:
+        with Image.open(image_path) as img:
+            rgb_image = img.convert("RGB")
+            rgb_image.save(jpg_path, "JPEG", quality=95)
+            logging.info("JPG file created: %s", jpg_path)
+    except Exception as e:
+        logging.error("Error converting PNG to JPG: %s", e)
+        raise
+
+    # Remove temporary PNG file
+    if os.path.exists(image_path):
+        os.remove(image_path)
+    else:
+        logging.warning("Temporary PNG file not found for deletion: %s", image_path)
+
+    # Validate JPG creation and return
+    if not os.path.exists(jpg_path):
+        logging.error("Failed to create JPG label image. Path does not exist: %s", jpg_path)
+        raise FileNotFoundError(f"JPG label image not created: {jpg_path}")
 
     return jpg_path
+

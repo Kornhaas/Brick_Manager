@@ -159,16 +159,17 @@ def generate_box_label():
             ]
         }
 
-        pdf_path = create_box_label_jpg(box_info)
-        safe_root = os.path.join(current_app.root_path, 'generated_labels')
-        full_pdf_path = os.path.normpath(pdf_path)
+        label_path = create_box_label_jpg(box_info)
 
-        if not full_pdf_path.startswith(safe_root):
-            raise Exception("Invalid file path.")
-        if not os.path.exists(full_pdf_path):
+        if not os.path.exists(label_path):
             raise FileNotFoundError("Label file could not be generated.")
 
-        return send_file(full_pdf_path, as_attachment=True, download_name=f"box_label_{box}.pdf", mimetype="application/pdf")
+        return send_file(
+            label_path,
+            as_attachment=True,
+            download_name=f"box_label_{box}.jpg",
+            mimetype="image/jpeg"
+        )
 
     except BadRequest as e:
         current_app.logger.error("BadRequest in generate_box_label: %s", e)
@@ -179,70 +180,4 @@ def generate_box_label():
         return jsonify({"error": "NotFound in generate_box_label."}), 404
     except Exception as e:
         current_app.logger.error("Error in generate_box_label: %s", e)
-        return jsonify({"error": "An unexpected error occurred."}), 500
-
-
-@box_maintenance_bp.route('/box_maintenance/generate_labels', methods=['POST'])
-def generate_labels():
-    """
-    Generate labels for all boxes, skipping boxes with empty location, level, or box values.
-    """
-    try:
-        storage_parts = db.session.query(PartStorage).join(PartInfo).all()
-        if not storage_parts:
-            raise NotFound("No matching labels to generate.")
-
-        boxes = {}
-        for storage in storage_parts:
-            # Validate that location, level, and box are present
-            if not storage.location or not storage.level or not storage.box:
-                current_app.logger.warning(
-                    "Skipping incomplete box info: %s", storage)
-                continue
-
-            box_key = (storage.location, storage.level, storage.box)
-            if box_key not in boxes:
-                boxes[box_key] = []
-            boxes[box_key].append({
-                "part_num": storage.part_num,
-                "name": storage.part_info.name,
-                "category": storage.part_info.category.name if storage.part_info.category else "Unknown",
-                "img_url": storage.part_info.part_img_url
-            })
-
-        generated_labels = []
-        for (location, level, box), items in boxes.items():
-            if not items:
-                current_app.logger.warning(
-                    "Skipping empty box: %s", (location, level, box))
-                continue
-
-            box_info = {
-                "location": location,
-                "level": level,
-                "box": box,
-                "items": items
-            }
-            try:
-                label_path = create_box_label_jpg(box_info)
-                if os.path.exists(label_path):
-                    generated_labels.append(label_path)
-                else:
-                    current_app.logger.warning(
-                        "Label not generated for box: %s", box_info)
-            except Exception:
-                current_app.logger.error(
-                    "Error generating label for box %s", box_info)
-                continue
-
-        if not generated_labels:
-            raise NotFound("No labels were successfully generated.")
-
-        return jsonify({"message": "Labels generated successfully.", "labels": generated_labels}), 200
-
-    except NotFound as e:
-        current_app.logger.error("NotFound in generate_labels: %s", e)
-        return jsonify({"error": "NotFound in generate_labels."}), 404
-    except Exception as e:
-        current_app.logger.error("Error in generate_labels: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500
