@@ -10,7 +10,7 @@ from services.cache_service import cache_image
 from services.label_service import create_box_label_jpg
 
 
-# pylint: disable=C0301,W0718
+# pylint: disable=C0301,W0718,W0719
 box_maintenance_bp = Blueprint('box_maintenance', __name__)
 
 
@@ -160,10 +160,15 @@ def generate_box_label():
         }
 
         pdf_path = create_box_label_jpg(box_info)
-        if not os.path.exists(pdf_path):
+        safe_root = os.path.join(current_app.root_path, 'generated_labels')
+        full_pdf_path = os.path.normpath(pdf_path)
+
+        if not full_pdf_path.startswith(safe_root):
+            raise Exception("Invalid file path.")
+        if not os.path.exists(full_pdf_path):
             raise FileNotFoundError("Label file could not be generated.")
 
-        return send_file(pdf_path, as_attachment=True, download_name=f"box_label_{box}.pdf", mimetype="application/pdf")
+        return send_file(full_pdf_path, as_attachment=True, download_name=f"box_label_{box}.pdf", mimetype="application/pdf")
 
     except BadRequest as e:
         current_app.logger.error("BadRequest in generate_box_label: %s", e)
