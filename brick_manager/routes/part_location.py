@@ -103,8 +103,8 @@ def save_locations():
         save_part_lookup(master_lookup)  # Save updated master lookup
         return jsonify({"message": "Locations saved successfully!"}), 200
     except Exception as error:
-        logging.error("Error saving locations: %s", error)
-        return jsonify({"error": str(error)}), 400
+        logging.error("Error saving locations: %s", error, exc_info=True)
+        return jsonify({"error": "An error occurred while saving locations."}), 400
 
 
 @part_location_bp.route('/create_label', methods=['POST'])
@@ -117,5 +117,5 @@ def create_label():
         label_image_path = create_label_image(label_data)
         return jsonify({"success": True, "image_path": label_image_path}), 200
     except Exception as error:
-        logging.error("Error creating label: %s", error)
-        return jsonify({"success": False, "error": str(error)}), 500
+        logging.error("Error creating label: %s", error, exc_info=True)
+        return jsonify({"success": False, "error": "An error occurred while creating the label."}), 500
