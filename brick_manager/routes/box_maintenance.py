@@ -167,10 +167,11 @@ def generate_box_label():
 
     except BadRequest as e:
         current_app.logger.error("BadRequest in generate_box_label: %s", e)
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": "BadRequest in generate_box_label."}), 400
+
     except NotFound as e:
         current_app.logger.error("NotFound in generate_box_label: %s", e)
-        return jsonify({"error": str(e)}), 404
+        return jsonify({"error": "NotFound in generate_box_label."}), 404
     except Exception as e:
         current_app.logger.error("Error in generate_box_label: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500
@@ -224,9 +225,9 @@ def generate_labels():
                 else:
                     current_app.logger.warning(
                         "Label not generated for box: %s", box_info)
-            except Exception as e:
+            except Exception:
                 current_app.logger.error(
-                    "Error generating label for box %s: %s", box_info, e)
+                    "Error generating label for box %s", box_info)
                 continue
 
         if not generated_labels:
@@ -236,7 +237,7 @@ def generate_labels():
 
     except NotFound as e:
         current_app.logger.error("NotFound in generate_labels: %s", e)
-        return jsonify({"error": str(e)}), 404
+        return jsonify({"error": "NotFound in generate_labels."}), 404
     except Exception as e:
         current_app.logger.error("Error in generate_labels: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500
