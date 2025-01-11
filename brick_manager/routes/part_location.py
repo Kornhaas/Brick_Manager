@@ -1,11 +1,15 @@
+"""
+This module manages part locations, allowing users to view and update locations,
+levels, and boxes for specific parts. It integrates with Rebrickable API and the master lookup.
+"""
+
 import logging
 from flask import Blueprint, render_template, request, jsonify
 from services.rebrickable_service import RebrickableService
 from services.part_lookup_service import load_part_lookup, save_part_lookup
-# Import the centralized cache_image function
 from services.cache_service import cache_image
 from services.label_service import create_label_image
-
+#pylint: disable=C0301,W0718
 part_location_bp = Blueprint('part_location', __name__)
 
 
@@ -14,28 +18,33 @@ def part_location():
     """
     Page to manage part locations. Fetches categories and allows the user to input locations.
     """
-    categories = RebrickableService.get_all_category_ids()
-    # Alphabetically sort categories
-    categories.sort(key=lambda category: category[1])
-    master_lookup = load_part_lookup()
+    try:
+        categories = RebrickableService.get_all_category_ids()
+        # Alphabetically sort categories
+        categories.sort(key=lambda category: category[1])
+        master_lookup = load_part_lookup()
+    except Exception as error:
+        logging.error("Error loading categories or master lookup: %s", error)
+        return render_template('error.html', message=str(error))
 
     if request.method == 'POST':
-        selected_category_id = request.form.get('category_id')
-        page = int(request.form.get('page', 1))
-        # Preserve card state from POST data
-        card_state = request.form.get('card_state', 'expanded')
-
         try:
-            logging.debug(f"Fetching parts for category {
-                          selected_category_id}, page {page}")
-            logging.debug(f"Categories: {categories}")
+            selected_category_id = request.form.get('category_id')
+            page = int(request.form.get('page', 1))
+            card_state = request.form.get(
+                'card_state', 'expanded')  # Preserve card state
+
+            logging.debug(
+                "Fetching parts for category %s, page %d", selected_category_id, page
+            )
             selected_category_name = next(
                 (category[1] for category in categories if category[0]
                  == int(selected_category_id)),
                 None
             )
             parts_data = RebrickableService.get_parts_by_category(
-                selected_category_id, page_size=5000, page=page)
+                selected_category_id, page_size=5000, page=page
+            )
             parts = parts_data.get('results', [])
 
             # Enrich parts with master lookup and cached images
@@ -46,20 +55,22 @@ def part_location():
                      == part.get('part_cat_id')), "Unknown"
                 )
                 part_info = master_lookup.get(part_num, {})
-                part['location'] = part_info.get('location', '')
-                part['level'] = part_info.get('level', '')
-                part['box'] = part_info.get('box', '')
-                part['cached_img_url'] = cache_image(
-                    part['part_img_url'] or "/static/default_image.png")
+                part.update({
+                    'location': part_info.get('location', ''),
+                    'level': part_info.get('level', ''),
+                    'box': part_info.get('box', ''),
+                    'cached_img_url': cache_image(part.get('part_img_url', "/static/default_image.png"))
+                })
 
             pagination = {
                 'count': parts_data.get('count', 0),
                 'next': parts_data.get('next'),
                 'previous': parts_data.get('previous')
             }
-        except Exception as e:
-            logging.error(f"Error fetching parts: {e}")
-            return render_template('error.html', message=str(e))
+
+        except Exception as error:
+            logging.error("Error fetching parts: %s", error)
+            return render_template('error.html', message=str(error))
 
         return render_template(
             'part_location.html',
@@ -87,14 +98,13 @@ def save_locations():
 
         # Update the master lookup with new location data
         for part_num, location_data in locations_data.items():
-            if part_num not in master_lookup:
-                master_lookup[part_num] = {}
-            master_lookup[part_num].update(location_data)
+            master_lookup.setdefault(part_num, {}).update(location_data)
 
         save_part_lookup(master_lookup)  # Save updated master lookup
         return jsonify({"message": "Locations saved successfully!"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    except Exception as error:
+        logging.error("Error saving locations: %s", error)
+        return jsonify({"error": str(error)}), 400
 
 
 @part_location_bp.route('/create_label', methods=['POST'])
@@ -106,5 +116,6 @@ def create_label():
         label_data = request.json  # Expecting label details in JSON format
         label_image_path = create_label_image(label_data)
         return jsonify({"success": True, "image_path": label_image_path}), 200
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+    except Exception as error:
+        logging.error("Error creating label: %s", error)
+        return jsonify({"success": False, "error": str(error)}), 500

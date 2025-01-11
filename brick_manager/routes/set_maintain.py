@@ -1,8 +1,13 @@
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
-from models import db, UserSet, PartInSet, Minifigure, UserMinifigurePart, PartInfo, PartStorage
-from services.part_lookup_service import load_part_lookup
-from sqlalchemy.orm import joinedload
+"""
+This module manages the maintenance of user sets, including adding, updating, deleting,
+and generating labels for sets and their parts.
+"""
+# pylint: disable=C0301,W0718
+
 import os
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
+from sqlalchemy.orm import joinedload
+from models import db, UserSet, UserMinifigurePart, PartInfo, PartStorage
 
 set_maintain_bp = Blueprint('set_maintain', __name__)
 
@@ -18,29 +23,22 @@ def set_maintain():
         joinedload(UserSet.minifigures)
     ).order_by(UserSet.id.desc()).all()
 
-    # Add completeness percentage to each user set
     sets_with_completeness = []
     for user_set in user_sets:
-        total_quantity = 0
-        total_have_quantity = 0
+        total_quantity = sum(part.quantity for part in user_set.parts_in_set)
+        total_have_quantity = sum(
+            part.have_quantity for part in user_set.parts_in_set)
 
-        # Calculate parts completeness
-        for part in user_set.parts_in_set:
-            total_quantity += part.quantity
-            total_have_quantity += part.have_quantity
-
-        # Calculate user minifigure parts completeness
         user_minifigure_parts = UserMinifigurePart.query.filter_by(
             user_set_id=user_set.id).all()
-        for part in user_minifigure_parts:
-            total_quantity += part.quantity
-            total_have_quantity += part.have_quantity
+        total_quantity += sum(part.quantity for part in user_minifigure_parts)
+        total_have_quantity += sum(
+            part.have_quantity for part in user_minifigure_parts)
 
-        # Compute completeness percentage
-        completeness_percentage = 0
-        if total_quantity > 0:
-            completeness_percentage = (
-                total_have_quantity / total_quantity) * 100
+        completeness_percentage = (
+            (total_have_quantity / total_quantity) *
+            100 if total_quantity > 0 else 0
+        )
 
         sets_with_completeness.append({
             'user_set': user_set,
@@ -55,38 +53,30 @@ def get_user_set_details(user_set_id):
     """
     Returns the details of a specific UserSet, including its parts, minifigures, and user minifigure parts.
     """
-    master_lookup = load_part_lookup()
+    # master_lookup = load_part_lookup()
     user_set = UserSet.query.options(
         joinedload(UserSet.parts_in_set),
         joinedload(UserSet.minifigures)
     ).get_or_404(user_set_id)
 
-    # Fetch user_minifigure_parts based on user_set_id
     user_minifigure_parts = UserMinifigurePart.query.filter_by(
         user_set_id=user_set_id).all()
 
-    # Calculate completeness
-    total_quantity = 0
-    total_have_quantity = 0
+    total_quantity = sum(part.quantity for part in user_set.parts_in_set)
+    total_have_quantity = sum(
+        part.have_quantity for part in user_set.parts_in_set)
+    total_quantity += sum(part.quantity for part in user_minifigure_parts)
+    total_have_quantity += sum(part.have_quantity for part in user_minifigure_parts)
 
-    for part in user_set.parts_in_set:
-        total_quantity += part.quantity
-        total_have_quantity += part.have_quantity
+    completeness_percentage = (
+        (total_have_quantity / total_quantity) *
+        100 if total_quantity > 0 else 0
+    )
 
-    for part in user_minifigure_parts:
-        total_quantity += part.quantity
-        total_have_quantity += part.have_quantity
-
-    completeness_percentage = 0
-    if total_quantity > 0:
-        completeness_percentage = (total_have_quantity / total_quantity) * 100
-
-    # Helper function for location and status
-    def enrich_item(part, master_lookup):
-        part_data = master_lookup.get(part.part_num, {})
-        part_info = PartInfo.query.filter_by(part_num=part.part_num).first()
+    def enrich_item(part):
         storage_data = db.session.query(PartStorage).filter_by(
-            part_num=part.part_num).first()  # Fetch PartStorage
+            part_num=part.part_num).first()
+        part_info = PartInfo.query.filter_by(part_num=part.part_num).first()
         return {
             'id': part.id,
             'part_num': part.part_num,
@@ -102,8 +92,9 @@ def get_user_set_details(user_set_id):
             'status': "Available" if storage_data else "Not Available"
         }
 
-    parts = [enrich_item(part, master_lookup)
-             for part in user_set.parts_in_set]
+    parts = [enrich_item(part) for part in user_set.parts_in_set]
+    minifigure_parts = [enrich_item(part) for part in user_minifigure_parts]
+
     minifigs = [
         {
             'id': minifig.id,
@@ -112,17 +103,11 @@ def get_user_set_details(user_set_id):
             'quantity': minifig.quantity,
             'have_quantity': minifig.have_quantity,
             'img_url': minifig.img_url,
-            'location': f"Location: {master_lookup.get(minifig.fig_num, {}).get('location', 'Unknown')}, "
-            f"Level: {master_lookup.get(
-                minifig.fig_num, {}).get('level', 'Unknown')}, "
-            f"Box: {master_lookup.get(minifig.fig_num, {}).get(
-                'box', 'Unknown')}" if master_lookup.get(minifig.fig_num) else "Not Specified",
-            'status': "Available" if master_lookup.get(minifig.fig_num) else "Not Available"
+            'location': "Not Specified",
+            'status': "Not Available"
         }
         for minifig in user_set.minifigures
     ]
-    minifigure_parts = [enrich_item(part, master_lookup)
-                        for part in user_minifigure_parts]
 
     return jsonify({
         'set_img_url': user_set.template_set.set_img_url,
@@ -144,7 +129,6 @@ def update_user_set():
     user_set = UserSet.query.get_or_404(user_set_id)
 
     try:
-        # Update parts in `parts_in_set`
         for part in user_set.parts_in_set:
             have_quantity = request.form.get(f'part_id_{part.id}')
             if have_quantity is not None:
@@ -152,7 +136,6 @@ def update_user_set():
                     0, min(part.quantity, int(have_quantity)))
                 db.session.add(part)
 
-        # Update minifigures
         for minifig in user_set.minifigures:
             have_quantity = request.form.get(f'minifig_id_{minifig.id}')
             if have_quantity is not None:
@@ -160,7 +143,6 @@ def update_user_set():
                     0, min(minifig.quantity, int(have_quantity)))
                 db.session.add(minifig)
 
-        # Update user minifigure parts
         user_minifigure_parts = UserMinifigurePart.query.filter_by(
             user_set_id=user_set_id).all()
         for part in user_minifigure_parts:
@@ -170,7 +152,6 @@ def update_user_set():
                     0, min(part.quantity, int(have_quantity)))
                 db.session.add(part)
 
-        # Update status
         if status:
             user_set.status = status
             db.session.add(user_set)
@@ -178,9 +159,9 @@ def update_user_set():
         db.session.commit()
         flash(f"User Set for {
               user_set.template_set.set_number} updated successfully.", "success")
-    except Exception as e:
+    except Exception as error:
         db.session.rollback()
-        current_app.logger.error(f"Error updating UserSet: {e}")
+        current_app.logger.error("Error updating UserSet: %s", error)
         flash("Failed to update UserSet.", "danger")
 
     return redirect(url_for('set_maintain.set_maintain'))
@@ -199,9 +180,9 @@ def delete_user_set(user_set_id):
         db.session.commit()
         flash(f"User Set for {
               template_set_number} deleted successfully.", "success")
-    except Exception as e:
+    except Exception as error:
         db.session.rollback()
-        current_app.logger.error(f"Error deleting UserSet: {e}")
+        current_app.logger.error("Error deleting UserSet: %s", error)
         flash("Failed to delete User Set.", "danger")
 
     return redirect(url_for('set_maintain.set_maintain'))
@@ -214,46 +195,36 @@ def generate_label():
     """
     set_id = request.json.get('set_id')
     box_size = request.json.get('box_size')
-    current_app.logger.info(f"Generating label for set {
-                            set_id} with box size {box_size}")
+    current_app.logger.info(
+        "Generating label for set %s with box size %s", set_id, box_size)
     try:
-        # Brick_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
-        Brick_set = UserSet.query.join(UserSet.template_set).filter(
+        user_set = UserSet.query.join(UserSet.template_set).filter(
             UserSet.id == set_id).first()
-        if not Brick_set:
+        if not user_set:
             return jsonify({'error': 'Set not found in the database'}), 404
 
-        Brick_data = {
-            "set_num": Brick_set.template_set.set_number,
-            "name": Brick_set.template_set.name,
-            "set_img_url": Brick_set.template_set.set_img_url,
-            # "box_id": str(Brick_set.template_set.id)
-            "box_id": str(Brick_set.id)
-
+        label_data = {
+            "BOX_LONG_TITLE": f"Brick SET - {user_set.template_set.set_number} - {user_set.template_set.name.replace('&', 'and')}",
+            "BOX_SHORT_TITLE": user_set.template_set.set_number,
+            "IMAGE_CONTEXT": user_set.template_set.set_img_url,
+            "BOX_ID": str(user_set.id)
         }
 
         drawio_template = f"templates/{box_size}.drawio"
         if not os.path.exists(drawio_template):
             return jsonify({'error': f'DrawIO template {box_size} not found'}), 400
 
-        replacements = {
-            "BOX_LONG_TITLE": f"Brick SET - {Brick_data['set_num']} - {Brick_data['name'].replace('&', 'and')}",
-            "BOX_SHORT_TITLE": Brick_data['set_num'],
-            "IMAGE_CONTEXT": Brick_data['set_img_url'],
-            "BOX_ID": Brick_data['box_id'],
-        }
-
-        with open(drawio_template, 'r', encoding='utf-8') as file:
-            content = file.read()
-            for key, value in replacements.items():
+        with open(drawio_template, 'r', encoding='utf-8') as template_file:
+            content = template_file.read()
+            for key, value in label_data.items():
                 content = content.replace(key, value)
 
         output_file = f"output/{set_id}_{box_size}.drawio"
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        with open(output_file, 'w', encoding='utf-8') as file:
-            file.write(content)
+        with open(output_file, 'w', encoding='utf-8') as output:
+            output.write(content)
 
         return send_file(output_file, as_attachment=True)
-    except Exception as e:
-        current_app.logger.error(f"Error generating label: {e}")
+    except Exception as error:
+        current_app.logger.error("Error generating label: %s", error)
         return jsonify({'error': 'Failed to generate label'}), 500

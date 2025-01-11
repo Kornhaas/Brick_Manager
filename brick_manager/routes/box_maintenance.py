@@ -7,7 +7,7 @@ from flask import Blueprint, jsonify, render_template, request, current_app, sen
 from models import db, PartStorage, PartInfo
 from services.cache_service import cache_image
 from services.label_service import create_box_label_jpg
-
+#pylint: disable=C0301,W0718
 box_maintenance_bp = Blueprint('box_maintenance', __name__)
 
 
