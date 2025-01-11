@@ -12,8 +12,9 @@ import os  # Standard library import
 # Third-party imports
 from flask import Blueprint, request, redirect, url_for, flash, render_template
 from werkzeug.utils import secure_filename
-from services.part_lookup_service import load_part_lookup  # Local imports
+from services.part_lookup_service import load_part_lookup
 from services.brickognize_service import get_predictions
+from services.sqlite_service import get_category_name_from_db
 from config import Config
 
 upload_bp = Blueprint('upload', __name__)
@@ -50,6 +51,14 @@ def upload():
                 item_id = item.get('id')
                 if item_id in master_lookup:
                     item['lookup_info'] = master_lookup[item_id]
+
+                # Add category information from the database
+                # Ensure your prediction result includes 'category_id'
+                part_cat_id = item.get('category_id')
+                if part_cat_id:
+                    item['category_name'] = get_category_name_from_db(
+                        part_cat_id)
+
             return render_template('results.html', result=result)
 
         flash("Invalid result structure or no items found")

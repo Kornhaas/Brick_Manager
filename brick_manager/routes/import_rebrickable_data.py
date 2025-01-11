@@ -2,19 +2,22 @@
 This module handles the loading and updating of Brick data (categories, parts, colors, and themes)
 from the Rebrickable API into the local database.
 """
+
 from datetime import datetime
-from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify
+from flask import Blueprint, current_app, render_template, request, jsonify
 from requests.exceptions import RequestException
 from sqlalchemy.exc import SQLAlchemyError
 from services.rebrickable_service import RebrickableService
 from models import db, Category, PartInfo, Color, Theme
-
+#pylint: disable=C0301,W0718
 import_rebrickable_data_bp = Blueprint('import_rebrickable_data', __name__)
+
 
 @import_rebrickable_data_bp.route('/import_data', methods=['GET', 'POST'])
 def import_data():
     """
-    Load and update Brick data (categories, parts, colors, and themes) from the Rebrickable API into the local database.
+    Load and update Brick data (categories, parts, colors, and themes) 
+    from the Rebrickable API into the local database.
 
     Handles POST requests to fetch and store categories, parts, colors, and themes in the database.
     """
@@ -26,18 +29,19 @@ def import_data():
             _load_themes()
             return jsonify({'status': 'success', 'message': 'Data imported successfully!'}), 200
         except RequestException as req_err:
-            print(f"HTTP request error: {str(req_err)}")
+            current_app.logger.error("HTTP request error: %s", str(req_err))
             return jsonify({'status': 'error', 'message': 'Failed to fetch data from Rebrickable API.'}), 500
         except SQLAlchemyError as db_err:
-            print(f"Database error: {str(db_err)}")
+            current_app.logger.error("Database error: %s", str(db_err))
             db.session.rollback()
             return jsonify({'status': 'error', 'message': 'Database error occurred. Changes rolled back.'}), 500
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
+            current_app.logger.error("Unexpected error: %s", str(e))
             db.session.rollback()
             return jsonify({'status': 'error', 'message': 'An unexpected error occurred. Changes rolled back.'}), 500
 
     return render_template('import_data.html')
+
 
 def _load_categories():
     """
@@ -53,6 +57,7 @@ def _load_categories():
             db.session.add(Category(id=cat_id, name=category_name))
     db.session.commit()
 
+
 def _load_parts():
     """
     Fetch and load Brick parts into the local database.
@@ -61,12 +66,13 @@ def _load_parts():
     page = 1
     while True:
         parts_data = RebrickableService.get_parts(page=page, page_size=1000)
-        if not parts_data:  # Stop if no data is returned (Invalid page)
+        if not parts_data:
             break
 
         parts = parts_data.get('results', [])
         for part in parts:
-            existing_part = PartInfo.query.filter_by(part_num=part['part_num']).first()
+            existing_part = PartInfo.query.filter_by(
+                part_num=part['part_num']).first()
             if not existing_part:
                 db.session.add(PartInfo(
                     part_num=part['part_num'],
@@ -81,6 +87,9 @@ def _load_parts():
 
 
 def _load_colors():
+    """
+    Fetch and load Brick colors into the local database.
+    """
     print("Loading colors...")
     page = 1
     while True:
@@ -104,6 +113,9 @@ def _load_colors():
 
 
 def _load_themes():
+    """
+    Fetch and load Brick themes into the local database.
+    """
     print("Loading themes...")
     page = 1
     while True:
