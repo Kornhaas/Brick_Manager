@@ -6,6 +6,7 @@ and generating labels for sets and their parts.
 
 import os
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
+from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
 from models import db, UserSet, UserMinifigurePart, PartInfo, PartStorage
 
@@ -210,7 +211,8 @@ def generate_label():
             "BOX_ID": str(user_set.id)
         }
 
-        drawio_template = f"templates/{box_size}.drawio"
+        safe_box_size = secure_filename(box_size)
+        drawio_template = os.path.join("templates", f"{safe_box_size}.drawio")
         if not os.path.exists(drawio_template):
             return jsonify({'error': f'DrawIO template {box_size} not found'}), 400
 
