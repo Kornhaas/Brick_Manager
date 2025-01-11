@@ -2,12 +2,15 @@
 This module provides routes for managing boxes, including filtering, fetching contents,
 and generating labels for boxes.
 """
-
+import os
 from flask import Blueprint, jsonify, render_template, request, current_app, send_file
+from werkzeug.exceptions import BadRequest, NotFound
 from models import db, PartStorage, PartInfo
 from services.cache_service import cache_image
 from services.label_service import create_box_label_jpg
-#pylint: disable=C0301,W0718
+
+
+# pylint: disable=C0301,W0718
 box_maintenance_bp = Blueprint('box_maintenance', __name__)
 
 
@@ -24,11 +27,14 @@ def filter_box_data():
     """
     Filters levels and boxes based on the selected location and level.
     """
-    data = request.json
-    location = data.get("location")
-    level = data.get("level")
-
     try:
+        data = request.get_json()
+        if not data:
+            raise BadRequest("Invalid input data format.")
+
+        location = data.get("location")
+        level = data.get("level")
+
         if location and not level:
             levels = db.session.query(PartStorage.level).filter_by(
                 location=location).distinct().all()
@@ -39,10 +45,13 @@ def filter_box_data():
                 location=location, level=level).distinct().all()
             return jsonify({"boxes": sorted([box[0] for box in boxes])})
 
-        return jsonify({"error": "Invalid parameters"}), 400
+        raise BadRequest("Invalid parameters provided.")
+    except BadRequest as e:
+        current_app.logger.error("BadRequest in filter_box_data: %s", e)
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         current_app.logger.error("Error in filter_box_data: %s", e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "An unexpected error occurred."}), 500
 
 
 @box_maintenance_bp.route('/box_maintenance/data', methods=['GET'])
@@ -62,7 +71,7 @@ def get_box_data():
         })
     except Exception as e:
         current_app.logger.error("Error in get_box_data: %s", e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Failed to retrieve box data."}), 500
 
 
 @box_maintenance_bp.route('/box_contents', methods=['POST'])
@@ -70,15 +79,18 @@ def get_box_contents():
     """
     Fetches the content of a specific box based on location, level, and box.
     """
-    data = request.json
-    location = data.get("location")
-    level = data.get("level")
-    box = data.get("box")
-
-    if not (location and level and box):
-        return jsonify({"error": "All fields are required"}), 400
-
     try:
+        data = request.get_json()
+        if not data:
+            raise BadRequest("Invalid input data format.")
+
+        location = data.get("location")
+        level = data.get("level")
+        box = data.get("box")
+
+        if not (location and level and box):
+            raise BadRequest("All fields are required.")
+
         contents = db.session.query(PartInfo).join(
             PartStorage, PartInfo.part_num == PartStorage.part_num
         ).filter(
@@ -96,9 +108,12 @@ def get_box_contents():
             }
             for part in contents
         ])
+    except BadRequest as e:
+        current_app.logger.error("BadRequest in get_box_contents: %s", e)
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        current_app.logger.error("Error fetching box contents: %s", e)
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.error("Error in get_box_contents: %s", e)
+        return jsonify({"error": "An unexpected error occurred."}), 500
 
 
 @box_maintenance_bp.route('/box_maintenance/label', methods=['POST'])
@@ -106,15 +121,18 @@ def generate_box_label():
     """
     Generates a label for a specific box containing its contents.
     """
-    data = request.json
-    location = data.get("location")
-    level = data.get("level")
-    box = data.get("box")
-
-    if not (location and level and box):
-        return jsonify({"error": "All fields are required"}), 400
-
     try:
+        data = request.get_json()
+        if not data:
+            raise BadRequest("Invalid input data format.")
+
+        location = data.get("location")
+        level = data.get("level")
+        box = data.get("box")
+
+        if not (location and level and box):
+            raise BadRequest("All fields are required.")
+
         contents = db.session.query(PartInfo).join(
             PartStorage, PartInfo.part_num == PartStorage.part_num
         ).filter(
@@ -124,7 +142,7 @@ def generate_box_label():
         ).all()
 
         if not contents:
-            return jsonify({"error": "No items found in the specified box"}), 404
+            raise NotFound("No items found in the specified box.")
 
         box_info = {
             "location": location,
@@ -142,11 +160,20 @@ def generate_box_label():
         }
 
         pdf_path = create_box_label_jpg(box_info)
+        if not os.path.exists(pdf_path):
+            raise FileNotFoundError("Label file could not be generated.")
+
         return send_file(pdf_path, as_attachment=True, download_name=f"box_label_{box}.pdf", mimetype="application/pdf")
 
+    except BadRequest as e:
+        current_app.logger.error("BadRequest in generate_box_label: %s", e)
+        return jsonify({"error": str(e)}), 400
+    except NotFound as e:
+        current_app.logger.error("NotFound in generate_box_label: %s", e)
+        return jsonify({"error": str(e)}), 404
     except Exception as e:
-        current_app.logger.error("Error generating box label: %s", e)
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.error("Error in generate_box_label: %s", e)
+        return jsonify({"error": "An unexpected error occurred."}), 500
 
 
 @box_maintenance_bp.route('/box_maintenance/generate_labels', methods=['POST'])
@@ -157,10 +184,11 @@ def generate_labels():
     try:
         storage_parts = db.session.query(PartStorage).join(PartInfo).all()
         if not storage_parts:
-            return jsonify({"message": "No matching labels to generate."}), 404
+            raise NotFound("No matching labels to generate.")
 
         boxes = {}
         for storage in storage_parts:
+            # Validate that location, level, and box are present
             if not storage.location or not storage.level or not storage.box:
                 current_app.logger.warning(
                     "Skipping incomplete box info: %s", storage)
@@ -178,27 +206,37 @@ def generate_labels():
 
         generated_labels = []
         for (location, level, box), items in boxes.items():
+            if not items:
+                current_app.logger.warning(
+                    "Skipping empty box: %s", (location, level, box))
+                continue
+
             box_info = {
                 "location": location,
                 "level": level,
                 "box": box,
                 "items": items
             }
-            if not items:
-                current_app.logger.warning(
-                    "Skipping empty box: %s", (location, level, box))
+            try:
+                label_path = create_box_label_jpg(box_info)
+                if os.path.exists(label_path):
+                    generated_labels.append(label_path)
+                else:
+                    current_app.logger.warning(
+                        "Label not generated for box: %s", box_info)
+            except Exception as e:
+                current_app.logger.error(
+                    "Error generating label for box %s: %s", box_info, e)
                 continue
 
-            box_info = {"location": location,
-                        "level": level, "box": box, "items": items}
-            label_path = create_box_label_jpg(box_info)
-            generated_labels.append(label_path)
-
         if not generated_labels:
-            return jsonify({"message": "No labels generated."}), 404
+            raise NotFound("No labels were successfully generated.")
 
         return jsonify({"message": "Labels generated successfully.", "labels": generated_labels}), 200
 
+    except NotFound as e:
+        current_app.logger.error("NotFound in generate_labels: %s", e)
+        return jsonify({"error": str(e)}), 404
     except Exception as e:
-        current_app.logger.error("Error generating labels: %s", e)
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.error("Error in generate_labels: %s", e)
+        return jsonify({"error": "An unexpected error occurred."}), 500
