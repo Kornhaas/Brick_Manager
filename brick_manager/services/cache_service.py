@@ -2,6 +2,7 @@ import os
 import requests
 from flask import current_app, url_for
 
+
 def cache_image(image_url, cache_dir='static/cache/images'):
     """
     Download and cache an image locally if not already cached.
@@ -14,11 +15,13 @@ def cache_image(image_url, cache_dir='static/cache/images'):
         str: Path to the cached image or fallback image if the download fails.
     """
     # Use Flask's url_for to get a fallback image path
-    fallback_image = url_for('static', filename='default_image.png', _external=True)
+    fallback_image = url_for(
+        'static', filename='default_image.png', _external=True)
 
     # Handle invalid or missing image_url
     if not image_url or not isinstance(image_url, str):
-        current_app.logger.warning("Invalid or missing image URL. Using fallback image.")
+        current_app.logger.warning(
+            "Invalid or missing image URL. Using fallback image.")
         return fallback_image
 
     # Ensure the cache directory exists
@@ -39,10 +42,12 @@ def cache_image(image_url, cache_dir='static/cache/images'):
                     for chunk in response.iter_content(1024):
                         f.write(chunk)
             else:
-                current_app.logger.error(f"Failed to download image: {image_url} (Status: {response.status_code})")
+                current_app.logger.error(f"Failed to download image: {
+                                         image_url} (Status: {response.status_code})")
                 return fallback_image
         except Exception as e:
-            current_app.logger.error(f"Error downloading image {image_url}: {e}")
+            current_app.logger.error(
+                f"Error downloading image {image_url}: {e}")
             return fallback_image
 
     # Generate a URL for the cached image

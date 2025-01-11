@@ -46,7 +46,8 @@ def add_to_storage(part_id):
         # Update the in-memory data in the application if needed
         current_app.config['MASTER_LOOKUP'] = master_lookup
 
-        print(f"Stored item {part_id} at Location: {location}, Level: {level}, Box: {box}")
+        print(f"Stored item {part_id} at Location: {
+              location}, Level: {level}, Box: {box}")
 
         return redirect(url_for('main.index'))
 

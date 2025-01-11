@@ -6,6 +6,7 @@ import os
 
 set_maintain_bp = Blueprint('set_maintain', __name__)
 
+
 @set_maintain_bp.route('/set_maintain', methods=['GET'])
 def set_maintain():
     """
@@ -29,7 +30,8 @@ def set_maintain():
             total_have_quantity += part.have_quantity
 
         # Calculate user minifigure parts completeness
-        user_minifigure_parts = UserMinifigurePart.query.filter_by(user_set_id=user_set.id).all()
+        user_minifigure_parts = UserMinifigurePart.query.filter_by(
+            user_set_id=user_set.id).all()
         for part in user_minifigure_parts:
             total_quantity += part.quantity
             total_have_quantity += part.have_quantity
@@ -37,7 +39,8 @@ def set_maintain():
         # Compute completeness percentage
         completeness_percentage = 0
         if total_quantity > 0:
-            completeness_percentage = (total_have_quantity / total_quantity) * 100
+            completeness_percentage = (
+                total_have_quantity / total_quantity) * 100
 
         sets_with_completeness.append({
             'user_set': user_set,
@@ -59,7 +62,8 @@ def get_user_set_details(user_set_id):
     ).get_or_404(user_set_id)
 
     # Fetch user_minifigure_parts based on user_set_id
-    user_minifigure_parts = UserMinifigurePart.query.filter_by(user_set_id=user_set_id).all()
+    user_minifigure_parts = UserMinifigurePart.query.filter_by(
+        user_set_id=user_set_id).all()
 
     # Calculate completeness
     total_quantity = 0
@@ -81,7 +85,8 @@ def get_user_set_details(user_set_id):
     def enrich_item(part, master_lookup):
         part_data = master_lookup.get(part.part_num, {})
         part_info = PartInfo.query.filter_by(part_num=part.part_num).first()
-        storage_data = db.session.query(PartStorage).filter_by(part_num=part.part_num).first()  # Fetch PartStorage
+        storage_data = db.session.query(PartStorage).filter_by(
+            part_num=part.part_num).first()  # Fetch PartStorage
         return {
             'id': part.id,
             'part_num': part.part_num,
@@ -92,12 +97,13 @@ def get_user_set_details(user_set_id):
             'color_rgb': part.color_rgb,
             'part_img_url': part_info.part_img_url if part_info else '',
             'location': f"Location: {storage_data.location if storage_data else 'Unknown'}, "
-                        f"Level: {storage_data.level if storage_data else 'Unknown'}, "
-                        f"Box: {storage_data.box if storage_data else 'Unknown'}",
+            f"Level: {storage_data.level if storage_data else 'Unknown'}, "
+            f"Box: {storage_data.box if storage_data else 'Unknown'}",
             'status': "Available" if storage_data else "Not Available"
         }
 
-    parts = [enrich_item(part, master_lookup) for part in user_set.parts_in_set]
+    parts = [enrich_item(part, master_lookup)
+             for part in user_set.parts_in_set]
     minifigs = [
         {
             'id': minifig.id,
@@ -107,13 +113,16 @@ def get_user_set_details(user_set_id):
             'have_quantity': minifig.have_quantity,
             'img_url': minifig.img_url,
             'location': f"Location: {master_lookup.get(minifig.fig_num, {}).get('location', 'Unknown')}, "
-                        f"Level: {master_lookup.get(minifig.fig_num, {}).get('level', 'Unknown')}, "
-                        f"Box: {master_lookup.get(minifig.fig_num, {}).get('box', 'Unknown')}" if master_lookup.get(minifig.fig_num) else "Not Specified",
+            f"Level: {master_lookup.get(
+                minifig.fig_num, {}).get('level', 'Unknown')}, "
+            f"Box: {master_lookup.get(minifig.fig_num, {}).get(
+                'box', 'Unknown')}" if master_lookup.get(minifig.fig_num) else "Not Specified",
             'status': "Available" if master_lookup.get(minifig.fig_num) else "Not Available"
         }
         for minifig in user_set.minifigures
     ]
-    minifigure_parts = [enrich_item(part, master_lookup) for part in user_minifigure_parts]
+    minifigure_parts = [enrich_item(part, master_lookup)
+                        for part in user_minifigure_parts]
 
     return jsonify({
         'set_img_url': user_set.template_set.set_img_url,
@@ -123,6 +132,7 @@ def get_user_set_details(user_set_id):
         'status': user_set.status,
         'completeness_percentage': round(completeness_percentage, 2)
     })
+
 
 @set_maintain_bp.route('/set_maintain/update', methods=['POST'])
 def update_user_set():
@@ -138,22 +148,26 @@ def update_user_set():
         for part in user_set.parts_in_set:
             have_quantity = request.form.get(f'part_id_{part.id}')
             if have_quantity is not None:
-                part.have_quantity = max(0, min(part.quantity, int(have_quantity)))
+                part.have_quantity = max(
+                    0, min(part.quantity, int(have_quantity)))
                 db.session.add(part)
 
         # Update minifigures
         for minifig in user_set.minifigures:
             have_quantity = request.form.get(f'minifig_id_{minifig.id}')
             if have_quantity is not None:
-                minifig.have_quantity = max(0, min(minifig.quantity, int(have_quantity)))
+                minifig.have_quantity = max(
+                    0, min(minifig.quantity, int(have_quantity)))
                 db.session.add(minifig)
 
         # Update user minifigure parts
-        user_minifigure_parts = UserMinifigurePart.query.filter_by(user_set_id=user_set_id).all()
+        user_minifigure_parts = UserMinifigurePart.query.filter_by(
+            user_set_id=user_set_id).all()
         for part in user_minifigure_parts:
             have_quantity = request.form.get(f'minifig_part_id_{part.id}')
             if have_quantity is not None:
-                part.have_quantity = max(0, min(part.quantity, int(have_quantity)))
+                part.have_quantity = max(
+                    0, min(part.quantity, int(have_quantity)))
                 db.session.add(part)
 
         # Update status
@@ -162,7 +176,8 @@ def update_user_set():
             db.session.add(user_set)
 
         db.session.commit()
-        flash(f"User Set for {user_set.template_set.set_number} updated successfully.", "success")
+        flash(f"User Set for {
+              user_set.template_set.set_number} updated successfully.", "success")
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error updating UserSet: {e}")
@@ -170,17 +185,20 @@ def update_user_set():
 
     return redirect(url_for('set_maintain.set_maintain'))
 
+
 @set_maintain_bp.route('/set_maintain/delete/<int:user_set_id>', methods=['POST'])
 def delete_user_set(user_set_id):
     """
     Deletes a specific UserSet from the database.
     """
     try:
-        user_set = UserSet.query.options(joinedload(UserSet.template_set)).get_or_404(user_set_id)
+        user_set = UserSet.query.options(joinedload(
+            UserSet.template_set)).get_or_404(user_set_id)
         template_set_number = user_set.template_set.set_number
         db.session.delete(user_set)
         db.session.commit()
-        flash(f"User Set for {template_set_number} deleted successfully.", "success")
+        flash(f"User Set for {
+              template_set_number} deleted successfully.", "success")
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error deleting UserSet: {e}")
@@ -196,10 +214,12 @@ def generate_label():
     """
     set_id = request.json.get('set_id')
     box_size = request.json.get('box_size')
-    current_app.logger.info(f"Generating label for set {set_id} with box size {box_size}")
+    current_app.logger.info(f"Generating label for set {
+                            set_id} with box size {box_size}")
     try:
-        #Brick_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
-        Brick_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
+        # Brick_set = UserSet.query.join(UserSet.template_set).filter(UserSet.id == set_id).first()
+        Brick_set = UserSet.query.join(UserSet.template_set).filter(
+            UserSet.id == set_id).first()
         if not Brick_set:
             return jsonify({'error': 'Set not found in the database'}), 404
 
@@ -207,7 +227,8 @@ def generate_label():
             "set_num": Brick_set.template_set.set_number,
             "name": Brick_set.template_set.name,
             "set_img_url": Brick_set.template_set.set_img_url,
-            "box_id": str(Brick_set.id)#"box_id": str(Brick_set.template_set.id)
+            # "box_id": str(Brick_set.template_set.id)
+            "box_id": str(Brick_set.id)
 
         }
 

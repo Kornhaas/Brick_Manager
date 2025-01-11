@@ -15,35 +15,42 @@ def part_location():
     Page to manage part locations. Fetches categories and allows the user to input locations.
     """
     categories = RebrickableService.get_all_category_ids()
-    categories.sort(key=lambda category: category[1])  # Alphabetically sort categories
+    # Alphabetically sort categories
+    categories.sort(key=lambda category: category[1])
     master_lookup = load_part_lookup()
 
     if request.method == 'POST':
         selected_category_id = request.form.get('category_id')
         page = int(request.form.get('page', 1))
-        card_state = request.form.get('card_state', 'expanded')  # Preserve card state from POST data
+        # Preserve card state from POST data
+        card_state = request.form.get('card_state', 'expanded')
 
         try:
-            logging.debug(f"Fetching parts for category {selected_category_id}, page {page}")
+            logging.debug(f"Fetching parts for category {
+                          selected_category_id}, page {page}")
             logging.debug(f"Categories: {categories}")
             selected_category_name = next(
-                (category[1] for category in categories if category[0] == int(selected_category_id)), 
+                (category[1] for category in categories if category[0]
+                 == int(selected_category_id)),
                 None
             )
-            parts_data = RebrickableService.get_parts_by_category(selected_category_id, page_size=5000, page=page)
+            parts_data = RebrickableService.get_parts_by_category(
+                selected_category_id, page_size=5000, page=page)
             parts = parts_data.get('results', [])
 
             # Enrich parts with master lookup and cached images
             for part in parts:
                 part_num = part['part_num']
                 part['category'] = next(
-                    (cat[1] for cat in categories if cat[0] == part.get('part_cat_id')), "Unknown"
+                    (cat[1] for cat in categories if cat[0]
+                     == part.get('part_cat_id')), "Unknown"
                 )
                 part_info = master_lookup.get(part_num, {})
                 part['location'] = part_info.get('location', '')
                 part['level'] = part_info.get('level', '')
                 part['box'] = part_info.get('box', '')
-                part['cached_img_url'] = cache_image(part['part_img_url'] or "/static/default_image.png")
+                part['cached_img_url'] = cache_image(
+                    part['part_img_url'] or "/static/default_image.png")
 
             pagination = {
                 'count': parts_data.get('count', 0),
@@ -67,6 +74,7 @@ def part_location():
 
     # First load defaults card state to "expanded"
     return render_template('part_location.html', categories=categories, parts=[], card_state="expanded")
+
 
 @part_location_bp.route('/save_locations', methods=['POST'])
 def save_locations():

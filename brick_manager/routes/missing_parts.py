@@ -6,6 +6,7 @@ from services.part_lookup_service import load_part_lookup
 # Define a new Blueprint for missing parts
 missing_parts_bp = Blueprint('missing_parts', __name__)
 
+
 @missing_parts_bp.route('/missing_parts', methods=['GET'])
 def missing_parts():
     """
@@ -30,18 +31,22 @@ def missing_parts():
                     'set_id': user_set.template_set.set_number,
                     'internal_id': user_set.id,
                     'item_id': part.part_num,
-                    'name': part.part_info.name if part.part_info else "Unknown",  # Using part_info for details
+                    # Using part_info for details
+                    'name': part.part_info.name if part.part_info else "Unknown",
                     'color': part.color,
                     'is_spare': part.is_spare,
                     'missing_quantity': part.quantity - part.have_quantity,
-                    'img_url': part.part_info.part_img_url if part.part_info else "/static/default_image.png",  # Using part_info for image
+                    # Using part_info for image
+                    'img_url': part.part_info.part_img_url if part.part_info else "/static/default_image.png",
                     'location': f"Location: {part_data.get('location', 'Unknown')}, "
-                                f"Level: {part_data.get('level', 'Unknown')}, "
-                                f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified"
+                    f"Level: {part_data.get('level', 'Unknown')}, "
+                    f"Box: {part_data.get('box', 'Unknown')
+                            }" if part_data else "Not Specified"
                 })
 
     # Collect missing minifigure parts
-    user_minifigure_parts = UserMinifigurePart.query.options(joinedload(UserMinifigurePart.user_set)).all()
+    user_minifigure_parts = UserMinifigurePart.query.options(
+        joinedload(UserMinifigurePart.user_set)).all()
     for minifig_part in user_minifigure_parts:
         if minifig_part.quantity > minifig_part.have_quantity:
             part_data = master_lookup.get(minifig_part.part_num, {})
@@ -56,8 +61,9 @@ def missing_parts():
                 'missing_quantity': minifig_part.quantity - minifig_part.have_quantity,
                 'img_url': minifig_part.part_img_url or "/static/default_image.png",
                 'location': f"Location: {part_data.get('location', 'Unknown')}, "
-                            f"Level: {part_data.get('level', 'Unknown')}, "
-                            f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified"
+                f"Level: {part_data.get('level', 'Unknown')}, "
+                f"Box: {part_data.get('box', 'Unknown')
+                        }" if part_data else "Not Specified"
             })
 
     return render_template('missing_parts.html', missing_items=missing_items)

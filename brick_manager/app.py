@@ -3,16 +3,17 @@ This module sets up and runs the Brick Manager Flask application.
 
 It configures the application, registers blueprints, and loads the master lookup data.
 """
-import os
-from datetime import datetime
-import shutil
-import atexit
-from apscheduler.schedulers.background import BackgroundScheduler
 
+import os
+import shutil
+import logging
+from datetime import datetime
+from logging.handlers import RotatingFileHandler
+import atexit
+
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
 from flask_migrate import Migrate
-import logging
-from logging.handlers import RotatingFileHandler
 
 from config import Config
 from models import db  # Import the db instance from models
@@ -24,63 +25,69 @@ from routes.manual_entry import manual_entry_bp
 from routes.part_lookup import part_lookup_bp
 from routes.set_search import set_search_bp
 from routes.import_rebrickable_data import import_rebrickable_data_bp
-from routes.box_maintenance import box_maintenance_bp  # Import the blueprint
-
+from routes.box_maintenance import box_maintenance_bp
 from routes.set_maintain import set_maintain_bp
 from routes.missing_parts import missing_parts_bp
 from routes.dashboard import dashboard_bp
 from routes.part_location import part_location_bp
 from services.part_lookup_service import load_part_lookup
 
-
-def backup_database():
-    # Backup the database
-    db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
-    backup_db_path = f"{db_path}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
-    shutil.copyfile(db_path, backup_db_path)
-    app.logger.info(f"Database backed up to {backup_db_path}")
-
+#pylint: disable=W0718
 
 # Initialize the Flask application
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Set your secret key here
 app.config.from_object(Config)  # Load the configuration
 
+# Configure database
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+instances_dir = os.path.join(basedir, 'instance')
 
 # Ensure the 'instances' directory exists
-instances_dir = os.path.join(basedir, 'instance')
-if not os.path.exists(instances_dir):
-    os.makedirs(instances_dir)
+os.makedirs(instances_dir, exist_ok=True)
 
 # Update the database URI to use the 'instances' directory
-db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance/brick_manager.db')
+db_path = os.path.join(instances_dir, 'brick_manager.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 # Initialize the db instance with the app
 db.init_app(app)
 
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
-# Update Logging Configuration to use env vars for log level
 # Configure logging
+log_path = os.path.join(basedir, 'brick_manager.log')
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# Create a rotating file handler
-log_path = os.path.join(basedir, 'brick_manager.log')
-rotating_file_handler = RotatingFileHandler(log_path, maxBytes=1024 * 1024 * 5, backupCount=3)
+rotating_file_handler = RotatingFileHandler(
+    log_path, maxBytes=1024 * 1024 * 5, backupCount=3
+)
 rotating_file_handler.setLevel(logging.DEBUG)
-
-# Create a logging formatter
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 rotating_file_handler.setFormatter(formatter)
-
-# Add the rotating file handler to the application's logger
 app.logger.addHandler(rotating_file_handler)
+
+
+def backup_database():
+    """
+    Backup the database at regular intervals.
+    """
+    try:
+        db_source_path = app.config['SQLALCHEMY_DATABASE_URI'].replace(
+            'sqlite:///', '')
+        backup_db_path = f"{db_source_path}.{
+            datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
+        shutil.copyfile(db_source_path, backup_db_path)
+        app.logger.info(
+            "Database backed up successfully to %s", backup_db_path)
+    except Exception as e:
+        app.logger.error("Failed to backup database: %s", e)
 
 
 # Ensure database tables are created
@@ -90,7 +97,7 @@ with app.app_context():
         master_lookup = load_part_lookup()
         app.logger.debug("Master lookup data loaded successfully.")
     except Exception as e:
-        app.logger.error(f"Failed to load master lookup data: {e}")
+        app.logger.error("Failed to load master lookup data: %s", e)
 
 # Register blueprints
 app.register_blueprint(upload_bp)
@@ -109,13 +116,12 @@ app.register_blueprint(box_maintenance_bp)
 
 # Set up the scheduler for database backup
 scheduler = BackgroundScheduler()
-#scheduler.add_job(func=backup_database, trigger="interval", hours=24)  # Backup every 24 hours
-scheduler.add_job(func=backup_database, trigger="interval", hours=6)  # Backup every 24 hours
+scheduler.add_job(func=backup_database, trigger="interval",
+                  hours=6)  # Backup every 6 hours
 scheduler.start()
 
 # Shut down the scheduler when exiting the app
-atexit.register(lambda: scheduler.shutdown())
+atexit.register(scheduler.shutdown)
 
 if __name__ == '__main__':
-   
     app.run(host='0.0.0.0', port=5000, debug=True)

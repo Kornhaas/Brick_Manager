@@ -38,8 +38,10 @@ class RebrickableService:
 
         for attempt in range(retries):
             try:
-                print(f"Attempt {attempt + 1}: Fetching {url} with params {params}...")
-                response = requests.get(url, headers=headers, params=params, timeout=30)
+                print(
+                    f"Attempt {attempt + 1}: Fetching {url} with params {params}...")
+                response = requests.get(
+                    url, headers=headers, params=params, timeout=30)
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code == 404:
@@ -47,20 +49,23 @@ class RebrickableService:
                         print(f"No more data available at {url}.")
                         return None
                 elif response.status_code == 429:  # Rate limiting
-                    retry_after = int(response.headers.get("Retry-After", retry_delay))
-                    print(f"Rate limit hit. Retrying in {retry_after} seconds...")
+                    retry_after = int(response.headers.get(
+                        "Retry-After", retry_delay))
+                    print(f"Rate limit hit. Retrying in {
+                          retry_after} seconds...")
                     time.sleep(retry_after)
                     retry_delay *= 2
             except requests.exceptions.ReadTimeout:
-                print(f"Read timeout on attempt {attempt + 1}. Retrying in {retry_delay} seconds...")
+                print(f"Read timeout on attempt {
+                      attempt + 1}. Retrying in {retry_delay} seconds...")
                 time.sleep(retry_delay)
                 retry_delay *= 2
             except requests.exceptions.RequestException as e:
                 print(f"Request failed: {e}")
                 raise
 
-        raise RebrickableAPIException(f"Failed to fetch data from {url} after {retries} retries.")
-
+        raise RebrickableAPIException(f"Failed to fetch data from {
+                                      url} after {retries} retries.")
 
     @staticmethod
     def get_all_category_ids():
@@ -131,7 +136,8 @@ class RebrickableService:
         Raises:
             RebrickableAPIException: If the API request fails.
         """
-        print(f"Fetching parts for category ID: {part_cat_id}, Page: {page}...")
+        print(f"Fetching parts for category ID: {
+              part_cat_id}, Page: {page}...")
         endpoint = 'parts/'
         params = {
             'part_cat_id': part_cat_id,
@@ -154,7 +160,8 @@ class RebrickableService:
         Returns:
             dict: A dictionary with parts data and pagination info.
         """
-        print(f"Fetching parts, Page: {page}, Page Size: {page_size}, Filters: {filters}...")
+        print(f"Fetching parts, Page: {page}, Page Size: {
+              page_size}, Filters: {filters}...")
         endpoint = 'parts/'
         params = filters or {}
         params.update({

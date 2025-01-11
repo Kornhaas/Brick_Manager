@@ -9,6 +9,7 @@ It includes functions to:
 import requests
 from services.sqlite_service import get_category_name_from_part_num
 
+
 def get_predictions(file_path, filename):
     """
     Get part predictions from the Brickognize API based on an uploaded image.
@@ -27,7 +28,8 @@ def get_predictions(file_path, filename):
     # Use 'with' statement to ensure the file is properly closed after use
     with open(file_path, 'rb') as file:
         files = {'query_image': (filename, file, 'image/jpeg')}
-        response = requests.post(api_url, headers=headers, files=files, timeout=10)
+        response = requests.post(
+            api_url, headers=headers, files=files, timeout=10)
 
     try:
         predictions = response.json()
@@ -40,7 +42,8 @@ def get_predictions(file_path, filename):
         for item in predictions['items']:
             part_num = item.get('id')  # Assuming 'id' corresponds to part_num
             if part_num:
-                item['category_name'] = get_category_name_from_part_num(part_num)
+                item['category_name'] = get_category_name_from_part_num(
+                    part_num)
             else:
                 item['category_name'] = 'Unknown Category'
 

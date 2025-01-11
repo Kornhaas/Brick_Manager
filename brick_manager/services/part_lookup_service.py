@@ -39,7 +39,8 @@ def save_part_lookup(master_lookup):
 
         if storage_entry:
             # Update the existing entry
-            storage_entry.location = data.get('location', storage_entry.location)
+            storage_entry.location = data.get(
+                'location', storage_entry.location)
             storage_entry.level = data.get('level', storage_entry.level)
             storage_entry.box = data.get('box', storage_entry.box)
         else:

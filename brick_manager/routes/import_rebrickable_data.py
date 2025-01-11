@@ -11,6 +11,7 @@ from models import db, Category, PartInfo, Color, Theme
 
 import_rebrickable_data_bp = Blueprint('import_rebrickable_data', __name__)
 
+
 @import_rebrickable_data_bp.route('/import_data', methods=['GET', 'POST'])
 def import_data():
     """
@@ -39,6 +40,7 @@ def import_data():
 
     return render_template('import_data.html')
 
+
 def _load_categories():
     """
     Fetch and load Brick part categories into the local database.
@@ -53,6 +55,7 @@ def _load_categories():
             db.session.add(Category(id=cat_id, name=category_name))
     db.session.commit()
 
+
 def _load_parts():
     """
     Fetch and load Brick parts into the local database.
@@ -66,7 +69,8 @@ def _load_parts():
 
         parts = parts_data.get('results', [])
         for part in parts:
-            existing_part = PartInfo.query.filter_by(part_num=part['part_num']).first()
+            existing_part = PartInfo.query.filter_by(
+                part_num=part['part_num']).first()
             if not existing_part:
                 db.session.add(PartInfo(
                     part_num=part['part_num'],

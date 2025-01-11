@@ -1,3 +1,4 @@
+from flask import url_for
 from flask import Blueprint, jsonify, render_template, current_app, request
 from models import db, UserSet, PartInSet, Minifigure, UserMinifigurePart, PartInfo, PartStorage
 from sqlalchemy.orm import selectinload
@@ -6,7 +7,6 @@ from services.part_lookup_service import load_part_lookup
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
-from flask import url_for
 
 def enrich_part(item, master_lookup):
     """
@@ -17,7 +17,8 @@ def enrich_part(item, master_lookup):
     category = part_info.category.name if part_info and part_info.category else "No Category"
 
     # Fallback to default image if the part image URL is unavailable
-    img_url = cache_image(part_info.part_img_url if part_info else "/static/default_image.png")
+    img_url = cache_image(
+        part_info.part_img_url if part_info else "/static/default_image.png")
 
     return {
         'part_id': item.id,
@@ -30,10 +31,12 @@ def enrich_part(item, master_lookup):
         'have_quantity': item.have_quantity,  # Ensure this is included
         'category': category,
         'location': f"Location: {part_data.get('location', 'Unknown')}, "
-                    f"Level: {part_data.get('level', 'Unknown')}, "
-                    f"Box: {part_data.get('box', 'Unknown')}" if part_data else "Not Specified",
+        f"Level: {part_data.get('level', 'Unknown')}, "
+        f"Box: {part_data.get('box', 'Unknown')
+                }" if part_data else "Not Specified",
         'image_url': img_url,
     }
+
 
 @dashboard_bp.route('/dashboard', methods=['GET'])
 def dashboard():
@@ -63,18 +66,20 @@ def dashboard():
         part.quantity - part.have_quantity for part in minifigure_parts
     )
 
-    konvolut_parts = PartInSet.query.join(UserSet).filter(UserSet.status == 'konvolut').all()
+    konvolut_parts = PartInSet.query.join(UserSet).filter(
+        UserSet.status == 'konvolut').all()
 
     missing_konvolut_parts = sum(
         part.quantity - part.have_quantity for part in konvolut_parts if part.quantity > part.have_quantity
     )
-    konvolut_minifigure_parts = UserMinifigurePart.query.join(UserSet).filter(UserSet.status == 'konvolut').all()
+    konvolut_minifigure_parts = UserMinifigurePart.query.join(
+        UserSet).filter(UserSet.status == 'konvolut').all()
 
     missing_konvolut_minifigure_parts = sum(
         part.quantity - part.have_quantity for part in konvolut_minifigure_parts if part.quantity > part.have_quantity
     )
 
-#konvolut_minifigure_parts
+# konvolut_minifigure_parts
     return render_template(
         'dashboard.html',
         total_parts=total_parts,
@@ -83,7 +88,7 @@ def dashboard():
         missing_minifigure_parts=missing_minifigure_parts,
         konvolut_parts=len(konvolut_parts),
         missing_konvolut_parts=missing_konvolut_parts,
-        missing_konvolut_minifigure_parts= missing_konvolut_minifigure_parts,
+        missing_konvolut_minifigure_parts=missing_konvolut_minifigure_parts,
     )
 
 
@@ -104,28 +109,35 @@ def update_quantity():
                 new_quantity = change.get('new_quantity')
 
                 if not part_id or new_quantity is None:
-                    current_app.logger.warning(f"Invalid entry in changes: {change}")
+                    current_app.logger.warning(
+                        f"Invalid entry in changes: {change}")
                     continue  # Skip invalid entries
 
                 # Update `PartInSet` first
                 part = PartInSet.query.filter_by(id=part_id).first()
                 if part:
-                    current_app.logger.debug(f"Updating PartInSet ID {part_id} to quantity {new_quantity}")
-                    part.have_quantity = max(0, min(part.quantity, int(new_quantity)))
+                    current_app.logger.debug(f"Updating PartInSet ID {
+                                             part_id} to quantity {new_quantity}")
+                    part.have_quantity = max(
+                        0, min(part.quantity, int(new_quantity)))
                     db.session.add(part)
                     updated_records += 1
                 else:
                     # If not found in `PartInSet`, try `UserMinifigurePart`
-                    minifigure_part = UserMinifigurePart.query.filter_by(id=part_id).first()
+                    minifigure_part = UserMinifigurePart.query.filter_by(
+                        id=part_id).first()
                     if minifigure_part:
-                        current_app.logger.debug(f"Updating UserMinifigurePart ID {part_id} to quantity {new_quantity}")
-                        minifigure_part.have_quantity = max(0, min(minifigure_part.quantity, int(new_quantity)))
+                        current_app.logger.debug(f"Updating UserMinifigurePart ID {
+                                                 part_id} to quantity {new_quantity}")
+                        minifigure_part.have_quantity = max(
+                            0, min(minifigure_part.quantity, int(new_quantity)))
                         db.session.add(minifigure_part)
                         updated_records += 1
 
         if updated_records > 0:
             db.session.commit()  # Commit all changes at once for efficiency
-            current_app.logger.info(f"Successfully updated {updated_records} records.")
+            current_app.logger.info(f"Successfully updated {
+                                    updated_records} records.")
             return jsonify({'message': f"{updated_records} records updated successfully!"}), 200
         else:
             current_app.logger.warning("No records were updated.")
@@ -135,7 +147,6 @@ def update_quantity():
         current_app.logger.error(f"Failed to update quantities: {e}")
         db.session.rollback()
         return jsonify({'error': 'Failed to update quantities.'}), 500
-
 
 
 @dashboard_bp.route('/details/<category>', methods=['GET'])
@@ -159,10 +170,12 @@ def details(category):
         ).all()
         title = "Missing Minifigure Parts"
     elif category == 'konvolut_parts':
-        data = PartInSet.query.join(UserSet).filter(UserSet.status == 'konvolut').all()
+        data = PartInSet.query.join(UserSet).filter(
+            UserSet.status == 'konvolut').all()
         title = "Konvolut Parts"
     elif category == 'konvolut_minifigure_parts':
-        data = UserMinifigurePart.query.join(UserSet).filter(UserSet.status == 'konvolut').all()
+        data = UserMinifigurePart.query.join(UserSet).filter(
+            UserSet.status == 'konvolut').all()
         title = "Konvolut Minifigure Parts"
     else:
         current_app.logger.error(f"Invalid category requested: {category}")
@@ -192,8 +205,10 @@ def api_missing_parts():
         ~UserSet.status.in_(['assembled', 'konvolut'])
     ).all()
 
-    enriched_data = [enrich_part(item, master_lookup) for item in missing_parts]
+    enriched_data = [enrich_part(item, master_lookup)
+                     for item in missing_parts]
     return jsonify(enriched_data)
+
 
 @dashboard_bp.route('/api/missing_minifigure_parts', methods=['GET'])
 def api_missing_minifigure_parts():
@@ -206,5 +221,6 @@ def api_missing_minifigure_parts():
         ~UserSet.status.in_(['assembled', 'konvolut'])
     ).all()
 
-    enriched_data = [enrich_part(item, master_lookup) for item in missing_minifigure_parts]
+    enriched_data = [enrich_part(item, master_lookup)
+                     for item in missing_minifigure_parts]
     return jsonify(enriched_data)
