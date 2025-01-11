@@ -17,14 +17,14 @@ COPY pyproject.toml poetry.lock ./
 
 # Configure Poetry to avoid creating virtual environments and install dependencies
 RUN poetry config virtualenvs.create false \
-    && poetry install --only main --no-interaction --no-ansi
+    && poetry install --only main --no-root --no-interaction --no-ansi
 
 # Copy the application code
 COPY . .
 
 # Stage 2: Production (distroless approach with minimal Python runtime)
 # Use Google's distroless image for improved security and reduced image size
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app /app
