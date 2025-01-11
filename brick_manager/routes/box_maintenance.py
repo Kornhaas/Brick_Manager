@@ -48,7 +48,7 @@ def filter_box_data():
         raise BadRequest("Invalid parameters provided.")
     except BadRequest as e:
         current_app.logger.error("BadRequest in filter_box_data: %s", e)
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": "BadRequest in filter_box_data."}), 400
     except Exception as e:
         current_app.logger.error("Error in filter_box_data: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500
@@ -110,7 +110,7 @@ def get_box_contents():
         ])
     except BadRequest as e:
         current_app.logger.error("BadRequest in get_box_contents: %s", e)
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": "BadRequest in get_box_contents."}), 400
     except Exception as e:
         current_app.logger.error("Error in get_box_contents: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500
