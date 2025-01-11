@@ -21,7 +21,7 @@ class TestBrickognizeService(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open, read_data=b"fake_image_data")
     @patch("requests.post")
     @patch("brick_manager.services.brickognize_service.get_category_name_from_part_num")
-    def test_get_predictions_success(self, mock_get_category, mock_post, _):
+    def test_get_predictions_success(self, mock_get_category, mock_post, mock_open_obj):
         """
         Test get_predictions when the API request and category enrichment succeed.
         """
@@ -44,7 +44,7 @@ class TestBrickognizeService(unittest.TestCase):
             "https://api.brickognize.com/predict/",
             headers={"accept": "application/json"},
             files={"query_image": (
-                filename, mock_open.return_value, "image/jpeg")},
+                filename, mock_open_obj(), "image/jpeg")},  # Use the mock file object here
             timeout=10,
         )
 
@@ -56,6 +56,7 @@ class TestBrickognizeService(unittest.TestCase):
         self.assertIn("items", result)
         self.assertEqual(result["items"][0]["category_name"], "Bricks")
 
+        
     @patch("builtins.open", new_callable=mock_open, read_data=b"fake_image_data")
     @patch("requests.post")
     def test_get_predictions_api_failure(self, mock_post, _):
