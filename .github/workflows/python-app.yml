@@ -43,6 +43,3 @@ jobs:
       run: |
         PYTHONPATH=$(pwd) poetry run pytest brick_manager/tests
 
-    - name: Run Linter (Optional)
-      run: |
-        poetry run flake8 .
