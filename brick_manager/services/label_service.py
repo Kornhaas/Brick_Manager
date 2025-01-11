@@ -15,7 +15,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import requests
 from services.cache_service import cache_image  # Import the cache_image function
-#pylint: disable=W0718,R0914
+# pylint: disable=W0718,R0914
 CM = 28.35  # 1 cm in points
 
 
@@ -373,12 +373,14 @@ def create_box_label_jpg(box_info):
     Returns:
         str: The path to the saved JPG file.
     """
-    logging.info("Generating JPG label for box %s.", box_info.get('box', 'unknown'))
+    logging.info("Generating JPG label for box %s.",
+                 box_info.get('box', 'unknown'))
 
     # Generate the PNG image for the label
     image_path = create_box_label_image(box_info)
     if not os.path.exists(image_path):
-        logging.error("Failed to create PNG label image. Path does not exist: %s", image_path)
+        logging.error(
+            "Failed to create PNG label image. Path does not exist: %s", image_path)
         raise FileNotFoundError(f"Label image not created: {image_path}")
 
     # Prepare JPG file path
@@ -398,12 +400,13 @@ def create_box_label_jpg(box_info):
     if os.path.exists(image_path):
         os.remove(image_path)
     else:
-        logging.warning("Temporary PNG file not found for deletion: %s", image_path)
+        logging.warning(
+            "Temporary PNG file not found for deletion: %s", image_path)
 
     # Validate JPG creation and return
     if not os.path.exists(jpg_path):
-        logging.error("Failed to create JPG label image. Path does not exist: %s", jpg_path)
+        logging.error(
+            "Failed to create JPG label image. Path does not exist: %s", jpg_path)
         raise FileNotFoundError(f"JPG label image not created: {jpg_path}")
 
     return jpg_path
-
