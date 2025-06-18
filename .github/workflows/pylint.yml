@@ -26,7 +26,7 @@ jobs:
         mkdir -p pylint_report
         poetry run pylint $(git ls-files '*.py') > pylint_report/pylint-report.txt || true
     - name: Upload pylint results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pylint-report
         path: pylint_report/pylint-report.txt
