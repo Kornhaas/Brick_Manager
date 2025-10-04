@@ -77,7 +77,11 @@
                     {% for part in parts %}
                     <tr data-print-of="{{ 'true' if part.print_of else 'false' }}">
                         <td>
-                            <img src="{{ part.cached_img_url }}" alt="{{ part.name }}" width="50">
+                            <img src="{{ part.cached_img_url }}" alt="{{ part.name }}" width="50"
+                                 class="img-thumbnail part-img-thumb"
+                                 style="cursor:pointer"
+                                 data-img-src="{{ part.cached_img_url }}"
+                                 data-part-name="{{ part.name }}">
                         </td>
                         <td>{{ part.part_num }}</td>
                         <td>{{ part.name }}</td>
@@ -131,6 +135,21 @@
         {% endif %}
     </div>
 
+    <!-- Modal for enlarged image -->
+    <div class="modal fade" id="partImageModal" tabindex="-1" aria-labelledby="partImageModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="partImageModalLabel">Part Image</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <img id="modalPartImg" src="" alt="" style="max-width:100%; max-height:400px;">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const fetchPartsBtn = document.getElementById("fetch-parts-btn");
@@ -179,6 +198,19 @@
             saveAllBtn.addEventListener("click", (event) => {
                 event.preventDefault();
                 saveChanges();
+            });
+
+            // Image modal logic
+            const partImageModal = new bootstrap.Modal(document.getElementById('partImageModal'));
+            const modalPartImg = document.getElementById('modalPartImg');
+            const modalTitle = document.getElementById('partImageModalLabel');
+            document.querySelectorAll('.part-img-thumb').forEach(img => {
+                img.addEventListener('click', function () {
+                    modalPartImg.src = img.dataset.imgSrc;
+                    modalPartImg.alt = img.dataset.partName;
+                    modalTitle.textContent = img.dataset.partName;
+                    partImageModal.show();
+                });
             });
         });
     </script>
