@@ -13,12 +13,15 @@ Models include:
 - MinifigurePart
 - UserMinifigurePart
 - PartStorage
+- RebrickablePartCategories
+- RebrickableColors
+- RebrickableParts
 """
 #pylint: disable=C0301,R0903
 
 from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Integer, ForeignKey, DateTime, Boolean
+from sqlalchemy import PrimaryKeyConstraint, String, Integer, ForeignKey, DateTime, Boolean
 
 db = SQLAlchemy()
 
@@ -121,42 +124,27 @@ class PartInfo(db.Model):
             'category_id': self.category_id,
             'part_img_url': self.part_img_url,
             'part_url': self.part_url,
+            'color_id': self.color_id,
+            'color_name': self.color_name
         }
 
-
-class Color(db.Model):
+class PartColor(db.Model):
     """
-    Represents a color used in parts.
+    Represents information about individual parts.
     """
-    __tablename__ = 'colors'
-    id = db.Column(Integer, primary_key=True)
-    name = db.Column(String, nullable=False)
-    rgb = db.Column(String, nullable=False)
-    is_trans = db.Column(Boolean, nullable=False)
+    __tablename__ = 'part_color'
+    part_num = db.Column(String, nullable=False)
+    color_id = db.Column(Integer, nullable=False)
+    color_name = db.Column(String, nullable=False)
+    part_img_url = db.Column(String, nullable=True)
 
-    def __repr__(self):
-        return f"<Color {self.name} (ID: {self.id})>"
-
-    def to_dict(self):
-        """Convert the Color object to a dictionary."""
-        return {'id': self.id, 'name': self.name, 'rgb': self.rgb, 'is_trans': self.is_trans}
+    __table_args__ = (
+        PrimaryKeyConstraint('part_num', 'color_id'),  # Composite primary key
+    )
 
 
-class Theme(db.Model):
-    """
-    Represents a theme for sets or parts.
-    """
-    __tablename__ = 'themes'
-    id = db.Column(Integer, primary_key=True)
-    name = db.Column(String, nullable=False)
-    parent_id = db.Column(Integer, nullable=True)
 
-    def __repr__(self):
-        return f"<Theme {self.name} (ID: {self.id}, Parent: {self.parent_id})>"
 
-    def to_dict(self):
-        """Convert the Theme object to a dictionary."""
-        return {'id': self.id, 'name': self.name, 'parent_id': self.parent_id}
 
 
 class PartInSet(db.Model):
@@ -276,3 +264,126 @@ class PartStorage(db.Model):
 
     def __repr__(self):
         return f'<PartStorage {self.part_num} - Location: {self.location}, Level: {self.level}, Box: {self.box}>'
+
+
+class RebrickablePartCategories(db.Model):
+    __tablename__ = 'rebrickable_part_categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+
+    def __repr__(self):
+        return f'<RebrickablePartCategory {self.name}>'
+
+    def to_dict(self):
+        """Convert the RebrickablePartCategory object to a dictionary."""
+        return {'id': self.id, 'name': self.name}
+
+
+class RebrickableColors(db.Model):
+    __tablename__ = 'rebrickable_colors'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    rgb = db.Column(db.Text, nullable=False)
+    is_trans = db.Column(db.Boolean, nullable=False, default=False)
+
+    def __repr__(self):
+        #return f'<RebrickableColor {self.name}>'
+        return f"<Color {self.name} (ID: {self.id})>"
+
+    def to_dict(self):
+        """Convert the RebrickableColor object to a dictionary."""
+        return {'id': self.id, 'name': self.name, 'rgb': self.rgb, 'is_trans': self.is_trans}
+    
+
+class RebrickableParts(db.Model):
+    __tablename__ = 'rebrickable_parts'
+    part_num = db.Column(db.Text, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    part_cat_id = db.Column(db.Integer, db.ForeignKey('rebrickable_part_categories.id'), nullable=False)
+    part_material = db.Column(db.Text)
+
+    def __repr__(self):
+        return f'<RebrickablePart {self.part_num}>'
+
+    def to_dict(self):
+        """Convert the RebrickablePart object to a dictionary."""
+        return {'part_num': self.part_num, 'name': self.name, 'part_cat_id': self.part_cat_id, 'part_material': self.part_material}
+
+
+class RebrickablePartRelationships(db.Model):
+    __tablename__ = 'rebrickable_part_relationships'
+    rel_type = db.Column(db.Text, primary_key=True)
+    child_part_num = db.Column(db.Text, db.ForeignKey('rebrickable_parts.part_num'), primary_key=True)
+    parent_part_num = db.Column(db.Text, db.ForeignKey('rebrickable_parts.part_num'), primary_key=True)
+
+
+class RebrickableElements(db.Model):
+    __tablename__ = 'rebrickable_elements'
+    element_id = db.Column(db.Text, primary_key=True)
+    part_num = db.Column(db.Text, db.ForeignKey('rebrickable_parts.part_num'), nullable=False)
+    color_id = db.Column(db.Integer, db.ForeignKey('rebrickable_colors.id'), nullable=False)
+    design_id = db.Column(db.Text)
+
+
+class RebrickableThemes(db.Model):
+    __tablename__ = 'rebrickable_themes'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('rebrickable_themes.id'))
+
+    def __repr__(self):
+        return f"<Theme {self.name} (ID: {self.id}, Parent: {self.parent_id})>"
+
+    def to_dict(self):
+        """Convert the Theme object to a dictionary."""
+        return {'id': self.id, 'name': self.name, 'parent_id': self.parent_id}
+
+
+
+class RebrickableSets(db.Model):
+    __tablename__ = 'rebrickable_sets'
+    set_num = db.Column(db.Text, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    theme_id = db.Column(db.Integer, db.ForeignKey('rebrickable_themes.id'), nullable=False)
+    num_parts = db.Column(db.Integer, nullable=False)
+    img_url = db.Column(db.Text)
+
+
+class RebrickableMinifigs(db.Model):
+    __tablename__ = 'rebrickable_minifigs'
+    fig_num = db.Column(db.Text, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    num_parts = db.Column(db.Integer, nullable=False)
+    img_url = db.Column(db.Text)
+
+
+class RebrickableInventories(db.Model):
+    __tablename__ = 'rebrickable_inventories'
+    id = db.Column(db.Integer, primary_key=True)
+    version = db.Column(db.Integer, nullable=False)
+    set_num = db.Column(db.Text, nullable=False)
+
+
+class RebrickableInventoryParts(db.Model):
+    __tablename__ = 'rebrickable_inventory_parts'
+    inventory_id = db.Column(db.Integer, db.ForeignKey('rebrickable_inventories.id'), primary_key=True)
+    part_num = db.Column(db.Text, db.ForeignKey('rebrickable_parts.part_num'), primary_key=True)
+    color_id = db.Column(db.Integer, db.ForeignKey('rebrickable_colors.id'), primary_key=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    is_spare = db.Column(db.Boolean, nullable=False, default=False, primary_key=True)
+    img_url = db.Column(db.Text)
+
+
+class RebrickableInventorySets(db.Model):
+    __tablename__ = 'rebrickable_inventory_sets'
+    inventory_id = db.Column(db.Integer, db.ForeignKey('rebrickable_inventories.id'), primary_key=True)
+    set_num = db.Column(db.Text, db.ForeignKey('rebrickable_sets.set_num'), primary_key=True)
+    quantity = db.Column(db.Integer, nullable=False)
+
+
+class RebrickableInventoryMinifigs(db.Model):
+    __tablename__ = 'rebrickable_inventory_minifigs'
+    inventory_id = db.Column(db.Integer, db.ForeignKey('rebrickable_inventories.id'), primary_key=True)
+    fig_num = db.Column(db.Text, db.ForeignKey('rebrickable_minifigs.fig_num'), primary_key=True)
+    quantity = db.Column(db.Integer, nullable=False)

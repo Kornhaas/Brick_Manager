@@ -59,7 +59,7 @@ def part_location():
                     'location': part_info.get('location', ''),
                     'level': part_info.get('level', ''),
                     'box': part_info.get('box', ''),
-                    'cached_img_url': cache_image(part.get('part_img_url', "/static/default_image.png"))
+                    'cached_img_url': cache_image(part.get('part_image_url', "/static/default_image.png"))
                 })
 
             pagination = {

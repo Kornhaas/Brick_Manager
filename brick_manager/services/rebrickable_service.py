@@ -12,6 +12,7 @@ import time
 from typing import List, Optional, Dict, Tuple, Union
 import requests
 from config import Config
+from models import RebrickablePartCategories, RebrickableParts, RebrickableInventoryParts
 #pylint: disable=W0107,C0301
 
 class RebrickableAPIException(Exception):
@@ -95,15 +96,13 @@ class RebrickableService:
     @staticmethod
     def get_all_category_ids() -> List[Tuple[int, str]]:
         """
-        Fetch all category IDs and names from the Rebrickable API.
+        Fetch all category IDs and names from the local database table rebrickable_part_categories.
 
         Returns:
             list: A list of tuples containing category IDs and names.
         """
-        logging.info("Fetching all category IDs...")
-        endpoint = 'part_categories/'
-        data = RebrickableService._make_request(endpoint)
-        return [(category['id'], category['name']) for category in data.get('results', [])]
+        categories = RebrickablePartCategories.query.all()
+        return [(cat.id, cat.name) for cat in categories]
 
     @staticmethod
     def get_part_details(part_num: str) -> Dict:
@@ -121,9 +120,42 @@ class RebrickableService:
         return RebrickableService._make_request(endpoint)
 
     @staticmethod
+    def get_part_image_url(part_num: str) -> Optional[str]:
+        """
+        Lookup the first img_url for a part_num in rebrickable_inventory_parts.
+        Returns None if not found.
+        """
+        part_img = RebrickableInventoryParts.query.filter_by(part_num=part_num).first()
+        if part_img and part_img.img_url:
+            return part_img.img_url
+        return None
+
+    @staticmethod
+    def get_part_images_bulk(part_nums: List[str]) -> Dict[str, Optional[str]]:
+        """
+        Bulk lookup img_url for a list of part_nums in rebrickable_inventory_parts.
+        Returns a dict mapping part_num to the first found img_url (or None).
+        """
+        if not part_nums:
+            return {}
+        # Query all matching rows at once
+        rows = RebrickableInventoryParts.query.filter(
+            RebrickableInventoryParts.part_num.in_(part_nums)
+        ).all()
+        # Map part_num to first img_url found
+        img_map = {}
+        for row in rows:
+            if row.part_num not in img_map and row.img_url:
+                img_map[row.part_num] = row.img_url
+        # Fill missing part_nums with None
+        for pn in part_nums:
+            img_map.setdefault(pn, None)
+        return img_map
+
+    @staticmethod
     def get_parts_by_category(part_cat_id: Union[int, str], page_size: int = 1000, page: int = 1) -> Optional[Dict]:
         """
-        Fetch parts for a given category from the Rebrickable API.
+        Fetch parts for a given category from the local database table rebrickable_parts.
 
         Args:
             part_cat_id (Union[int, str]): The category ID (can be string or integer).
@@ -134,23 +166,34 @@ class RebrickableService:
             dict: A dictionary with parts data and pagination info.
         """
         try:
-            # Ensure part_cat_id is an integer for consistent logging
             part_cat_id = int(part_cat_id)
-            logging.info(
-                "Fetching parts for category ID: %d, Page: %d", part_cat_id, page
-            )
         except ValueError as exc:
             logging.error(
                 "Invalid category ID: %s. Unable to convert to integer.", part_cat_id
             )
             raise ValueError("Category ID must be an integer.") from exc
 
-        endpoint = 'parts/'
-        params = {'part_cat_id': part_cat_id,
-                'page_size': page_size, 'page': page}
-        return RebrickableService._make_request(endpoint, params=params)
-
-
+        query = RebrickableParts.query.filter_by(part_cat_id=part_cat_id)
+        total = query.count()
+        results = query.offset((page - 1) * page_size).limit(page_size).all()
+        part_nums = [part.part_num for part in results]
+        img_map = RebrickableService.get_part_images_bulk(part_nums)
+        parts_list = [
+            {
+                'part_num': part.part_num,
+                'name': part.name,
+                'part_cat_id': part.part_cat_id,
+                'part_material': part.part_material,
+                'part_image_url': img_map.get(part.part_num)
+            }
+            for part in results
+        ]
+        return {
+            'count': total,
+            'page': page,
+            'page_size': page_size,
+            'results': parts_list
+        }
 
     @staticmethod
     def get_parts(filters: Optional[Dict] = None, page: int = 1, page_size: int = 1000, inc_part_details: bool = False) -> Dict:
