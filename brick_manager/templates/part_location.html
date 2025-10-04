@@ -30,8 +30,8 @@
                             <label for="category" class="form-label">Select Category</label>
                             <select class="form-select" id="category" name="category_id" required>
                                 {% for category in categories %}
-                                <option value="{{ category[0] }}" 
-                                    {% if selected_category_id and selected_category_id == category[0] %}selected{% endif %}>
+                                <option value="{{ category[0] }}"
+                                    {% if selected_category_id and (selected_category_id|string) == (category[0]|string) %}selected{% endif %}>
                                     {{ category[1] }}
                                 </option>
                                 {% endfor %}
