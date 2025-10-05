@@ -2,18 +2,15 @@
 
 ```mermaid
 erDiagram
-    CATEGORIES ||--o{ PART_INFO : contains
-    PART_INFO ||--o{ PART_COLOR : has
-    COLORS ||--o{ PART_COLOR : color
+    SETS ||--o{ USER_SETS : template
     USER_SETS ||--o{ PARTS_IN_SET : contains
-    PART_INFO ||--o{ PARTS_IN_SET : part
+    REBRICKABLE_PARTS ||--o{ PARTS_IN_SET : part
     USER_SETS ||--o{ MINIFIGURES : contains
     MINIFIGURES ||--o{ MINIFIGURE_PARTS : has
     USER_SETS ||--o{ USER_MINIFIGURE_PARTS : contains
-    PART_INFO ||--o{ PART_STORAGE : stored
-    USER_SETS ||--o{ PARTS_IN_SET : user_set
-    USER_SETS ||--o{ MINIFIGURES : user_set
-    USER_SETS ||--o{ USER_MINIFIGURE_PARTS : user_set
+    REBRICKABLE_PARTS ||--o{ PART_STORAGE : stored
+    PART_COLOR ||--|| REBRICKABLE_PARTS : references
+    PART_COLOR ||--|| REBRICKABLE_COLORS : colored_by
 
     REBRICKABLE_PART_CATEGORIES ||--o{ REBRICKABLE_PARTS : contains
     REBRICKABLE_COLORS ||--o{ REBRICKABLE_ELEMENTS : colors
@@ -21,6 +18,7 @@ erDiagram
     REBRICKABLE_PARTS ||--o{ REBRICKABLE_PART_RELATIONSHIPS : child
     REBRICKABLE_PARTS ||--o{ REBRICKABLE_PART_RELATIONSHIPS : parent
     REBRICKABLE_THEMES ||--o{ REBRICKABLE_SETS : theme
+    REBRICKABLE_THEMES ||--o{ REBRICKABLE_THEMES : parent_theme
     REBRICKABLE_SETS ||--o{ REBRICKABLE_INVENTORIES : inventories
     REBRICKABLE_INVENTORIES ||--o{ REBRICKABLE_INVENTORY_PARTS : inventory
     REBRICKABLE_PARTS ||--o{ REBRICKABLE_INVENTORY_PARTS : part
@@ -30,34 +28,22 @@ erDiagram
     REBRICKABLE_INVENTORIES ||--o{ REBRICKABLE_INVENTORY_MINIFIGS : inventory
     REBRICKABLE_MINIFIGS ||--o{ REBRICKABLE_INVENTORY_MINIFIGS : minifig
 
-    CATEGORIES {
+    SETS {
         int id PK
+        string set_number
         string name
-        datetime last_updated
+        string set_img_url
     }
-    PART_INFO {
-        string part_num PK
-        string name
-        int category_id FK
-        string part_img_url
-        string part_url
+    USER_SETS {
+        int id PK
+        int set_id FK
+        string status
     }
     PART_COLOR {
         string part_num PK, FK
         int color_id PK, FK
         string color_name
         string part_img_url
-    }
-    COLORS {
-        int id PK
-        string name
-        string rgb
-        bool is_trans
-    }
-    THEMES {
-        int id PK
-        string name
-        int parent_id
     }
     PARTS_IN_SET {
         int id PK
@@ -68,17 +54,6 @@ erDiagram
         int have_quantity
         int user_set_id FK
         bool is_spare
-    }
-    USER_SETS {
-        int id PK
-        int set_id FK
-        string status
-    }
-    SETS {
-        int id PK
-        string set_number
-        string name
-        string set_img_url
     }
     MINIFIGURES {
         int id PK
@@ -131,12 +106,18 @@ erDiagram
         text name
         text rgb
         bool is_trans
+        int num_parts
+        int num_sets
+        float y1
+        float y2
     }
     REBRICKABLE_PARTS {
         text part_num PK
         text name
         int part_cat_id FK
         text part_material
+        text part_img_url
+        text part_url
     }
     REBRICKABLE_PART_RELATIONSHIPS {
         text rel_type PK
