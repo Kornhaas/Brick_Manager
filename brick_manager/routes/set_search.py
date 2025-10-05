@@ -4,7 +4,7 @@ This module handles the search, retrieval, and addition of Brick sets, parts, an
 
 from flask import Blueprint, render_template, request, flash, current_app, redirect, url_for
 import requests
-from models import db, Set, UserSet, PartInSet, Minifigure, UserMinifigurePart, RebrickableParts
+from models import db, Set, UserSet, PartInSet, Minifigure, UserMinifigurePart, RebrickableParts, RebrickableSets, RebrickableInventoryParts, RebrickableColors, RebrickableInventories, RebrickableInventoryMinifigs, RebrickableMinifigs
 from config import Config
 from services.part_lookup_service import load_part_lookup
 #pylint: disable=C0301,W0718
@@ -167,138 +167,181 @@ def add_set():
 
 def fetch_set_info(set_number):
     """
-    Fetches basic set information including image URL.
+    Fetches basic set information from the internal database (rebrickable_sets table).
     """
     try:
-        response = requests.get(
-            f'https://rebrickable.com/api/v3/lego/sets/{set_number}/',
-            headers={
-                'Accept': 'application/json',
-                'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
-            },
-            timeout=10
-        )
-        if response.status_code == 200:
-            return response.json()
+        # Query the RebrickableSets table for set information
+        rebrickable_set = RebrickableSets.query.filter_by(set_num=set_number).first()
+        
+        if rebrickable_set:
+            # Return data in the same format as the API response
+            return {
+                'set_num': rebrickable_set.set_num,
+                'name': rebrickable_set.name,
+                'year': rebrickable_set.year,
+                'theme_id': rebrickable_set.theme_id,
+                'num_parts': rebrickable_set.num_parts,
+                'set_img_url': rebrickable_set.img_url
+            }
+        else:
+            current_app.logger.warning(
+                "Set %s not found in local database", set_number)
+            return None
+    except Exception as error:
         current_app.logger.error(
-            "Failed to fetch set info for %s: %d", set_number, response.status_code)
-        return None
-    except requests.exceptions.RequestException as error:
-        current_app.logger.error(
-            "Error fetching set info for %s: %s", set_number, error)
+            "Error fetching set info from database for %s: %s", set_number, error)
         return None
 
 
 def fetch_set_parts_info(set_number):
     """
-    Fetches the parts information for a given set number from the Rebrickable API.
+    Fetches the parts information for a given set number from the internal database.
+    Uses RebrickableInventories, RebrickableInventoryParts, RebrickableParts, and RebrickableColors tables.
     """
     master_lookup = load_part_lookup()
 
     try:
-        response = requests.get(
-            f'https://rebrickable.com/api/v3/lego/sets/{
-                set_number}/parts/?page_size=1000',
-            headers={
-                'Accept': 'application/json',
-                'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
-            },
-            timeout=10
-        )
-        if response.status_code == 200:
-            data = response.json()
-            return [
-                {
-                    'part_num': item['part']['part_num'],
-                    'name': item['part'].get('name', 'Unknown'),
-                    'category': item['part'].get('part_cat_id'),
-                    'color': item['color'].get('name', 'Unknown'),
-                    'color_rgb': item['color'].get('rgb', 'FFFFFF'),
-                    'quantity': item['quantity'],
-                    'is_spare': item['is_spare'],
-                    'part_img_url': item['part'].get('part_img_url'),
-                    'location': format_location(master_lookup.get(item['part']['part_num']))
-                }
-                for item in data.get('results', [])
-            ]
+        # First, find the inventory for this set
+        inventory = RebrickableInventories.query.filter_by(set_num=set_number).first()
+        
+        if not inventory:
+            current_app.logger.warning(
+                "No inventory found for set %s in local database", set_number)
+            return []
+        
+        # Query inventory parts with joins to get part and color information
+        inventory_parts = db.session.query(
+            RebrickableInventoryParts,
+            RebrickableParts,
+            RebrickableColors
+        ).join(
+            RebrickableParts, RebrickableInventoryParts.part_num == RebrickableParts.part_num
+        ).join(
+            RebrickableColors, RebrickableInventoryParts.color_id == RebrickableColors.id
+        ).filter(
+            RebrickableInventoryParts.inventory_id == inventory.id
+        ).all()
+        
+        parts_info = []
+        for inv_part, part, color in inventory_parts:
+            part_info = {
+                'part_num': part.part_num,
+                'name': part.name or 'Unknown',
+                'category': part.part_cat_id,
+                'color': color.name or 'Unknown',
+                'color_rgb': color.rgb or 'FFFFFF',
+                'quantity': inv_part.quantity,
+                'is_spare': inv_part.is_spare,
+                'part_img_url': inv_part.img_url or part.part_img_url,
+                'location': format_location(master_lookup.get(part.part_num))
+            }
+            parts_info.append(part_info)
+        
+        current_app.logger.debug(
+            "Fetched %d parts for set %s from local database", len(parts_info), set_number)
+        return parts_info
+        
+    except Exception as error:
         current_app.logger.error(
-            "Failed to fetch parts for set %s: %d", set_number, response.status_code)
-        return []
-    except requests.exceptions.RequestException as error:
-        current_app.logger.error(
-            "Error fetching parts for set %s: %s", set_number, error)
+            "Error fetching parts for set %s from database: %s", set_number, error)
         return []
 
 
 def fetch_minifigs_info(set_number):
     """
-    Fetches the minifigures information for a given set number from the Rebrickable API.
+    Fetches the minifigures information for a given set number from the internal database.
+    Uses RebrickableInventories, RebrickableInventoryMinifigs, and RebrickableMinifigs tables.
     """
     try:
-        response = requests.get(
-            f'https://rebrickable.com/api/v3/lego/sets/{
-                set_number}/minifigs/?page_size=1000',
-            headers={
-                'Accept': 'application/json',
-                'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
-            },
-            timeout=10
-        )
-        if response.status_code == 200:
-            return [
-                {
-                    'fig_num': item['set_num'],
-                    'name': item.get('set_name', 'Unknown'),
-                    'quantity': item['quantity'],
-                    'img_url': item.get('set_img_url'),
-                    'location': format_location(load_part_lookup().get(item['set_num']))
-                }
-                for item in response.json().get('results', [])
-            ]
+        # First, find the inventory for this set
+        inventory = RebrickableInventories.query.filter_by(set_num=set_number).first()
+        
+        if not inventory:
+            current_app.logger.warning(
+                "No inventory found for set %s in local database", set_number)
+            return []
+        
+        # Query inventory minifigs with joins to get minifigure information
+        inventory_minifigs = db.session.query(
+            RebrickableInventoryMinifigs,
+            RebrickableMinifigs
+        ).join(
+            RebrickableMinifigs, RebrickableInventoryMinifigs.fig_num == RebrickableMinifigs.fig_num
+        ).filter(
+            RebrickableInventoryMinifigs.inventory_id == inventory.id
+        ).all()
+        
+        minifigs_info = []
+        for inv_minifig, minifig in inventory_minifigs:
+            minifig_info = {
+                'fig_num': minifig.fig_num,
+                'name': minifig.name or 'Unknown',
+                'quantity': inv_minifig.quantity,
+                'img_url': minifig.img_url,
+                'location': format_location(load_part_lookup().get(minifig.fig_num))
+            }
+            minifigs_info.append(minifig_info)
+        
+        current_app.logger.debug(
+            "Fetched %d minifigs for set %s from local database", len(minifigs_info), set_number)
+        return minifigs_info
+        
+    except Exception as error:
         current_app.logger.error(
-            "Failed to fetch minifigs for set %s: %d", set_number, response.status_code)
-        return []
-    except requests.exceptions.RequestException as error:
-        current_app.logger.error(
-            "Error fetching minifigs for set %s: %s", set_number, error)
+            "Error fetching minifigs for set %s from database: %s", set_number, error)
         return []
 
 
 def fetch_minifigure_parts(fig_num):
     """
-    Fetches parts information for a specific minifigure from the Rebrickable API.
+    Fetches parts information for a specific minifigure from the internal database.
+    Uses fig_num to find inventory in rebrickable_inventories (where set_num = fig_num),
+    then gets parts from rebrickable_inventory_parts using the inventory_id.
     """
     master_lookup = load_part_lookup()
 
     try:
-        response = requests.get(
-            f'https://rebrickable.com/api/v3/lego/minifigs/{
-                fig_num}/parts/?page_size=1000',
-            headers={
-                'Accept': 'application/json',
-                'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
-            },
-            timeout=10
-        )
-        if response.status_code == 200:
-            return [
-                {
-                    'part_num': item['part']['part_num'],
-                    'name': item['part']['name'],
-                    'color': item['color']['name'],
-                    'color_rgb': item['color']['rgb'],
-                    'quantity': item['quantity'],
-                    'part_img_url': item['part']['part_img_url'],
-                    'location': format_location(master_lookup.get(item['part']['part_num']))
-                }
-                for item in response.json().get('results', [])
-            ]
+        # First, find the inventory for this minifigure (fig_num is used as set_num)
+        inventory = RebrickableInventories.query.filter_by(set_num=fig_num).first()
+        
+        if not inventory:
+            current_app.logger.warning(
+                "No inventory found for minifigure %s in local database", fig_num)
+            return []
+        
+        # Query inventory parts with joins to get part and color information
+        inventory_parts = db.session.query(
+            RebrickableInventoryParts,
+            RebrickableParts,
+            RebrickableColors
+        ).join(
+            RebrickableParts, RebrickableInventoryParts.part_num == RebrickableParts.part_num
+        ).join(
+            RebrickableColors, RebrickableInventoryParts.color_id == RebrickableColors.id
+        ).filter(
+            RebrickableInventoryParts.inventory_id == inventory.id
+        ).all()
+        
+        parts_info = []
+        for inv_part, part, color in inventory_parts:
+            part_info = {
+                'part_num': part.part_num,
+                'name': part.name or 'Unknown',
+                'color': color.name or 'Unknown',
+                'color_rgb': color.rgb or 'FFFFFF',
+                'quantity': inv_part.quantity,
+                'part_img_url': inv_part.img_url or part.part_img_url,
+                'location': format_location(master_lookup.get(part.part_num))
+            }
+            parts_info.append(part_info)
+        
+        current_app.logger.debug(
+            "Fetched %d parts for minifigure %s from local database", len(parts_info), fig_num)
+        return parts_info
+        
+    except Exception as error:
         current_app.logger.error(
-            "Failed to fetch parts for minifigure %s: %d", fig_num, response.status_code)
-        return []
-    except requests.exceptions.RequestException as error:
-        current_app.logger.error(
-            "Error fetching parts for minifigure %s: %s", fig_num, error)
+            "Error fetching parts for minifigure %s from database: %s", fig_num, error)
         return []
 
 
