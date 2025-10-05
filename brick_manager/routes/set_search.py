@@ -4,7 +4,7 @@ This module handles the search, retrieval, and addition of Brick sets, parts, an
 
 from flask import Blueprint, render_template, request, flash, current_app, redirect, url_for
 import requests
-from models import db, Set, UserSet, PartInSet, Minifigure, UserMinifigurePart, PartInfo
+from models import db, Set, UserSet, PartInSet, Minifigure, UserMinifigurePart, RebrickableParts
 from config import Config
 from services.part_lookup_service import load_part_lookup
 #pylint: disable=C0301,W0718
@@ -108,9 +108,9 @@ def add_set():
 
         parts_info = fetch_set_parts_info(set_number)
         for part in parts_info:
-            part_info, _ = get_or_create(db.session, PartInfo, part_num=part['part_num'], defaults={
+            part_info, _ = get_or_create(db.session, RebrickableParts, part_num=part['part_num'], defaults={
                 'name': part['name'],
-                'category_id': part['category'],
+                'part_cat_id': part['category'],
                 'part_img_url': part['part_img_url'],
                 'part_url': part.get('part_url', ''),
             })
@@ -138,9 +138,9 @@ def add_set():
 
             minifig_parts = fetch_minifigure_parts(minifig['fig_num'])
             for part in minifig_parts:
-                part_info, _ = get_or_create(db.session, PartInfo, part_num=part['part_num'], defaults={
+                part_info, _ = get_or_create(db.session, RebrickableParts, part_num=part['part_num'], defaults={
                     'name': part['name'],
-                    'category_id': part.get('category_id'),
+                    'part_cat_id': part.get('category_id'),
                     'part_img_url': part['part_img_url'],
                     'part_url': part.get('part_url', ''),
                 })

@@ -70,7 +70,6 @@ Create a `.env` file in the root directory and add the following environment var
 ```env
 FLASK_APP=app.py
 FLASK_ENV=development
-REBRICKABLE_TOKEN=your_rebrickable_api_key
 ```
 
 ### 5. Run the Application

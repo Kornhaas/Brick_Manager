@@ -3,7 +3,7 @@ This module provides routes for the dashboard,
 including viewing summaries, details, and updating quantities.
 """
 from flask import Blueprint, jsonify, render_template, current_app, request
-from models import db, UserSet, PartInSet, UserMinifigurePart, PartInfo
+from models import db, UserSet, PartInSet, UserMinifigurePart, RebrickableParts
 from services.cache_service import cache_image
 from services.part_lookup_service import load_part_lookup
 #pylint: disable=C0301,W0718
@@ -22,7 +22,7 @@ def enrich_part(item, master_lookup):
     Returns:
         dict: Enriched part data.
     """
-    part_info = PartInfo.query.filter_by(part_num=item.part_num).first()
+    part_info = RebrickableParts.query.filter_by(part_num=item.part_num).first()
     part_data = master_lookup.get(item.part_num, {})
     category = part_info.category.name if part_info and part_info.category else "No Category"
 

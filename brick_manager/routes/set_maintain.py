@@ -8,7 +8,7 @@ import os
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
-from models import db, UserSet, UserMinifigurePart, PartInfo, PartStorage
+from models import db, UserSet, UserMinifigurePart, RebrickableParts, PartStorage
 
 set_maintain_bp = Blueprint('set_maintain', __name__)
 
@@ -77,7 +77,7 @@ def get_user_set_details(user_set_id):
     def enrich_item(part):
         storage_data = db.session.query(PartStorage).filter_by(
             part_num=part.part_num).first()
-        part_info = PartInfo.query.filter_by(part_num=part.part_num).first()
+        part_info = RebrickableParts.query.filter_by(part_num=part.part_num).first()
         return {
             'id': part.id,
             'part_num': part.part_num,

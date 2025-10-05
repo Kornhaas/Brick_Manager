@@ -19,7 +19,6 @@ class Config:  # pylint: disable=R0903
 
     UPLOAD_FOLDER = 'uploads/'
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    REBRICKABLE_TOKEN = os.getenv('REBRICKABLE_TOKEN')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///brick_manager.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

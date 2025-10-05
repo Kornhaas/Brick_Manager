@@ -5,7 +5,7 @@ and generating labels for boxes.
 import os
 from flask import Blueprint, jsonify, render_template, request, current_app, send_file
 from werkzeug.exceptions import BadRequest, NotFound
-from models import db, PartStorage, PartInfo
+from models import db, PartStorage, RebrickableParts
 from services.cache_service import cache_image
 from services.label_service import create_box_label_jpg
 
@@ -91,8 +91,8 @@ def get_box_contents():
         if not (location and level and box):
             raise BadRequest("All fields are required.")
 
-        contents = db.session.query(PartInfo).join(
-            PartStorage, PartInfo.part_num == PartStorage.part_num
+        contents = db.session.query(RebrickableParts).join(
+            PartStorage, RebrickableParts.part_num == PartStorage.part_num
         ).filter(
             PartStorage.location == location,
             PartStorage.level == level,
@@ -133,8 +133,8 @@ def generate_box_label():
         if not (location and level and box):
             raise BadRequest("All fields are required.")
 
-        contents = db.session.query(PartInfo).join(
-            PartStorage, PartInfo.part_num == PartStorage.part_num
+        contents = db.session.query(RebrickableParts).join(
+            PartStorage, RebrickableParts.part_num == PartStorage.part_num
         ).filter(
             PartStorage.location == location,
             PartStorage.level == level,

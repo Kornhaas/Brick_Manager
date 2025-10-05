@@ -51,11 +51,43 @@ def download_and_extract_csv(file_name):
     os.remove(gz_path)
     return csv_path
 
+def ensure_table_structure():
+    """
+    Ensures all tables are created with proper SQLAlchemy model definitions
+    This preserves primary keys, foreign keys, and other constraints
+    """
+    logging.info("Ensuring database tables match model definitions...")
+    db.create_all()
+    logging.info("✅ All tables are properly structured")
+
 def import_csv_to_sqlite(csv_path, model_class):
     logging.info(f"Importing {csv_path} into {model_class.__tablename__} ...")
+    
+    # Read the CSV data
     df = pd.read_csv(csv_path)
-    df.to_sql(model_class.__tablename__, db.engine, if_exists='replace', index=False)
+    
+    # First, ensure the table exists with proper SQLAlchemy constraints
+    # This will create the table with correct primary keys, foreign keys, etc.
+    db.create_all()
+    
+    # Clear existing data but preserve table structure using SQLAlchemy
+    try:
+        # Use SQLAlchemy's delete method to maintain proper constraints
+        db.session.query(model_class).delete()
+        db.session.commit()
+        logging.info(f"Cleared existing data from {model_class.__tablename__}")
+    except Exception as e:
+        logging.warning(f"Could not clear table {model_class.__tablename__}: {e}")
+        db.session.rollback()
+    
+    # Import data while preserving table structure
+    # Use 'append' instead of 'replace' to keep the SQLAlchemy-created structure
+    df.to_sql(model_class.__tablename__, db.engine, if_exists='append', index=False)
+    
+    # Clean up the CSV file
     os.remove(csv_path)
+    
+    logging.info(f"Successfully imported {len(df)} records into {model_class.__tablename__}")
 
 @import_rebrickable_data_bp.route('/import_data', methods=['GET', 'POST'])
 def import_data():
@@ -67,6 +99,9 @@ def import_data():
     """
     if request.method == 'POST':
         try:
+            # First ensure all tables have proper structure
+            ensure_table_structure()
+            
             from models import (
                 RebrickablePartCategories, RebrickableColors, RebrickableParts,
                 RebrickablePartRelationships, RebrickableElements, RebrickableThemes,

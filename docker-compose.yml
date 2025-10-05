@@ -13,4 +13,3 @@ services:
     environment:
       FLASK_APP: app.py
       FLASK_ENV: production
-      REBRICKABLE_TOKEN: ${REBRICKABLE_TOKEN}

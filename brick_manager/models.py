@@ -2,12 +2,8 @@
 This module defines the SQLAlchemy models for the Brick Manager application.
 
 Models include:
-- Category
 - Set
 - UserSet
-- PartInfo
-- Color
-- Theme
 - PartInSet
 - Minifigure
 - MinifigurePart
@@ -25,23 +21,6 @@ from sqlalchemy import PrimaryKeyConstraint, String, Integer, ForeignKey, DateTi
 
 db = SQLAlchemy()
 
-
-class Category(db.Model):
-    """
-    Represents a category for parts.
-    """
-    __tablename__ = 'categories'
-    id = db.Column(Integer, primary_key=True)
-    name = db.Column(String(100), nullable=False)
-    last_updated = db.Column(
-        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-
-    def __repr__(self):
-        return f'<Category {self.name}>'
-
-    def to_dict(self):
-        """Convert the Category object to a dictionary."""
-        return {'id': self.id, 'name': self.name, 'last_updated': self.last_updated}
 
 
 class Set(db.Model):
@@ -95,39 +74,6 @@ class UserSet(db.Model):
         return {'id': self.id, 'set_id': self.set_id, 'status': self.status}
 
 
-class PartInfo(db.Model):
-    """
-    Represents information about individual parts.
-    """
-    __tablename__ = 'part_info'
-
-    part_num = db.Column(String, primary_key=True)
-    name = db.Column(String, nullable=False)
-    category_id = db.Column(Integer, ForeignKey(
-        'categories.id'), nullable=True)
-    part_img_url = db.Column(String, nullable=True)
-    part_url = db.Column(String, nullable=True)
-
-    # Relationships
-    category = db.relationship('Category', lazy='joined')
-    parts_in_sets = db.relationship(
-        'PartInSet', back_populates='part_info', lazy='dynamic')
-
-    def __repr__(self):
-        return f'<PartInfo {self.part_num} - {self.name}>'
-
-    def to_dict(self):
-        """Convert the PartInfo object to a dictionary."""
-        return {
-            'part_num': self.part_num,
-            'name': self.name,
-            'category_id': self.category_id,
-            'part_img_url': self.part_img_url,
-            'part_url': self.part_url,
-            'color_id': self.color_id,
-            'color_name': self.color_name
-        }
-
 class PartColor(db.Model):
     """
     Represents information about individual parts.
@@ -144,9 +90,6 @@ class PartColor(db.Model):
 
 
 
-
-
-
 class PartInSet(db.Model):
     """
     Represents the relationship between parts and sets.
@@ -155,7 +98,7 @@ class PartInSet(db.Model):
 
     id = db.Column(Integer, primary_key=True)
     part_num = db.Column(String, ForeignKey(
-        'part_info.part_num'), nullable=False)
+        'rebrickable_parts.part_num'), nullable=False)
     color = db.Column(String, nullable=False)
     color_rgb = db.Column(String, nullable=True)
     quantity = db.Column(Integer, nullable=False)
@@ -166,7 +109,7 @@ class PartInSet(db.Model):
 
     # Relationships
     user_set = db.relationship('UserSet', back_populates='parts_in_set')
-    part_info = db.relationship('PartInfo', back_populates='parts_in_sets')
+    rebrickable_part = db.relationship('RebrickableParts', lazy='joined')
 
     def __repr__(self):
         return f'<PartInSet {self.part_num} - Quantity: {self.quantity}>'
@@ -253,18 +196,21 @@ class PartStorage(db.Model):
     __tablename__ = 'part_storage'
     id = db.Column(Integer, primary_key=True)
     part_num = db.Column(String, ForeignKey(
-        'part_info.part_num'), nullable=False)
+        'rebrickable_parts.part_num'), nullable=False)
     location = db.Column(String)
     level = db.Column(String)
     box = db.Column(String)
 
     # Relationships
-    part_info = db.relationship(
-        'PartInfo', backref='part_storage', lazy='joined')
+    rebrickable_part = db.relationship(
+        'RebrickableParts', backref='part_storage', lazy='joined')
 
     def __repr__(self):
         return f'<PartStorage {self.part_num} - Location: {self.location}, Level: {self.level}, Box: {self.box}>'
 
+
+
+    
 
 class RebrickablePartCategories(db.Model):
     __tablename__ = 'rebrickable_part_categories'
@@ -285,6 +231,10 @@ class RebrickableColors(db.Model):
     name = db.Column(db.Text, nullable=False)
     rgb = db.Column(db.Text, nullable=False)
     is_trans = db.Column(db.Boolean, nullable=False, default=False)
+    num_parts = db.Column(db.Integer, nullable=True)
+    num_sets = db.Column(db.Integer, nullable=True) 
+    y1 = db.Column(db.Float, nullable=True)
+    y2 = db.Column(db.Float, nullable=True)
 
     def __repr__(self):
         #return f'<RebrickableColor {self.name}>'
@@ -292,7 +242,16 @@ class RebrickableColors(db.Model):
 
     def to_dict(self):
         """Convert the RebrickableColor object to a dictionary."""
-        return {'id': self.id, 'name': self.name, 'rgb': self.rgb, 'is_trans': self.is_trans}
+        return {
+            'id': self.id, 
+            'name': self.name, 
+            'rgb': self.rgb, 
+            'is_trans': self.is_trans,
+            'num_parts': self.num_parts,
+            'num_sets': self.num_sets,
+            'y1': self.y1,
+            'y2': self.y2
+        }
     
 
 class RebrickableParts(db.Model):
@@ -301,13 +260,26 @@ class RebrickableParts(db.Model):
     name = db.Column(db.Text, nullable=False)
     part_cat_id = db.Column(db.Integer, db.ForeignKey('rebrickable_part_categories.id'), nullable=False)
     part_material = db.Column(db.Text)
+    part_img_url = db.Column(db.Text, nullable=True)
+    part_url = db.Column(db.Text, nullable=True)
+
+    # Relationships
+    category = db.relationship('RebrickablePartCategories', lazy='joined')
+    parts_in_sets = db.relationship('PartInSet', back_populates='rebrickable_part', lazy='dynamic')
 
     def __repr__(self):
         return f'<RebrickablePart {self.part_num}>'
 
     def to_dict(self):
         """Convert the RebrickablePart object to a dictionary."""
-        return {'part_num': self.part_num, 'name': self.name, 'part_cat_id': self.part_cat_id, 'part_material': self.part_material}
+        return {
+            'part_num': self.part_num, 
+            'name': self.name, 
+            'part_cat_id': self.part_cat_id, 
+            'part_material': self.part_material,
+            'part_img_url': self.part_img_url,
+            'part_url': self.part_url
+        }
 
 
 class RebrickablePartRelationships(db.Model):
