@@ -165,9 +165,6 @@ document.addEventListener("DOMContentLoaded", function () {
                                     <td>${minifig.fig_num}</td>
                                     <td>${minifig.name}</td>
                                     <td>${minifig.quantity}</td>
-                                    <td>
-                                        <input type="number" name="minifig_id_${minifig.id}" value="${minifig.have_quantity}" min="0" max="${minifig.quantity}" class="form-control">
-                                    </td>
                                 </tr>`;
               
               // Minifigure parts row (nested table)
@@ -194,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 minifigsTableBody.innerHTML += `
                                 <tr>
-                                    <td colspan="5">
+                                    <td colspan="4">
                                         <h6>Parts for ${minifig.name}:</h6>
                                         <table class="table table-sm table-striped">
                                             <thead>

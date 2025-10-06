@@ -58,7 +58,6 @@ class User_Minifigures(db.Model):
     fig_num = db.Column(Text, ForeignKey(
         'rebrickable_minifigs.fig_num'), nullable=False)
     quantity = db.Column(Integer, nullable=False)
-    have_quantity = db.Column(Integer, default=0)
     user_set_id = db.Column(Integer, ForeignKey(
         'user_sets.id'), nullable=False)
 
@@ -111,11 +110,14 @@ class UserMinifigurePart(db.Model):
     have_quantity = db.Column(Integer, default=0)  # Track ownership
     user_set_id = db.Column(Integer, ForeignKey(
         'user_sets.id'), nullable=False)
+    minifigure_id = db.Column(Integer, ForeignKey(
+        'user_minifigures.id'), nullable=False)  # Link to specific minifigure
     is_spare = db.Column(Boolean, default=False, nullable=False)
 
     # Relationships
     user_set = db.relationship(
         "User_Set", back_populates="user_minifigure_parts")
+    user_minifigure = db.relationship("User_Minifigures")
     rebrickable_part = db.relationship('RebrickableParts', lazy='joined')
     rebrickable_color = db.relationship('RebrickableColors', lazy='joined')
 

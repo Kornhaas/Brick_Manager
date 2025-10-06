@@ -175,27 +175,14 @@ def get_user_set_details(user_set_id):
     # Sort parts by color name
     parts.sort(key=lambda x: x['color'])
     
-    # Group minifigure parts by minifigure using inventory data
+    # Group minifigure parts by minifigure using the new minifigure_id field
     minifigures_with_parts = []
     for minifig in user_set.minifigures_in_set:
-        # Get the expected parts for this minifigure from Rebrickable inventory
-        inventory = RebrickableInventories.query.filter_by(set_num=minifig.fig_num).first()
-        minifig_expected_parts = set()
-        
-        if inventory:
-            expected_parts = db.session.query(RebrickableInventoryParts).filter_by(
-                inventory_id=inventory.id
-            ).all()
-            minifig_expected_parts = {(part.part_num, part.color_id) for part in expected_parts}
-        
-        # Find user minifigure parts that match this minifigure's expected parts
-        matching_user_parts = []
-        for user_part in user_minifigure_parts:
-            if (user_part.part_num, user_part.color_id) in minifig_expected_parts:
-                matching_user_parts.append(user_part)
+        # Get parts for this specific minifigure using the minifigure_id
+        minifig_parts = [part for part in user_minifigure_parts if part.minifigure_id == minifig.id]
         
         # Enrich and sort the parts for this minifigure
-        enriched_parts = [enrich_minifigure_part(part) for part in matching_user_parts]
+        enriched_parts = [enrich_minifigure_part(part) for part in minifig_parts]
         enriched_parts.sort(key=lambda x: x['color'])
         
         minifig_data = {
@@ -203,7 +190,6 @@ def get_user_set_details(user_set_id):
             'fig_num': minifig.fig_num,
             'name': minifig.rebrickable_minifig.name if minifig.rebrickable_minifig else "Unknown",
             'quantity': minifig.quantity,
-            'have_quantity': minifig.have_quantity,
             'img_url': minifig.rebrickable_minifig.img_url if minifig.rebrickable_minifig else '',
             'location': "Not Specified",
             'status': "Not Available",
@@ -236,13 +222,6 @@ def update_user_set():
                 part.have_quantity = max(
                     0, min(part.quantity, int(have_quantity)))
                 db.session.add(part)
-
-        for minifig in user_set.minifigures_in_set:
-            have_quantity = request.form.get(f'minifig_id_{minifig.id}')
-            if have_quantity is not None:
-                minifig.have_quantity = max(
-                    0, min(minifig.quantity, int(have_quantity)))
-                db.session.add(minifig)
 
         user_minifigure_parts = UserMinifigurePart.query.filter_by(
             user_set_id=user_set_id).all()

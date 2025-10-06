@@ -175,6 +175,7 @@ def add_set():
                 minifig_part.color_id = color_info.id
                 minifig_part.quantity = part['quantity']
                 minifig_part.user_set_id = user_set.id
+                minifig_part.minifigure_id = db_minifig.id  # Link to specific minifigure
                 db.session.add(minifig_part)
         db.session.commit()
         flash(f"Set {template_set.name} added successfully as {
