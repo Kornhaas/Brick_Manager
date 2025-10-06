@@ -207,3 +207,46 @@ footer.dark-mode {
 .hidden {
     display: none;
 }
+
+/* Enhanced table styling for better visual consistency */
+.table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-success {
+    background-color: #d1e7dd !important;
+}
+
+.table-danger {
+    background-color: #f8d7da !important;
+}
+
+.table-sm {
+    font-size: 0.875rem;
+}
+
+.table-sm th,
+.table-sm td {
+    padding: 0.5rem;
+}
+
+/* Image thumbnail hover effect */
+.img-thumbnail {
+    transition: transform 0.2s ease-in-out;
+}
+
+.img-thumbnail:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+/* Form control styling in tables */
+.table .form-control {
+    margin-bottom: 0;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}

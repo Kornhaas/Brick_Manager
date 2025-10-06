@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (tableBody) {
           const rows = tableBody.querySelectorAll("tr");
           rows.forEach((row) => {
-            const quantityCell = row.querySelector("td:nth-child(4)"); // Quantity cell
+            const quantityCell = row.querySelector("td:nth-child(6)"); // Quantity Required cell (6th column)
             const ownedInput = row.querySelector("input[type='number']"); // Owned input field
 
             if (quantityCell && ownedInput) {
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
     filterCheckbox.addEventListener("change", () => {
       const filterRows = (rows) => {
         rows.forEach((row) => {
-          const quantityCell = row.querySelector("td:nth-child(4)");
+          const quantityCell = row.querySelector("td:nth-child(6)"); // Quantity Required cell (6th column)
           const ownedInput = row.querySelector("input[type='number']");
           if (quantityCell && ownedInput) {
             const quantity = parseInt(quantityCell.textContent.trim(), 10);
@@ -119,8 +119,8 @@ document.addEventListener("DOMContentLoaded", function () {
             sparePartsTableBody.innerHTML = "";
 
             data.parts.forEach((part) => {
-              const mismatchClass =
-                part.quantity !== part.have_quantity ? "table-warning" : "";
+              // Use table-danger for missing parts, table-success for complete parts
+              const statusClass = part.quantity > part.have_quantity ? "table-danger" : "table-success";
               
               // Determine text color based on background color brightness
               const colorRgb = part.color_rgb || "FFFFFF";
@@ -128,11 +128,13 @@ document.addEventListener("DOMContentLoaded", function () {
               const textColor = brightness > 0x888888 ? "black" : "white";
               
               const partRow = `
-                    <tr class="${mismatchClass}">
+                    <tr class="${statusClass}">
                         <td><img src="${part.part_img_url}" alt="${
                 part.name
               }" class="img-thumbnail" width="50" style="cursor: pointer;" onclick="showImageModal('${part.part_img_url}', '${part.name} (${part.part_num})')" /></td>
+                        <td>${part.part_num}</td>
                         <td>${part.name}</td>
+                        <td>${part.category || "Unknown Category"}</td>
                         <td style="background-color: #${colorRgb}; color: ${textColor};">${part.color || "Not Specified"}</td>
                         <td>${part.quantity}</td>
                         <td>
@@ -170,13 +172,14 @@ document.addEventListener("DOMContentLoaded", function () {
               // Minifigure parts row (nested table)
               if (minifig.parts && minifig.parts.length > 0) {
                 const partsTableRows = minifig.parts.map(part => {
-                  const mismatchClass = part.quantity !== part.have_quantity ? "table-warning" : "";
+                  // Use table-danger for missing parts, table-success for complete parts
+                  const statusClass = part.quantity > part.have_quantity ? "table-danger" : "table-success";
                   const colorRgb = part.color_rgb || "FFFFFF";
                   const brightness = parseInt(colorRgb, 16);
                   const textColor = brightness > 0x888888 ? "black" : "white";
                   
                   return `
-                    <tr class="${mismatchClass}">
+                    <tr class="${statusClass}">
                         <td><img src="${part.part_img_url}" alt="${part.name}" class="img-thumbnail" width="30" style="cursor: pointer;" onclick="showImageModal('${part.part_img_url}', '${part.name} (${part.part_num})')" /></td>
                         <td>${part.part_num}</td>
                         <td>${part.name}</td>
