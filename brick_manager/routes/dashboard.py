@@ -3,7 +3,7 @@ This module provides routes for the dashboard,
 including viewing summaries, details, and updating quantities.
 """
 from flask import Blueprint, jsonify, render_template, current_app, request
-from models import db, UserSet, PartInSet, UserMinifigurePart, RebrickableParts
+from models import db, User_Set, User_Parts, UserMinifigurePart, RebrickableParts
 from services.cache_service import cache_image
 from services.part_lookup_service import load_part_lookup
 #pylint: disable=C0301,W0718
@@ -16,7 +16,7 @@ def enrich_part(item, master_lookup):
     Enrich part data with additional information.
 
     Args:
-        item (PartInSet | UserMinifigurePart): The part or minifigure part to enrich.
+        item (User_Parts | UserMinifigurePart): The part or minifigure part to enrich.
         master_lookup (dict): Lookup data for additional information.
 
     Returns:
@@ -39,11 +39,11 @@ def enrich_part(item, master_lookup):
 
     return {
         'part_id': item.id,
-        'set_id': item.user_set.template_set.set_number if item.user_set else None,
+        'set_id': item.user_set.template_set.set_num if item.user_set else None,
         'internal_id': item.user_set.id if item.user_set else None,
         'part_num': item.part_num,
         'name': part_info.name if part_info else "Unknown",
-        'color': item.color or "Unknown",
+        'color': item.rebrickable_color.name if item.rebrickable_color else "Unknown",
         'total_quantity': item.quantity,
         'have_quantity': item.have_quantity,
         'category': category,
@@ -57,13 +57,13 @@ def dashboard():
     """
     Displays an overview of total and missing parts/minifigure parts.
     """
-    parts_in_sets = PartInSet.query.join(UserSet).filter(
-        ~UserSet.status.in_(['assembled', 'konvolut'])
+    parts_in_sets = User_Parts.query.join(User_Set).filter(
+        ~User_Set.status.in_(['assembled', 'konvolut'])
     ).all()
 
-    minifigure_parts = UserMinifigurePart.query.join(UserSet).filter(
+    minifigure_parts = UserMinifigurePart.query.join(User_Set).filter(
         UserMinifigurePart.quantity > UserMinifigurePart.have_quantity,
-        ~UserSet.status.in_(['assembled', 'konvolut'])
+        ~User_Set.status.in_(['assembled', 'konvolut'])
     ).all()
 
     total_parts = sum(part.have_quantity for part in parts_in_sets)
@@ -82,8 +82,8 @@ def dashboard():
         part.quantity - part.have_quantity for part in minifigure_parts
     )
 
-    konvolut_parts = PartInSet.query.join(UserSet).filter(
-        UserSet.status == 'konvolut'
+    konvolut_parts = User_Parts.query.join(User_Set).filter(
+        User_Set.status == 'konvolut'
     ).all()
 
     missing_konvolut_parts = sum(
@@ -91,8 +91,8 @@ def dashboard():
         for part in konvolut_parts if part.quantity > part.have_quantity
     )
 
-    konvolut_minifigure_parts = UserMinifigurePart.query.join(UserSet).filter(
-        UserSet.status == 'konvolut'
+    konvolut_minifigure_parts = UserMinifigurePart.query.join(User_Set).filter(
+        User_Set.status == 'konvolut'
     ).all()
 
     missing_konvolut_minifigure_parts = sum(
@@ -134,7 +134,7 @@ def update_quantity():
                     f"Invalid entry in changes: {change}")
                 continue
 
-            part = PartInSet.query.filter_by(id=part_id).first()
+            part = User_Parts.query.filter_by(id=part_id).first()
             if part:
                 part.have_quantity = max(
                     0, min(part.quantity, int(new_quantity)))
@@ -173,25 +173,25 @@ def details(category):
     master_lookup = load_part_lookup()
 
     if category == 'missing_parts':
-        data = PartInSet.query.join(UserSet).filter(
-            PartInSet.quantity > PartInSet.have_quantity,
-            ~UserSet.status.in_(['assembled', 'konvolut'])
+        data = User_Parts.query.join(User_Set).filter(
+            User_Parts.quantity > User_Parts.have_quantity,
+            ~User_Set.status.in_(['assembled', 'konvolut'])
         ).all()
         title = "Missing Parts"
     elif category == 'missing_minifigure_parts':
-        data = UserMinifigurePart.query.join(UserSet).filter(
+        data = UserMinifigurePart.query.join(User_Set).filter(
             UserMinifigurePart.quantity > UserMinifigurePart.have_quantity,
-            ~UserSet.status.in_(['assembled', 'konvolut'])
+            ~User_Set.status.in_(['assembled', 'konvolut'])
         ).all()
         title = "Missing Minifigure Parts"
     elif category == 'konvolut_parts':
-        data = PartInSet.query.join(UserSet).filter(
-            UserSet.status == 'konvolut'
+        data = User_Parts.query.join(User_Set).filter(
+            User_Set.status == 'konvolut'
         ).all()
         title = "Konvolut Parts"
     elif category == 'konvolut_minifigure_parts':
-        data = UserMinifigurePart.query.join(UserSet).filter(
-            UserSet.status == 'konvolut'
+        data = UserMinifigurePart.query.join(User_Set).filter(
+            User_Set.status == 'konvolut'
         ).all()
         title = "Konvolut Minifigure Parts"
     else:
@@ -209,9 +209,9 @@ def api_missing_parts():
     API endpoint to retrieve missing parts.
     """
     master_lookup = load_part_lookup()
-    missing_parts = PartInSet.query.join(UserSet).filter(
-        PartInSet.quantity > PartInSet.have_quantity,
-        ~UserSet.status.in_(['assembled', 'konvolut'])
+    missing_parts = User_Parts.query.join(User_Set).filter(
+        User_Parts.quantity > User_Parts.have_quantity,
+        ~User_Set.status.in_(['assembled', 'konvolut'])
     ).all()
 
     enriched_data = [enrich_part(item, master_lookup)
@@ -225,9 +225,9 @@ def api_missing_minifigure_parts():
     API endpoint to retrieve missing minifigure parts.
     """
     master_lookup = load_part_lookup()
-    missing_minifigure_parts = UserMinifigurePart.query.join(UserSet).filter(
+    missing_minifigure_parts = UserMinifigurePart.query.join(User_Set).filter(
         UserMinifigurePart.quantity > UserMinifigurePart.have_quantity,
-        ~UserSet.status.in_(['assembled', 'konvolut'])
+        ~User_Set.status.in_(['assembled', 'konvolut'])
     ).all()
 
     enriched_data = [enrich_part(item, master_lookup)

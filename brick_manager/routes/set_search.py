@@ -4,7 +4,7 @@ This module handles the search, retrieval, and addition of Brick sets, parts, an
 
 from flask import Blueprint, render_template, request, flash, current_app, redirect, url_for
 import requests
-from models import db, Set, UserSet, PartInSet, Minifigure, UserMinifigurePart, RebrickableParts, RebrickableSets, RebrickableInventoryParts, RebrickableColors, RebrickableInventories, RebrickableInventoryMinifigs, RebrickableMinifigs
+from models import db, User_Set, User_Parts, User_Minifigures, UserMinifigurePart, RebrickableParts, RebrickableSets, RebrickableInventoryParts, RebrickableColors, RebrickableInventories, RebrickableInventoryMinifigs, RebrickableMinifigs
 from config import Config
 from services.part_lookup_service import load_part_lookup
 #pylint: disable=C0301,W0718
@@ -80,7 +80,7 @@ def set_search():
 @set_search_bp.route('/add_set', methods=['POST'])
 def add_set():
     """
-    Add a Brick set instance (UserSet) to the database, including its parts, minifigures, and minifigure parts.
+    Add a Brick set instance (User_Set) to the database, including its parts, minifigures, and minifigure parts.
     """
     set_number = request.form.get('set_number')
     status = request.form.get('status', 'unknown')
@@ -88,6 +88,10 @@ def add_set():
         "Adding set %s to the database with status %s.", set_number, status)
 
     try:
+        if not set_number:
+            flash("Set number is required.", category="danger")
+            return redirect(url_for('set_search.set_search'))
+            
         if not set_number.endswith('-1'):
             set_number += '-1'
             current_app.logger.debug("Set number corrected to: %s", set_number)
@@ -97,12 +101,18 @@ def add_set():
             flash(f"Set {set_number} not found.", category="danger")
             return redirect(url_for('set_search.set_search'))
 
-        template_set, _ = get_or_create(db.session, Set, set_number=set_number, defaults={
+        # Check if RebrickableSet already exists, if not create it
+        template_set, _ = get_or_create(db.session, RebrickableSets, set_num=set_number, defaults={
             'name': set_info['name'],
-            'set_img_url': set_info['set_img_url']
+            'year': set_info.get('year', 2023),
+            'theme_id': set_info.get('theme_id', 1),
+            'num_parts': set_info.get('num_parts', 0),
+            'img_url': set_info['set_img_url']
         })
 
-        user_set = UserSet(template_set=template_set, status=status)
+        user_set = User_Set()
+        user_set.set_num = template_set.set_num
+        user_set.status = status
         db.session.add(user_set)
         db.session.flush()
 
@@ -115,24 +125,33 @@ def add_set():
                 'part_url': part.get('part_url', ''),
             })
 
-            db.session.add(PartInSet(
-                part_num=part_info.part_num,
-                color=part['color'],
-                color_rgb=part['color_rgb'],
-                quantity=part['quantity'],
-                is_spare=part['is_spare'],
-                user_set_id=user_set.id
-            ))
+            # Get or create color
+            color_info, _ = get_or_create(db.session, RebrickableColors, name=part['color'], defaults={
+                'rgb': part['color_rgb'],
+                'is_trans': False
+            })
+
+            user_part = User_Parts()
+            user_part.part_num = part_info.part_num
+            user_part.color_id = color_info.id
+            user_part.quantity = part['quantity']
+            user_part.is_spare = part['is_spare']
+            user_part.user_set_id = user_set.id
+            db.session.add(user_part)
 
         minifigs_info = fetch_minifigs_info(set_number)
         for minifig in minifigs_info:
-            db_minifig = Minifigure(
-                fig_num=minifig['fig_num'],
-                name=minifig['name'],
-                quantity=minifig['quantity'],
-                img_url=minifig['img_url'],
-                user_set_id=user_set.id
-            )
+            # Get or create rebrickable minifig
+            rebrickable_minifig, _ = get_or_create(db.session, RebrickableMinifigs, fig_num=minifig['fig_num'], defaults={
+                'name': minifig['name'],
+                'num_parts': minifig.get('num_parts', 0),
+                'img_url': minifig['img_url']
+            })
+            
+            db_minifig = User_Minifigures()
+            db_minifig.fig_num = minifig['fig_num']
+            db_minifig.quantity = minifig['quantity']
+            db_minifig.user_set_id = user_set.id
             db.session.add(db_minifig)
             db.session.flush()
 
@@ -145,15 +164,18 @@ def add_set():
                     'part_url': part.get('part_url', ''),
                 })
 
-                db.session.add(UserMinifigurePart(
-                    part_num=part_info.part_num,
-                    name=part_info.name,
-                    color=part['color'],
-                    color_rgb=part['color_rgb'],
-                    quantity=part['quantity'],
-                    part_img_url=part['part_img_url'],
-                    user_set_id=user_set.id
-                ))
+                # Get or create color
+                color_info, _ = get_or_create(db.session, RebrickableColors, name=part['color'], defaults={
+                    'rgb': part['color_rgb'],
+                    'is_trans': False
+                })
+
+                minifig_part = UserMinifigurePart()
+                minifig_part.part_num = part_info.part_num
+                minifig_part.color_id = color_info.id
+                minifig_part.quantity = part['quantity']
+                minifig_part.user_set_id = user_set.id
+                db.session.add(minifig_part)
         db.session.commit()
         flash(f"Set {template_set.name} added successfully as {
               status}!", category="success")

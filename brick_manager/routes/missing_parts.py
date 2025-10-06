@@ -4,7 +4,7 @@ This module handles the display of all missing parts and missing minifigure part
 
 from flask import Blueprint, render_template
 from sqlalchemy.orm import joinedload
-from models import UserSet, UserMinifigurePart
+from models import User_Set, UserMinifigurePart
 from services.part_lookup_service import load_part_lookup
 #pylint: disable=C0301
 # Define a new Blueprint for missing parts
@@ -19,10 +19,10 @@ def missing_parts():
     missing_items = []
     master_lookup = load_part_lookup()
 
-    # Query all UserSets
-    user_sets = UserSet.query.options(
-        joinedload(UserSet.parts_in_set),  # Correct relationship name
-        joinedload(UserSet.template_set)
+    # Query all User_Sets
+    user_sets = User_Set.query.options(
+        joinedload(User_Set.parts_in_set),  # Correct relationship name
+        joinedload(User_Set.template_set)
     ).all()
 
     # Collect missing regular parts
@@ -38,14 +38,14 @@ def missing_parts():
                 )
                 missing_items.append({
                     'type': 'Regular Part',
-                    'set_id': user_set.template_set.set_number,
+                    'set_id': user_set.template_set.set_num,
                     'internal_id': user_set.id,
                     'item_id': part.part_num,
-                    'name': part.part_info.name if part.part_info else "Unknown",
-                    'color': part.color,
+                    'name': part.rebrickable_part.name if part.rebrickable_part else "Unknown",
+                    'color': part.rebrickable_color.name if part.rebrickable_color else "Unknown",
                     'is_spare': part.is_spare,
                     'missing_quantity': part.quantity - part.have_quantity,
-                    'img_url': part.part_info.part_img_url if part.part_info else "/static/default_image.png",
+                    'img_url': part.rebrickable_part.part_img_url if part.rebrickable_part else "/static/default_image.png",
                     'location': location_data
                 })
 
@@ -64,14 +64,14 @@ def missing_parts():
             )
             missing_items.append({
                 'type': 'Minifigure Part',
-                'set_id': minifig_part.user_set.template_set.set_number,
+                'set_id': minifig_part.user_set.template_set.set_num,
                 'internal_id': minifig_part.user_set.id,
                 'item_id': minifig_part.part_num,
-                'name': minifig_part.name,
-                'color': minifig_part.color,
+                'name': minifig_part.rebrickable_part.name if minifig_part.rebrickable_part else "Unknown",
+                'color': minifig_part.rebrickable_color.name if minifig_part.rebrickable_color else "Unknown",
                 'is_spare': minifig_part.is_spare,
                 'missing_quantity': minifig_part.quantity - minifig_part.have_quantity,
-                'img_url': minifig_part.part_img_url or "/static/default_image.png",
+                'img_url': minifig_part.rebrickable_part.part_img_url if minifig_part.rebrickable_part else "/static/default_image.png",
                 'location': location_data
             })
 

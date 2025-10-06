@@ -99,13 +99,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // Handle view details
     document.querySelectorAll(".view-details").forEach((button) => {
       button.addEventListener("click", () => {
-        const userSetId = button.getAttribute("data-user-set-id");
-        fetch(`/set_maintain/${userSetId}`)
+        const User_SetId = button.getAttribute("data-user-set-id");
+        fetch(`/set_maintain/${User_SetId}`)
           .then((response) => response.json())
           .then((data) => {
             setDetails.classList.remove("hidden");
             setsTable.classList.add("hidden");
-            document.getElementById("user-set-id").value = userSetId;
+            document.getElementById("user-set-id").value = User_SetId;
 
             // Populate Parts Table (Split into Non-Spare and Spare Parts)
             const nonSparePartsTableBody = document.getElementById(
@@ -121,13 +121,19 @@ document.addEventListener("DOMContentLoaded", function () {
             data.parts.forEach((part) => {
               const mismatchClass =
                 part.quantity !== part.have_quantity ? "table-warning" : "";
+              
+              // Determine text color based on background color brightness
+              const colorRgb = part.color_rgb || "FFFFFF";
+              const brightness = parseInt(colorRgb, 16);
+              const textColor = brightness > 0x888888 ? "black" : "white";
+              
               const partRow = `
                     <tr class="${mismatchClass}">
                         <td><img src="${part.part_img_url}" alt="${
                 part.name
-              }" width="50"></td>
+              }" class="img-thumbnail" width="50" style="cursor: pointer;" onclick="showImageModal('${part.part_img_url}', '${part.name} (${part.part_num})')" /></td>
                         <td>${part.name}</td>
-                        <td>${part.color || "Not Specified"}</td>
+                        <td style="background-color: #${colorRgb}; color: ${textColor};">${part.color || "Not Specified"}</td>
                         <td>${part.quantity}</td>
                         <td>
                             <input type="number" name="part_id_${
@@ -146,53 +152,75 @@ document.addEventListener("DOMContentLoaded", function () {
               }
             });
 
-            // Populate Minifigures Table
+            // Populate Minifigures Table with their parts
             const minifigsTableBody = document.getElementById(
               "minifigs-table-body"
             );
             minifigsTableBody.innerHTML = "";
             data.minifigs.forEach((minifig) => {
+              // Main minifigure row
               minifigsTableBody.innerHTML += `
                                 <tr>
-                                    <td><img src="${minifig.img_url}" alt="${minifig.name}" width="50"></td>
+                                    <td><img src="${minifig.img_url}" alt="${minifig.name}" class="img-thumbnail" width="50" style="cursor: pointer;" onclick="showImageModal('${minifig.img_url}', '${minifig.name} (${minifig.fig_num})')" /></td>
+                                    <td>${minifig.fig_num}</td>
                                     <td>${minifig.name}</td>
                                     <td>${minifig.quantity}</td>
-                                </tr>`;
-            });
-
-            // Populate Minifigure Parts Table
-            const minifigPartsTableBody = document.getElementById(
-              "minifig-parts-table-body"
-            );
-            minifigPartsTableBody.innerHTML = "";
-            data.minifigure_parts.forEach((part) => {
-              const mismatchClass =
-                part.quantity !== part.have_quantity ? "table-warning" : "";
-              minifigPartsTableBody.innerHTML += `
-                                <tr class="${mismatchClass}">
-                                    <td><img src="${
-                                      part.part_img_url
-                                    }" alt="${part.name}" width="50"></td>
-                                    <td>${part.part_num}</td>
-                                    <td>${part.name}</td>
-                                    <td>${part.quantity}</td>
                                     <td>
-                                        <input type="number" name="minifig_part_id_${
-                                          part.id
-                                        }" value="${
-                part.have_quantity
-              }" min="0" max="${part.quantity}" class="form-control">
+                                        <input type="number" name="minifig_id_${minifig.id}" value="${minifig.have_quantity}" min="0" max="${minifig.quantity}" class="form-control">
                                     </td>
-                                    <td>${
-                                      part.location || "Not Specified"
-                                    }</td>
                                 </tr>`;
+              
+              // Minifigure parts row (nested table)
+              if (minifig.parts && minifig.parts.length > 0) {
+                const partsTableRows = minifig.parts.map(part => {
+                  const mismatchClass = part.quantity !== part.have_quantity ? "table-warning" : "";
+                  const colorRgb = part.color_rgb || "FFFFFF";
+                  const brightness = parseInt(colorRgb, 16);
+                  const textColor = brightness > 0x888888 ? "black" : "white";
+                  
+                  return `
+                    <tr class="${mismatchClass}">
+                        <td><img src="${part.part_img_url}" alt="${part.name}" class="img-thumbnail" width="30" style="cursor: pointer;" onclick="showImageModal('${part.part_img_url}', '${part.name} (${part.part_num})')" /></td>
+                        <td>${part.part_num}</td>
+                        <td>${part.name}</td>
+                        <td style="background-color: #${colorRgb}; color: ${textColor};">${part.color || "Not Specified"}</td>
+                        <td>${part.quantity}</td>
+                        <td>
+                            <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control">
+                        </td>
+                        <td>${part.location || "Not Specified"}</td>
+                    </tr>`;
+                }).join('');
+                
+                minifigsTableBody.innerHTML += `
+                                <tr>
+                                    <td colspan="5">
+                                        <h6>Parts for ${minifig.name}:</h6>
+                                        <table class="table table-sm table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Image</th>
+                                                    <th>Part Number</th>
+                                                    <th>Name</th>
+                                                    <th>Color</th>
+                                                    <th>Quantity</th>
+                                                    <th>Owned</th>
+                                                    <th>Location</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${partsTableRows}
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>`;
+              }
             });
 
             document.getElementById("status").value = data.status;
           })
           .catch((error) =>
-            console.error("Error fetching UserSet details:", error)
+            console.error("Error fetching User_Set details:", error)
           );
       });
     });
@@ -218,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Handle Generate Label
     document.querySelectorAll(".generate-label").forEach((button) => {
       button.addEventListener("click", () => {
-        const userSetId = button.getAttribute("data-user-set-id");
+        const User_SetId = button.getAttribute("data-user-set-id");
         const boxSize = button.getAttribute("data-box-size");
 
         fetch("/set_maintain/generate_label", {
@@ -226,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ set_id: userSetId, box_size: boxSize }),
+          body: JSON.stringify({ set_id: User_SetId, box_size: boxSize }),
         })
           .then((response) => {
             if (response.ok) {
@@ -239,7 +267,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const a = document.createElement("a");
             a.style.display = "none";
             a.href = url;
-            a.download = `${userSetId}_${boxSize}.drawio`;
+            a.download = `${User_SetId}_${boxSize}.drawio`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -250,3 +278,12 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   });
+
+  // Function to show image in modal
+  function showImageModal(imageSrc, imageName) {
+    document.getElementById('modalImage').src = imageSrc;
+    document.getElementById('modalImageName').textContent = imageName;
+    document.getElementById('imageModalLabel').textContent = imageName + ' - Image';
+    var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+    imageModal.show();
+  }

@@ -2,15 +2,20 @@
 
 ```mermaid
 erDiagram
-    SETS ||--o{ USER_SETS : template
-    USER_SETS ||--o{ PARTS_IN_SET : contains
-    REBRICKABLE_PARTS ||--o{ PARTS_IN_SET : part
-    USER_SETS ||--o{ MINIFIGURES : contains
-    MINIFIGURES ||--o{ MINIFIGURE_PARTS : has
+# Brick Manager Database ER Diagram
+
+```mermaid
+erDiagram
+    REBRICKABLE_SETS ||--o{ USER_SETS : template
+    USER_SETS ||--o{ USER_PARTS : contains
+    REBRICKABLE_PARTS ||--o{ USER_PARTS : part
+    REBRICKABLE_COLORS ||--o{ USER_PARTS : color
+    USER_SETS ||--o{ USER_MINIFIGURES : contains
+    REBRICKABLE_MINIFIGS ||--o{ USER_MINIFIGURES : minifig
     USER_SETS ||--o{ USER_MINIFIGURE_PARTS : contains
+    REBRICKABLE_PARTS ||--o{ USER_MINIFIGURE_PARTS : part
+    REBRICKABLE_COLORS ||--o{ USER_MINIFIGURE_PARTS : color
     REBRICKABLE_PARTS ||--o{ PART_STORAGE : stored
-    PART_COLOR ||--|| REBRICKABLE_PARTS : references
-    PART_COLOR ||--|| REBRICKABLE_COLORS : colored_by
 
     REBRICKABLE_PART_CATEGORIES ||--o{ REBRICKABLE_PARTS : contains
     REBRICKABLE_COLORS ||--o{ REBRICKABLE_ELEMENTS : colors
@@ -28,64 +33,33 @@ erDiagram
     REBRICKABLE_INVENTORIES ||--o{ REBRICKABLE_INVENTORY_MINIFIGS : inventory
     REBRICKABLE_MINIFIGS ||--o{ REBRICKABLE_INVENTORY_MINIFIGS : minifig
 
-    SETS {
-        int id PK
-        string set_number
-        string name
-        string set_img_url
-    }
     USER_SETS {
         int id PK
-        int set_id FK
+        string set_num FK
         string status
     }
-    PART_COLOR {
-        string part_num PK, FK
-        int color_id PK, FK
-        string color_name
-        string part_img_url
-    }
-    PARTS_IN_SET {
+    USER_PARTS {
         int id PK
         string part_num FK
-        string color
-        string color_rgb
+        int color_id FK
         int quantity
         int have_quantity
         int user_set_id FK
         bool is_spare
     }
-    MINIFIGURES {
+    USER_MINIFIGURES {
         int id PK
-        string fig_num
-        string name
+        string fig_num FK
         int quantity
         int have_quantity
-        string img_url
         int user_set_id FK
-    }
-    MINIFIGURE_PARTS {
-        int id PK
-        string part_num
-        string name
-        string color
-        string color_rgb
-        int quantity
-        string part_img_url
-        string part_url
-        int minifigure_id FK
-        bool is_spare
     }
     USER_MINIFIGURE_PARTS {
         int id PK
-        string part_num
-        string name
-        string color
-        string color_rgb
+        string part_num FK
+        int color_id FK
         int quantity
         int have_quantity
-        string part_img_url
-        string part_url
         int user_set_id FK
         bool is_spare
     }
