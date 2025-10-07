@@ -5,7 +5,7 @@ and generating labels for boxes.
 import os
 from flask import Blueprint, jsonify, render_template, request, current_app, send_file
 from werkzeug.exceptions import BadRequest, NotFound
-from models import db, PartStorage, RebrickableParts
+from models import db, PartStorage, RebrickableParts, RebrickableInventoryParts
 from services.cache_service import cache_image
 from services.label_service import create_box_label_jpg
 
@@ -99,15 +99,41 @@ def get_box_contents():
             PartStorage.box == box
         ).all()
 
-        return jsonify([
-            {
+        current_app.logger.info(f"Found {len(contents)} parts in box {location}-{level}-{box}")
+
+        result = []
+        for part in contents:
+            # Use the same image lookup logic as part_lookup.py
+            # First try to get image URL from RebrickableInventoryParts (inventory-specific images)
+            inventory_part = RebrickableInventoryParts.query.filter(
+                RebrickableInventoryParts.part_num == part.part_num,
+                RebrickableInventoryParts.img_url.isnot(None),
+                RebrickableInventoryParts.img_url != '',
+                RebrickableInventoryParts.img_url != 'None'
+            ).first()
+            
+            # Use inventory image if available, otherwise fall back to generic part image
+            if inventory_part and inventory_part.img_url:
+                original_img_url = inventory_part.img_url
+            else:
+                original_img_url = part.part_img_url
+            
+            # Handle various "empty" cases: None, empty string, or literal 'None' string
+            if original_img_url and original_img_url.strip() and original_img_url.strip().lower() != 'none':
+                cached_img_url = cache_image(original_img_url)
+            else:
+                cached_img_url = '/static/default_image.png'
+                
+            current_app.logger.debug(f"Part {part.part_num}: original_url='{original_img_url}', cached_url='{cached_img_url}'")
+            
+            result.append({
                 "part_num": part.part_num,
-                "image": cache_image(part.part_img_url),
+                "image": cached_img_url,
                 "category": part.category.name if part.category else "Unknown",
                 "name": part.name,
-            }
-            for part in contents
-        ])
+            })
+
+        return jsonify(result)
     except BadRequest as e:
         current_app.logger.error("BadRequest in get_box_contents: %s", e)
         return jsonify({"error": "BadRequest in get_box_contents."}), 400
@@ -148,16 +174,31 @@ def generate_box_label():
             "location": location,
             "level": level,
             "box": box,
-            "items": [
-                {
-                    "part_num": part.part_num,
-                    "name": part.name,
-                    "category": part.category.name if part.category else "Unknown",
-                    "img_url": part.part_img_url
-                }
-                for part in contents
-            ]
+            "items": []
         }
+        
+        # Apply the same improved image logic for label generation
+        for part in contents:
+            # First try to get image URL from RebrickableInventoryParts
+            inventory_part = RebrickableInventoryParts.query.filter(
+                RebrickableInventoryParts.part_num == part.part_num,
+                RebrickableInventoryParts.img_url.isnot(None),
+                RebrickableInventoryParts.img_url != '',
+                RebrickableInventoryParts.img_url != 'None'
+            ).first()
+            
+            # Use inventory image if available, otherwise fall back to generic part image
+            if inventory_part and inventory_part.img_url:
+                img_url = inventory_part.img_url
+            else:
+                img_url = part.part_img_url
+            
+            box_info["items"].append({
+                "part_num": part.part_num,
+                "name": part.name,
+                "category": part.category.name if part.category else "Unknown",
+                "img_url": img_url
+            })
 
         label_path = create_box_label_jpg(box_info)
 

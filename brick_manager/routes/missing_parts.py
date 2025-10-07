@@ -55,8 +55,11 @@ def enrich_missing_part(part, user_set, part_type='Regular Part'):
         # Determine the best image URL (inventory-specific first, then generic part image)
         best_img_url = inventory_img_url or (part_info.part_img_url if part_info else None)
         
-        # Use cache service to get cached image URL (or fallback if no image available)
-        cached_img_url = cache_image(best_img_url) if best_img_url else '/static/default_image.png'
+        # Handle various "empty" cases: None, empty string, or literal 'None' string
+        if best_img_url and best_img_url.strip() and best_img_url.strip().lower() != 'none':
+            cached_img_url = cache_image(best_img_url)
+        else:
+            cached_img_url = '/static/default_image.png'
         
         
         master_lookup = load_part_lookup()

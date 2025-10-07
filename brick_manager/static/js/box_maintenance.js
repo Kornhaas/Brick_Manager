@@ -152,12 +152,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
                 // Populate new contents
+                console.log('Box contents received:', data);
                 data.forEach((item) => {
+                    console.log(`Part ${item.part_num}: image URL = "${item.image}"`);
                     const card = document.createElement("div");
                     card.className = "col-md-4 mb-3";
                     card.innerHTML = `
                         <div class="card h-100">
-                            <img src="${item.image || 'placeholder.jpg'}" class="card-img-top" alt="${item.name}">
+                            <img src="${item.image || '/static/default_image.png'}" class="card-img-top" alt="${item.name}" 
+                                 onerror="console.error('Image failed to load:', this.src); this.src='/static/default_image.png'" 
+                                 onload="console.log('Image loaded successfully:', this.src)"
+                                 style="height: 200px; object-fit: contain;">
                             <div class="card-body">
                                 <h5 class="card-title">${item.name}</h5>
                                 <p class="card-text"><strong>Category:</strong> ${item.category}</p>
