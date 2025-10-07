@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Missing Parts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
         th.sortable {
             cursor: pointer;
@@ -13,94 +15,307 @@
         th.sortable:hover {
             background-color: #f1f1f1;
         }
+
+        .category-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .category-card.active {
+            border-color: #0d6efd;
+            background-color: #e7f3ff;
+        }
+
+        .loading-spinner {
+            display: none;
+        }
+
+        .parts-section {
+            display: none;
+        }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
 <body>
     <!-- Include the navigation bar -->
     {% include 'navbar.html' %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <div class="container mt-5">
         <h1>Missing Items</h1>
 
-        <!-- Spare Parts Toggle -->
-        <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="toggle-spare-parts" checked>
-            <label class="form-check-label" for="toggle-spare-parts">
-                Include Spare Parts
-            </label>
+        {% if categories %}
+        <!-- Category Overview Section -->
+        <div id="category-overview">
+            <h3>Categories with Missing Parts</h3>
+            <p class="text-muted">Click on a category to view the missing parts in that category.</p>
+            
+            <div class="row">
+                {% for category in categories %}
+                <div class="col-md-4 col-lg-3 mb-3">
+                    <div class="card category-card" onclick="loadCategoryParts('{{ category.name }}')">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ category.name }}</h5>
+                            <p class="card-text">
+                                <span class="badge bg-primary">{{ category.count }} items</span><br>
+                                <span class="badge bg-warning">{{ category.total_missing }} missing</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
-        {% if missing_items %}
-        <table id="missing-parts-table" class="table table-bordered mt-3">
-            <thead>
-                <tr>
-                    <th class="sortable" data-column="type">Type</th>
-                    <th class="sortable" data-column="set_id">Set ID</th>
-                    <th class="sortable" data-column="internal_id">Internal ID</th>
-                    <th class="sortable" data-column="item_id">Item ID</th>
-                    <th>Name</th>
-                    <th>Color</th>
-                    <th class="sortable" data-column="missing_quantity">Missing Quantity</th>
-                    <th>Location</th>
-                    <th>Image</th>
-                    <th class="sortable" data-column="is_spare">Spare Part</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in missing_items %}
-                <tr class="missing-item {% if item.is_spare %}spare-part{% endif %}">
-                    <td>{{ item.type }}</td>
-                    <td>{{ item.set_id }}</td>
-                    <td>{{ item.internal_id }}</td>
-                    <td>{{ item.item_id }}</td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.color or 'Not Specified' }}</td>
-                    <td>{{ item.missing_quantity }}</td>
-                    <td>{{ item.location }}</td>
-                    <td>
-                        <img src="{{ item.img_url }}" alt="{{ item.name }}" width="50">
-                    </td>
-                    <td>{{ 'Yes' if item.is_spare else 'No' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <!-- Parts Details Section -->
+        <div id="parts-section" class="parts-section mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 id="category-title">Category Parts</h3>
+                <button class="btn btn-secondary" onclick="showCategoryOverview()">Back to Categories</button>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="text-center loading-spinner">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading parts...</p>
+            </div>
+
+            <!-- Spare Parts Toggle -->
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="toggle-spare-parts" checked>
+                <label class="form-check-label" for="toggle-spare-parts">
+                    Include Spare Parts
+                </label>
+            </div>
+
+            <!-- Parts Table -->
+            <div id="parts-table-container">
+                <table id="missing-parts-table" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th class="sortable" data-column="type">Type</th>
+                            <th class="sortable" data-column="set_id">Set ID</th>
+                            <th class="sortable" data-column="internal_id">Internal ID</th>
+                            <th class="sortable" data-column="item_id">Part Number</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Color</th>
+                            <th class="sortable" data-column="total_quantity">Needed</th>
+                            <th>Have Quantity</th>
+                            <th>Location</th>
+                            <th class="sortable" data-column="is_spare">Spare Part</th>
+                        </tr>
+                    </thead>
+                    <tbody id="parts-table-body">
+                        <!-- Parts will be loaded here via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
         {% else %}
         <div class="alert alert-info mt-3">
             <p>No missing items found.</p>
         </div>
         {% endif %}
 
-        <a href="{{ url_for('set_maintain.set_maintain') }}" class="btn btn-secondary mt-3">Back to Set Maintenance</a>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="imageModalLabel">Part Image</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <img id="modalImage" src="" alt="" class="img-fluid" style="max-height: 70vh;" />
+            <p id="modalImageName" class="mt-3 fw-bold"></p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let currentCategoryParts = [];
+        
         document.addEventListener('DOMContentLoaded', function () {
-            const table = document.getElementById('missing-parts-table');
             const toggleSpareParts = document.getElementById('toggle-spare-parts');
 
             // Spare Parts Toggle
             toggleSpareParts.addEventListener('change', function () {
-                const showSpareParts = toggleSpareParts.checked;
-                const sparePartRows = table.querySelectorAll('tr.spare-part');
+                filterParts();
+            });
+        });
 
-                sparePartRows.forEach(row => {
-                    row.style.display = showSpareParts ? '' : 'none';
+        function loadCategoryParts(categoryName) {
+            // Show loading spinner
+            document.getElementById('category-overview').style.display = 'none';
+            document.getElementById('parts-section').style.display = 'block';
+            document.getElementById('loading-spinner').style.display = 'block';
+            document.getElementById('parts-table-container').style.display = 'none';
+            document.getElementById('category-title').textContent = categoryName + ' - Missing Parts';
+
+            // Reset loading spinner content
+            document.getElementById('loading-spinner').innerHTML = `
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading parts...</p>
+            `;
+
+            // Make AJAX request to get parts for this category
+            const includeSpare = document.getElementById('toggle-spare-parts').checked;
+            
+            // Properly encode the category name for the URL
+            const encodedCategoryName = encodeURIComponent(categoryName);
+            const url = `/missing_parts_category/${encodedCategoryName}?include_spare=${includeSpare}`;
+            
+            console.log('Loading category:', categoryName);
+            console.log('URL:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received data:', data.length, 'items');
+                    currentCategoryParts = data;
+                    
+                    // Only hide spinner and show table after successful data load
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    document.getElementById('parts-table-container').style.display = 'block';
+                    
+                    renderPartsTable(data);
+                })
+                .catch(error => {
+                    console.error('Error loading category parts:', error);
+                    
+                    // Only show error if we're still in loading state
+                    if (document.getElementById('loading-spinner').style.display !== 'none') {
+                        document.getElementById('loading-spinner').innerHTML = 
+                            `<div class="alert alert-danger">
+                                <h5>Error loading parts</h5>
+                                <p>${error.message}</p>
+                                <button class="btn btn-primary btn-sm" onclick="loadCategoryParts('${categoryName}')">Try Again</button>
+                                <button class="btn btn-secondary btn-sm" onclick="showCategoryOverview()">Back to Categories</button>
+                            </div>`;
+                    }
                 });
+        }
+
+        function showCategoryOverview() {
+            document.getElementById('parts-section').style.display = 'none';
+            document.getElementById('category-overview').style.display = 'block';
+        }
+
+        function renderPartsTable(parts) {
+            const tbody = document.getElementById('parts-table-body');
+            tbody.innerHTML = '';
+
+            if (parts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">No missing parts found in this category.</td></tr>';
+                return;
+            }
+
+            // Show a brief processing message
+            if (parts.length > 50) {
+                document.getElementById('loading-spinner').innerHTML = `
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                    <p>Processing ${parts.length} parts...</p>
+                `;
+                document.getElementById('loading-spinner').style.display = 'block';
+                
+                // Small delay to allow the processing message to show
+                setTimeout(() => {
+                    renderPartsTableContent(parts);
+                    document.getElementById('loading-spinner').style.display = 'none';
+                }, 100);
+            } else {
+                renderPartsTableContent(parts);
+            }
+        }
+
+        function renderPartsTableContent(parts) {
+            const tbody = document.getElementById('parts-table-body');
+            
+            parts.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = `missing-item ${item.is_spare ? 'spare-part' : ''} ${item.status === 'Not Available' ? 'table-danger' : 'table-success'}`;
+                
+                const colorTextColor = parseInt(item.color_rgb, 16) > 0x888888 ? 'black' : 'white';
+                
+                row.innerHTML = `
+                    <td>
+                        <img src="${item.img_url}" alt="${item.name}" class="img-thumbnail" width="50" 
+                             style="cursor: pointer;" onclick="showImageModal('${item.img_url}', '${item.name} (${item.item_id})')" 
+                             onerror="this.src='/static/default_image.png'"
+                             loading="lazy">
+                    </td>
+                    <td>${item.type}</td>
+                    <td>${item.set_id}</td>
+                    <td>${item.internal_id}</td>
+                    <td>${item.item_id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.category || 'Unknown Category'}</td>
+                    <td style="background-color: #${item.color_rgb}; color: ${colorTextColor};">
+                        ${item.color || 'Not Specified'}
+                    </td>
+                    <td>${item.total_quantity}</td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm" 
+                               value="${item.have_quantity || 0}" 
+                               min="0" 
+                               max="${item.total_quantity}"
+                               data-part-id="${item.item_id}" 
+                               data-set-id="${item.internal_id}"
+                               data-part-type="${item.type}"
+                               data-is-spare="${item.is_spare}"
+                               data-color-id="${item.color_id || ''}"
+                               data-total-quantity="${item.total_quantity}"
+                               onchange="updateHaveQuantity(this)"
+                               style="width: 80px;">
+                    </td>
+                    <td>${item.location}</td>
+                    <td>${item.is_spare ? 'Yes' : 'No'}</td>
+                `;
+                
+                tbody.appendChild(row);
             });
 
-            // Sorting Logic
+            // Reattach sorting functionality
+            attachSortingHandlers();
+        }
+
+        function filterParts() {
+            const includeSpare = document.getElementById('toggle-spare-parts').checked;
+            const filteredParts = currentCategoryParts.filter(part => includeSpare || !part.is_spare);
+            renderPartsTable(filteredParts);
+        }
+
+        function attachSortingHandlers() {
+            const table = document.getElementById('missing-parts-table');
             const headers = table.querySelectorAll('th.sortable');
+            
             headers.forEach(header => {
                 header.addEventListener('click', function () {
                     const column = header.getAttribute('data-column');
                     const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
-                    const isNumericColumn = ['set_id', 'internal_id', 'item_id', 'missing_quantity'].includes(column);
+                    const isNumericColumn = ['set_id', 'internal_id', 'item_id', 'total_quantity'].includes(column);
 
                     const sortedRows = rows.sort((a, b) => {
                         const aValue = a.querySelector(`td:nth-child(${header.cellIndex + 1})`).innerText.trim();
@@ -108,6 +323,11 @@
 
                         if (isNumericColumn) {
                             return parseFloat(aValue) - parseFloat(bValue);
+                        }
+
+                        // Special handling for part numbers (alphanumeric sorting)
+                        if (column === 'item_id') {
+                            return aValue.localeCompare(bValue, undefined, { numeric: true, caseInsensitive: true });
                         }
 
                         return aValue.localeCompare(bValue);
@@ -119,7 +339,139 @@
                     sortedRows.forEach(row => tbody.appendChild(row));
                 });
             });
-        });
+        }
+
+        // Function to update category overview counts after parts are completed
+        function updateCategoryOverviewCounts() {
+            // This function could fetch updated counts from the server
+            // For now, we'll just indicate that a refresh might be needed
+            console.log('Category counts may need updating - consider refreshing the overview');
+        }
+
+        // Function to show image in modal
+        function showImageModal(imageSrc, imageName) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('modalImageName').textContent = imageName;
+            document.getElementById('imageModalLabel').textContent = imageName + ' - Image';
+            var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+            imageModal.show();
+        }
+
+        // Function to update have_quantity
+        function updateHaveQuantity(input) {
+            const partId = input.dataset.partId;
+            const setId = input.dataset.setId;
+            const partType = input.dataset.partType;
+            const isSpare = input.dataset.isSpare === 'true';
+            const colorId = input.dataset.colorId;
+            const totalQuantity = parseInt(input.dataset.totalQuantity);
+            const newQuantity = parseInt(input.value);
+            
+            if (isNaN(newQuantity) || newQuantity < 0) {
+                alert('Please enter a valid quantity (0 or greater)');
+                input.focus();
+                return;
+            }
+
+            if (newQuantity > totalQuantity) {
+                alert(`Cannot have more than ${totalQuantity} (needed quantity)`);
+                input.value = totalQuantity;
+                return;
+            }
+
+            // Show loading state
+            input.disabled = true;
+            const originalValue = input.value;
+            
+            // Prepare the update data with more specific identification
+            const updateData = {
+                part_id: partId,
+                set_id: parseInt(setId),
+                part_type: partType,
+                is_spare: isSpare,
+                color_id: colorId,
+                have_quantity: newQuantity
+            };
+
+            console.log('Updating have_quantity:', updateData);
+
+            // Make AJAX request to update the quantity
+            fetch('/update_part_quantity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateData)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    console.log('Successfully updated quantity');
+                    
+                    // Update row styling based on whether all parts are owned
+                    const row = input.closest('tr');
+                    const neededQuantity = totalQuantity;
+                    const missingQuantity = neededQuantity - newQuantity;
+                    
+                    if (missingQuantity === 0) {
+                        // Part is no longer missing - remove from table with animation
+                        row.style.transition = 'opacity 0.5s ease-out';
+                        row.style.opacity = '0.3';
+                        row.style.backgroundColor = '#d4edda';
+                        
+                        // Show completion message briefly, then remove row
+                        setTimeout(() => {
+                            row.style.opacity = '0';
+                            setTimeout(() => {
+                                row.remove();
+                                
+                                // Check if table is now empty
+                                const tbody = document.getElementById('parts-table-body');
+                                if (tbody.children.length === 0) {
+                                    tbody.innerHTML = '<tr><td colspan="12" class="text-center text-success"><strong>🎉 All parts completed for this category!</strong></td></tr>';
+                                }
+                                
+                                // Update category count in overview (if we came from there)
+                                updateCategoryOverviewCounts();
+                            }, 500);
+                        }, 1500);
+                    } else {
+                        row.classList.remove('table-success');
+                        row.classList.add('table-danger');
+                        row.style.opacity = '1';
+                        row.style.backgroundColor = '';
+                    }
+                    
+                    // Show success feedback
+                    input.style.borderColor = '#28a745';
+                    setTimeout(() => {
+                        input.style.borderColor = '';
+                    }, 1000);
+                } else {
+                    throw new Error(data.message || 'Failed to update quantity');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating quantity:', error);
+                alert(`Error updating quantity: ${error.message}`);
+                // Reset the input value
+                input.value = originalValue;
+                input.style.borderColor = '#dc3545';
+                setTimeout(() => {
+                    input.style.borderColor = '';
+                }, 3000);
+            })
+            .finally(() => {
+                input.disabled = false;
+            });
+        }
     </script>
 </body>
 
