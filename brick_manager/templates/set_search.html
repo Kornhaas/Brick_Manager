@@ -209,7 +209,7 @@
           {% if minifig['parts'] %}
           <tr>
             <td colspan="5">
-              <h5>Parts for {{ minifig['name'] }}:</h5>
+              <h5>Parts for {{ minifig['name'] }} ({{ minifig['quantity'] }} {% if minifig['quantity'] > 1 %}minifigures{% else %}minifigure{% endif %}):</h5>
               <table class="table table-sm table-striped">
                 <thead>
                   <tr>
@@ -217,7 +217,8 @@
                     <th>Part Number</th>
                     <th>Name</th>
                     <th>Color</th>
-                    <th>Quantity</th>
+                    <th>Quantity per Figure</th>
+                    <th>Total Quantity</th>
                     <th>Location</th>
                   </tr>
                 </thead>
@@ -231,6 +232,7 @@
                       {{ part['color'] }}
                     </td>
                     <td>{{ part['quantity'] }}</td>
+                    <td><strong>{{ part['quantity'] * minifig['quantity'] }}</strong></td>
                     <td>{{ part['location'] or 'Not Specified' }}</td>
                   </tr>
                   {% endfor %}

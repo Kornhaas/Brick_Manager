@@ -173,7 +173,8 @@ def add_set():
                 minifig_part = UserMinifigurePart()
                 minifig_part.part_num = part_info.part_num
                 minifig_part.color_id = color_info.id
-                minifig_part.quantity = part['quantity']
+                # Multiply part quantity by minifigure quantity
+                minifig_part.quantity = part['quantity'] * minifig['quantity']
                 minifig_part.user_set_id = user_set.id
                 minifig_part.minifigure_id = db_minifig.id  # Link to specific minifigure
                 db.session.add(minifig_part)

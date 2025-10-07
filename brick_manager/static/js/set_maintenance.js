@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 minifigsTableBody.innerHTML += `
                                 <tr>
                                     <td colspan="4">
-                                        <h6>Parts for ${minifig.name}:</h6>
+                                        <h6>Parts for ${minifig.name} (${minifig.quantity} ${minifig.quantity > 1 ? 'minifigures' : 'minifigure'}) - Total quantities shown:</h6>
                                         <table class="table table-sm table-striped">
                                             <thead>
                                                 <tr>
@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                     <th>Part Number</th>
                                                     <th>Name</th>
                                                     <th>Color</th>
-                                                    <th>Quantity</th>
+                                                    <th>Total Quantity</th>
                                                     <th>Owned</th>
                                                     <th>Location</th>
                                                 </tr>
