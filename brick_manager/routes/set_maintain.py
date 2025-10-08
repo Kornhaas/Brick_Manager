@@ -8,7 +8,7 @@ import os
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
-from models import db, User_Set, User_Minifigures, UserMinifigurePart, RebrickableParts, PartStorage
+from models import db, User_Set, User_Minifigures, UserMinifigurePart, RebrickableParts, PartStorage, RebrickablePartCategories
 
 set_maintain_bp = Blueprint('set_maintain', __name__)
 
@@ -95,6 +95,15 @@ def get_user_set_details(user_set_id):
         part_info = part_query[0] if part_query else None
         color_info = part_query[1] if part_query else None
         
+        # Get category information using part_cat_id
+        category_name = "Unknown Category"
+        if part_info and part_info.part_cat_id:
+            category = db.session.query(RebrickablePartCategories).filter_by(
+                id=part_info.part_cat_id
+            ).first()
+            if category:
+                category_name = category.name
+        
         # Try to get inventory-specific image URL for regular parts
         inventory_img_url = None
         if user_set.template_set:
@@ -112,6 +121,7 @@ def get_user_set_details(user_set_id):
             'id': part.id,
             'part_num': part.part_num,
             'name': part_info.name if part_info else "Unknown",
+            'category': category_name,
             'quantity': part.quantity,
             'have_quantity': part.have_quantity,
             'color': color_info.name if color_info else "Unknown",
@@ -131,6 +141,15 @@ def get_user_set_details(user_set_id):
         # Use the relationships that should be already loaded
         part_info = part.rebrickable_part
         color_info = part.rebrickable_color
+        
+        # Get category information using part_cat_id
+        category_name = "Unknown Category"
+        if part_info and part_info.part_cat_id:
+            category = db.session.query(RebrickablePartCategories).filter_by(
+                id=part_info.part_cat_id
+            ).first()
+            if category:
+                category_name = category.name
         
         # For minifigure parts, first try the simple part image, then look for inventory-specific
         part_img_url = part_info.part_img_url if part_info else ''
@@ -154,6 +173,7 @@ def get_user_set_details(user_set_id):
             'id': part.id,
             'part_num': part.part_num,
             'name': part_info.name if part_info else "Unknown",
+            'category': category_name,
             'quantity': part.quantity,
             'have_quantity': part.have_quantity,
             'color': color_info.name if color_info else "Unknown",
@@ -172,8 +192,8 @@ def get_user_set_details(user_set_id):
 
     parts = [enrich_item(part) for part in user_set.parts_in_set]
     
-    # Sort parts by color name
-    parts.sort(key=lambda x: x['color'])
+    # Sort parts by color, then category, then name
+    parts.sort(key=lambda x: (x['color'], x['category'], x['name']))
     
     # Group minifigure parts by minifigure using the new minifigure_id field
     minifigures_with_parts = []
@@ -183,7 +203,7 @@ def get_user_set_details(user_set_id):
         
         # Enrich and sort the parts for this minifigure
         enriched_parts = [enrich_minifigure_part(part) for part in minifig_parts]
-        enriched_parts.sort(key=lambda x: x['color'])
+        enriched_parts.sort(key=lambda x: (x['color'], x['category'], x['name']))
         
         minifig_data = {
             'id': minifig.id,
