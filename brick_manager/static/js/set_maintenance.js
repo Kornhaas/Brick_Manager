@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 <tr>
                                     <td colspan="4">
                                         <h6>Parts for ${minifig.name} (${minifig.quantity} ${minifig.quantity > 1 ? 'minifigures' : 'minifigure'}) - Total quantities shown:</h6>
-                                        <table class="table table-sm table-striped">
+                                        <table class="table table-sm table-bordered">
                                             <thead>
                                                 <tr>
                                                     <th>Image</th>
