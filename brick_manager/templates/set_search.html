@@ -251,8 +251,14 @@
     <script>
       function validateSetNumber() {
         const input = document.getElementById('set-number');
-        if (input.value && !input.value.endsWith('-1')) {
-          input.value = `${input.value}-1`;
+        if (input.value) {
+          // Check if the set number already contains a dash followed by a number
+          const hasVariant = /.*-\d+$/.test(input.value);
+          
+          // Only add -1 if there's no variant number already
+          if (!hasVariant) {
+            input.value = `${input.value}-1`;
+          }
         }
       }
 

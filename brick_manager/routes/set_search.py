@@ -1,7 +1,7 @@
 """
 This module handles the search, retrieval, and addition of Brick sets, parts, and minifigures.
 """
-
+import re
 from flask import Blueprint, render_template, request, flash, current_app, redirect, url_for
 import requests
 from models import db, User_Set, User_Parts, User_Minifigures, UserMinifigurePart, RebrickableParts, RebrickableSets, RebrickableInventoryParts, RebrickableColors, RebrickableInventories, RebrickableInventoryMinifigs, RebrickableMinifigs
@@ -41,7 +41,8 @@ def set_search():
         if not set_number:
             flash("Please enter a set number.", category="danger")
         else:
-            if not set_number.endswith('-1'):
+            # Check if set number already contains a dash followed by a number
+            if not re.search(r'-\d+$', set_number):
                 set_number += '-1'
                 current_app.logger.debug(
                     "Set number corrected to: %s", set_number)
@@ -92,7 +93,8 @@ def add_set():
             flash("Set number is required.", category="danger")
             return redirect(url_for('set_search.set_search'))
             
-        if not set_number.endswith('-1'):
+        # Check if set number already contains a dash followed by a number
+        if not re.search(r'-\d+$', set_number):
             set_number += '-1'
             current_app.logger.debug("Set number corrected to: %s", set_number)
 
