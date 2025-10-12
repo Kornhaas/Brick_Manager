@@ -30,6 +30,8 @@ from routes.missing_parts import missing_parts_bp
 from routes.dashboard import dashboard_bp
 from routes.part_location import part_location_bp
 from routes.token_management import token_management_bp
+from routes.rebrickable_sync import rebrickable_sync_bp
+from routes.admin_sync import admin_sync_bp
 from services.part_lookup_service import load_part_lookup
 
 #pylint: disable=W0718
@@ -90,6 +92,66 @@ def backup_database():
         app.logger.error("Failed to backup database: %s", e)
 
 
+def scheduled_sync_missing_parts():
+    """
+    Scheduled task to sync missing parts with Rebrickable every 6 hours.
+    Only runs if tokens are configured.
+    """
+    try:
+        from services.token_service import get_rebrickable_user_token, get_rebrickable_api_key
+        from services.rebrickable_sync_service import sync_missing_parts_with_rebrickable
+        
+        # Check if tokens are configured
+        user_token = get_rebrickable_user_token()
+        api_key = get_rebrickable_api_key()
+        
+        if not user_token or not api_key:
+            app.logger.info("Scheduled missing parts sync skipped - no API credentials configured")
+            return
+        
+        app.logger.info("Starting scheduled missing parts sync")
+        result = sync_missing_parts_with_rebrickable(batch_size=500)  # Use moderate batch size for scheduled runs
+        
+        if result['success']:
+            summary = result.get('summary', {})
+            app.logger.info(f"Scheduled missing parts sync completed - processed {summary.get('sample_processed', 0)} parts, added {summary.get('to_add', 0)} to Rebrickable")
+        else:
+            app.logger.error(f"Scheduled missing parts sync failed: {result.get('message', 'Unknown error')}")
+            
+    except Exception as e:
+        app.logger.error(f"Error during scheduled missing parts sync: {e}")
+
+
+def scheduled_sync_user_sets():
+    """
+    Scheduled task to sync user sets with Rebrickable every 6 hours.
+    Only runs if tokens are configured.
+    """
+    try:
+        from services.token_service import get_rebrickable_user_token, get_rebrickable_api_key
+        from services.rebrickable_sets_sync_service import sync_user_sets_with_rebrickable
+        
+        # Check if tokens are configured
+        user_token = get_rebrickable_user_token()
+        api_key = get_rebrickable_api_key()
+        
+        if not user_token or not api_key:
+            app.logger.info("Scheduled user sets sync skipped - no API credentials configured")
+            return
+        
+        app.logger.info("Starting scheduled user sets sync")
+        result = sync_user_sets_with_rebrickable()
+        
+        if result['success']:
+            summary = result.get('summary', {})
+            app.logger.info(f"Scheduled user sets sync completed - {summary.get('sets_added', 0)} sets added, {summary.get('sets_removed', 0)} sets removed")
+        else:
+            app.logger.error(f"Scheduled user sets sync failed: {result.get('message', 'Unknown error')}")
+            
+    except Exception as e:
+        app.logger.error(f"Error during scheduled user sets sync: {e}")
+
+
 # Ensure database tables are created
 with app.app_context():
     db.create_all()  # Ensure tables are created
@@ -113,11 +175,23 @@ app.register_blueprint(dashboard_bp)
 app.register_blueprint(part_location_bp)
 app.register_blueprint(box_maintenance_bp)
 app.register_blueprint(token_management_bp)
+app.register_blueprint(rebrickable_sync_bp)
+app.register_blueprint(admin_sync_bp)
 
-# Set up the scheduler for database backup
+# Set up the scheduler for database backup and sync tasks
 scheduler = BackgroundScheduler()
+
+# Database backup every 6 hours
 scheduler.add_job(func=backup_database, trigger="interval",
-                  hours=6)  # Backup every 6 hours
+                  hours=6, id='backup_database')
+
+# Rebrickable sync tasks every 6 hours (offset by 30 minutes to avoid conflicts)
+scheduler.add_job(func=scheduled_sync_missing_parts, trigger="interval",
+                  hours=6, minutes=30, id='sync_missing_parts')
+
+scheduler.add_job(func=scheduled_sync_user_sets, trigger="interval", 
+                  hours=6, minutes=35, id='sync_user_sets')
+
 scheduler.start()
 
 # Shut down the scheduler when exiting the app

@@ -46,13 +46,33 @@
     {% include 'navbar.html' %}
 
     <div class="container mt-5">
-        <h1>Missing Items</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Missing Items</h1>
+        </div>
 
         {% if categories %}
         <!-- Category Overview Section -->
         <div id="category-overview">
             <h3>Categories with Missing Parts</h3>
             <p class="text-muted">Click on a category to view the missing parts in that category.</p>
+            
+            <!-- Spare Parts Toggle for Overview -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Spare Parts Filter</h6>
+                            <small class="text-muted">Toggle to include or exclude spare parts from category counts and results</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="overview-toggle-spare-parts" checked>
+                            <label class="form-check-label" for="overview-toggle-spare-parts">
+                                <span id="overview-spare-parts-label">Include Spare Parts</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <div class="row" id="category-grid">
                 {% for category in categories %}
@@ -68,6 +88,7 @@
                     </div>
                 </div>
                 {% endfor %}
+            </div>
             </div>
         </div>
 
@@ -160,28 +181,75 @@
         
         document.addEventListener('DOMContentLoaded', function () {
             const toggleSpareParts = document.getElementById('toggle-spare-parts');
+            const overviewToggleSpareParts = document.getElementById('overview-toggle-spare-parts');
 
-            // Set initial state from server
+            // Set initial state from server for both toggles
             {% if include_spare is defined %}
-            toggleSpareParts.checked = {{ 'true' if include_spare else 'false' }};
-            const label = document.getElementById('spare-parts-label');
-            label.textContent = toggleSpareParts.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+            const initialSpareState = {{ 'true' if include_spare else 'false' }};
+            if (toggleSpareParts) {
+                toggleSpareParts.checked = initialSpareState;
+                const label = document.getElementById('spare-parts-label');
+                if (label) {
+                    label.textContent = toggleSpareParts.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+                }
+            }
+            if (overviewToggleSpareParts) {
+                overviewToggleSpareParts.checked = initialSpareState;
+                const overviewLabel = document.getElementById('overview-spare-parts-label');
+                if (overviewLabel) {
+                    overviewLabel.textContent = overviewToggleSpareParts.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+                }
+            }
             {% endif %}
 
-            // Spare Parts Toggle - reload category data when changed
-            toggleSpareParts.addEventListener('change', function () {
-                // Update the label text based on toggle state
-                const label = document.getElementById('spare-parts-label');
-                label.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
-                
-                if (currentCategoryName) {
-                    // If we're viewing a category, reload it with new spare parts setting
-                    loadCategoryParts(currentCategoryName);
-                } else {
-                    // If we're in overview mode, reload the category overview
+            // Overview Spare Parts Toggle - reload category overview
+            if (overviewToggleSpareParts) {
+                overviewToggleSpareParts.addEventListener('change', function () {
+                    // Update the label text based on toggle state
+                    const label = document.getElementById('overview-spare-parts-label');
+                    label.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+                    
+                    // Sync with details toggle
+                    if (toggleSpareParts) {
+                        toggleSpareParts.checked = this.checked;
+                        const detailsLabel = document.getElementById('spare-parts-label');
+                        if (detailsLabel) {
+                            detailsLabel.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+                        }
+                    }
+                    
+                    // Reload the category overview
                     reloadCategoryOverview();
-                }
-            });
+                });
+            }
+
+            // Details Spare Parts Toggle - reload category data when changed
+            if (toggleSpareParts) {
+                toggleSpareParts.addEventListener('change', function () {
+                    // Update the label text based on toggle state
+                    const label = document.getElementById('spare-parts-label');
+                    if (label) {
+                        label.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+                    }
+                    
+                    // Sync with overview toggle
+                    if (overviewToggleSpareParts) {
+                        overviewToggleSpareParts.checked = this.checked;
+                        const overviewLabel = document.getElementById('overview-spare-parts-label');
+                        if (overviewLabel) {
+                            overviewLabel.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+                        }
+                    }
+                    
+                    if (currentCategoryName) {
+                        // If we're viewing a category, reload it with new spare parts setting
+                        loadCategoryParts(currentCategoryName);
+                    } else {
+                        // If we're in overview mode, reload the category overview
+                        reloadCategoryOverview();
+                    }
+                });
+            }
         });
 
         function loadCategoryParts(categoryName) {
@@ -204,7 +272,10 @@
             `;
 
             // Make AJAX request to get parts for this category
-            const includeSpare = document.getElementById('toggle-spare-parts').checked;
+            // Get state from details toggle if available, otherwise from overview toggle
+            const detailsToggle = document.getElementById('toggle-spare-parts');
+            const overviewToggle = document.getElementById('overview-toggle-spare-parts');
+            const includeSpare = detailsToggle ? detailsToggle.checked : (overviewToggle ? overviewToggle.checked : true);
             
             // Properly encode the category name for the URL
             const encodedCategoryName = encodeURIComponent(categoryName);
@@ -256,7 +327,10 @@
         }
 
         function reloadCategoryOverview() {
-            const includeSpare = document.getElementById('toggle-spare-parts').checked;
+            // Get state from overview toggle if available, otherwise from details toggle
+            const overviewToggle = document.getElementById('overview-toggle-spare-parts');
+            const detailsToggle = document.getElementById('toggle-spare-parts');
+            const includeSpare = overviewToggle ? overviewToggle.checked : (detailsToggle ? detailsToggle.checked : true);
             
             // Show loading spinner
             const categoryGrid = document.getElementById('category-grid');
@@ -562,6 +636,7 @@
                 input.disabled = false;
             });
         }
+
     </script>
 </body>
 
