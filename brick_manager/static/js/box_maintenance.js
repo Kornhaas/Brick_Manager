@@ -167,10 +167,21 @@ document.addEventListener("DOMContentLoaded", function () {
                                 <h5 class="card-title">${item.name}</h5>
                                 <p class="card-text"><strong>Category:</strong> ${item.category}</p>
                                 <p class="card-text"><strong>Part Number:</strong> ${item.part_num}</p>
+                                <div class="form-check">
+                                    <input class="form-check-input label-printed-checkbox" type="checkbox" 
+                                           id="label-${item.storage_id}" data-storage-id="${item.storage_id}"
+                                           ${item.label_printed ? 'checked' : ''}>
+                                    <label class="form-check-label" for="label-${item.storage_id}">
+                                        Label Printed
+                                    </label>
+                                </div>
                             </div>
                         </div>`;
                     contentsContainer.appendChild(card);
                 });
+
+                // Add event listeners for checkbox changes
+                addLabelCheckboxListeners();
             })
             .catch((error) => {
                 submitButton.disabled = false; // Re-enable submit button
@@ -219,4 +230,44 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         
     });
+
+    // Function to add event listeners for label printed checkboxes
+    function addLabelCheckboxListeners() {
+        const checkboxes = document.querySelectorAll('.label-printed-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const storageId = this.getAttribute('data-storage-id');
+                const isChecked = this.checked;
+                
+                // Update the database
+                fetch('/box_maintenance/update_label_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        storage_id: parseInt(storageId),
+                        label_printed: isChecked
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Label status updated:', data);
+                    // Optional: Show success feedback
+                    // You could add a small toast notification here
+                })
+                .catch(error => {
+                    console.error('Error updating label status:', error);
+                    // Revert the checkbox state on error
+                    this.checked = !isChecked;
+                    alert('Failed to update label status. Please try again.');
+                });
+            });
+        });
+    }
 });

@@ -31,6 +31,7 @@ class User_Set(db.Model):
     id = db.Column(Integer, primary_key=True)
     set_num = db.Column(Text, ForeignKey('rebrickable_sets.set_num'), nullable=False)
     status = db.Column(Text, default='unknown', nullable=False)
+    label_printed = db.Column(Boolean, default=False, nullable=False)
 
     # Relationships
     template_set = db.relationship('RebrickableSets', lazy='joined')
@@ -46,7 +47,7 @@ class User_Set(db.Model):
 
     def to_dict(self):
         """Convert the User_Set object to a dictionary."""
-        return {'id': self.id, 'set_num': self.set_num, 'status': self.status}
+        return {'id': self.id, 'set_num': self.set_num, 'status': self.status, 'label_printed': self.label_printed}
 
 class User_Minifigures(db.Model):
     """
@@ -136,6 +137,7 @@ class PartStorage(db.Model):
     location = db.Column(Text)
     level = db.Column(Text)
     box = db.Column(Text)
+    label_printed = db.Column(Boolean, default=False, nullable=False)
 
     # Relationships
     rebrickable_part = db.relationship(

@@ -267,6 +267,46 @@ def update_user_set():
     return redirect(url_for('set_maintain.set_maintain'))
 
 
+@set_maintain_bp.route('/set_maintain/update_label_status', methods=['POST'])
+def update_set_label_status():
+    """
+    Updates the label_printed status for a user set.
+    """
+    try:
+        current_app.logger.info("update_set_label_status endpoint called")
+        data = request.get_json()
+        current_app.logger.info(f"Received data: {data}")
+        
+        if not data:
+            current_app.logger.error("No data received")
+            return jsonify({"error": "Invalid input data format."}), 400
+
+        user_set_id = data.get("user_set_id")
+        label_printed = data.get("label_printed")
+        current_app.logger.info(f"user_set_id: {user_set_id}, label_printed: {label_printed}")
+
+        if user_set_id is None or label_printed is None:
+            current_app.logger.error("Missing required fields")
+            return jsonify({"error": "user_set_id and label_printed are required."}), 400
+
+        user_set = User_Set.query.get(user_set_id)
+        if not user_set:
+            current_app.logger.error(f"User set {user_set_id} not found")
+            return jsonify({"error": "User set not found."}), 404
+
+        current_app.logger.info(f"Before update: user_set.label_printed = {user_set.label_printed}")
+        user_set.label_printed = bool(label_printed)
+        current_app.logger.info(f"After update: user_set.label_printed = {user_set.label_printed}")
+        db.session.commit()
+        current_app.logger.info("Database committed successfully")
+
+        return jsonify({"message": "Label status updated successfully."}), 200
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error("Error updating set label status: %s", e)
+        return jsonify({"error": "An unexpected error occurred."}), 500
+
+
 @set_maintain_bp.route('/set_maintain/delete/<int:user_set_id>', methods=['POST'])
 def delete_user_set(user_set_id):
     """

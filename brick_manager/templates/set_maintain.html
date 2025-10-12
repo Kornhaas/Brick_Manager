@@ -39,6 +39,7 @@
                         <th>Set Number</th>
                         <th>Box Number</th>
                         <th>Status</th>
+                        <th>Label Printed</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -85,6 +86,16 @@
                                         {{ entry.completeness_percentage }}%
                                     </div>
                                 </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input set-label-printed-checkbox" type="checkbox" 
+                                       id="set-label-{{ entry.user_set.id }}" data-user-set-id="{{ entry.user_set.id }}"
+                                       {{ 'checked' if entry.user_set.label_printed else '' }}>
+                                <label class="form-check-label" for="set-label-{{ entry.user_set.id }}">
+                                    Printed
+                                </label>
                             </div>
                         </td>
                         <td>

@@ -91,7 +91,7 @@ def get_box_contents():
         if not (location and level and box):
             raise BadRequest("All fields are required.")
 
-        contents = db.session.query(RebrickableParts).join(
+        contents = db.session.query(RebrickableParts, PartStorage).join(
             PartStorage, RebrickableParts.part_num == PartStorage.part_num
         ).filter(
             PartStorage.location == location,
@@ -102,7 +102,7 @@ def get_box_contents():
         current_app.logger.info(f"Found {len(contents)} parts in box {location}-{level}-{box}")
 
         result = []
-        for part in contents:
+        for part, storage in contents:
             # Use the same image lookup logic as part_lookup.py
             # First try to get image URL from RebrickableInventoryParts (inventory-specific images)
             inventory_part = RebrickableInventoryParts.query.filter(
@@ -131,6 +131,8 @@ def get_box_contents():
                 "image": cached_img_url,
                 "category": part.category.name if part.category else "Unknown",
                 "name": part.name,
+                "storage_id": storage.id,
+                "label_printed": storage.label_printed,
             })
 
         return jsonify(result)
@@ -139,6 +141,41 @@ def get_box_contents():
         return jsonify({"error": "BadRequest in get_box_contents."}), 400
     except Exception as e:
         current_app.logger.error("Error in get_box_contents: %s", e)
+        return jsonify({"error": "An unexpected error occurred."}), 500
+
+
+@box_maintenance_bp.route('/box_maintenance/update_label_status', methods=['POST'])
+def update_label_status():
+    """
+    Updates the label_printed status for a part storage entry.
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            raise BadRequest("Invalid input data format.")
+
+        storage_id = data.get("storage_id")
+        label_printed = data.get("label_printed")
+
+        if storage_id is None or label_printed is None:
+            raise BadRequest("storage_id and label_printed are required.")
+
+        storage = PartStorage.query.get(storage_id)
+        if not storage:
+            raise NotFound("Part storage entry not found.")
+
+        storage.label_printed = bool(label_printed)
+        db.session.commit()
+
+        return jsonify({"message": "Label status updated successfully."}), 200
+    except BadRequest as e:
+        current_app.logger.error("BadRequest in update_label_status: %s", e)
+        return jsonify({"error": "BadRequest in update_label_status."}), 400
+    except NotFound as e:
+        current_app.logger.error("NotFound in update_label_status: %s", e)
+        return jsonify({"error": "Part storage entry not found."}), 404
+    except Exception as e:
+        current_app.logger.error("Error in update_label_status: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500
 
 
