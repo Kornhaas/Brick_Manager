@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Management - Brick Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="container mt-5">
+        <h1>Rebrickable API Token Management</h1>
+        <p class="text-muted">Manage your Rebrickable user token for API access.</p>
+        
+        <!-- Token Status Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Token Status</h5>
+            </div>
+            <div class="card-body">
+                <div id="tokenStatus">
+                    {% if token_exists %}
+                        <div class="alert alert-success" role="alert">
+                            <i class="bi bi-check-circle"></i> Token is configured
+                            {% if username %}
+                                for user: <strong>{{ username }}</strong>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> No token configured
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if token_exists %}
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-primary" onclick="testToken()">
+                            <i class="bi bi-check-circle"></i> Test Token
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="deleteToken()">
+                            <i class="bi bi-trash"></i> Delete Token
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Generate New Token Card -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Generate New Token</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Enter your Rebrickable username (or email) and password to generate a new user token.
+                    This token will be encrypted and stored securely in the database.
+                </p>
+                
+                <form id="tokenForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username/Email</label>
+                        <input type="text" class="form-control" id="username" name="username" 
+                               value="{{ username }}" placeholder="Enter your Rebrickable username or email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Enter your Rebrickable password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success" id="generateBtn">
+                        <i class="bi bi-key"></i> Generate Token
+                    </button>
+                    <div class="spinner-border spinner-border-sm text-primary d-none" id="loadingSpinner" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Information Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Information</h5>
+            </div>
+            <div class="card-body">
+                <h6>What is a User Token?</h6>
+                <p>A user token allows the application to access your personal Rebrickable data, such as your sets, parts, and wishlists. This token is required for certain features that need to interact with your Rebrickable account.</p>
+                
+                <h6>Security</h6>
+                <p>Your password is never stored in the application. Only the generated token is encrypted and stored securely in the database. The token can be regenerated or deleted at any time.</p>
+                
+                <h6>API Requirements</h6>
+                <p>To generate a token, you need a valid Rebrickable account. The application uses the official Rebrickable API to generate and validate tokens.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageModalLabel">Result</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="messageModalBody">
+                    <!-- Message content will be inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form submission handler
+        document.getElementById('tokenForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const generateBtn = document.getElementById('generateBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showMessage('Error', 'Please enter both username and password.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            generateBtn.disabled = true;
+            loadingSpinner.classList.remove('d-none');
+            
+            try {
+                const response = await fetch('/generate_token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'username': username,
+                        'password': password
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('Success', result.message, 'success');
+                    // Clear the password field
+                    document.getElementById('password').value = '';
+                    // Reload the page to update token status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showMessage('Error', result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Error', 'Network error: ' + error.message, 'error');
+            } finally {
+                // Hide loading state
+                generateBtn.disabled = false;
+                loadingSpinner.classList.add('d-none');
+            }
+        });
+
+        // Test token function
+        async function testToken() {
+            try {
+                const response = await fetch('/test_token', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('Token Test Result', result.message, 'success');
+                } else {
+                    showMessage('Token Test Result', result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Error', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        // Delete token function
+        async function deleteToken() {
+            if (!confirm('Are you sure you want to delete the stored token? You will need to generate a new one to access Rebrickable features.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/delete_token', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('Success', result.message, 'success');
+                    // Reload the page to update token status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showMessage('Error', result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Error', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        // Show message in modal
+        function showMessage(title, message, type) {
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            const modalLabel = document.getElementById('messageModalLabel');
+            const modalBody = document.getElementById('messageModalBody');
+            
+            modalLabel.textContent = title;
+            
+            let alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            modalBody.innerHTML = `<div class="alert ${alertClass}" role="alert">${message}</div>`;
+            
+            modal.show();
+        }
+    </script>
+</body>
+
+</html>

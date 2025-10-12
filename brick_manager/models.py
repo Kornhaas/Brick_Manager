@@ -246,6 +246,12 @@ class RebrickableParts(db.Model):
 
 
 class RebrickablePartRelationships(db.Model):
+    """
+    Represents relationships between LEGO parts from Rebrickable.
+    
+    This model stores parent-child relationships between parts, such as when
+    one part is a variant or component of another part.
+    """
     __tablename__ = 'rebrickable_part_relationships'
     rel_type = db.Column(db.Text, primary_key=True)
     child_part_num = db.Column(db.Text, db.ForeignKey(
@@ -255,6 +261,12 @@ class RebrickablePartRelationships(db.Model):
 
 
 class RebrickableElements(db.Model):
+    """
+    Represents LEGO elements from Rebrickable.
+    
+    An element is a specific combination of a part in a particular color.
+    This model maps element IDs to their corresponding parts and colors.
+    """
     __tablename__ = 'rebrickable_elements'
     element_id = db.Column(db.Text, primary_key=True)
     part_num = db.Column(db.Text, db.ForeignKey(
@@ -265,6 +277,12 @@ class RebrickableElements(db.Model):
 
 
 class RebrickableThemes(db.Model):
+    """
+    Represents LEGO themes from Rebrickable.
+    
+    This model stores theme information such as 'Star Wars', 'City', 'Technic', etc.
+    Themes can have parent-child relationships for sub-themes.
+    """
     __tablename__ = 'rebrickable_themes'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
@@ -279,6 +297,12 @@ class RebrickableThemes(db.Model):
 
 
 class RebrickableSets(db.Model):
+    """
+    Represents LEGO sets from the Rebrickable database.
+    
+    This model stores set information including set numbers, names, years,
+    themes, part counts, and image URLs for complete LEGO sets.
+    """
     __tablename__ = 'rebrickable_sets'
     set_num = db.Column(db.Text, primary_key=True)
     name = db.Column(db.Text, nullable=False)
@@ -309,6 +333,12 @@ class RebrickableSets(db.Model):
 
 
 class RebrickableMinifigs(db.Model):
+    """
+    Represents LEGO minifigures from the Rebrickable database.
+    
+    This model stores minifigure information including figure numbers, names,
+    part counts, and image URLs for complete minifigures.
+    """
     __tablename__ = 'rebrickable_minifigs'
     fig_num = db.Column(db.Text, primary_key=True)
     name = db.Column(db.Text, nullable=False)
@@ -324,6 +354,12 @@ class RebrickableMinifigs(db.Model):
 
 
 class RebrickableInventories(db.Model):
+    """
+    Represents inventories from Rebrickable.
+    
+    This model stores inventory information which tracks different versions
+    of set contents and their associated parts and minifigures.
+    """
     __tablename__ = 'rebrickable_inventories'
     id = db.Column(db.Integer, primary_key=True)
     version = db.Column(db.Integer, nullable=False)
@@ -331,6 +367,12 @@ class RebrickableInventories(db.Model):
 
 
 class RebrickableInventoryParts(db.Model):
+    """
+    Represents parts within specific inventories from Rebrickable.
+    
+    This model stores the relationship between inventories and the parts they contain,
+    including quantities, colors, spare part status, and part-specific images.
+    """
     __tablename__ = 'rebrickable_inventory_parts'
     inventory_id = db.Column(db.Integer, db.ForeignKey(
         'rebrickable_inventories.id'), primary_key=True)
@@ -345,6 +387,12 @@ class RebrickableInventoryParts(db.Model):
 
 
 class RebrickableInventorySets(db.Model):
+    """
+    Represents sets within specific inventories from Rebrickable.
+    
+    This model stores the relationship between inventories and the sets they contain,
+    including quantities of each set within the inventory.
+    """
     __tablename__ = 'rebrickable_inventory_sets'
     inventory_id = db.Column(db.Integer, db.ForeignKey(
         'rebrickable_inventories.id'), primary_key=True)
@@ -354,9 +402,50 @@ class RebrickableInventorySets(db.Model):
 
 
 class RebrickableInventoryMinifigs(db.Model):
+    """
+    Represents minifigures within specific inventories from Rebrickable.
+    
+    This model stores the relationship between inventories and the minifigures they contain,
+    including quantities of each minifigure within the inventory.
+    """
     __tablename__ = 'rebrickable_inventory_minifigs'
     inventory_id = db.Column(db.Integer, db.ForeignKey(
         'rebrickable_inventories.id'), primary_key=True)
     fig_num = db.Column(db.Text, db.ForeignKey(
         'rebrickable_minifigs.fig_num'), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
+
+
+class ConfigSettings(db.Model):
+    """
+    Stores application configuration settings including API tokens and other preferences.
+    
+    This model provides a secure way to store configuration data including encrypted
+    API tokens for external services like Rebrickable. Settings are stored as key-value
+    pairs with optional encryption for sensitive data.
+    """
+    __tablename__ = 'config_settings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.Text, nullable=False, unique=True)
+    value = db.Column(db.Text, nullable=True)
+    encrypted = db.Column(db.Boolean, default=False, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), 
+                          onupdate=db.func.current_timestamp())
+    
+    def __repr__(self):
+        return f'<ConfigSettings {self.key}>'
+    
+    def to_dict(self):
+        """Convert the ConfigSettings object to a dictionary."""
+        return {
+            'id': self.id,
+            'key': self.key,
+            'value': '***' if self.encrypted else self.value,
+            'encrypted': self.encrypted,
+            'description': self.description,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }

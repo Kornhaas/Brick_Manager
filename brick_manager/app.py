@@ -29,6 +29,7 @@ from routes.set_maintain import set_maintain_bp
 from routes.missing_parts import missing_parts_bp
 from routes.dashboard import dashboard_bp
 from routes.part_location import part_location_bp
+from routes.token_management import token_management_bp
 from services.part_lookup_service import load_part_lookup
 
 #pylint: disable=W0718
@@ -111,6 +112,7 @@ app.register_blueprint(missing_parts_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(part_location_bp)
 app.register_blueprint(box_maintenance_bp)
+app.register_blueprint(token_management_bp)
 
 # Set up the scheduler for database backup
 scheduler = BackgroundScheduler()
