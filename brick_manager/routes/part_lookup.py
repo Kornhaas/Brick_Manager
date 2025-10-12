@@ -29,14 +29,15 @@ def lookup_part():
 
     if request.method == 'POST':
         part_id = request.form.get('part_id')
-        
+
         # Query the RebrickableParts table for part details
-        rebrickable_part = RebrickableParts.query.filter_by(part_num=part_id).first()
-        
+        rebrickable_part = RebrickableParts.query.filter_by(
+            part_num=part_id).first()
+
         if rebrickable_part:
             # Get part category information
             category_name = rebrickable_part.category.name if rebrickable_part.category else "Unknown"
-            
+
             # Get image URL from RebrickableInventoryParts table
             # Select one entry that has an image URL (could be any color/inventory)
             inventory_part = RebrickableInventoryParts.query.filter(
@@ -44,9 +45,9 @@ def lookup_part():
                 RebrickableInventoryParts.img_url.isnot(None),
                 RebrickableInventoryParts.img_url != ''
             ).first()
-            
+
             part_img_url = inventory_part.img_url if inventory_part else rebrickable_part.part_img_url
-            
+
             # Create part_details dictionary with database information
             part_details = {
                 'part_num': rebrickable_part.part_num,
@@ -57,16 +58,18 @@ def lookup_part():
                 'part_img_url': part_img_url,
                 'part_url': f"https://rebrickable.com/parts/{rebrickable_part.part_num}/"
             }
-            
+
             # Query the PartStorage table for storage location
-            part_storage = PartStorage.query.filter_by(part_num=part_id).first()
-            
+            part_storage = PartStorage.query.filter_by(
+                part_num=part_id).first()
+
             if part_storage:
                 schrank = part_storage.location
                 fach = part_storage.level
                 box = part_storage.box
             else:
-                flash(f"Storage location for Part ID {part_id} not found in database.")
+                flash(
+                    f"Storage location for Part ID {part_id} not found in database.")
         else:
             flash(f"Part ID {part_id} not found in database.")
 

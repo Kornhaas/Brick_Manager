@@ -99,7 +99,8 @@ def get_box_contents():
             PartStorage.box == box
         ).all()
 
-        current_app.logger.info(f"Found {len(contents)} parts in box {location}-{level}-{box}")
+        current_app.logger.info(
+            f"Found {len(contents)} parts in box {location}-{level}-{box}")
 
         result = []
         for part, storage in contents:
@@ -111,21 +112,22 @@ def get_box_contents():
                 RebrickableInventoryParts.img_url != '',
                 RebrickableInventoryParts.img_url != 'None'
             ).first()
-            
+
             # Use inventory image if available, otherwise fall back to generic part image
             if inventory_part and inventory_part.img_url:
                 original_img_url = inventory_part.img_url
             else:
                 original_img_url = part.part_img_url
-            
+
             # Handle various "empty" cases: None, empty string, or literal 'None' string
             if original_img_url and original_img_url.strip() and original_img_url.strip().lower() != 'none':
                 cached_img_url = cache_image(original_img_url)
             else:
                 cached_img_url = '/static/default_image.png'
-                
-            current_app.logger.debug(f"Part {part.part_num}: original_url='{original_img_url}', cached_url='{cached_img_url}'")
-            
+
+            current_app.logger.debug(
+                f"Part {part.part_num}: original_url='{original_img_url}', cached_url='{cached_img_url}'")
+
             result.append({
                 "part_num": part.part_num,
                 "image": cached_img_url,
@@ -213,7 +215,7 @@ def generate_box_label():
             "box": box,
             "items": []
         }
-        
+
         # Apply the same improved image logic for label generation
         for part in contents:
             # First try to get image URL from RebrickableInventoryParts
@@ -223,13 +225,13 @@ def generate_box_label():
                 RebrickableInventoryParts.img_url != '',
                 RebrickableInventoryParts.img_url != 'None'
             ).first()
-            
+
             # Use inventory image if available, otherwise fall back to generic part image
             if inventory_part and inventory_part.img_url:
                 img_url = inventory_part.img_url
             else:
                 img_url = part.part_img_url
-            
+
             box_info["items"].append({
                 "part_num": part.part_num,
                 "name": part.name,

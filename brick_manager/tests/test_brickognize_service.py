@@ -56,7 +56,6 @@ class TestBrickognizeService(unittest.TestCase):
         self.assertIn("items", result)
         self.assertEqual(result["items"][0]["category_name"], "Bricks")
 
-        
     @patch("builtins.open", new_callable=mock_open, read_data=b"fake_image_data")
     @patch("requests.post")
     def test_get_predictions_api_failure(self, mock_post, _):

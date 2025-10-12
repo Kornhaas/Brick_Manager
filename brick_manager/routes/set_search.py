@@ -3,11 +3,9 @@ This module handles the search, retrieval, and addition of Brick sets, parts, an
 """
 import re
 from flask import Blueprint, render_template, request, flash, current_app, redirect, url_for
-import requests
 from models import db, User_Set, User_Parts, User_Minifigures, UserMinifigurePart, RebrickableParts, RebrickableSets, RebrickableInventoryParts, RebrickableColors, RebrickableInventories, RebrickableInventoryMinifigs, RebrickableMinifigs
-from config import Config
 from services.part_lookup_service import load_part_lookup
-#pylint: disable=C0301,W0718
+# pylint: disable=C0301,W0718
 set_search_bp = Blueprint('set_search', __name__)
 
 
@@ -92,7 +90,7 @@ def add_set():
         if not set_number:
             flash("Set number is required.", category="danger")
             return redirect(url_for('set_search.set_search'))
-            
+
         # Check if set number already contains a dash followed by a number
         if not re.search(r'-\d+$', set_number):
             set_number += '-1'
@@ -149,7 +147,7 @@ def add_set():
                 'num_parts': minifig.get('num_parts', 0),
                 'img_url': minifig['img_url']
             })
-            
+
             db_minifig = User_Minifigures()
             db_minifig.fig_num = minifig['fig_num']
             db_minifig.quantity = minifig['quantity']
@@ -197,8 +195,9 @@ def fetch_set_info(set_number):
     """
     try:
         # Query the RebrickableSets table for set information
-        rebrickable_set = RebrickableSets.query.filter_by(set_num=set_number).first()
-        
+        rebrickable_set = RebrickableSets.query.filter_by(
+            set_num=set_number).first()
+
         if rebrickable_set:
             # Return data in the same format as the API response
             return {
@@ -228,13 +227,14 @@ def fetch_set_parts_info(set_number):
 
     try:
         # First, find the inventory for this set
-        inventory = RebrickableInventories.query.filter_by(set_num=set_number).first()
-        
+        inventory = RebrickableInventories.query.filter_by(
+            set_num=set_number).first()
+
         if not inventory:
             current_app.logger.warning(
                 "No inventory found for set %s in local database", set_number)
             return []
-        
+
         # Query inventory parts with joins to get part and color information
         inventory_parts = db.session.query(
             RebrickableInventoryParts,
@@ -247,7 +247,7 @@ def fetch_set_parts_info(set_number):
         ).filter(
             RebrickableInventoryParts.inventory_id == inventory.id
         ).all()
-        
+
         parts_info = []
         for inv_part, part, color in inventory_parts:
             part_info = {
@@ -262,11 +262,11 @@ def fetch_set_parts_info(set_number):
                 'location': format_location(master_lookup.get(part.part_num))
             }
             parts_info.append(part_info)
-        
+
         current_app.logger.debug(
             "Fetched %d parts for set %s from local database", len(parts_info), set_number)
         return parts_info
-        
+
     except Exception as error:
         current_app.logger.error(
             "Error fetching parts for set %s from database: %s", set_number, error)
@@ -280,13 +280,14 @@ def fetch_minifigs_info(set_number):
     """
     try:
         # First, find the inventory for this set
-        inventory = RebrickableInventories.query.filter_by(set_num=set_number).first()
-        
+        inventory = RebrickableInventories.query.filter_by(
+            set_num=set_number).first()
+
         if not inventory:
             current_app.logger.warning(
                 "No inventory found for set %s in local database", set_number)
             return []
-        
+
         # Query inventory minifigs with joins to get minifigure information
         inventory_minifigs = db.session.query(
             RebrickableInventoryMinifigs,
@@ -296,7 +297,7 @@ def fetch_minifigs_info(set_number):
         ).filter(
             RebrickableInventoryMinifigs.inventory_id == inventory.id
         ).all()
-        
+
         minifigs_info = []
         for inv_minifig, minifig in inventory_minifigs:
             minifig_info = {
@@ -307,11 +308,11 @@ def fetch_minifigs_info(set_number):
                 'location': format_location(load_part_lookup().get(minifig.fig_num))
             }
             minifigs_info.append(minifig_info)
-        
+
         current_app.logger.debug(
             "Fetched %d minifigs for set %s from local database", len(minifigs_info), set_number)
         return minifigs_info
-        
+
     except Exception as error:
         current_app.logger.error(
             "Error fetching minifigs for set %s from database: %s", set_number, error)
@@ -328,13 +329,14 @@ def fetch_minifigure_parts(fig_num):
 
     try:
         # First, find the inventory for this minifigure (fig_num is used as set_num)
-        inventory = RebrickableInventories.query.filter_by(set_num=fig_num).first()
-        
+        inventory = RebrickableInventories.query.filter_by(
+            set_num=fig_num).first()
+
         if not inventory:
             current_app.logger.warning(
                 "No inventory found for minifigure %s in local database", fig_num)
             return []
-        
+
         # Query inventory parts with joins to get part and color information
         inventory_parts = db.session.query(
             RebrickableInventoryParts,
@@ -347,7 +349,7 @@ def fetch_minifigure_parts(fig_num):
         ).filter(
             RebrickableInventoryParts.inventory_id == inventory.id
         ).all()
-        
+
         parts_info = []
         for inv_part, part, color in inventory_parts:
             part_info = {
@@ -360,11 +362,11 @@ def fetch_minifigure_parts(fig_num):
                 'location': format_location(master_lookup.get(part.part_num))
             }
             parts_info.append(part_info)
-        
+
         current_app.logger.debug(
             "Fetched %d parts for minifigure %s from local database", len(parts_info), fig_num)
         return parts_info
-        
+
     except Exception as error:
         current_app.logger.error(
             "Error fetching parts for minifigure %s from database: %s", fig_num, error)

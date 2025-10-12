@@ -8,7 +8,7 @@ import os
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
-from models import db, User_Set, User_Minifigures, UserMinifigurePart, RebrickableParts, PartStorage, RebrickablePartCategories
+from models import db, User_Set, UserMinifigurePart, RebrickableParts, PartStorage, RebrickablePartCategories
 
 set_maintain_bp = Blueprint('set_maintain', __name__)
 
@@ -55,7 +55,7 @@ def get_user_set_details(user_set_id):
     Returns the details of a specific User_Set, including its parts, minifigures, and user minifigure parts.
     """
     from models import RebrickableColors, RebrickableInventoryParts, RebrickableInventories
-    
+
     user_set = User_Set.query.options(
         joinedload(User_Set.template_set),
         joinedload(User_Set.parts_in_set),
@@ -81,7 +81,7 @@ def get_user_set_details(user_set_id):
     def enrich_item(part):
         storage_data = db.session.query(PartStorage).filter_by(
             part_num=part.part_num).first()
-        
+
         # Get part info with proper joins to get color and image information
         part_query = db.session.query(
             RebrickableParts,
@@ -91,10 +91,10 @@ def get_user_set_details(user_set_id):
         ).filter(
             RebrickableParts.part_num == part.part_num
         ).first()
-        
+
         part_info = part_query[0] if part_query else None
         color_info = part_query[1] if part_query else None
-        
+
         # Get category information using part_cat_id
         category_name = "Unknown Category"
         if part_info and part_info.part_cat_id:
@@ -103,11 +103,12 @@ def get_user_set_details(user_set_id):
             ).first()
             if category:
                 category_name = category.name
-        
+
         # Try to get inventory-specific image URL for regular parts
         inventory_img_url = None
         if user_set.template_set:
-            inventory = RebrickableInventories.query.filter_by(set_num=user_set.template_set.set_num).first()
+            inventory = RebrickableInventories.query.filter_by(
+                set_num=user_set.template_set.set_num).first()
             if inventory:
                 inv_part = RebrickableInventoryParts.query.filter_by(
                     inventory_id=inventory.id,
@@ -116,7 +117,7 @@ def get_user_set_details(user_set_id):
                 ).first()
                 if inv_part and inv_part.img_url:
                     inventory_img_url = inv_part.img_url
-        
+
         return {
             'id': part.id,
             'part_num': part.part_num,
@@ -137,11 +138,11 @@ def get_user_set_details(user_set_id):
     def enrich_minifigure_part(part):
         storage_data = db.session.query(PartStorage).filter_by(
             part_num=part.part_num).first()
-        
+
         # Use the relationships that should be already loaded
         part_info = part.rebrickable_part
         color_info = part.rebrickable_color
-        
+
         # Get category information using part_cat_id
         category_name = "Unknown Category"
         if part_info and part_info.part_cat_id:
@@ -150,15 +151,16 @@ def get_user_set_details(user_set_id):
             ).first()
             if category:
                 category_name = category.name
-        
+
         # For minifigure parts, first try the simple part image, then look for inventory-specific
         part_img_url = part_info.part_img_url if part_info else ''
-        
+
         # Try to find a better image from minifigure inventories
         if not part_img_url:
             minifigures_in_set = user_set.minifigures_in_set
             for minifig in minifigures_in_set:
-                inventory = RebrickableInventories.query.filter_by(set_num=minifig.fig_num).first()
+                inventory = RebrickableInventories.query.filter_by(
+                    set_num=minifig.fig_num).first()
                 if inventory:
                     inv_part = RebrickableInventoryParts.query.filter_by(
                         inventory_id=inventory.id,
@@ -168,7 +170,7 @@ def get_user_set_details(user_set_id):
                     if inv_part and inv_part.img_url:
                         part_img_url = inv_part.img_url
                         break  # Found the image, stop looking
-        
+
         result = {
             'id': part.id,
             'part_num': part.part_num,
@@ -185,26 +187,30 @@ def get_user_set_details(user_set_id):
             'status': "Available" if storage_data else "Not Available",
             'is_spare': getattr(part, 'is_spare', False)
         }
-        
+
         # Debug logging for minifigure parts
-        current_app.logger.debug(f"Minifigure part enriched: {part.part_num}, name: {result['name']}, img_url: {result['part_img_url']}")
+        current_app.logger.debug(
+            f"Minifigure part enriched: {part.part_num}, name: {result['name']}, img_url: {result['part_img_url']}")
         return result
 
     parts = [enrich_item(part) for part in user_set.parts_in_set]
-    
+
     # Sort parts by color, then category, then name
     parts.sort(key=lambda x: (x['color'], x['category'], x['name']))
-    
+
     # Group minifigure parts by minifigure using the new minifigure_id field
     minifigures_with_parts = []
     for minifig in user_set.minifigures_in_set:
         # Get parts for this specific minifigure using the minifigure_id
-        minifig_parts = [part for part in user_minifigure_parts if part.minifigure_id == minifig.id]
-        
+        minifig_parts = [
+            part for part in user_minifigure_parts if part.minifigure_id == minifig.id]
+
         # Enrich and sort the parts for this minifigure
-        enriched_parts = [enrich_minifigure_part(part) for part in minifig_parts]
-        enriched_parts.sort(key=lambda x: (x['color'], x['category'], x['name']))
-        
+        enriched_parts = [enrich_minifigure_part(
+            part) for part in minifig_parts]
+        enriched_parts.sort(key=lambda x: (
+            x['color'], x['category'], x['name']))
+
         minifig_data = {
             'id': minifig.id,
             'fig_num': minifig.fig_num,
@@ -216,11 +222,12 @@ def get_user_set_details(user_set_id):
             'parts': enriched_parts
         }
         minifigures_with_parts.append(minifig_data)
-    
+
     return jsonify({
         'set_img_url': user_set.template_set.img_url if user_set.template_set and user_set.template_set.img_url else '/static/default_image.png',
         'parts': parts,
-        'minifigs': minifigures_with_parts,  # Now includes parts grouped with each minifig
+        # Now includes parts grouped with each minifig
+        'minifigs': minifigures_with_parts,
         'status': user_set.status,
         'completeness_percentage': round(completeness_percentage, 2)
     })
@@ -276,14 +283,15 @@ def update_set_label_status():
         current_app.logger.info("update_set_label_status endpoint called")
         data = request.get_json()
         current_app.logger.info(f"Received data: {data}")
-        
+
         if not data:
             current_app.logger.error("No data received")
             return jsonify({"error": "Invalid input data format."}), 400
 
         user_set_id = data.get("user_set_id")
         label_printed = data.get("label_printed")
-        current_app.logger.info(f"user_set_id: {user_set_id}, label_printed: {label_printed}")
+        current_app.logger.info(
+            f"user_set_id: {user_set_id}, label_printed: {label_printed}")
 
         if user_set_id is None or label_printed is None:
             current_app.logger.error("Missing required fields")
@@ -294,9 +302,11 @@ def update_set_label_status():
             current_app.logger.error(f"User set {user_set_id} not found")
             return jsonify({"error": "User set not found."}), 404
 
-        current_app.logger.info(f"Before update: user_set.label_printed = {user_set.label_printed}")
+        current_app.logger.info(
+            f"Before update: user_set.label_printed = {user_set.label_printed}")
         user_set.label_printed = bool(label_printed)
-        current_app.logger.info(f"After update: user_set.label_printed = {user_set.label_printed}")
+        current_app.logger.info(
+            f"After update: user_set.label_printed = {user_set.label_printed}")
         db.session.commit()
         current_app.logger.info("Database committed successfully")
 
