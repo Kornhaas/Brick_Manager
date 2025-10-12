@@ -115,7 +115,7 @@ def enrich_missing_part(part, user_set, part_type='Regular Part'):
         }
 
 
-def get_missing_parts_categories():
+def get_missing_parts_categories(include_spare=True):
     """Get summary of missing parts grouped by category"""
     start_time = time.time()
     current_app.logger.info("Starting category summary analysis")
@@ -138,6 +138,10 @@ def get_missing_parts_categories():
 
             for part in user_set.parts_in_set:
                 if part.quantity > part.have_quantity:
+                    # Skip spare parts if not requested
+                    if not include_spare and getattr(part, 'is_spare', False):
+                        continue
+                        
                     # Get category information efficiently
                     part_info = db.session.query(RebrickableParts).filter_by(
                         part_num=part.part_num).first()
@@ -164,6 +168,10 @@ def get_missing_parts_categories():
 
         for minifig_part in user_minifigure_parts:
             if minifig_part.quantity > minifig_part.have_quantity:
+                # Skip spare parts if not requested
+                if not include_spare and getattr(minifig_part, 'is_spare', False):
+                    continue
+                    
                 # Get category information efficiently
                 part_info = db.session.query(RebrickableParts).filter_by(
                     part_num=minifig_part.part_num).first()
@@ -299,18 +307,35 @@ def missing_parts():
     current_app.logger.info("Starting missing parts category analysis")
 
     try:
-        categories = get_missing_parts_categories()
+        # Get spare parts parameter from query string
+        include_spare = request.args.get('include_spare', 'true').lower() == 'true'
+        
+        categories = get_missing_parts_categories(include_spare=include_spare)
         total_time = time.time() - start_time
         current_app.logger.info(
             f"Missing parts category analysis complete in {total_time:.2f} seconds")
 
-        return render_template('missing_parts.html', categories=categories)
+        return render_template('missing_parts.html', categories=categories, include_spare=include_spare)
 
     except Exception as e:
         current_app.logger.error(f"Error in missing_parts route: {str(e)}")
         current_app.logger.exception("Full traceback:")
         # Return empty categories to prevent crash
-        return render_template('missing_parts.html', categories=[])
+        return render_template('missing_parts.html', categories=[], include_spare=True)
+
+
+@missing_parts_bp.route('/missing_parts_categories', methods=['GET'])
+def missing_parts_categories_api():
+    """
+    API endpoint to get category summary with spare parts filtering.
+    """
+    try:
+        include_spare = request.args.get('include_spare', 'true').lower() == 'true'
+        categories = get_missing_parts_categories(include_spare=include_spare)
+        return jsonify(categories)
+    except Exception as e:
+        current_app.logger.error(f"Error in missing_parts_categories_api route: {str(e)}")
+        return jsonify([])
 
 
 @missing_parts_bp.route('/update_part_quantity', methods=['POST'])

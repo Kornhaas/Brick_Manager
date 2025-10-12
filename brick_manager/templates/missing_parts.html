@@ -54,7 +54,7 @@
             <h3>Categories with Missing Parts</h3>
             <p class="text-muted">Click on a category to view the missing parts in that category.</p>
             
-            <div class="row">
+            <div class="row" id="category-grid">
                 {% for category in categories %}
                 <div class="col-md-4 col-lg-3 mb-3">
                     <div class="card category-card" onclick="loadCategoryParts('{{ category.name }}')">
@@ -87,11 +87,21 @@
             </div>
 
             <!-- Spare Parts Toggle -->
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="toggle-spare-parts" checked>
-                <label class="form-check-label" for="toggle-spare-parts">
-                    Include Spare Parts
-                </label>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Spare Parts Filter</h6>
+                            <small class="text-muted">Toggle to include or exclude spare parts from the results</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggle-spare-parts" checked>
+                            <label class="form-check-label" for="toggle-spare-parts">
+                                <span id="spare-parts-label">Include Spare Parts</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Parts Table -->
@@ -146,17 +156,38 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentCategoryParts = [];
+        let currentCategoryName = null;
         
         document.addEventListener('DOMContentLoaded', function () {
             const toggleSpareParts = document.getElementById('toggle-spare-parts');
 
-            // Spare Parts Toggle
+            // Set initial state from server
+            {% if include_spare is defined %}
+            toggleSpareParts.checked = {{ 'true' if include_spare else 'false' }};
+            const label = document.getElementById('spare-parts-label');
+            label.textContent = toggleSpareParts.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+            {% endif %}
+
+            // Spare Parts Toggle - reload category data when changed
             toggleSpareParts.addEventListener('change', function () {
-                filterParts();
+                // Update the label text based on toggle state
+                const label = document.getElementById('spare-parts-label');
+                label.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+                
+                if (currentCategoryName) {
+                    // If we're viewing a category, reload it with new spare parts setting
+                    loadCategoryParts(currentCategoryName);
+                } else {
+                    // If we're in overview mode, reload the category overview
+                    reloadCategoryOverview();
+                }
             });
         });
 
         function loadCategoryParts(categoryName) {
+            // Track the current category
+            currentCategoryName = categoryName;
+            
             // Show loading spinner
             document.getElementById('category-overview').style.display = 'none';
             document.getElementById('parts-section').style.display = 'block';
@@ -217,8 +248,67 @@
         }
 
         function showCategoryOverview() {
+            // Clear current category when going back to overview
+            currentCategoryName = null;
+            
             document.getElementById('parts-section').style.display = 'none';
             document.getElementById('category-overview').style.display = 'block';
+        }
+
+        function reloadCategoryOverview() {
+            const includeSpare = document.getElementById('toggle-spare-parts').checked;
+            
+            // Show loading spinner
+            const categoryGrid = document.getElementById('category-grid');
+            categoryGrid.innerHTML = `
+                <div class="col-12 text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Updating categories...</p>
+                </div>
+            `;
+            
+            // Fetch updated categories
+            fetch(`/missing_parts_categories?include_spare=${includeSpare}`)
+                .then(response => response.json())
+                .then(categories => {
+                    // Re-render the category grid
+                    let categoryHtml = '';
+                    categories.forEach(category => {
+                        categoryHtml += `
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                <div class="card category-card" onclick="loadCategoryParts('${category.name}')">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">${category.name}</h5>
+                                        <p class="card-text">
+                                            <span class="badge bg-primary">${category.count} items</span><br>
+                                            <span class="badge bg-warning">${category.total_missing} missing</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    if (categories.length === 0) {
+                        categoryHtml = `
+                            <div class="col-12 text-center">
+                                <p class="text-muted">No missing parts found.</p>
+                            </div>
+                        `;
+                    }
+                    
+                    categoryGrid.innerHTML = categoryHtml;
+                })
+                .catch(error => {
+                    console.error('Error reloading categories:', error);
+                    categoryGrid.innerHTML = `
+                        <div class="col-12 text-center">
+                            <p class="text-danger">Error loading categories. Please refresh the page.</p>
+                        </div>
+                    `;
+                });
         }
 
         function renderPartsTable(parts) {
