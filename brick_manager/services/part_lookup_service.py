@@ -7,14 +7,28 @@ operations occur within the Flask application context.
 """
 from models import db, PartStorage
 
+# Global cache for part lookup data to avoid reloading on every request
+_part_lookup_cache = None
+_cache_timestamp = None
 
 def load_part_lookup():
     """
-    Load the master lookup data from the PartStorage table.
+    Load the master lookup data from the PartStorage table with caching.
+    Cache is maintained across requests to avoid repeated database queries.
 
     Returns:
         dict: The master lookup data loaded from the database.
     """
+    global _part_lookup_cache, _cache_timestamp
+    import time
+    
+    current_time = time.time()
+    
+    # Use cache if it exists and is less than 5 minutes old
+    if _part_lookup_cache is not None and _cache_timestamp and (current_time - _cache_timestamp) < 300:
+        return _part_lookup_cache
+    
+    # Load from database and cache the result
     lookup_data = {}
     lookup_entries = PartStorage.query.all()
     for entry in lookup_entries:
@@ -23,16 +37,23 @@ def load_part_lookup():
             'level': entry.level,
             'box': entry.box,
         }
+    
+    # Update cache
+    _part_lookup_cache = lookup_data
+    _cache_timestamp = current_time
+    
     return lookup_data
 
 
 def save_part_lookup(master_lookup):
     """
-    Save the master lookup data to the PartStorage table.
+    Save the master lookup data to the PartStorage table and clear cache.
 
     Args:
-        master_lookup (dict): The master lookup data to be saved.
+        master_lookup (dict): The master lookup data to save.
     """
+    global _part_lookup_cache, _cache_timestamp
+    
     for part_num, data in master_lookup.items():
         # Retrieve or create an entry in PartStorage
         storage_entry = PartStorage.query.filter_by(part_num=part_num).first()
@@ -54,3 +75,7 @@ def save_part_lookup(master_lookup):
             db.session.add(new_entry)
 
     db.session.commit()
+    
+    # Clear cache since data has been updated
+    _part_lookup_cache = None
+    _cache_timestamp = None
