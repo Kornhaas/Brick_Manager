@@ -89,9 +89,16 @@
             // Trim whitespace
             partInput.value = partInput.value.trim();
 
-            // Validate input format (optional, adjust to your needs)
-            if (!/^\d+$/.test(partInput.value)) {
-                alert('Please enter a valid numerical Part ID.');
+            // Basic validation - just ensure it's not empty and doesn't contain dangerous characters
+            if (partInput.value.length < 1 || partInput.value.length > 50) {
+                alert('Please enter a valid Part ID (1-50 characters).');
+                event.preventDefault();
+                return;
+            }
+            
+            // Prevent potential injection attacks - only allow safe characters
+            if (!/^[a-zA-Z0-9\-_]+$/.test(partInput.value)) {
+                alert('Part ID can only contain letters, numbers, hyphens, and underscores.');
                 event.preventDefault();
                 return;
             }
