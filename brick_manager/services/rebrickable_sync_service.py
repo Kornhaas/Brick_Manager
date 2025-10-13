@@ -191,10 +191,14 @@ def make_rate_limited_request(url, headers, params=None, timeout=20, max_retries
                 time.sleep(2 ** attempt)
 
 
-def get_local_missing_parts(include_spare=False):
+def get_local_missing_parts(include_spare=False, include_minifig=True):
     """
     Get all missing parts from the local database (excluding spare parts by default).
     Returns a list of parts with their missing quantities.
+    
+    Args:
+        include_spare: Include spare parts in the results
+        include_minifig: Include minifigure parts in the results
     """
     missing_parts = []
     
@@ -221,7 +225,42 @@ def get_local_missing_parts(include_spare=False):
                         'is_spare': getattr(part, 'is_spare', False)
                     })
         
-        # Get missing minifigure parts
+        # Get missing minifigure parts (if requested)
+        if include_minifig:
+            user_minifigure_parts = UserMinifigurePart.query.all()
+            
+            for minifig_part in user_minifigure_parts:
+                if minifig_part.quantity > minifig_part.have_quantity:
+                    # Skip spare parts if not requested
+                    if not include_spare and getattr(minifig_part, 'is_spare', False):
+                        continue
+                    
+                    missing_quantity = minifig_part.quantity - minifig_part.have_quantity
+                    missing_parts.append({
+                        'part_num': minifig_part.part_num,
+                        'color_id': minifig_part.color_id,
+                        'missing_quantity': missing_quantity,
+                        'set_num': None,  # Minifig parts don't have direct set association
+                        'is_spare': getattr(minifig_part, 'is_spare', False),
+                        'is_minifig': True
+                    })
+        
+        logger.info(f"Found {len(missing_parts)} missing parts locally (minifig included: {include_minifig})")
+        return missing_parts
+        
+    except Exception as e:
+        logger.error(f"Error getting local missing parts: {e}")
+        return []
+
+
+def get_local_missing_minifigure_parts(include_spare=False):
+    """
+    Get only missing minifigure parts from the local database.
+    Returns a list of minifigure parts with their missing quantities.
+    """
+    missing_parts = []
+    
+    try:
         user_minifigure_parts = UserMinifigurePart.query.all()
         
         for minifig_part in user_minifigure_parts:
@@ -235,16 +274,17 @@ def get_local_missing_parts(include_spare=False):
                     'part_num': minifig_part.part_num,
                     'color_id': minifig_part.color_id,
                     'missing_quantity': missing_quantity,
-                    'set_num': None,  # Minifig parts don't have direct set association
+                    'set_num': getattr(minifig_part.user_set, 'set_num', None) if hasattr(minifig_part, 'user_set') else None,
+                    'minifigure_id': minifig_part.minifigure_id,
                     'is_spare': getattr(minifig_part, 'is_spare', False),
                     'is_minifig': True
                 })
         
-        logger.info(f"Found {len(missing_parts)} missing parts locally")
+        logger.info(f"Found {len(missing_parts)} missing minifigure parts locally")
         return missing_parts
         
     except Exception as e:
-        logger.error(f"Error getting local missing parts: {e}")
+        logger.error(f"Error getting local missing minifigure parts: {e}")
         return []
 
 def get_rebrickable_lost_parts():
@@ -1207,8 +1247,8 @@ def sync_missing_parts_with_rebrickable(batch_size=None):
     try:
         logger.info("Starting smart missing parts synchronization with Rebrickable Part Lists")
         
-        # Get current missing parts from local database (excluding spare parts)
-        local_missing = get_local_missing_parts(include_spare=False)
+        # Get current missing parts from local database (excluding spare parts and minifig parts)
+        local_missing = get_local_missing_parts(include_spare=False, include_minifig=False)
         
         # Find or create the missing parts list
         list_id = find_or_create_missing_parts_list("Brick_Manager-Missing_Parts")
@@ -1223,10 +1263,35 @@ def sync_missing_parts_with_rebrickable(batch_size=None):
         current_list_parts = get_part_list_parts(list_id)
         
         # Create lookup dictionaries for efficient comparison
+        # Sum quantities for parts that appear in multiple sets
         local_parts_dict = {}
+        duplicate_parts_count = 0
+        
         for part in local_missing:
             key = f"{part['part_num']}_{part['color_id']}"
-            local_parts_dict[key] = part
+            if key in local_parts_dict:
+                # Part already exists - sum the missing quantities
+                old_quantity = local_parts_dict[key]['missing_quantity']
+                local_parts_dict[key]['missing_quantity'] += part['missing_quantity']
+                new_quantity = local_parts_dict[key]['missing_quantity']
+                
+                # Keep track of all sets that need this part (for reference)
+                if 'source_sets' not in local_parts_dict[key]:
+                    local_parts_dict[key]['source_sets'] = [local_parts_dict[key].get('set_num', 'Unknown')]
+                if part.get('set_num'):
+                    local_parts_dict[key]['source_sets'].append(part['set_num'])
+                
+                # Log the quantity summing for debugging
+                logger.debug(f"Part {part['part_num']}/{part['color_id']} found in multiple sets: {old_quantity} + {part['missing_quantity']} = {new_quantity}")
+                duplicate_parts_count += 1
+            else:
+                # First occurrence of this part
+                local_parts_dict[key] = part.copy()  # Make a copy to avoid modifying original
+                if part.get('set_num'):
+                    local_parts_dict[key]['source_sets'] = [part['set_num']]
+        
+        if duplicate_parts_count > 0:
+            logger.info(f"Found {duplicate_parts_count} parts that appear in multiple sets - quantities have been summed correctly")
         
         current_parts_dict = {}
         for part in current_list_parts:
@@ -1366,4 +1431,208 @@ def sync_missing_parts_with_rebrickable(batch_size=None):
         return {
             'success': False,
             'message': f'Smart synchronization failed: {str(e)}'
+        }
+
+
+def sync_missing_minifigure_parts_with_rebrickable(batch_size=None):
+    """
+    Synchronize missing minifigure parts from local database with Rebrickable's Part Lists feature using smart diff-based updates.
+    
+    This function:
+    1. Gets all missing minifigure parts from the local database (excluding spare parts)
+    2. Creates or finds 'Brick_Manager-Missing_Minifigure_Parts' part list
+    3. Compares current list with local missing minifigure parts
+    4. Only adds missing parts and removes/updates parts as needed
+    
+    Args:
+        batch_size: Number of parts to process in one batch (default: 200 for collections >500, 100 otherwise)
+    
+    Returns:
+        dict: Results of the synchronization operation
+    """
+    try:
+        logger.info("Starting smart missing minifigure parts synchronization with Rebrickable Part Lists")
+        
+        # Get current missing minifigure parts from local database (excluding spare parts)
+        local_missing = get_local_missing_minifigure_parts(include_spare=False)
+        
+        # Find or create the missing minifigure parts list
+        list_id = find_or_create_missing_parts_list("Brick_Manager-Missing_Minifigure_Parts")
+        
+        if not list_id:
+            return {
+                'success': False,
+                'message': 'Failed to create or find missing minifigure parts list on Rebrickable'
+            }
+        
+        # Get current parts in the Rebrickable list
+        current_list_parts = get_part_list_parts(list_id)
+        
+        # Create lookup dictionaries for efficient comparison
+        # Sum quantities for parts that appear in multiple minifigures
+        local_parts_dict = {}
+        duplicate_parts_count = 0
+        
+        for part in local_missing:
+            key = f"{part['part_num']}_{part['color_id']}"
+            if key in local_parts_dict:
+                # Part already exists - sum the missing quantities
+                old_quantity = local_parts_dict[key]['missing_quantity']
+                local_parts_dict[key]['missing_quantity'] += part['missing_quantity']
+                new_quantity = local_parts_dict[key]['missing_quantity']
+                
+                # Keep track of all minifigures that need this part (for reference)
+                if 'source_minifigures' not in local_parts_dict[key]:
+                    local_parts_dict[key]['source_minifigures'] = [local_parts_dict[key].get('minifigure_id', 'Unknown')]
+                if part.get('minifigure_id'):
+                    local_parts_dict[key]['source_minifigures'].append(part['minifigure_id'])
+                
+                # Log the quantity summing for debugging
+                logger.debug(f"Minifig part {part['part_num']}/{part['color_id']} found in multiple minifigures: {old_quantity} + {part['missing_quantity']} = {new_quantity}")
+                duplicate_parts_count += 1
+            else:
+                # First occurrence of this part
+                local_parts_dict[key] = part.copy()  # Make a copy to avoid modifying original
+                if part.get('minifigure_id'):
+                    local_parts_dict[key]['source_minifigures'] = [part['minifigure_id']]
+        
+        if duplicate_parts_count > 0:
+            logger.info(f"Found {duplicate_parts_count} minifigure parts that appear in multiple minifigures - quantities have been summed correctly")
+        
+        current_parts_dict = {}
+        for part in current_list_parts:
+            key = f"{part['part']['part_num']}_{part['color']['id']}"
+            current_parts_dict[key] = {
+                'part_num': part['part']['part_num'],
+                'color_id': part['color']['id'],
+                'quantity': part['quantity'],
+                'list_part_id': part.get('id')  # For removal operations
+            }
+        
+        # Smart diff analysis
+        parts_to_add = []  # Parts in local but not in list
+        parts_to_remove = []  # Parts in list but not in local
+        parts_to_update = []  # Parts in both but with different quantities
+        
+        # Find parts to add (in local but not in list)
+        for key, local_part in local_parts_dict.items():
+            if key not in current_parts_dict:
+                parts_to_add.append(local_part)
+            else:
+                # Check if quantity needs updating
+                current_quantity = current_parts_dict[key]['quantity']
+                if current_quantity != local_part['missing_quantity']:
+                    parts_to_update.append({
+                        'part_num': local_part['part_num'],
+                        'color_id': local_part['color_id'],
+                        'old_quantity': current_quantity,
+                        'new_quantity': local_part['missing_quantity'],
+                        'list_part_id': current_parts_dict[key]['list_part_id']
+                    })
+        
+        # Find parts to remove (in list but not in local)
+        for key, current_part in current_parts_dict.items():
+            if key not in local_parts_dict:
+                parts_to_remove.append(current_part)
+        
+        results = {
+            'success': True,
+            'summary': {
+                'local_missing_count': len(local_missing),
+                'list_parts_count': len(current_list_parts),
+                'to_add': len(parts_to_add),
+                'to_remove': len(parts_to_remove),
+                'to_update': len(parts_to_update),
+                'list_id': list_id
+            },
+            'operations': []
+        }
+        
+        logger.info(f"Smart minifigure sync analysis: {len(parts_to_add)} to add, {len(parts_to_remove)} to remove, {len(parts_to_update)} to update")
+        
+        # Step 1: Remove parts that are no longer missing
+        removed_count = 0
+        if parts_to_remove:
+            logger.info(f"Removing {len(parts_to_remove)} minifigure parts that are no longer missing")
+            remove_result = remove_parts_from_part_list(list_id, parts_to_remove)
+            removed_count = remove_result.get('removed', 0)
+            results['operations'].append({
+                'operation': 'remove_obsolete',
+                'result': remove_result
+            })
+        
+        # Step 2: Add new missing parts
+        added_count = 0
+        rate_limited_count = 0
+        
+        if parts_to_add:
+            # Apply batch size limiting for large additions
+            if batch_size is None:
+                if len(parts_to_add) > 1000:
+                    batch_size = 500
+                elif len(parts_to_add) > 500:
+                    batch_size = 200
+                else:
+                    batch_size = len(parts_to_add)  # Process all if small
+            
+            batch_size = min(batch_size, len(parts_to_add))
+            sample_parts = parts_to_add[:batch_size]
+            
+            logger.info(f"Adding {len(sample_parts)} new missing minifigure parts (out of {len(parts_to_add)} total)")
+            
+            add_result = add_parts_to_part_list(list_id, sample_parts)
+            added_count = add_result.get('added', 0)
+            rate_limited_count = add_result.get('rate_limited_count', 0)
+            results['operations'].append({
+                'operation': 'add_new_missing',
+                'result': add_result
+            })
+        
+        # Step 3: Update quantities for existing parts (if supported by API)
+        updated_count = 0
+        if parts_to_update:
+            logger.info(f"Found {len(parts_to_update)} minifigure parts with quantity changes")
+            update_result = update_part_quantities_in_list(list_id, parts_to_update)
+            updated_count = update_result.get('updated', 0)
+            results['operations'].append({
+                'operation': 'update_quantities',
+                'result': update_result
+            })
+        
+        logger.info(f"Smart minifigure sync completed - added {added_count}, removed {removed_count}, updated {updated_count} parts")
+        
+        results['summary']['actual_added'] = added_count
+        results['summary']['actual_removed'] = removed_count
+        results['summary']['actual_updated'] = updated_count
+        results['summary']['rate_limited_count'] = rate_limited_count
+        results['summary']['total_local'] = len(local_missing)
+        results['summary']['sample_processed'] = len(parts_to_add) if batch_size and len(parts_to_add) > batch_size else len(parts_to_add)
+        
+        # Enhanced message with smart sync information
+        message_parts = [
+            f"Smart minifigure synchronization completed! ",
+            f"Found {len(local_missing)} missing minifigure parts locally vs {len(current_list_parts)} in list. "
+        ]
+        
+        if added_count > 0:
+            message_parts.append(f"Added {added_count} new missing minifigure parts. ")
+        if removed_count > 0:
+            message_parts.append(f"Removed {removed_count} minifigure parts no longer missing. ")
+        if updated_count > 0:
+            message_parts.append(f"Updated quantities for {updated_count} minifigure parts. ")
+        if added_count == 0 and removed_count == 0 and updated_count == 0:
+            message_parts.append("No changes needed - minifigure lists are already in sync! ")
+        
+        if rate_limited_count > 0:
+            message_parts.append(f"{rate_limited_count} operations were rate limited and will be completed in the next sync.")
+        
+        results['summary']['message'] = "".join(message_parts)
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"Error during smart missing minifigure parts synchronization: {e}")
+        return {
+            'success': False,
+            'message': f'Smart minifigure synchronization failed: {str(e)}'
         }

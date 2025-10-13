@@ -94,12 +94,12 @@ def backup_database():
 
 def scheduled_sync_missing_parts():
     """
-    Scheduled task to sync missing parts with Rebrickable every 6 hours.
+    Scheduled task to sync both regular and minifigure missing parts with Rebrickable every 6 hours.
     Only runs if tokens are configured.
     """
     try:
         from services.token_service import get_rebrickable_user_token, get_rebrickable_api_key
-        from services.rebrickable_sync_service import sync_missing_parts_with_rebrickable
+        from services.rebrickable_sync_service import sync_missing_parts_with_rebrickable, sync_missing_minifigure_parts_with_rebrickable
         
         # Check if tokens are configured
         user_token = get_rebrickable_user_token()
@@ -109,14 +109,40 @@ def scheduled_sync_missing_parts():
             app.logger.info("Scheduled missing parts sync skipped - no API credentials configured")
             return
         
-        app.logger.info("Starting scheduled missing parts sync")
-        result = sync_missing_parts_with_rebrickable(batch_size=500)  # Use moderate batch size for scheduled runs
+        app.logger.info("Starting scheduled sync for both regular and minifigure missing parts")
+        batch_size = 500  # Use moderate batch size for scheduled runs
         
-        if result['success']:
-            summary = result.get('summary', {})
-            app.logger.info(f"Scheduled missing parts sync completed - processed {summary.get('sample_processed', 0)} parts, added {summary.get('to_add', 0)} to Rebrickable")
+        # Sync regular parts
+        app.logger.info("Syncing regular missing parts...")
+        regular_result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
+        
+        # Sync minifigure parts
+        app.logger.info("Syncing minifigure missing parts...")
+        minifig_result = sync_missing_minifigure_parts_with_rebrickable(batch_size=batch_size)
+        
+        # Log combined results
+        if regular_result['success'] and minifig_result['success']:
+            regular_summary = regular_result.get('summary', {})
+            minifig_summary = minifig_result.get('summary', {})
+            
+            total_regular = regular_summary.get('local_missing_count', 0)
+            total_minifig = minifig_summary.get('local_missing_count', 0)
+            added_regular = regular_summary.get('actual_added', 0)
+            added_minifig = minifig_summary.get('actual_added', 0)
+            removed_regular = regular_summary.get('actual_removed', 0)
+            removed_minifig = minifig_summary.get('actual_removed', 0)
+            
+            app.logger.info(f"Scheduled sync completed successfully:")
+            app.logger.info(f"  Regular parts: {total_regular} local, {added_regular} added, {removed_regular} removed")
+            app.logger.info(f"  Minifig parts: {total_minifig} local, {added_minifig} added, {removed_minifig} removed")
+            app.logger.info(f"  Total: {total_regular + total_minifig} parts across both lists")
         else:
-            app.logger.error(f"Scheduled missing parts sync failed: {result.get('message', 'Unknown error')}")
+            error_messages = []
+            if not regular_result['success']:
+                error_messages.append(f"Regular parts: {regular_result.get('message', 'Unknown error')}")
+            if not minifig_result['success']:
+                error_messages.append(f"Minifig parts: {minifig_result.get('message', 'Unknown error')}")
+            app.logger.error(f"Scheduled sync failed - {'; '.join(error_messages)}")
             
     except Exception as e:
         app.logger.error(f"Error during scheduled missing parts sync: {e}")
