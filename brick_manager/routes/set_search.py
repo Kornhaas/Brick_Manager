@@ -137,6 +137,13 @@ def add_set():
             user_part.quantity = part['quantity']
             user_part.is_spare = part['is_spare']
             user_part.user_set_id = user_set.id
+            
+            # Set have_quantity based on status
+            if status in ['complete', 'assembled']:
+                user_part.have_quantity = part['quantity']  # Have all parts
+            else:  # unknown
+                user_part.have_quantity = 0  # Have no parts
+            
             db.session.add(user_part)
 
         minifigs_info = fetch_minifigs_info(set_number)
@@ -177,10 +184,25 @@ def add_set():
                 minifig_part.quantity = part['quantity'] * minifig['quantity']
                 minifig_part.user_set_id = user_set.id
                 minifig_part.minifigure_id = db_minifig.id  # Link to specific minifigure
+                
+                # Set have_quantity based on status
+                if status in ['complete', 'assembled']:
+                    minifig_part.have_quantity = minifig_part.quantity  # Have all parts
+                else:  # unknown
+                    minifig_part.have_quantity = 0  # Have no parts
+                
                 db.session.add(minifig_part)
         db.session.commit()
-        flash(f"Set {template_set.name} added successfully as {
-              status}!", category="success")
+        
+        # Create descriptive success message based on status
+        status_messages = {
+            'complete': 'complete (all parts marked as owned)',
+            'assembled': 'assembled (all parts marked as owned)', 
+            'unknown': 'unknown (no parts marked as owned)'
+        }
+        status_description = status_messages.get(status, status)
+        
+        flash(f"Set {template_set.name} added successfully as {status_description}!", category="success")
     except Exception as error:
         db.session.rollback()
         current_app.logger.error("Error adding set %s: %s", set_number, error)

@@ -91,15 +91,32 @@
       <form id="save-set-form" method="post" action="{{ url_for('set_search.add_set') }}" class="mt-4">
         <input type="hidden" name="set_number" value="{{ set_info['set_num'] }}" />
         <input type="hidden" id="set-status" name="status" value="unknown" />
-        <button type="submit" class="btn btn-success">Save Set</button>
-        <button
-          type="button"
-          class="btn btn-warning"
-          onclick="saveAsKonvolut(event)"
-          aria-label="Save set as Konvolut"
-        >
-          Save as Konvolut
-        </button>
+        <div class="btn-group" role="group" aria-label="Save options">
+          <button
+            type="button"
+            class="btn btn-success"
+            onclick="saveAsComplete(event)"
+            aria-label="Save complete set"
+          >
+            Save Complete Set
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="saveAsAssembled(event)"
+            aria-label="Save assembled set"
+          >
+            Save Assembled
+          </button>
+          <button
+            type="button"
+            class="btn btn-warning"
+            onclick="saveAsUnknown(event)"
+            aria-label="Save set as unknown"
+          >
+            Save as Unknown
+          </button>
+        </div>
       </form>
       {% endif %}
 
@@ -262,9 +279,21 @@
         }
       }
 
-      function saveAsKonvolut(event) {
+      function saveAsComplete(event) {
         event.preventDefault();
-        document.getElementById("set-status").value = "konvolut";
+        document.getElementById("set-status").value = "complete";
+        document.getElementById("save-set-form").submit();
+      }
+
+      function saveAsAssembled(event) {
+        event.preventDefault();
+        document.getElementById("set-status").value = "assembled";
+        document.getElementById("save-set-form").submit();
+      }
+
+      function saveAsUnknown(event) {
+        event.preventDefault();
+        document.getElementById("set-status").value = "unknown";
         document.getElementById("save-set-form").submit();
       }
 
