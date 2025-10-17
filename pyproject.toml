@@ -23,7 +23,40 @@ pytest = "^8.3.2"
 pylint = "^3.2.6"
 flask-testing = "^0.8.1"
 vulture = "^2.14"
+pytest-cov = "^5.0.0"
+coverage = "^7.6.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+source = ["brick_manager"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/migrations/*",
+    "*/__pycache__/*",
+    "*/instance/*",
+    "*/static/*",
+    "*/templates/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "htmlcov"

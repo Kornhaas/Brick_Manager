@@ -21,6 +21,8 @@ class Config:  # pylint: disable=R0903
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     SQLALCHEMY_DATABASE_URI = 'sqlite:///brick_manager.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    REBRICKABLE_TOKEN = os.getenv('REBRICKABLE_TOKEN', 'test-token')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
 
     # Ensure the upload directory exists
     if not os.path.exists(UPLOAD_FOLDER):
