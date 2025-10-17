@@ -8,9 +8,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("mark-all-existing");
 
   markAllExistingButton.addEventListener("click", () => {
-    // Get all input fields in the Non-Spare Parts and Spare Parts tables
+    // Get all input fields in the Non-Spare Parts, Spare Parts, and Minifigs tables
     const partsTables = [
       document.getElementById("non-spare-parts-table-body"),
+      document.getElementById("spare-parts-table-body"),
+      document.getElementById("minifigs-table-body"),
     ];
 
     partsTables.forEach((tableBody) => {
@@ -34,6 +36,33 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     alert("All parts marked as existing!");
+  });
+
+  // Reset all parts to 0
+  const resetAllToZeroButton = document.getElementById("reset-all-to-zero");
+
+  resetAllToZeroButton.addEventListener("click", () => {
+    // Get all input fields in the Non-Spare Parts, Spare Parts, and Minifigs tables
+    const partsTables = [
+      document.getElementById("non-spare-parts-table-body"),
+      document.getElementById("spare-parts-table-body"),
+      document.getElementById("minifigs-table-body"),
+    ];
+
+    partsTables.forEach((tableBody) => {
+      if (tableBody) {
+        const rows = tableBody.querySelectorAll("tr");
+        rows.forEach((row) => {
+          const ownedInput = row.querySelector("input[type='number']"); // Owned input field
+
+          if (ownedInput) {
+            ownedInput.value = 0; // Set Owned to 0
+          }
+        });
+      }
+    });
+
+    alert("All parts reset to 0!");
   });
 
   // Add event listener for mismatched parts filter
@@ -64,9 +93,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const sparePartsRows = document.querySelectorAll(
       "#spare-parts-table-body tr"
     );
+    const minifigsRows = document.querySelectorAll(
+      "#minifigs-table-body tr"
+    );
 
     filterRows(nonSparePartsRows);
     filterRows(sparePartsRows);
+    filterRows(minifigsRows);
   });
 
   // Handle back to sets button
@@ -91,9 +124,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const sparePartsRows = document.querySelectorAll(
       "#spare-parts-table-body tr"
     );
+    const minifigsRows = document.querySelectorAll(
+      "#minifigs-table-body tr"
+    );
 
     resetFilter(nonSparePartsRows);
     resetFilter(sparePartsRows);
+    resetFilter(minifigsRows);
   });
 
   // Handle view details
