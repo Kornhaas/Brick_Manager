@@ -1,45 +1,105 @@
-name: Python Unittests
+name: 🧪 Python Tests
+
+# This workflow focuses on comprehensive testing across multiple Python versions
+# It runs faster than the Docker workflow and provides quick feedback on code changes
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'poetry.lock'
+      - 'tests/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'poetry.lock'
+      - 'tests/**'
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
+    name: 🧪 Test Python ${{ matrix.python-version }}
+    
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+        
     steps:
-    - name: Checkout code
+    - name: 📥 Checkout code
       uses: actions/checkout@v4
     
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v3
+    - name: 🐍 Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        python-version: "3.13"
+        python-version: ${{ matrix.python-version }}
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
+    - name: 📦 Install Poetry
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: latest
     
-    - name: Cache dependencies
+    - name: 🗄️ Cache dependencies
       uses: actions/cache@v3
       with:
         path: ~/.cache/pypoetry
-        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        key: ${{ runner.os }}-poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
         restore-keys: |
+          ${{ runner.os }}-poetry-${{ matrix.python-version }}-
           ${{ runner.os }}-poetry-
 
-    - name: Install dependencies
+    - name: 🔧 Configure Poetry
+      run: |
+        poetry config virtualenvs.create false
+
+    - name: 📚 Install dependencies
       run: |
         poetry install --with dev --no-root
 
-    - name: Run tests with pytest
+    - name: 🧪 Run tests with pytest
       run: |
-        PYTHONPATH=$(pwd) poetry run pytest brick_manager/tests
+        echo "## 🧪 Test Results (Python ${{ matrix.python-version }})" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Run tests with coverage
+        if poetry run pytest brick_manager/tests/ --verbose --cov=brick_manager --cov-report=term --cov-report=xml > test_output.txt 2>&1; then
+          echo "✅ **All tests passed!**" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract coverage percentage if available
+          if grep -q "TOTAL" test_output.txt; then
+            COVERAGE=$(grep "TOTAL" test_output.txt | awk '{print $NF}')
+            echo "**Coverage:** $COVERAGE" >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "❌ **Some tests failed:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat test_output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+
+    - name: 📊 Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: matrix.python-version == '3.12'
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: 📤 Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-py${{ matrix.python-version }}
+        path: |
+          test_output.txt
+          coverage.xml
+        retention-days: 30
 

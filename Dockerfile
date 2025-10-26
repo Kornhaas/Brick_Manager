@@ -1,44 +1,69 @@
-# Stage 1: Build
-FROM python:3.13-slim AS builder
+# Multi-stage build for optimal image size and security
+FROM python:3.12-slim AS builder
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Install build dependencies, combining steps to reduce layers and clean up after installation
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential gcc \
+    build-essential \
+    gcc \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry for dependency management
+# Install Poetry
 RUN pip install --no-cache-dir poetry
 
-# Copy dependency files first for layer caching optimization
+# Copy dependency files
 COPY pyproject.toml poetry.lock ./
 
-# Configure Poetry to avoid creating virtual environments and install dependencies
+# Configure Poetry and install dependencies
 RUN poetry config virtualenvs.create false \
     && poetry install --only main --no-root --no-interaction --no-ansi
 
-# Copy the application code
-COPY . .
+# Production stage
+FROM python:3.12-slim
 
-# Stage 2: Production (distroless approach with minimal Python runtime)
-# Use Google's distroless image for improved security and reduced image size
-FROM python:3.13-slim
+# Create app user for security
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /bin/bash appuser
 
-# Copy only the necessary files from the builder stage
-COPY --from=builder /app /app
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-# Switch to non-root user to enhance security
-USER 1000
-
-# Set the working directory and expose the necessary port
+# Set working directory
 WORKDIR /app
+
+# Copy Python packages from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
+
+# Copy application code
+COPY brick_manager/ ./brick_manager/
+COPY migrations/ ./migrations/
+COPY entrypoint.sh ./
+
+# Create directories for mounted volumes with correct permissions
+RUN mkdir -p /app/data/instance \
+    /app/data/uploads \
+    /app/data/output \
+    /app/data/cache \
+    /app/brick_manager/static/cache \
+    && chown -R appuser:appuser /app
+
+# Make entrypoint script executable
+RUN chmod +x entrypoint.sh
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
 EXPOSE 5000
 
-# Set environment variables for Flask
-ENV FLASK_APP=app.py
+# Set environment variables
+ENV FLASK_APP=brick_manager/app.py
 ENV FLASK_ENV=production
+ENV PYTHONPATH=/app
 
-# Use entrypoint to run the application, focusing on minimal executable setup
-ENTRYPOINT ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+# Use entrypoint script
+ENTRYPOINT ["./entrypoint.sh"]

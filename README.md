@@ -1,152 +1,394 @@
-# Brick Manager
+# 🧱 Lego Manager
 
-Brick Manager is a Flask-based web application designed to help users manage Brick parts and sets. This application allows users to manually enter parts, look up part details, search for parts by set number, and print labels. It leverages the Rebrickable API to fetch part details and uses a SQLite database to manage categories locally, helping to avoid hitting API rate limits.
+A comprehensive Flask-based web application for managing LEGO brick collections, sets, and parts. This application helps LEGO enthusiasts organize their collection, track missing parts, generate labels, and efficiently manage storage systems with integration to the Rebrickable database.
 
-## Table of Contents
+![Python](https://img.shields.io/badge/python-v3.11+-blue.svg)
+![Flask](https://img.shields.io/badge/flask-v3.0+-green.svg)
+![Docker](https://img.shields.io/badge/docker-supported-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Setup](#setup)
-  - [1. Clone the Repository](#1-clone-the-repository)
-  - [2. Install Dependencies](#2-install-dependencies)
-  - [3. Set Up the Database](#3-set-up-the-database)
-  - [4. Set Environment Variables](#4-set-environment-variables)
-  - [5. Run the Application](#5-run-the-application)
-- [Usage](#usage)
-  - [Manual Part Entry](#manual-part-entry)
-  - [Part Lookup](#part-lookup)
-  - [Set Search](#set-search)
-  - [Print Labels](#print-labels)
-  - [Load Categories](#load-categories)
-- [Docker](#docker)
-  - [1. Build the Docker Image](#1-build-the-docker-image)
-  - [2. Run the Docker Container](#2-run-the-docker-container)
-- [Running Tests](#running-tests)
-- [Contributing](#contributing)
-- [License](#license)
+## 📋 Table of Contents
 
-## Features
+- [🌟 Features](#-features)
+- [🚀 Quick Start](#-quick-start)
+  - [Docker Deployment (Recommended)](#docker-deployment-recommended)
+  - [Local Development](#local-development)
+- [📁 Project Structure](#-project-structure)
+- [⚙️ Configuration](#️-configuration)
+- [🔧 Usage Guide](#-usage-guide)
+- [🐳 Docker Support](#-docker-support)
+- [🧪 Testing](#-testing)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
-- **Manual Part Entry**: Add or update Brick parts in the local database.
-- **Part Lookup**: Search for parts by their ID and view details including location and category.
-- **Set Search**: Enter a Brick set number to retrieve a list of all parts in the set.
-- **Print Labels**: Generate and print labels for Brick parts with details like part number, name, category, and location.
-- **Category Management**: Load and update part categories from Rebrickable to avoid hitting API rate limits.
+## 🌟 Features
 
-## Prerequisites
+### 📦 **Set Management**
+- **Enhanced Set Maintenance Interface** with sortable columns and advanced filtering
+- **Automatic Database Creation** for new deployments
+- **Progress Tracking** with visual completion indicators
+- **Automatic Label Printing** when generating box labels
+- **Theme-based Organization** with dynamic theme detection
 
-- Python 3.8 or higher
-- [Poetry](https://python-poetry.org/) (for dependency management)
-- [Docker](https://www.docker.com/) (optional, for running the app in a container)
+### 🔍 **Advanced Search & Filtering**
+- **Quick Search** across set numbers, names, and themes
+- **Expandable Advanced Filters** with multiple criteria:
+  - Status filtering (Complete, Missing Parts, etc.)
+  - Theme-based filtering
+  - Label printing status
+  - Parts completion percentage
+- **Real-time Filtering** with instant results
+- **Filter Combinations** for precise searches
 
-## Setup
+### 🧾 **Part Management**
+- **Manual Part Entry** with comprehensive validation
+- **Part Lookup** with detailed information and storage location
+- **Missing Parts Detection** and tracking
+- **Color-coded Status Indicators** for quick visual reference
+- **Spare Parts Handling** with dedicated tracking
 
-### 1. Clone the Repository
+### 🏷️ **Label Generation**
+- **Professional Label Printing** for storage organization
+- **Multiple Box Sizes** (Small/Big box support)
+- **QR Code Integration** for quick scanning
+- **Batch Label Generation** for multiple sets
+- **Print Status Tracking** to avoid duplicates
 
-```bash
-git clone https://github.com/yourusername/Brick-scanner.git
-cd Brick-scanner
+### 📊 **Data Integration**
+- **Rebrickable API Integration** for comprehensive LEGO database access
+- **Automatic Data Synchronization** with scheduled updates
+- **Local Caching** to reduce API calls and improve performance
+- **Master Lookup Data** for offline capabilities
+
+### 🗄️ **Storage Management**
+- **Multi-level Storage System** (Cabinet → Shelf → Box)
+- **Storage Location Tracking** for every part
+- **Box Maintenance** with visual organization tools
+- **Location-based Search** and filtering
+
+## 🚀 Quick Start
+
+### Docker Deployment (Recommended)
+
+1. **Clone and Setup**
+   ```bash
+   git clone https://github.com/Kornhaas/Lego_Manager.git
+   cd Lego_Manager
+   
+   # Configure environment
+   cp .env.example .env
+   # Edit .env with your settings (especially REBRICKABLE_TOKEN)
+   ```
+
+2. **Start with Docker Compose**
+   ```bash
+   # Quick start
+   make setup
+   
+   # Or manually
+   docker compose up -d
+   ```
+
+3. **Access Application**
+   - Main Application: http://localhost:5000
+   - Health Check: http://localhost:5000/health
+
+### Local Development
+
+1. **Prerequisites**
+   - Python 3.11+
+   - Poetry (dependency management)
+   - SQLite3
+
+2. **Setup**
+   ```bash
+   git clone https://github.com/Kornhaas/Lego_Manager.git
+   cd Lego_Manager
+   
+   # Install dependencies
+   poetry install
+   
+   # Set up environment
+   cp .env.example .env
+   # Configure your .env file
+   
+   # Initialize database
+   cd brick_manager
+   poetry run flask db upgrade
+   
+   # Start application
+   poetry run flask run
+   ```
+
+## 📁 Project Structure
+
+```
+Lego_Manager/
+├── 🐳 Docker Configuration
+│   ├── Dockerfile                 # Multi-stage container build
+│   ├── docker-compose.yml         # Production deployment
+│   ├── docker-compose.dev.yml     # Development overrides
+│   ├── entrypoint.sh             # Container startup script
+│   └── .dockerignore             # Build optimization
+├── 
+├── 🏠 Application Core
+│   └── brick_manager/
+│       ├── app.py                # Flask application factory
+│       ├── config.py             # Configuration management
+│       ├── models.py             # Database models
+│       └── manage.py             # CLI management commands
+├── 
+├── 🛣️ Routes & Views
+│   └── brick_manager/routes/
+│       ├── main.py               # Home and health endpoints
+│       ├── set_maintain.py       # Enhanced set management
+│       ├── part_lookup.py        # Part search and details
+│       ├── missing_parts.py      # Missing parts tracking
+│       ├── dashboard.py          # Analytics dashboard
+│       └── ...                   # Additional route modules
+├── 
+├── 🎨 Frontend Assets
+│   └── brick_manager/
+│       ├── templates/            # Jinja2 HTML templates
+│       │   ├── set_maintain.html # Enhanced with sorting/filtering
+│       │   └── ...               # Other UI templates
+│       └── static/
+│           ├── css/              # Stylesheets
+│           ├── js/               # JavaScript functionality
+│           └── cache/            # Dynamic cache storage
+├── 
+├── 🔧 Services & Utilities
+│   └── brick_manager/services/
+│       ├── rebrickable_service.py    # API integration
+│       ├── part_lookup_service.py    # Part search logic
+│       ├── label_service.py          # Label generation
+│       └── cache_service.py          # Caching system
+├── 
+├── 📁 Data Storage (Docker Volumes)
+│   └── data/
+│       ├── instance/             # SQLite database
+│       ├── uploads/              # User uploaded files
+│       ├── output/               # Generated labels/exports
+│       ├── cache/                # Application cache
+│       └── logs/                 # Application logs
+├── 
+├── 🧪 Testing & Quality
+│   ├── tests/                    # Unit and integration tests
+│   ├── pytest.ini               # Test configuration
+│   └── .pylintrc                # Code quality rules
+├── 
+└── 📚 Documentation & Config
+    ├── README.md                 # This file
+    ├── DOCKER_README.md          # Docker deployment guide
+    ├── Makefile                  # Development commands
+    ├── pyproject.toml            # Poetry dependencies
+    └── .env.example              # Environment template
 ```
 
-### 2. Install Dependencies
-Using Poetry:
+## ⚙️ Configuration
+
+### Environment Variables (.env)
 
 ```bash
-poetry install
+# Required - Rebrickable API
+REBRICKABLE_TOKEN=your-rebrickable-api-token-here
+
+# Security (Change in production!)
+SECRET_KEY=your-very-secure-secret-key-here
+
+# Application Settings
+FLASK_ENV=production
+FLASK_DEBUG=0
+
+# Database (auto-configured for Docker)
+SQLALCHEMY_DATABASE_URI=sqlite:///data/instance/brick_manager.db
+
+# Optional
+LOG_LEVEL=INFO
 ```
 
-### 3. Set Up the Database
-Initialize the database with the following commands:
+### Rebrickable API Setup
+
+1. Create account at [rebrickable.com](https://rebrickable.com)
+2. Go to Settings → API → Generate API Key
+3. Add the token to your `.env` file
+
+## 🔧 Usage Guide
+
+### 📦 Set Management
+
+**Enhanced Interface Features:**
+- **Sortable Columns**: Click any header to sort (Set Number, Name, Theme, etc.)
+- **Quick Search**: Universal search across all set data
+- **Advanced Filters**: Expandable panel with detailed filtering options
+- **Status Tracking**: Visual progress bars and completion indicators
+- **Bulk Operations**: Select multiple sets for batch operations
+
+**Workflow:**
+1. Navigate to "Set Maintenance"
+2. Use Quick Search or Advanced Filters to find sets
+3. Track completion with visual progress indicators
+4. Generate labels automatically when creating storage boxes
+5. Monitor printing status to avoid duplicates
+
+### 🔍 Part Lookup & Management
+
+**Features:**
+- **Comprehensive Search**: Find parts by number, name, or category
+- **Storage Location**: Track exactly where each part is stored
+- **Missing Parts**: Identify and track incomplete sets
+- **Color Management**: Handle multiple color variants
+- **Quantity Tracking**: Monitor collected vs. required quantities
+
+### 🏷️ Label Generation
+
+**Capabilities:**
+- **Professional Labels**: Clean, scannable labels for organization
+- **Multiple Formats**: Small and large box label sizes
+- **QR Codes**: Quick scanning for digital integration
+- **Batch Printing**: Generate multiple labels efficiently
+- **Status Tracking**: Automatic print status updates
+
+### 📊 Dashboard & Analytics
+
+- **Collection Overview**: Visual statistics and progress tracking
+- **Completion Metrics**: Set and part completion percentages
+- **Storage Utilization**: Monitor space usage across storage systems
+- **Recent Activity**: Track latest additions and changes
+
+## 🐳 Docker Support
+
+### Production Deployment
 
 ```bash
-poetry run flask db init
-poetry run flask db migrate -m "Initial migration."
-poetry run flask db upgrade
+# Complete setup with one command
+make setup
+
+# Or step by step
+cp .env.example .env
+# Edit .env with your settings
+docker compose up -d
 ```
 
-### 4. Set Environment Variables
-Create a `.env` file in the root directory and add the following environment variables:
-
-```env
-FLASK_APP=app.py
-FLASK_ENV=development
-```
-
-### 5. Run the Application
-Start the Flask application:
+### Development Mode
 
 ```bash
-poetry run flask run
+# Start in development mode with live reloading
+make dev
+
+# Or manually
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 ```
 
-The application should be accessible at http://127.0.0.1:5000.
-
-## Usage
-### Manual Part Entry
-Navigate to the "Manual Entry" page from the menu to manually add or update parts in the database. Enter the part ID, location (schrank), level (fach), and box details.
-
-### Part Lookup
-Use the "Part Lookup" feature to search for parts by their ID. The application will display details such as part number, name, category, color, quantity, and location.
-
-### Set Search
-Enter a Brick set number on the "Set Search" page to retrieve a list of all parts in that set. The list includes part numbers, names, categories, colors, quantities, and locations.
-
-### Print Labels
-Labels can be generated and printed for Brick parts. The label will include details like part number, name, category, and box location.
-
-### Load Categories
-To avoid hitting the Rebrickable API rate limits, use the "Load Categories" page to preload or update part categories in the local database. This will save the categories in the database, so subsequent requests will not need to hit the API.
-
-## Docker
-### 1. Build the Docker Image
-To build the Docker image:
+### Available Make Commands
 
 ```bash
-
-docker build -t Brick-scanner .
+make help           # Show all available commands
+make up             # Start application
+make down           # Stop application
+make logs           # View logs
+make logs-f         # Follow logs
+make backup         # Backup all data
+make restore        # Restore from backup
+make health         # Check application health
+make shell          # Access container shell
+make clean          # Clean Docker resources
+make update         # Update and restart
 ```
 
-### 2. Run the Docker Container
-To run the Docker container:
+### Data Persistence
+
+All user data is stored in mounted volumes:
+- **Database**: `./data/instance/` - SQLite database
+- **Uploads**: `./data/uploads/` - User uploaded files
+- **Output**: `./data/output/` - Generated labels and exports
+- **Cache**: `./data/cache/` - Application cache
+- **Logs**: `./data/logs/` - Application logs
+
+## 🧪 Testing
+
+### Run Tests
 
 ```bash
-docker run -p 5000:5000 Brick-scanner
-```
-The application should now be accessible at http://localhost:5000.
-
-## Running Tests
-You can run the test suite using Poetry:
-
-```bash
+# Local development
 poetry run pytest
+
+# Docker environment
+docker compose exec lego-manager pytest
+
+# With coverage
+poetry run pytest --cov=brick_manager
 ```
 
-This will run all the unit tests and report the results.
+### Test Structure
 
-## Contributing
-Contributions are welcome! Please follow these steps:
+- **Unit Tests**: Individual component testing
+- **Integration Tests**: API and database integration
+- **Service Tests**: Business logic validation
+- **Route Tests**: HTTP endpoint testing
 
-1. Fork this repository.
-2. Create a feature branch (`git checkout -b feature/your-feature-name`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/your-feature-name`).
-5. Open a pull request.
-6. Please make sure to update tests as appropriate.
+## 🤝 Contributing
 
-### License
-This project is licensed under the MIT License. See the LICENSE file for details.
+### Development Setup
 
-### Explanation:
+1. **Fork and Clone**
+   ```bash
+   git clone https://github.com/yourusername/Lego_Manager.git
+   cd Lego_Manager
+   ```
 
-- **Introduction**: Provides an overview of the project and its purpose.
-- **Table of Contents**: Lists the major sections of the README for easy navigation.
-- **Features**: Summarizes the key functionalities of the application.
-- **Prerequisites**: Lists the software and tools needed to set up the project.
-- **Setup Instructions**: Guides users through the process of setting up the project, including cloning the repository, installing dependencies, setting up the database, and running the application.
-- **Usage**: Describes how to use the various features of the application.
-- **Docker**: Instructions for building and running the application using Docker.
-- **Running Tests**: Explains how to run the test suite.
-- **Contributing**: Provides guidelines for contributing to the project.
-- **License**: Details the licensing information for the project.
+2. **Setup Development Environment**
+   ```bash
+   poetry install
+   cp .env.example .env
+   # Configure your .env file
+   ```
 
-Feel free to customize any part of this `README.md` file to better suit your project!
+3. **Run in Development Mode**
+   ```bash
+   make dev  # Docker
+   # OR
+   cd brick_manager && poetry run flask run  # Local
+   ```
+
+### Code Quality
+
+- **Linting**: `poetry run pylint brick_manager/`
+- **Type Checking**: Python type hints encouraged
+- **Testing**: Add tests for new features
+- **Documentation**: Update docs for significant changes
+
+### Pull Request Process
+
+1. Create feature branch (`git checkout -b feature/amazing-feature`)
+2. Make changes with proper testing
+3. Update documentation if needed
+4. Commit changes (`git commit -m 'Add amazing feature'`)
+5. Push branch (`git push origin feature/amazing-feature`)
+6. Open Pull Request with detailed description
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🆘 Support & Help
+
+- **Docker Issues**: See [DOCKER_README.md](DOCKER_README.md)
+- **Health Check**: Visit `/health` endpoint for system status
+- **Logs**: Use `make logs` or `docker compose logs`
+- **Issues**: Open GitHub issues for bugs or feature requests
+
+## 🎯 Roadmap
+
+- [ ] **Web API**: REST API for mobile apps
+- [ ] **Advanced Analytics**: Detailed collection insights
+- [ ] **Multi-user Support**: User authentication and permissions
+- [ ] **Cloud Storage**: Optional cloud backup integration
+- [ ] **Mobile App**: Companion mobile application
+- [ ] **Barcode Scanning**: Physical barcode integration
+
+---
+
+**Happy Building! 🧱✨**

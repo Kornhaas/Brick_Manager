@@ -1,15 +1,62 @@
-version: '3.13'
+version: '3.8'
 
 services:
-  app:
+  lego-manager:
     build:
       context: .
       dockerfile: Dockerfile
-    user: "1000:1000"  # Specify the user by UID:GID
+    container_name: lego-manager-app
+    restart: unless-stopped
     ports:
-      - "5000:5000"  # Map port 5000 of the container to port 5000 on the host
+      - "5000:5000"
     volumes:
-      - .:/app  # Mount the current directory to /app in the container
+      # Mount persistent data directories outside the container
+      - ./data/instance:/app/data/instance       # Database storage
+      - ./data/uploads:/app/data/uploads         # File uploads
+      - ./data/output:/app/data/output           # Generated outputs (labels, etc.)
+      - ./data/cache:/app/data/cache             # Application cache
+      - ./data/logs:/app/data/logs               # Application logs
     environment:
-      FLASK_APP: app.py
-      FLASK_ENV: production
+      - FLASK_APP=brick_manager/app.py
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - PYTHONPATH=/app
+      - REBRICKABLE_TOKEN=${REBRICKABLE_TOKEN:-your-rebrickable-token-here}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+      # Database configuration pointing to mounted volume
+      - SQLALCHEMY_DATABASE_URI=sqlite:///data/instance/brick_manager.db
+    networks:
+      - lego-manager-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Optional: Add a reverse proxy for production use
+  nginx:
+    image: nginx:alpine
+    container_name: lego-manager-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - lego-manager
+    networks:
+      - lego-manager-network
+    profiles:
+      - production  # Only start with --profile production
+
+networks:
+  lego-manager-network:
+    driver: bridge
+
+volumes:
+  # Named volumes for better Docker management (optional)
+  lego_data:
+    driver: local

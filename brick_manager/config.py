@@ -2,6 +2,7 @@
 This module defines the configuration settings for the Brick Manager application.
 
 It includes paths for file uploads, allowed file types, and tokens for external APIs.
+Supports both local development and Docker environments.
 """
 
 import os
@@ -17,13 +18,37 @@ class Config:  # pylint: disable=R0903
         REBRICKABLE_TOKEN (str): The API token for accessing the Rebrickable service.
     """
 
-    UPLOAD_FOLDER = 'uploads/'
+    # Dynamic paths - use environment variables for Docker, fallback for local dev
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    
+    # Check if running in Docker (data volumes are mounted)
+    if os.path.exists('/app/data'):
+        # Docker environment - use mounted volumes
+        UPLOAD_FOLDER = '/app/data/uploads'
+        OUTPUT_FOLDER = '/app/data/output'
+        CACHE_FOLDER = '/app/data/cache'
+        INSTANCE_FOLDER = '/app/data/instance'
+        LOG_FOLDER = '/app/data/logs'
+        SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///data/instance/brick_manager.db')
+    else:
+        # Local development environment
+        UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+        OUTPUT_FOLDER = os.path.join(BASE_DIR, 'output')
+        CACHE_FOLDER = os.path.join(BASE_DIR, 'static', 'cache')
+        INSTANCE_FOLDER = os.path.join(BASE_DIR, 'instance')
+        LOG_FOLDER = os.path.join(BASE_DIR, 'logs')
+        SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', f'sqlite:///{INSTANCE_FOLDER}/brick_manager.db')
+
+    # Application settings
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///brick_manager.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REBRICKABLE_TOKEN = os.getenv('REBRICKABLE_TOKEN', 'test-token')
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
+    
+    # Flask settings
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    TEMPLATES_AUTO_RELOAD = True
 
-    # Ensure the upload directory exists
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
+    # Ensure all directories exist
+    for folder in [UPLOAD_FOLDER, OUTPUT_FOLDER, CACHE_FOLDER, INSTANCE_FOLDER, LOG_FOLDER]:
+        os.makedirs(folder, exist_ok=True)

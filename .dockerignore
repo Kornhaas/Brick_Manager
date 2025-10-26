@@ -1,0 +1,64 @@
+# Docker ignore file for Lego Manager
+
+# Git and version control
+.git/
+.gitignore
+.gitattributes
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Application data (will be mounted as volumes)
+data/
+brick_manager/instance/
+brick_manager/uploads/
+brick_manager/output/
+brick_manager/static/cache/
+brick_manager/logs/
+
+# Test files
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+docs/
+*.md
+README*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
