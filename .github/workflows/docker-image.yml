@@ -45,7 +45,9 @@ jobs:
 
     - name: 🧪 Run tests
       run: |
-        poetry run pytest tests/ --verbose
+        # Set PYTHONPATH to include the brick_manager directory
+        export PYTHONPATH="${PWD}/brick_manager:${PYTHONPATH}"
+        poetry run pytest --verbose
 
   # Build and push Docker image
   build-and-push:

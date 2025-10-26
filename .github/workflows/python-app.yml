@@ -67,14 +67,23 @@ jobs:
         echo "## 🧪 Test Results (Python ${{ matrix.python-version }})" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        # Run tests with coverage
-        if poetry run pytest brick_manager/tests/ --verbose --cov=brick_manager --cov-report=term --cov-report=xml > test_output.txt 2>&1; then
+        # Set PYTHONPATH to include the brick_manager directory
+        export PYTHONPATH="${PWD}/brick_manager:${PYTHONPATH}"
+        
+        # Run tests with coverage from the root directory
+        if poetry run pytest --verbose > test_output.txt 2>&1; then
           echo "✅ **All tests passed!**" >> $GITHUB_STEP_SUMMARY
           
           # Extract coverage percentage if available
           if grep -q "TOTAL" test_output.txt; then
             COVERAGE=$(grep "TOTAL" test_output.txt | awk '{print $NF}')
             echo "**Coverage:** $COVERAGE" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Also show test summary
+          if grep -q "passed" test_output.txt; then
+            TEST_SUMMARY=$(grep "====.*passed" test_output.txt | tail -1)
+            echo "**Tests:** $TEST_SUMMARY" >> $GITHUB_STEP_SUMMARY
           fi
         else
           echo "❌ **Some tests failed:**" >> $GITHUB_STEP_SUMMARY

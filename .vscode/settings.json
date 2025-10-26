@@ -1,10 +1,24 @@
 {
     "python.testing.pytestArgs": [
-        "brick_manager"
+        "."
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
         "./brick_manager"
-    ]
+    ],
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.testing.pytestPath": "poetry run pytest",
+    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/htmlcov": true,
+        "**/.coverage": true,
+        "**/.pytest_cache": true
+    }
 }
