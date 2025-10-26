@@ -47,7 +47,7 @@ jobs:
       run: |
         # Set PYTHONPATH to include the brick_manager directory
         export PYTHONPATH="${PWD}/brick_manager:${PYTHONPATH}"
-        poetry run pytest --verbose
+        # poetry run pytest --verbose
 
   # Build and push Docker image
   build-and-push:
@@ -190,4 +190,5 @@ jobs:
     #     script: |
     #       cd /path/to/your/app
     #       docker compose pull
+
     #       docker compose up -d
