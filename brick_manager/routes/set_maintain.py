@@ -8,7 +8,7 @@ import os
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, send_file
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
-from models import db, User_Set, UserMinifigurePart, RebrickableParts, PartStorage, RebrickablePartCategories
+from models import db, User_Set, UserMinifigurePart, RebrickableParts, PartStorage, RebrickablePartCategories, RebrickableThemes
 
 set_maintain_bp = Blueprint('set_maintain', __name__)
 
@@ -16,7 +16,7 @@ set_maintain_bp = Blueprint('set_maintain', __name__)
 @set_maintain_bp.route('/set_maintain', methods=['GET'])
 def set_maintain():
     """
-    Displays the list of user sets.
+    Displays the list of user sets with enhanced information including theme data.
     """
     user_sets = User_Set.query.options(
         joinedload(User_Set.template_set),
@@ -41,9 +41,24 @@ def set_maintain():
             100 if total_quantity > 0 else 0
         )
 
+        # Get theme information
+        theme_name = "Unknown"
+        if user_set.template_set and user_set.template_set.theme:
+            theme_name = user_set.template_set.theme.name
+
+        # Get set name
+        set_name = "Unknown Set"
+        if user_set.template_set:
+            set_name = user_set.template_set.name
+
         sets_with_completeness.append({
             'user_set': user_set,
-            'completeness_percentage': round(completeness_percentage, 2)
+            'completeness_percentage': round(completeness_percentage, 2),
+            'theme_name': theme_name,
+            'set_name': set_name,
+            'set_num': user_set.template_set.set_num if user_set.template_set else "Unknown",
+            'total_parts': total_quantity,
+            'parts_owned': total_have_quantity
         })
 
     return render_template('set_maintain.html', sets_with_completeness=sets_with_completeness)
@@ -374,6 +389,11 @@ def generate_label():
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, 'w', encoding='utf-8') as output:
             output.write(content)
+
+        # Automatically mark the label as printed
+        user_set.label_printed = True
+        db.session.commit()
+        current_app.logger.info(f"Label automatically marked as printed for set {set_id}")
 
         return send_file(output_file, as_attachment=True)
     except Exception as error:

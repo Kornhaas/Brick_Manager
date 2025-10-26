@@ -32,51 +32,182 @@
         <!-- Sets Table -->
         <div id="sets-table">
             <h2 class="mt-4">Your User Sets</h2>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Set Number</th>
-                        <th>Box Number</th>
-                        <th>Status</th>
-                        <th>Label Printed</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in sets_with_completeness %}
-                    <tr>
-                        <td>
-                            <img
-                                src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
-                                alt="{{ entry.user_set.template_set.set_num if entry.user_set.template_set else 'Unknown Set' }}"
-                                width="100"
-                                class="img-thumbnail"
-                                onerror="this.src='{{ url_for('static', filename='default_image.png') }}'"
-                            >
-                        </td>
-                        <td>{{ entry.user_set.template_set.set_num }}</td>
-                        <td>{{ entry.user_set.id }}</td>
-                        <td>
-                            <div class="status-badge status-{{ entry.user_set.status }}">
-                                {% if entry.user_set.status == "unknown" %}
-                                <i class="bi bi-question-circle-fill"></i> Unknown
-                                {% elif entry.user_set.status == "konvolut" %}
-                                <i class="bi bi-box-seam"></i> Konvolut
-                                {% elif entry.user_set.status == "assembled" %}
-                                <i class="bi bi-tools"></i> Assembled
-                                {% elif entry.user_set.status == "complete" %}
-                                <i class="bi bi-check-circle-fill"></i> Complete
-                                {% elif entry.user_set.status == "completenospareparts" %}
-                                <i class="bi bi-check-circle-fill"></i> Complete (No Spare Parts)
-                                {% elif entry.user_set.status == "missingparts" %}
-                                <i class="bi bi-exclamation-triangle-fill"></i> Missing Parts
-                                {% endif %}
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress">
+            
+            <!-- Quick Search -->
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <input type="text" class="form-control form-control-lg" id="search-input" 
+                           placeholder="🔍 Quick search by set number, name, or theme...">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-outline-secondary w-100" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#advancedFilters" 
+                            aria-expanded="false" aria-controls="advancedFilters">
+                        <i class="bi bi-funnel"></i> Advanced Filters
+                        <i class="bi bi-chevron-down" id="filter-chevron"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Filters (Collapsible) -->
+            <div class="collapse" id="advancedFilters">
+                <div class="card card-body mb-3 bg-light">
+                    <h6 class="text-muted mb-3"><i class="bi bi-gear"></i> Advanced Filter Options</h6>
+                    <div class="row g-3">
+                        <!-- Status Filter -->
+                        <div class="col-md-3">
+                            <label for="status-filter" class="form-label">Status</label>
+                            <select class="form-select" id="status-filter">
+                                <option value="">All Statuses</option>
+                                <option value="unknown">Unknown</option>
+                                <option value="konvolut">Konvolut</option>
+                                <option value="assembled">Assembled</option>
+                                <option value="complete">Complete</option>
+                                <option value="completenospareparts">Complete (No Spare Parts)</option>
+                                <option value="missingparts">Missing Parts</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Set Number Filter -->
+                        <div class="col-md-3">
+                            <label for="set-number-filter" class="form-label">Set Number</label>
+                            <input type="text" class="form-control" id="set-number-filter" 
+                                   placeholder="e.g. 75192, 10221">
+                        </div>
+                        
+                        <!-- Set Name Filter -->
+                        <div class="col-md-3">
+                            <label for="set-name-filter" class="form-label">Set Name</label>
+                            <input type="text" class="form-control" id="set-name-filter" 
+                                   placeholder="e.g. Millennium Falcon">
+                        </div>
+                        
+                        <!-- Theme Filter -->
+                        <div class="col-md-3">
+                            <label for="theme-filter" class="form-label">Theme</label>
+                            <select class="form-select" id="theme-filter">
+                                <option value="">All Themes</option>
+                                <!-- Themes will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Filter Row -->
+                    <div class="row g-3 mt-2">
+                        <!-- Label Status Filter -->
+                        <div class="col-md-3">
+                            <label for="label-filter" class="form-label">Label Status</label>
+                            <select class="form-select" id="label-filter">
+                                <option value="">All Labels</option>
+                                <option value="printed">Printed</option>
+                                <option value="not-printed">Not Printed</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Parts Completion Filter -->
+                        <div class="col-md-3">
+                            <label for="completion-filter" class="form-label">Parts Completion</label>
+                            <select class="form-select" id="completion-filter">
+                                <option value="">All Sets</option>
+                                <option value="complete">100% Complete</option>
+                                <option value="incomplete">Incomplete</option>
+                                <option value="no-parts">No Parts Collected</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Clear Filters Button -->
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-warning me-2" id="clear-filters">
+                                <i class="bi bi-x-circle"></i> Clear All Filters
+                            </button>
+                            <small class="text-muted align-self-center">
+                                <span id="filter-count">0</span> active filters
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="sets-table-main">
+                    <thead class="table-secondary">
+                        <tr style="background-color: #6c757d !important; color: white !important; font-weight: 600;">
+                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="image">
+                                Image <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </th>
+                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="set_num">
+                                Set Number <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </th>
+                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="set_name">
+                                Set Name <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </th>
+                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="theme">
+                                Theme <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </th>
+                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="box_id">
+                                Box ID <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </th>
+                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="parts">
+                                Parts <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </th>
+                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="status">
+                                Status & Progress <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </th>
+                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="label_printed">
+                                Label <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </th>
+                            <th style="background-color: #6c757d !important; color: white !important;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in sets_with_completeness %}
+                        <tr>
+                            <td>
+                                <img
+                                    src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
+                                    alt="{{ entry.set_num }}"
+                                    width="60"
+                                    class="img-thumbnail"
+                                    onerror="this.src='{{ url_for('static', filename='default_image.png') }}'"
+                                >
+                            </td>
+                            <td><strong>{{ entry.set_num }}</strong></td>
+                            <td class="set-name">
+                                <div class="text-truncate" style="max-width: 200px;" title="{{ entry.set_name }}">
+                                    {{ entry.set_name }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ entry.theme_name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info text-dark">{{ entry.user_set.id }}</span>
+                            </td>
+                            <td>
+                                <div class="text-center">
+                                    <div class="fw-bold">{{ entry.parts_owned }}/{{ entry.total_parts }}</div>
+                                    <small class="text-muted">parts</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="status-badge status-{{ entry.user_set.status }} mb-2">
+                                    {% if entry.user_set.status == "unknown" %}
+                                    <i class="bi bi-question-circle-fill"></i> Unknown
+                                    {% elif entry.user_set.status == "konvolut" %}
+                                    <i class="bi bi-box-seam"></i> Konvolut
+                                    {% elif entry.user_set.status == "assembled" %}
+                                    <i class="bi bi-tools"></i> Assembled
+                                    {% elif entry.user_set.status == "complete" %}
+                                    <i class="bi bi-check-circle-fill"></i> Complete
+                                    {% elif entry.user_set.status == "completenospareparts" %}
+                                    <i class="bi bi-check-circle-fill"></i> Complete (No Spare Parts)
+                                    {% elif entry.user_set.status == "missingparts" %}
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Missing Parts
+                                    {% endif %}
+                                </div>
+                                <div class="progress" style="height: 20px;">
                                     <div
-                                        class="progress-bar"
+                                        class="progress-bar {% if entry.completeness_percentage == 100 %}bg-success{% elif entry.completeness_percentage >= 80 %}bg-warning{% else %}bg-danger{% endif %}"
                                         role="progressbar"
                                         style="width: {{ entry.completeness_percentage }}%;"
                                         aria-valuenow="{{ entry.completeness_percentage }}"
@@ -86,51 +217,60 @@
                                         {{ entry.completeness_percentage }}%
                                     </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-check">
-                                <input class="form-check-input set-label-printed-checkbox" type="checkbox" 
-                                       id="set-label-{{ entry.user_set.id }}" data-user-set-id="{{ entry.user_set.id }}"
-                                       {{ 'checked' if entry.user_set.label_printed else '' }}>
-                                <label class="form-check-label" for="set-label-{{ entry.user_set.id }}">
-                                    Printed
-                                </label>
-                            </div>
-                        </td>
-                        <td>
-                            <button
-                                class="btn btn-info btn-sm view-details"
-                                data-user-set-id="{{ entry.user_set.id }}"
-                            >
-                                View
-                            </button>
-                            <button
-                                class="btn btn-success btn-sm generate-label"
-                                data-user-set-id="{{ entry.user_set.id }}"
-                                data-box-size="MB-1"
-                            >
-                                Small Box
-                            </button>
-                            <button
-                                class="btn btn-primary btn-sm generate-label"
-                                data-user-set-id="{{ entry.user_set.id }}"
-                                data-box-size="MB-4"
-                            >
-                                Big Box
-                            </button>
-                            <form
-                                method="post"
-                                action="{{ url_for('set_maintain.delete_user_set', user_set_id=entry.user_set.id) }}"
-                                class="d-inline delete-form"
-                            >
-                                <button type="submit" class="btn btn-danger btn-sm delete-button">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </td>
+                            <td class="text-center">
+                                {% if entry.user_set.label_printed %}
+                                    <i class="bi bi-check-circle-fill text-success" title="Label Printed"></i>
+                                    <br><small class="text-success">Printed</small>
+                                {% else %}
+                                    <i class="bi bi-x-circle-fill text-danger" title="Label Not Printed"></i>
+                                    <br><small class="text-danger">Not Printed</small>
+                                {% endif %}
+                                <div class="form-check mt-1">
+                                    <input class="form-check-input set-label-printed-checkbox" type="checkbox" 
+                                           id="set-label-{{ entry.user_set.id }}" data-user-set-id="{{ entry.user_set.id }}"
+                                           {{ 'checked' if entry.user_set.label_printed else '' }}>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group-vertical d-grid gap-1">
+                                    <button
+                                        class="btn btn-info btn-sm view-details"
+                                        data-user-set-id="{{ entry.user_set.id }}"
+                                        title="View Set Details"
+                                    >
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                    <button
+                                        class="btn btn-success btn-sm generate-label"
+                                        data-user-set-id="{{ entry.user_set.id }}"
+                                        data-box-size="MB-1"
+                                        title="Generate Small Box Label"
+                                    >
+                                        <i class="bi bi-box"></i> Small Box
+                                    </button>
+                                    <button
+                                        class="btn btn-primary btn-sm generate-label"
+                                        data-user-set-id="{{ entry.user_set.id }}"
+                                        data-box-size="MB-4"
+                                        title="Generate Big Box Label"
+                                    >
+                                        <i class="bi bi-box-fill"></i> Big Box
+                                    </button>
+                                    <button
+                                        class="btn btn-danger btn-sm delete-user-set"
+                                        data-user-set-id="{{ entry.user_set.id }}"
+                                        title="Delete Set"
+                                    >
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
       <!-- Set Details -->
