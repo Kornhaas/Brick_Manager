@@ -29,6 +29,7 @@ RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /bin/bash appuser
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
