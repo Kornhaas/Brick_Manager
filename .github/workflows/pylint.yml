@@ -53,6 +53,9 @@ jobs:
         echo "## 🧹 Pylint Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
+        # Set PYTHONPATH to include the brick_manager directory
+        export PYTHONPATH="${PWD}/brick_manager:${PYTHONPATH}"
+        
         # Run pylint and capture output
         if poetry run pylint brick_manager/ --output-format=text --reports=yes > pylint_output.txt 2>&1; then
           echo "✅ **No linting issues found!**" >> $GITHUB_STEP_SUMMARY

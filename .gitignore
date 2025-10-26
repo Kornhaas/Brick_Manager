@@ -7,3 +7,4 @@ brick_manager/__pycache__/*
 brick_manager/static/cache/*
 brick_manager/brick_manager.log
 coverage.xml
+coverage.xml
