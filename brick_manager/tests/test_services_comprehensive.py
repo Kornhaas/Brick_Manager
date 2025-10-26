@@ -215,8 +215,8 @@ class TestPartLookupServiceCoverage:
         """Test part search functionality."""
         from brick_manager.services.part_lookup_service import search_parts
         
-        # Test with empty lookup data
-        result = search_parts('test', {})
+        # Test with empty query
+        result = search_parts('test', 10)
         assert isinstance(result, list)
 
 

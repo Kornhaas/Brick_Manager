@@ -111,3 +111,27 @@ def cache_image(image_url, cache_dir='static/cache/images'):
 
     # Return fallback image in case of errors
     return fallback_image
+
+
+def get_cached_image_path(image_url, cache_dir='static/cache/images'):
+    """
+    Get the path to a cached image without downloading it.
+    
+    Args:
+        image_url (str): The URL of the image
+        cache_dir (str): Directory where cached images are stored
+        
+    Returns:
+        str: Path to the cached image if it exists, None otherwise
+    """
+    if not is_valid_url(image_url):
+        return None
+        
+    filename = image_url.split('/')[-1]
+    if not filename or '.' not in filename:
+        return None
+        
+    cache_path = os.path.join(cache_dir, filename)
+    if os.path.exists(cache_path):
+        return cache_path
+    return None

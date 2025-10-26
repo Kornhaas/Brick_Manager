@@ -40,7 +40,6 @@ COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 # Copy application code
 COPY brick_manager/ ./brick_manager/
-COPY migrations/ ./migrations/
 COPY entrypoint.sh ./
 
 # Create directories for mounted volumes with correct permissions

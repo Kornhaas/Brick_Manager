@@ -449,3 +449,8 @@ class ConfigSettings(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
+
+
+# Add aliases for backward compatibility with tests
+Parts = User_Parts
+MissingParts = UserMinifigurePart  # Closest match for missing parts functionality

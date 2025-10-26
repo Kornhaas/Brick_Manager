@@ -79,3 +79,28 @@ def save_part_lookup(master_lookup):
     # Clear cache since data has been updated
     _part_lookup_cache = None
     _cache_timestamp = None
+
+
+def search_parts(query, limit=10):
+    """
+    Search for parts based on a query string.
+    
+    Args:
+        query (str): Search query
+        limit (int): Maximum number of results to return
+        
+    Returns:
+        list: List of matching parts
+    """
+    from models import PartStorage
+    
+    if not query:
+        return []
+    
+    # Search in part numbers and locations
+    results = PartStorage.query.filter(
+        PartStorage.part_num.like(f'%{query}%')
+    ).limit(limit).all()
+    
+    return [{'part_num': result.part_num, 'location': result.location, 
+             'level': result.level, 'box': result.box} for result in results]

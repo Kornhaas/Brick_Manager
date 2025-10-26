@@ -410,3 +410,64 @@ def create_box_label_jpg(box_info):
         raise FileNotFoundError(f"JPG label image not created: {jpg_path}")
 
     return jpg_path
+
+
+def generate_qr_code(data, size=100):
+    """
+    Generate a QR code for the given data.
+    
+    Args:
+        data (str): Data to encode in QR code
+        size (int): Size of the QR code
+        
+    Returns:
+        PIL.Image: QR code image
+    """
+    try:
+        import qrcode
+        qr = qrcode.QRCode(version=1, box_size=size//25, border=4)
+        qr.add_data(data)
+        qr.make(fit=True)
+        return qr.make_image(fill_color="black", back_color="white")
+    except ImportError:
+        # Return a placeholder if qrcode is not available
+        from PIL import Image
+        return Image.new('RGB', (size, size), color='white')
+
+
+def create_label_pdf(label_info, output_path):
+    """
+    Create a PDF label from label information.
+    
+    Args:
+        label_info (dict): Label information
+        output_path (str): Path for the output PDF
+        
+    Returns:
+        str: Path to the created PDF
+    """
+    # Create the label image first
+    image_path = create_label_image(label_info)
+    
+    # Convert to PDF
+    save_image_as_pdf(image_path, output_path)
+    
+    # Clean up temporary image
+    if os.path.exists(image_path):
+        os.remove(image_path)
+    
+    return output_path
+
+
+def create_storage_label(storage_info):
+    """
+    Create a storage label for boxes or storage locations.
+    
+    Args:
+        storage_info (dict): Storage information including location, contents, etc.
+        
+    Returns:
+        str: Path to the created label image
+    """
+    # Use the box label creation function as a base
+    return create_box_label_image(storage_info)

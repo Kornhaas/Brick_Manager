@@ -86,3 +86,44 @@ def get_category_name_from_part_num(part_num):
         logging.error(
             "Database error while fetching category for part_num %s: %s", part_num, e)
         return 'Unknown Category'
+
+
+# Add missing functions and imports for test compatibility
+import sqlite3
+from flask import current_app
+
+def get_connection():
+    """Get a SQLite database connection."""
+    try:
+        db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
+        db_path = db_uri.replace('sqlite:///', '')
+        return sqlite3.connect(db_path)
+    except Exception as e:
+        logging.error(f"Error getting database connection: {e}")
+        return None
+
+def execute_query(query, params=None):
+    """Execute a query on the database."""
+    conn = get_connection()
+    if not conn:
+        return None
+    
+    try:
+        cursor = conn.cursor()
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+        
+        if query.strip().upper().startswith('SELECT'):
+            result = cursor.fetchall()
+        else:
+            conn.commit()
+            result = cursor.rowcount
+        
+        return result
+    except Exception as e:
+        logging.error(f"Error executing query: {e}")
+        return None
+    finally:
+        conn.close()

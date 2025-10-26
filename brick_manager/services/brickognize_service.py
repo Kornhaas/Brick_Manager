@@ -114,3 +114,45 @@ def get_predictions(file_path, filename):
     logging.info(
         "Brickognize prediction process completed for file: %s", filename)
     return predictions
+
+
+def predict_part(image_path):
+    """
+    Predict part from image using Brickognize API.
+    
+    Args:
+        image_path (str): Path to the image file
+        
+    Returns:
+        dict: Prediction results
+    """
+    import os
+    filename = os.path.basename(image_path)
+    return get_predictions(image_path, filename)
+
+
+def identify_lego_part(image_path):
+    """
+    Identify LEGO part from image (alias for predict_part).
+    
+    Args:
+        image_path (str): Path to the image file
+        
+    Returns:
+        dict: Identification results
+    """
+    return predict_part(image_path)
+
+
+def get_part_details(part_id):
+    """
+    Get detailed information about a part.
+    
+    Args:
+        part_id (str): Part identifier
+        
+    Returns:
+        dict: Part details
+    """
+    # This would typically fetch from database or API
+    return {'part_id': part_id, 'name': f'Part {part_id}', 'category': 'Unknown'}

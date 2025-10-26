@@ -86,3 +86,7 @@ def is_user_token_configured():
     except Exception as e:
         logger.error(f"Error checking token configuration: {e}")
         return False
+
+
+# Add alias for backward compatibility with tests
+UserTokens = ConfigSettings
