@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Base brick -->
+  <rect x="2" y="12" width="28" height="18" fill="#e74c3c" stroke="#c0392b" stroke-width="1" rx="1"/>
+  
+  <!-- Brick studs -->
+  <circle cx="8" cy="18" r="2" fill="#c0392b"/>
+  <circle cx="16" cy="18" r="2" fill="#c0392b"/>
+  <circle cx="24" cy="18" r="2" fill="#c0392b"/>
+  
+  <circle cx="8" cy="24" r="2" fill="#c0392b"/>
+  <circle cx="16" cy="24" r="2" fill="#c0392b"/>
+  <circle cx="24" cy="24" r="2" fill="#c0392b"/>
+  
+  <!-- Top brick -->
+  <rect x="6" y="2" width="20" height="14" fill="#3498db" stroke="#2980b9" stroke-width="1" rx="1"/>
+  
+  <!-- Top brick studs -->
+  <circle cx="12" cy="6" r="1.5" fill="#2980b9"/>
+  <circle cx="20" cy="6" r="1.5" fill="#2980b9"/>
+  <circle cx="12" cy="12" r="1.5" fill="#2980b9"/>
+  <circle cx="20" cy="12" r="1.5" fill="#2980b9"/>
+</svg>

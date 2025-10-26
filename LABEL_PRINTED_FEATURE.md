@@ -1,6 +1,6 @@
 # Label Printed Feature
 
-This document describes the new "Label Printed" feature added to the Lego Manager application.
+This document describes the new "Label Printed" feature added to the Bricks Manager application.
 
 ## Overview
 

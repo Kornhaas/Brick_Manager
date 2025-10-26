@@ -2,7 +2,7 @@
 
 import sys
 import os
-sys.path.insert(0, '/workspaces/Lego_Manager/brick_manager')
+sys.path.insert(0, '/workspaces/Bricks_Manager/brick_manager')
 
 from app import app
 from models import db, User_Set

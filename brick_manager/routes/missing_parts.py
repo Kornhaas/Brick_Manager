@@ -39,7 +39,7 @@ def get_cached_image_url(image_url):
             _image_url_cache[image_url] = '/static/default_image.png'
             return '/static/default_image.png'
         
-        cache_dir = '/workspaces/Lego_Manager/brick_manager/static/cache/images'
+        cache_dir = '/workspaces/Bricks_Manager/brick_manager/static/cache/images'
         cached_path = os.path.join(cache_dir, raw_filename)
         
         if os.path.exists(cached_path):

@@ -1,8 +1,8 @@
-# Comprehensive Unit Test Suite for Lego Manager
+# Comprehensive Unit Test Suite for Bricks Manager
 
-## Overview
+## 📋 Overview
 
-This comprehensive test suite provides nearly full unittest coverage for the Lego Manager application. The test suite includes:
+This comprehensive test suite provides nearly full unittest coverage for the Bricks Manager application. The test suite includes:
 
 - **Model Tests**: Testing all database models and relationships
 - **Service Tests**: Testing all service layer functionality
@@ -102,7 +102,7 @@ brick_manager/tests/
 
 ### Basic Test Run
 ```bash
-cd /workspaces/Lego_Manager
+cd /workspaces/Bricks_Manager
 python -m pytest brick_manager/tests/ -v
 ```
 
@@ -215,4 +215,4 @@ For questions about the test suite:
 
 **Total Estimated Coverage: 70-85%**
 
-This comprehensive test suite provides robust testing coverage for the Lego Manager application, ensuring reliability, maintainability, and confidence in code changes.
+This comprehensive test suite provides robust testing coverage for the Bricks Manager application, ensuring reliability, maintainability, and confidence in code changes.

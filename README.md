@@ -1,6 +1,6 @@
-# 🧱 Lego Manager
+# 🧱 Bricks Manager
 
-A comprehensive Flask-based web application for managing LEGO brick collections, sets, and parts. This application helps LEGO enthusiasts organize their collection, track missing parts, generate labels, and efficiently manage storage systems with integration to the Rebrickable database.
+A comprehensive Flask-based web application for managing brick collections, sets, and parts. This application helps brick enthusiasts organize their collection, track missing parts, generate labels, and efficiently manage storage systems with integration to the Rebrickable database.
 
 ![Python](https://img.shields.io/badge/python-v3.11+-blue.svg)
 ![Flask](https://img.shields.io/badge/flask-v3.0+-green.svg)
@@ -55,7 +55,7 @@ A comprehensive Flask-based web application for managing LEGO brick collections,
 - **Print Status Tracking** to avoid duplicates
 
 ### 📊 **Data Integration**
-- **Rebrickable API Integration** for comprehensive LEGO database access
+- **Rebrickable API Integration** for comprehensive brick database access
 - **Automatic Data Synchronization** with scheduled updates
 - **Local Caching** to reduce API calls and improve performance
 - **Master Lookup Data** for offline capabilities
@@ -72,8 +72,8 @@ A comprehensive Flask-based web application for managing LEGO brick collections,
 
 1. **Clone and Setup**
    ```bash
-   git clone https://github.com/Kornhaas/Lego_Manager.git
-   cd Lego_Manager
+   git clone https://github.com/Kornhaas/Bricks_Manager.git
+   cd Bricks_Manager
    
    # Configure environment
    cp .env.example .env
@@ -102,8 +102,8 @@ A comprehensive Flask-based web application for managing LEGO brick collections,
 
 2. **Setup**
    ```bash
-   git clone https://github.com/Kornhaas/Lego_Manager.git
-   cd Lego_Manager
+   git clone https://github.com/Kornhaas/Bricks_Manager.git
+   cd Bricks_Manager
    
    # Install dependencies
    poetry install
@@ -123,7 +123,7 @@ A comprehensive Flask-based web application for managing LEGO brick collections,
 ## 📁 Project Structure
 
 ```
-Lego_Manager/
+Bricks_Manager/
 ├── 🐳 Docker Configuration
 │   ├── Dockerfile                 # Multi-stage container build
 │   ├── docker-compose.yml         # Production deployment
@@ -314,7 +314,7 @@ All user data is stored in mounted volumes:
 poetry run pytest
 
 # Docker environment
-docker compose exec lego-manager pytest
+docker compose exec bricks-manager pytest
 
 # With coverage
 poetry run pytest --cov=brick_manager
@@ -333,8 +333,8 @@ poetry run pytest --cov=brick_manager
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/yourusername/Lego_Manager.git
-   cd Lego_Manager
+   git clone https://github.com/yourusername/Bricks_Manager.git
+   cd Bricks_Manager
    ```
 
 2. **Setup Development Environment**

@@ -151,7 +151,7 @@ class RebrickablePartCategories(db.Model):
     """
     Represents categories for Rebrickable parts.
     
-    This model stores the category information for LEGO parts as defined by Rebrickable,
+    This model stores the category information for brick parts as defined by Rebrickable,
     such as 'Brick', 'Plate', 'Technic', etc.
     """
     __tablename__ = 'rebrickable_part_categories'
@@ -168,7 +168,7 @@ class RebrickablePartCategories(db.Model):
 
 class RebrickableColors(db.Model):
     """
-    Represents colors available for LEGO parts from Rebrickable.
+    Represents colors available for brick parts from Rebrickable.
     
     This model stores color information including RGB values, transparency status,
     and statistics about how many parts and sets use each color.
@@ -209,10 +209,10 @@ class RebrickableColors(db.Model):
 
 class RebrickableParts(db.Model):
     """
-    Represents individual LEGO parts from the Rebrickable database.
+    Represents individual brick parts from the Rebrickable database.
     
     This model stores part information including part numbers, names, categories,
-    materials, and image URLs for individual LEGO pieces.
+    materials, and image URLs for individual brick pieces.
     """
     __tablename__ = 'rebrickable_parts'
     part_num = db.Column(db.Text, primary_key=True)

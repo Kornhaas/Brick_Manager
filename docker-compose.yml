@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  lego-manager:
+  bricks-manager:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: lego-manager-app
+    container_name: bricks-manager-app
     restart: unless-stopped
     ports:
       - "5000:5000"
@@ -26,7 +26,7 @@ services:
       # Database configuration pointing to mounted volume
       - SQLALCHEMY_DATABASE_URI=sqlite:///data/instance/brick_manager.db
     networks:
-      - lego-manager-network
+      - bricks-manager-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
@@ -37,7 +37,7 @@ services:
   # Optional: Add a reverse proxy for production use
   nginx:
     image: nginx:alpine
-    container_name: lego-manager-nginx
+    container_name: bricks-manager-nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -46,17 +46,17 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
-      - lego-manager
+      - bricks-manager
     networks:
-      - lego-manager-network
+      - bricks-manager-network
     profiles:
       - production  # Only start with --profile production
 
 networks:
-  lego-manager-network:
+  bricks-manager-network:
     driver: bridge
 
 volumes:
   # Named volumes for better Docker management (optional)
-  lego_data:
+  bricks_data:
     driver: local

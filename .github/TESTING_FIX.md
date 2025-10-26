@@ -44,7 +44,7 @@ poetry run pylint brick_manager/ --output-format=text --reports=yes
 
 The project follows this testing structure:
 ```
-Lego_Manager/
+Bricks_Manager/
 ├── pytest.ini                    # Pytest configuration
 ├── pyproject.toml                # Poetry dependencies
 └── brick_manager/                # Main application code

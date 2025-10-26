@@ -1,0 +1,22 @@
+{
+    "name": "Bricks Manager",
+    "short_name": "Bricks Manager",
+    "description": "A comprehensive web application for managing brick collections, sets, and parts",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#e74c3c",
+    "icons": [
+        {
+            "src": "/static/favicon.ico",
+            "sizes": "32x32",
+            "type": "image/x-icon"
+        },
+        {
+            "src": "/static/brick-icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

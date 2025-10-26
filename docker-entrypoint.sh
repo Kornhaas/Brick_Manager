@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== Lego Manager Docker Entrypoint ==="
+echo "=== Bricks Manager Docker Entrypoint ==="
 
 # Create data directories if they don't exist
 mkdir -p /app/data/uploads /app/data/cache /app/data/output /app/data/instance
@@ -56,7 +56,7 @@ fi
 # Ensure proper permissions for data directories
 chmod 755 /app/data/uploads /app/data/cache /app/data/output /app/data/instance 2>/dev/null || true
 
-echo "Starting Lego Manager application..."
+echo "Starting Bricks Manager application..."
 echo "Database: $SQLALCHEMY_DATABASE_URI"
 echo "Working directory: $(pwd)"
 

@@ -4,7 +4,7 @@
 version: '3.8'
 
 services:
-  lego-manager:
+  bricks-manager:
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1

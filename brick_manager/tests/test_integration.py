@@ -1,5 +1,5 @@
 """
-Integration tests for the Lego Manager application.
+Integration tests for the Bricks Manager application.
 
 These tests check the integration between different components
 and the overall application flow.

@@ -1,8 +1,8 @@
-# 🐳 Lego Manager - Complete Docker Setup
+# 🐳 Bricks Manager - Complete Docker Setup
 
 ## ✅ What's Been Implemented
 
-Your Lego Manager application is now fully dockerized with the following features:
+Your Bricks Manager application is now fully dockerized with the following features:
 
 ### 🏗️ **Multi-stage Dockerfile**
 - **Optimized build** with Python 3.12-slim base image
@@ -90,7 +90,7 @@ docker compose build
 docker compose up -d
 
 # View logs
-docker compose logs -f lego-manager
+docker compose logs -f bricks-manager
 
 # Stop
 docker compose down
@@ -132,7 +132,7 @@ docker compose down
 ## 📁 File Structure
 
 ```
-Lego_Manager/
+Bricks_Manager/
 ├── 🐳 Dockerfile                 # Multi-stage container build
 ├── 🐳 docker-compose.yml         # Production deployment config  
 ├── 🐳 docker-compose.dev.yml     # Development overrides
@@ -212,4 +212,4 @@ make reset-db
    - Set up regular backups with `make backup`
    - Monitor with the health endpoint
 
-Your Lego Manager is now fully containerized and production-ready! 🎉
+Your Bricks Manager is now fully containerized and production-ready! 🎉

@@ -2,7 +2,7 @@
 Unit tests for the models module.
 
 This test suite validates the functionality of all database models
-in the Lego Manager application.
+in the Bricks Manager application.
 """
 
 import pytest

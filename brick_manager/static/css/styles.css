@@ -26,6 +26,16 @@ h3, h4, h5 {
     font-weight: bold;
     font-size: 1.5rem;
     color: #0d6efd !important;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand img {
+    transition: transform 0.2s ease-in-out;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.1);
 }
 
 /* Links */

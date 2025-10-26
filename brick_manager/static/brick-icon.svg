@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Base brick -->
+  <rect x="8" y="24" width="48" height="32" fill="#e74c3c" stroke="#c0392b" stroke-width="2" rx="2"/>
+  
+  <!-- Brick studs (top row) -->
+  <circle cx="18" cy="34" r="4" fill="#c0392b"/>
+  <circle cx="30" cy="34" r="4" fill="#c0392b"/>
+  <circle cx="42" cy="34" r="4" fill="#c0392b"/>
+  <circle cx="54" cy="34" r="4" fill="#c0392b"/>
+  
+  <!-- Brick studs (bottom row) -->
+  <circle cx="18" cy="46" r="4" fill="#c0392b"/>
+  <circle cx="30" cy="46" r="4" fill="#c0392b"/>
+  <circle cx="42" cy="46" r="4" fill="#c0392b"/>
+  <circle cx="54" cy="46" r="4" fill="#c0392b"/>
+  
+  <!-- Top brick -->
+  <rect x="16" y="8" width="32" height="24" fill="#3498db" stroke="#2980b9" stroke-width="2" rx="2"/>
+  
+  <!-- Top brick studs -->
+  <circle cx="24" cy="16" r="3" fill="#2980b9"/>
+  <circle cx="32" cy="16" r="3" fill="#2980b9"/>
+  <circle cx="40" cy="16" r="3" fill="#2980b9"/>
+  
+  <circle cx="24" cy="24" r="3" fill="#2980b9"/>
+  <circle cx="32" cy="24" r="3" fill="#2980b9"/>
+  <circle cx="40" cy="24" r="3" fill="#2980b9"/>
+</svg>

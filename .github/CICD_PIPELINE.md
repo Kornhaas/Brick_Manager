@@ -1,6 +1,6 @@
-# 🔄 GitHub Actions CI/CD Pipeline
+# � CI/CD Pipeline Documentation
 
-This document explains the automated CI/CD pipeline for the Lego Manager project using GitHub Actions.
+This document explains the automated CI/CD pipeline for the Bricks Manager project using GitHub Actions.
 
 ## 📋 Pipeline Overview
 
@@ -51,10 +51,10 @@ The workflow is triggered by:
 
 **Tags Generated**:
 ```
-kornhaas/lego_manager:main
-kornhaas/lego_manager:latest (for main branch)
-kornhaas/lego_manager:v1.2.3 (for version tags)
-kornhaas/lego_manager:pr-123 (for pull requests)
+kornhaas/bricks_manager:main
+kornhaas/bricks_manager:latest (for main branch)
+kornhaas/bricks_manager:v1.2.3 (for version tags)
+kornhaas/bricks_manager:pr-123 (for pull requests)
 ```
 
 ### 3. 🔒 Security Scan Job
@@ -112,41 +112,41 @@ Configure these secrets in your GitHub repository settings:
 
 ### Development Builds
 ```
-kornhaas/lego_manager:main
-kornhaas/lego_manager:develop
+kornhaas/bricks_manager:main
+kornhaas/bricks_manager:develop
 ```
 
 ### Release Builds
 ```
-kornhaas/lego_manager:v1.2.3    # Full version
-kornhaas/lego_manager:1.2       # Minor version
-kornhaas/lego_manager:1         # Major version
-kornhaas/lego_manager:latest    # Latest stable
+kornhaas/bricks_manager:v1.2.3    # Full version
+kornhaas/bricks_manager:1.2       # Minor version
+kornhaas/bricks_manager:1         # Major version
+kornhaas/bricks_manager:latest    # Latest stable
 ```
 
 ### Pull Request Builds
 ```
-kornhaas/lego_manager:pr-123    # PR number
+kornhaas/bricks_manager:pr-123    # PR number
 ```
 
 ## 🚀 Using Built Images
 
 ### Latest Stable Release
 ```bash
-docker pull kornhaas/lego_manager:latest
-docker run -p 5000:5000 -v ./data:/app/data kornhaas/lego_manager:latest
+docker pull kornhaas/bricks_manager:latest
+docker run -p 5000:5000 -v ./data:/app/data kornhaas/bricks_manager:latest
 ```
 
 ### Specific Version
 ```bash
-docker pull kornhaas/lego_manager:v1.2.3
-docker run -p 5000:5000 -v ./data:/app/data kornhaas/lego_manager:v1.2.3
+docker pull kornhaas/bricks_manager:v1.2.3
+docker run -p 5000:5000 -v ./data:/app/data kornhaas/bricks_manager:v1.2.3
 ```
 
 ### Development Build
 ```bash
-docker pull kornhaas/lego_manager:main
-docker run -p 5000:5000 -v ./data:/app/data kornhaas/lego_manager:main
+docker pull kornhaas/bricks_manager:main
+docker run -p 5000:5000 -v ./data:/app/data kornhaas/bricks_manager:main
 ```
 
 ## 🔄 Pipeline Optimization

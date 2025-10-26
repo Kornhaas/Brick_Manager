@@ -1,10 +1,10 @@
-# Lego Manager - Docker Management Makefile
+# Bricks Manager - Docker Management Makefile
 
 .PHONY: help build up down logs restart clean backup restore health
 
 # Default target
 help:
-	@echo "🔧 Lego Manager Docker Commands"
+	@echo "🔧 Bricks Manager Docker Commands"
 	@echo ""
 	@echo "🚀 Basic Operations:"
 	@echo "  make up          - Start the application (build if needed)"
@@ -33,41 +33,41 @@ help:
 
 # Basic operations
 up:
-	@echo "🚀 Starting Lego Manager..."
+	@echo "🚀 Starting Bricks Manager..."
 	docker-compose up -d
 	@echo "✅ Application started! Visit http://localhost:5000"
 
 down:
-	@echo "🛑 Stopping Lego Manager..."
+	@echo "🛑 Stopping Bricks Manager..."
 	docker-compose down
 
 restart:
-	@echo "🔄 Restarting Lego Manager..."
+	@echo "🔄 Restarting Bricks Manager..."
 	docker-compose restart
 	@echo "✅ Application restarted!"
 
 logs:
-	docker-compose logs lego-manager
+	docker-compose logs bricks-manager
 
 logs-f:
-	docker-compose logs -f lego-manager
+	docker-compose logs -f bricks-manager
 
 # Build operations
 build:
-	@echo "🔨 Building Lego Manager Docker image..."
+	@echo "🔨 Building Bricks Manager Docker image..."
 	docker-compose build
 
 rebuild:
-	@echo "🔨 Rebuilding Lego Manager Docker image (no cache)..."
+	@echo "🔨 Rebuilding Bricks Manager Docker image (no cache)..."
 	docker-compose build --no-cache
 
 dev:
-	@echo "🚀 Starting Lego Manager in development mode..."
+	@echo "🚀 Starting Bricks Manager in development mode..."
 	@if [ ! -f docker-compose.dev.yml ]; then \
 		echo "⚠️  docker-compose.dev.yml not found. Creating basic dev override..."; \
 		echo "version: '3.8'" > docker-compose.dev.yml; \
 		echo "services:" >> docker-compose.dev.yml; \
-		echo "  lego-manager:" >> docker-compose.dev.yml; \
+		echo "  bricks-manager:" >> docker-compose.dev.yml; \
 		echo "    environment:" >> docker-compose.dev.yml; \
 		echo "      - FLASK_ENV=development" >> docker-compose.dev.yml; \
 		echo "      - FLASK_DEBUG=1" >> docker-compose.dev.yml; \
@@ -76,18 +76,18 @@ dev:
 
 shell:
 	@echo "🐚 Accessing container shell..."
-	docker-compose exec lego-manager bash
+	docker-compose exec bricks-manager bash
 
 # Database operations
 backup:
 	@echo "💾 Creating backup..."
 	@mkdir -p backups
-	tar -czf backups/lego-manager-backup-$$(date +%Y%m%d-%H%M%S).tar.gz data/
+	tar -czf backups/bricks-manager-backup-$$(date +%Y%m%d-%H%M%S).tar.gz data/
 	@echo "✅ Backup created in backups/ directory"
 
 restore:
 	@echo "📥 Restoring from latest backup..."
-	@LATEST=$$(ls -t backups/lego-manager-backup-*.tar.gz 2>/dev/null | head -1); \
+	@LATEST=$$(ls -t backups/bricks-manager-backup-*.tar.gz 2>/dev/null | head -1); \
 	if [ -z "$$LATEST" ]; then \
 		echo "❌ No backup files found in backups/ directory"; \
 		exit 1; \
@@ -100,7 +100,7 @@ restore:
 
 db-shell:
 	@echo "🗄️ Accessing database shell..."
-	docker-compose exec lego-manager sqlite3 /app/data/instance/brick_manager.db
+	docker-compose exec bricks-manager sqlite3 /app/data/instance/brick_manager.db
 
 reset-db:
 	@echo "⚠️  This will DESTROY all database data!"
@@ -118,7 +118,7 @@ health:
 
 stats:
 	@echo "📊 Container resource usage:"
-	docker stats lego-manager-app --no-stream
+	docker stats bricks-manager-app --no-stream
 
 # Maintenance
 clean:
@@ -128,7 +128,7 @@ clean:
 	@echo "✅ Cleanup completed!"
 
 update:
-	@echo "🔄 Updating Lego Manager..."
+	@echo "🔄 Updating Bricks Manager..."
 	git pull
 	docker-compose down
 	docker-compose build --no-cache
@@ -137,7 +137,7 @@ update:
 
 # Setup for first time users
 setup:
-	@echo "⚙️ Setting up Lego Manager for first time..."
+	@echo "⚙️ Setting up Bricks Manager for first time..."
 	@if [ ! -f .env ]; then \
 		echo "📝 Creating .env file from template..."; \
 		cp .env.example .env; \

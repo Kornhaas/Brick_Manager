@@ -1,5 +1,5 @@
 """
-Pytest configuration and fixtures for the Lego Manager test suite.
+Pytest configuration and fixtures for the Bricks Manager test suite.
 """
 
 import pytest

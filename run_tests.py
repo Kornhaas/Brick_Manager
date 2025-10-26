@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive test runner for Lego Manager application.
+Comprehensive test runner for Bricks Manager application.
 Provides easy commands for running different test suites and generating coverage reports.
 """
 
@@ -27,7 +27,7 @@ def run_command(cmd, description):
         return False
 
 def main():
-    parser = argparse.ArgumentParser(description="Lego Manager Test Runner")
+    parser = argparse.ArgumentParser(description="Bricks Manager Test Runner")
     parser.add_argument(
         'test_type', 
         choices=['all', 'unit', 'integration', 'models', 'services', 'routes', 'coverage', 'quick'],

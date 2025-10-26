@@ -1,6 +1,6 @@
-# Lego Manager - Docker Deployment Guide
+# Bricks Manager - Docker Deployment Guide
 
-This guide explains how to deploy the Lego Manager application using Docker and Docker Compose.
+This guide explains how to deploy the Bricks Manager application using Docker and Docker Compose.
 
 ## 🚀 Quick Start
 
@@ -11,7 +11,7 @@ This guide explains how to deploy the Lego Manager application using Docker and 
 ### 1. Clone and Setup
 ```bash
 git clone <your-repo-url>
-cd Lego_Manager
+cd Bricks_Manager
 
 # Copy and configure environment variables
 cp .env.example .env
@@ -24,7 +24,7 @@ cp .env.example .env
 docker-compose up -d
 
 # Check the logs
-docker-compose logs -f lego-manager
+docker-compose logs -f bricks-manager
 
 # The application will be available at http://localhost:5000
 ```
@@ -55,7 +55,7 @@ The container automatically:
 ### Manual Database Operations
 ```bash
 # Access the container shell
-docker-compose exec lego-manager bash
+docker-compose exec bricks-manager bash
 
 # Run Flask commands
 cd /app/brick_manager
@@ -84,7 +84,7 @@ Create `docker-compose.override.yml` for custom settings:
 ```yaml
 version: '3.8'
 services:
-  lego-manager:
+  bricks-manager:
     ports:
       - "8080:5000"  # Change port
     environment:
@@ -102,10 +102,10 @@ docker-compose --profile production up -d
 ### Backup Data
 ```bash
 # Backup all persistent data
-tar -czf lego-manager-backup-$(date +%Y%m%d).tar.gz data/
+tar -czf bricks-manager-backup-$(date +%Y%m%d).tar.gz data/
 
 # Restore backup
-tar -xzf lego-manager-backup-YYYYMMDD.tar.gz
+tar -xzf bricks-manager-backup-YYYYMMDD.tar.gz
 ```
 
 ### Update Application
@@ -123,7 +123,7 @@ docker-compose up -d
 ```yaml
 # In docker-compose.yml
 services:
-  lego-manager:
+  bricks-manager:
     deploy:
       resources:
         limits:
@@ -165,10 +165,10 @@ services:
 docker-compose logs
 
 # Follow logs in real-time
-docker-compose logs -f lego-manager
+docker-compose logs -f bricks-manager
 
 # View specific container logs
-docker logs lego-manager-app
+docker logs bricks-manager-app
 ```
 
 ### Health Check
@@ -188,7 +188,7 @@ For development with live code reloading:
 # docker-compose.dev.yml
 version: '3.8'
 services:
-  lego-manager:
+  bricks-manager:
     build:
       context: .
       dockerfile: Dockerfile
@@ -210,10 +210,10 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 ### Resource Usage
 ```bash
 # Monitor container resource usage
-docker stats lego-manager-app
+docker stats bricks-manager-app
 
 # Container information
-docker inspect lego-manager-app
+docker inspect bricks-manager-app
 ```
 
 ### Application Metrics
@@ -233,7 +233,7 @@ The application exposes a health endpoint at `/health` for monitoring tools like
 ## 📞 Support
 
 For issues and questions:
-1. Check the application logs: `docker-compose logs lego-manager`
+1. Check the application logs: `docker-compose logs bricks-manager`
 2. Verify configuration in `.env` file
 3. Ensure data directory permissions are correct
 4. Check Docker and Docker Compose versions

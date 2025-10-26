@@ -1,12 +1,12 @@
-# Lego Manager Database Schema
+# Bricks Manager Database Schema
 
-This document provides a comprehensive overview of the Lego Manager database schema, including all tables, relationships, and their purposes.
+This document provides a comprehensive overview of the Bricks Manager database schema, including all tables, relationships, and their purposes.
 
 ## Database Structure Overview
 
-The Lego Manager application uses SQLAlchemy ORM with a SQLite database to manage LEGO sets, parts, storage, and Rebrickable data integration. The database consists of two main sections:
+The Bricks Manager application uses SQLAlchemy ORM with a SQLite database to manage brick sets, parts, storage, and Rebrickable data integration. The database consists of two main sections:
 
-1. **User Management Tables** - For managing user's LEGO collection
+1. **User Management Tables** - For managing user's brick collection
 2. **Rebrickable Integration Tables** - For storing reference data from Rebrickable API
 
 ## Entity Relationship Diagram
@@ -284,7 +284,7 @@ Minifigures contained in specific set inventories.
 
 3. **Flexible Storage System**: Physical storage tracking with location, level, and box organization.
 
-4. **Rebrickable Integration**: Complete integration with Rebrickable's data structure for comprehensive LEGO data.
+4. **Rebrickable Integration**: Complete integration with Rebrickable's data structure for comprehensive brick data.
 
 5. **Color Management**: Sophisticated color handling through both user tables and Rebrickable reference data.
 

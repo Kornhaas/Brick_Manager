@@ -1,11 +1,10 @@
 #!/bin/bash
-
-# Entrypoint script for Lego Manager Docker container
+# Entrypoint script for Bricks Manager Docker container
 # Handles database initialization and starts the Flask application
 
 set -e
 
-echo "🚀 Starting Lego Manager container..."
+echo "🚀 Starting Bricks Manager container..."
 
 # Set up paths for mounted volumes
 export UPLOAD_FOLDER="/app/data/uploads"

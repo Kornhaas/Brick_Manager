@@ -1,11 +1,11 @@
-# 📊 GitHub Actions Workflow Status
+# � GitHub Actions Workflow Status
 
-This document provides an overview of all GitHub Actions workflows in the Lego Manager project.
+This document provides an overview of all GitHub Actions workflows in the Bricks Manager project.
 
 ## 🔄 Active Workflows
 
 ### 1. 🐳 Docker Build and Deploy
-[![Docker Image CI](https://github.com/Kornhaas/Lego_Manager/actions/workflows/docker-image.yml/badge.svg)](https://github.com/Kornhaas/Lego_Manager/actions/workflows/docker-image.yml)
+[![Docker Image CI](https://github.com/Kornhaas/Bricks_Manager/actions/workflows/docker-image.yml/badge.svg)](https://github.com/Kornhaas/Bricks_Manager/actions/workflows/docker-image.yml)
 
 **Purpose**: Complete CI/CD pipeline with Docker image building, testing, and deployment preparation.
 
@@ -21,7 +21,7 @@ This document provides an overview of all GitHub Actions workflows in the Lego M
 - 🚀 **Deploy** - Deployment preparation
 
 ### 2. 🧪 Python Tests
-[![Python Tests](https://github.com/Kornhaas/Lego_Manager/actions/workflows/python-app.yml/badge.svg)](https://github.com/Kornhaas/Lego_Manager/actions/workflows/python-app.yml)
+[![Python Tests](https://github.com/Kornhaas/Bricks_Manager/actions/workflows/python-app.yml/badge.svg)](https://github.com/Kornhaas/Bricks_Manager/actions/workflows/python-app.yml)
 
 **Purpose**: Fast feedback on code changes with comprehensive testing across multiple Python versions.
 
@@ -36,7 +36,7 @@ This document provides an overview of all GitHub Actions workflows in the Lego M
 - Fast dependency caching
 
 ### 3. 🧹 Code Quality (Pylint)
-[![Pylint](https://github.com/Kornhaas/Lego_Manager/actions/workflows/pylint.yml/badge.svg)](https://github.com/Kornhaas/Lego_Manager/actions/workflows/pylint.yml)
+[![Pylint](https://github.com/Kornhaas/Bricks_Manager/actions/workflows/pylint.yml/badge.svg)](https://github.com/Kornhaas/Bricks_Manager/actions/workflows/pylint.yml)
 
 **Purpose**: Continuous code quality monitoring with linting across multiple Python versions.
 
@@ -116,7 +116,7 @@ main:
 ## 🏷️ Generated Artifacts
 
 ### Docker Images
-Available on Docker Hub: `kornhaas/lego_manager`
+Available on Docker Hub: `kornhaas/bricks_manager`
 
 **Tags**:
 - `latest` - Latest stable release (main branch)
