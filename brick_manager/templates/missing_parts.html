@@ -69,12 +69,54 @@
                             <small class="text-muted">Toggle to include or exclude spare parts from category counts and results</small>
                         </div>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="overview-toggle-spare-parts" checked>
+                            <input class="form-check-input" type="checkbox" id="overview-toggle-spare-parts" {% if include_spare %}checked{% endif %}>
                             <label class="form-check-label" for="overview-toggle-spare-parts">
-                                <span id="overview-spare-parts-label">Include Spare Parts</span>
+                                <span id="overview-spare-parts-label">{% if include_spare %}Include Spare Parts{% else %}Exclude Spare Parts{% endif %}</span>
                             </label>
                         </div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Set Filter -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h6 class="mb-3">Internal ID Filter</h6>
+                    <small class="text-muted d-block mb-3">Filter missing parts by specific internal IDs (the number in the Internal ID column). Leave empty to show all sets.</small>
+                    
+                    <form method="GET" id="set-filter-form">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" name="set_filter" id="set_filter_input" 
+                                       value="{{ set_filter }}" placeholder="e.g. 229 or 200-220 or 200;204;205">
+                                <input type="hidden" name="include_spare" value="{% if include_spare %}true{% else %}false{% endif %}">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-outline-secondary w-100" onclick="clearSetFilter()">Clear</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <strong>Supported formats:</strong><br>
+                            • Single internal ID: <code>229</code><br>
+                            • Range: <code>200-220</code><br>
+                            • List: <code>200;204;205</code> or <code>200,204,205</code><br>
+                            • Mixed: <code>200-210;229;250-260</code>
+                        </small>
+                    </div>
+                    
+                    {% if set_filter %}
+                    <div class="mt-3">
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-filter"></i> Currently filtering by internal IDs: <strong>{{ set_filter }}</strong>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             
@@ -155,8 +197,84 @@
             </div>
         </div>
         {% else %}
-        <div class="alert alert-info mt-3">
-            <p>No missing items found.</p>
+        <!-- No Results Section -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="alert alert-warning text-center">
+                    <h4><i class="fas fa-search"></i> No Missing Items Found</h4>
+                    {% if set_filter %}
+                    <p class="mb-3">No missing parts found for the specified internal ID filter: <strong>{{ set_filter }}</strong></p>
+                    {% else %}
+                    <p class="mb-3">Great news! You don't have any missing parts.</p>
+                    {% endif %}
+                </div>
+                
+                {% if set_filter %}
+                <!-- Filter Modification Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-filter"></i> Modify Filter</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" class="mb-3">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label for="new_set_filter" class="form-label">Internal ID Filter:</label>
+                                    <input type="text" class="form-control" name="set_filter" id="new_set_filter" 
+                                           value="{{ set_filter }}" placeholder="e.g. 229 or 200-220 or 200;204;205">
+                                    <input type="hidden" name="include_spare" value="{% if include_spare %}true{% else %}false{% endif %}">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">Update Filter</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="{{ url_for('missing_parts.missing_parts') }}?include_spare={% if include_spare %}true{% else %}false{% endif %}" 
+                                   class="btn btn-outline-secondary w-100">
+                                    <i class="fas fa-times"></i> Clear Filter & Show All
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-outline-info w-100" onclick="showFilterHelp()">
+                                    <i class="fas fa-question-circle"></i> Filter Help
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Spare Parts Toggle -->
+                        <div class="mt-3 p-3 bg-light rounded">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <strong>Spare Parts Filter:</strong>
+                                    <small class="text-muted d-block">Include or exclude spare parts from results</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="no-results-spare-toggle" 
+                                           {% if include_spare %}checked{% endif %} onchange="toggleSparePartsNoResults(this)">
+                                    <label class="form-check-label" for="no-results-spare-toggle">
+                                        {% if include_spare %}Include Spare Parts{% else %}Exclude Spare Parts{% endif %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filter Help (Initially Hidden) -->
+                        <div id="filter-help" class="mt-3 p-3 bg-info text-white rounded" style="display: none;">
+                            <h6><i class="fas fa-info-circle"></i> Filter Format Examples:</h6>
+                            <ul class="mb-0">
+                                <li><strong>Single ID:</strong> <code>229</code> - Shows parts from internal ID 229</li>
+                                <li><strong>Range:</strong> <code>200-220</code> - Shows parts from internal IDs 200 to 220</li>
+                                <li><strong>List:</strong> <code>200;204;205</code> - Shows parts from specific internal IDs</li>
+                                <li><strong>Mixed:</strong> <code>200-210;229;250-260</code> - Combines ranges and individual IDs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
         {% endif %}
 
@@ -281,9 +399,18 @@
             const overviewToggle = document.getElementById('overview-toggle-spare-parts');
             const includeSpare = detailsToggle ? detailsToggle.checked : (overviewToggle ? overviewToggle.checked : true);
             
+            // Get current set filter value
+            const setFilterInput = document.getElementById('set_filter_input');
+            const setFilter = setFilterInput ? setFilterInput.value.trim() : '';
+            
             // Properly encode the category name for the URL
             const encodedCategoryName = encodeURIComponent(categoryName);
-            const url = `/missing_parts_category/${encodedCategoryName}?include_spare=${includeSpare}`;
+            let url = `/missing_parts_category/${encodedCategoryName}?include_spare=${includeSpare}`;
+            
+            // Add set filter if provided
+            if (setFilter) {
+                url += `&set_filter=${encodeURIComponent(setFilter)}`;
+            }
             
             console.log('Loading category:', categoryName);
             console.log('URL:', url);
@@ -336,6 +463,10 @@
             const detailsToggle = document.getElementById('toggle-spare-parts');
             const includeSpare = overviewToggle ? overviewToggle.checked : (detailsToggle ? detailsToggle.checked : true);
             
+            // Get current set filter value
+            const setFilterInput = document.getElementById('set_filter_input');
+            const setFilter = setFilterInput ? setFilterInput.value.trim() : '';
+            
             // Show loading spinner
             const categoryGrid = document.getElementById('category-grid');
             categoryGrid.innerHTML = `
@@ -347,8 +478,14 @@
                 </div>
             `;
             
+            // Build URL with parameters
+            let url = `/missing_parts_categories?include_spare=${includeSpare}`;
+            if (setFilter) {
+                url += `&set_filter=${encodeURIComponent(setFilter)}`;
+            }
+            
             // Fetch updated categories
-            fetch(`/missing_parts_categories?include_spare=${includeSpare}`)
+            fetch(url)
                 .then(response => response.json())
                 .then(categories => {
                     // Re-render the category grid
@@ -370,11 +507,37 @@
                     });
                     
                     if (categories.length === 0) {
-                        categoryHtml = `
-                            <div class="col-12 text-center">
-                                <p class="text-muted">No missing parts found.</p>
-                            </div>
-                        `;
+                        // Get current set filter for the message
+                        const setFilterInput = document.getElementById('set_filter_input');
+                        const currentFilter = setFilterInput ? setFilterInput.value.trim() : '';
+                        
+                        if (currentFilter) {
+                            categoryHtml = `
+                                <div class="col-12">
+                                    <div class="alert alert-warning text-center">
+                                        <h5><i class="fas fa-search"></i> No Missing Parts Found</h5>
+                                        <p>No missing parts found for internal ID filter: <strong>${currentFilter}</strong></p>
+                                        <div class="mt-3">
+                                            <button class="btn btn-primary btn-sm me-2" onclick="document.getElementById('set_filter_input').focus()">
+                                                <i class="fas fa-edit"></i> Modify Filter
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="clearSetFilter()">
+                                                <i class="fas fa-times"></i> Clear Filter
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            categoryHtml = `
+                                <div class="col-12 text-center">
+                                    <div class="alert alert-success">
+                                        <h5><i class="fas fa-check-circle"></i> Great News!</h5>
+                                        <p class="text-muted">No missing parts found. Your collection is complete!</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
                     }
                     
                     categoryGrid.innerHTML = categoryHtml;
@@ -394,7 +557,42 @@
             tbody.innerHTML = '';
 
             if (parts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">No missing parts found in this category.</td></tr>';
+                // Check if there's a filter applied
+                const setFilterInput = document.getElementById('set_filter_input');
+                const currentFilter = setFilterInput ? setFilterInput.value.trim() : '';
+                
+                if (currentFilter) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="12" class="text-center p-4">
+                                <div class="alert alert-warning mb-0">
+                                    <h6><i class="fas fa-search"></i> No Missing Parts Found in This Category</h6>
+                                    <p class="mb-2">No missing parts found for internal ID filter: <strong>${currentFilter}</strong></p>
+                                    <button class="btn btn-sm btn-primary me-2" onclick="showCategoryOverview()">
+                                        <i class="fas fa-arrow-left"></i> Back to Categories
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="clearSetFilter()">
+                                        <i class="fas fa-times"></i> Clear Filter
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="12" class="text-center p-4">
+                                <div class="alert alert-success mb-0">
+                                    <h6><i class="fas fa-check-circle"></i> No Missing Parts in This Category</h6>
+                                    <p class="mb-2">Great! You have all parts for this category.</p>
+                                    <button class="btn btn-sm btn-secondary" onclick="showCategoryOverview()">
+                                        <i class="fas fa-arrow-left"></i> Back to Categories
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
                 return;
             }
 
@@ -639,6 +837,38 @@
             .finally(() => {
                 input.disabled = false;
             });
+        }
+        
+        function clearSetFilter() {
+            // Clear the input field
+            document.getElementById('set_filter_input').value = '';
+            
+            // Submit the form to reload without the filter
+            document.getElementById('set-filter-form').submit();
+        }
+        
+        function showFilterHelp() {
+            const helpElement = document.getElementById('filter-help');
+            if (helpElement.style.display === 'none') {
+                helpElement.style.display = 'block';
+            } else {
+                helpElement.style.display = 'none';
+            }
+        }
+        
+        function toggleSparePartsNoResults(checkbox) {
+            // Get current filter value
+            const setFilter = new URLSearchParams(window.location.search).get('set_filter') || '';
+            const includeSpare = checkbox.checked;
+            
+            // Redirect with updated spare parts setting
+            const url = new URL(window.location.href);
+            url.searchParams.set('include_spare', includeSpare ? 'true' : 'false');
+            if (setFilter) {
+                url.searchParams.set('set_filter', setFilter);
+            }
+            
+            window.location.href = url.toString();
         }
 
     </script>

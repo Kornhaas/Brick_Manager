@@ -24,7 +24,7 @@ services:
       - REBRICKABLE_TOKEN=${REBRICKABLE_TOKEN:-your-rebrickable-token-here}
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
       # Database configuration pointing to mounted volume
-      - SQLALCHEMY_DATABASE_URI=sqlite:///data/instance/brick_manager.db
+      - SQLALCHEMY_DATABASE_URI=sqlite:////app/data/instance/brick_manager.db
     networks:
       - bricks-manager-network
     healthcheck:

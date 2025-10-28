@@ -4,6 +4,7 @@ This module handles the display of all missing parts and missing minifigure part
 
 import time
 import urllib.parse
+import re
 from flask import Blueprint, render_template, current_app, jsonify, request
 from models import db, User_Set, User_Parts, UserMinifigurePart, PartStorage, RebrickableParts, RebrickableColors, RebrickableInventories, RebrickableInventoryParts, RebrickablePartCategories
 from services.part_lookup_service import load_part_lookup
@@ -18,6 +19,93 @@ missing_parts_bp = Blueprint('missing_parts', __name__)
 
 # In-memory cache for image URLs to avoid repeated filesystem checks
 _image_url_cache = {}
+
+
+def parse_internal_id_filter(id_filter):
+    """
+    Parse internal ID filter string and return a list of internal IDs to filter by.
+    
+    Supports formats:
+    - Single ID: "229"
+    - Range: "200-220" 
+    - List: "200;204;205" or "200,204,205"
+    - Mixed: "200-210;229;250-260"
+    
+    Returns empty list if no filter or if filter is invalid.
+    """
+    if not id_filter or not id_filter.strip():
+        return []
+    
+    internal_ids = []
+    
+    try:
+        # Split by semicolon or comma
+        parts = re.split('[;,]', id_filter.strip())
+        
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+                
+            # Check if it's a range (contains dash)
+            if '-' in part:
+                try:
+                    start, end = part.split('-', 1)
+                    start_num = int(start.strip())
+                    end_num = int(end.strip())
+                    internal_ids.extend(str(i) for i in range(start_num, end_num + 1))
+                except ValueError:
+                    current_app.logger.warning(f"Invalid range format in internal ID filter: {part}")
+                    continue
+            else:
+                # Single internal ID
+                try:
+                    int(part)  # Validate it's a number
+                    internal_ids.append(part)
+                except ValueError:
+                    current_app.logger.warning(f"Invalid internal ID in filter: {part}")
+                    continue
+        
+        current_app.logger.info(f"Parsed internal ID filter '{id_filter}' to {len(internal_ids)} IDs: {internal_ids[:10]}{'...' if len(internal_ids) > 10 else ''}")
+        return internal_ids
+        
+    except Exception as e:
+        current_app.logger.error(f"Error parsing internal ID filter '{id_filter}': {e}")
+        return []
+
+
+def should_include_set(user_set, allowed_internal_ids):
+    """
+    Check if a user set should be included based on the internal ID filter.
+    
+    Args:
+        user_set: The user set object
+        allowed_internal_ids: List of allowed internal IDs (empty means no filter)
+        
+    Returns:
+        True if the set should be included, False otherwise
+    """
+    if not allowed_internal_ids:  # No filter applied
+        return True
+        
+    # Filter by internal ID (user_set.id)
+    internal_id_str = str(user_set.id)
+    
+    # Check for exact match first
+    if internal_id_str in allowed_internal_ids:
+        current_app.logger.debug(f"Including user set {user_set.id} (internal ID match)")
+        return True
+    
+    # Check if the internal ID starts with any of the allowed numbers (for range support)
+    for allowed_id in allowed_internal_ids:
+        if internal_id_str.startswith(allowed_id) and (
+            len(internal_id_str) == len(allowed_id) or 
+            not internal_id_str[len(allowed_id)].isdigit()
+        ):
+            current_app.logger.debug(f"Including user set {user_set.id} (partial internal ID match with {allowed_id})")
+            return True
+    
+    return False
 
 
 def get_cached_image_url(image_url):
@@ -286,10 +374,15 @@ def enrich_missing_part(part, user_set, part_type='Regular Part'):
         }
 
 
-def get_missing_parts_categories(include_spare=True):
+def get_missing_parts_categories(include_spare=True, set_filter=''):
     """Get summary of missing parts grouped by category"""
     start_time = time.time()
     current_app.logger.info("Starting category summary analysis")
+    
+    # Parse internal ID filter
+    allowed_internal_ids = parse_internal_id_filter(set_filter)
+    if allowed_internal_ids:
+        current_app.logger.info(f"Filtering by {len(allowed_internal_ids)} internal IDs")
 
     categories = {}
 
@@ -303,12 +396,28 @@ def get_missing_parts_categories(include_spare=True):
 
         # Process regular parts
         regular_start = time.time()
+        filtered_sets_count = 0
+        total_sets_checked = 0
+        
         for user_set in user_sets:
+            total_sets_checked += 1
+            
+            # Apply internal ID filter
+            if not should_include_set(user_set, allowed_internal_ids):
+                continue
+                
+            filtered_sets_count += 1
+                
             if not hasattr(user_set, 'parts_in_set') or user_set.parts_in_set is None:
                 continue
 
+            parts_in_set_count = len(user_set.parts_in_set) if user_set.parts_in_set else 0
+            missing_parts_count = 0
+
             for part in user_set.parts_in_set:
                 if part.quantity > part.have_quantity:
+                    missing_parts_count += 1
+                    
                     # Skip spare parts if not requested
                     if not include_spare and getattr(part, 'is_spare', False):
                         continue
@@ -328,7 +437,12 @@ def get_missing_parts_categories(include_spare=True):
                     categories[category_name]['count'] += 1
                     categories[category_name]['total_missing'] += (
                         part.quantity - part.have_quantity)
+            
+            if filtered_sets_count <= 5:  # Log details for first few sets
+                set_num = user_set.template_set.set_num if user_set.template_set else 'None'
+                current_app.logger.debug(f"Processed set {user_set.id} (set_num: {set_num}) - {parts_in_set_count} total parts, {missing_parts_count} missing parts")
 
+        current_app.logger.info(f"Checked {total_sets_checked} user sets, {filtered_sets_count} matched filter")
         regular_time = time.time() - regular_start
         current_app.logger.info(
             f"Processed regular parts in {regular_time:.2f} seconds")
@@ -338,6 +452,11 @@ def get_missing_parts_categories(include_spare=True):
         user_minifigure_parts = UserMinifigurePart.query.all()
 
         for minifig_part in user_minifigure_parts:
+            # Apply internal ID filter for minifigure parts
+            if hasattr(minifig_part, 'user_set') and minifig_part.user_set:
+                if not should_include_set(minifig_part.user_set, allowed_internal_ids):
+                    continue
+                    
             if minifig_part.quantity > minifig_part.have_quantity:
                 # Skip spare parts if not requested
                 if not include_spare and getattr(minifig_part, 'is_spare', False):
@@ -399,6 +518,12 @@ def missing_parts_category(category_name):
 
     missing_items = []
     include_spare = request.args.get('include_spare', 'true').lower() == 'true'
+    set_filter = request.args.get('set_filter', '').strip()
+    
+    # Parse internal ID filter
+    allowed_internal_ids = parse_internal_id_filter(set_filter)
+    if allowed_internal_ids:
+        current_app.logger.info(f"Filtering category parts by {len(allowed_internal_ids)} internal IDs")
 
     try:
         # Step 1: Collect all parts that need checking (without individual DB queries)
@@ -407,6 +532,10 @@ def missing_parts_category(category_name):
         # Collect regular parts
         user_sets = User_Set.query.all()
         for user_set in user_sets:
+            # Apply internal ID filter
+            if not should_include_set(user_set, allowed_internal_ids):
+                continue
+                
             if not hasattr(user_set, 'parts_in_set') or user_set.parts_in_set is None:
                 continue
             for part in user_set.parts_in_set:
@@ -418,6 +547,11 @@ def missing_parts_category(category_name):
         # Collect minifigure parts
         user_minifigure_parts = UserMinifigurePart.query.all()
         for minifig_part in user_minifigure_parts:
+            # Apply internal ID filter for minifigure parts
+            if hasattr(minifig_part, 'user_set') and minifig_part.user_set:
+                if not should_include_set(minifig_part.user_set, allowed_internal_ids):
+                    continue
+                    
             if minifig_part.quantity > minifig_part.have_quantity:
                 if not include_spare and minifig_part.is_spare:
                     continue
@@ -484,18 +618,21 @@ def missing_parts():
         # Get spare parts parameter from query string
         include_spare = request.args.get('include_spare', 'true').lower() == 'true'
         
-        categories = get_missing_parts_categories(include_spare=include_spare)
+        # Get set filtering parameters
+        set_filter = request.args.get('set_filter', '').strip()
+        
+        categories = get_missing_parts_categories(include_spare=include_spare, set_filter=set_filter)
         total_time = time.time() - start_time
         current_app.logger.info(
             f"Missing parts category analysis complete in {total_time:.2f} seconds")
 
-        return render_template('missing_parts.html', categories=categories, include_spare=include_spare)
+        return render_template('missing_parts.html', categories=categories, include_spare=include_spare, set_filter=set_filter)
 
     except Exception as e:
         current_app.logger.error(f"Error in missing_parts route: {str(e)}")
         current_app.logger.exception("Full traceback:")
         # Return empty categories to prevent crash
-        return render_template('missing_parts.html', categories=[], include_spare=True)
+        return render_template('missing_parts.html', categories=[], include_spare=True, set_filter='')
 
 
 @missing_parts_bp.route('/missing_parts_categories', methods=['GET'])
@@ -505,7 +642,8 @@ def missing_parts_categories_api():
     """
     try:
         include_spare = request.args.get('include_spare', 'true').lower() == 'true'
-        categories = get_missing_parts_categories(include_spare=include_spare)
+        set_filter = request.args.get('set_filter', '').strip()
+        categories = get_missing_parts_categories(include_spare=include_spare, set_filter=set_filter)
         return jsonify(categories)
     except Exception as e:
         current_app.logger.error(f"Error in missing_parts_categories_api route: {str(e)}")

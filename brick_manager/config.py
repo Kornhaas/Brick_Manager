@@ -29,7 +29,7 @@ class Config:  # pylint: disable=R0903
         CACHE_FOLDER = '/app/data/cache'
         INSTANCE_FOLDER = '/app/data/instance'
         LOG_FOLDER = '/app/data/logs'
-        SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///data/instance/brick_manager.db')
+        SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:////app/data/instance/brick_manager.db')
     else:
         # Local development environment
         UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')

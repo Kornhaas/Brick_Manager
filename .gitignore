@@ -9,3 +9,4 @@ brick_manager/brick_manager.log
 coverage.xml
 coverage.xml
 .env
+data/*

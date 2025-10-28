@@ -22,7 +22,7 @@ ln -sf /app/data/output /app/brick_manager/output
 mkdir -p "$UPLOAD_FOLDER" "$OUTPUT_FOLDER" "$CACHE_FOLDER" "$INSTANCE_FOLDER"
 
 # Set database path to mounted volume
-export SQLALCHEMY_DATABASE_URI="sqlite:///data/instance/brick_manager.db"
+export SQLALCHEMY_DATABASE_URI="sqlite:////app/data/instance/brick_manager.db"
 
 # Change to brick_manager directory for Flask commands
 cd /app/brick_manager

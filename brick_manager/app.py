@@ -63,17 +63,20 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Set your secret key here
 app.config.from_object(Config)  # Load the configuration
 
-# Configure database
+# Configure database using Config class
+app.config.from_object(Config)
+
+# Get base directory for local development
 basedir = os.path.abspath(os.path.dirname(__file__))
-instances_dir = os.path.join(basedir, 'instance')
 
-# Ensure the 'instances' directory exists
-os.makedirs(instances_dir, exist_ok=True)
-
-# Update the database URI to use the 'instances' directory
-db_path = os.path.join(instances_dir, 'brick_manager.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# For Docker environment, ensure instance directory exists
+if os.path.exists('/app/data'):
+    # Docker environment - ensure mounted volume directory exists
+    os.makedirs('/app/data/instance', exist_ok=True)
+else:
+    # Local development - ensure local instance directory exists
+    instances_dir = os.path.join(basedir, 'instance')
+    os.makedirs(instances_dir, exist_ok=True)
 
 # Initialize the db instance with the app
 db.init_app(app)
@@ -103,8 +106,14 @@ def backup_database():
     Backup the database at regular intervals.
     """
     try:
-        db_source_path = app.config['SQLALCHEMY_DATABASE_URI'].replace(
-            'sqlite:///', '')
+        db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+        if db_uri.startswith('sqlite:////'):
+            # Absolute path format
+            db_source_path = db_uri.replace('sqlite:////', '')
+        else:
+            # Relative path format
+            db_source_path = db_uri.replace('sqlite:///', '')
+        
         backup_db_path = f"{db_source_path}.{
             datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
         shutil.copyfile(db_source_path, backup_db_path)
