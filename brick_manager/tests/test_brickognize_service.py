@@ -8,8 +8,10 @@ from the `brickognize_service` module, including:
 """
 
 import unittest
-from unittest.mock import patch, mock_open, MagicMock
+from unittest.mock import MagicMock, mock_open, patch
+
 import requests
+
 from brick_manager.services.brickognize_service import get_predictions
 
 
@@ -43,8 +45,9 @@ class TestBrickognizeService(unittest.TestCase):
         mock_post.assert_called_once_with(
             "https://api.brickognize.com/predict/",
             headers={"accept": "application/json"},
-            files={"query_image": (
-                filename, mock_open_obj(), "image/jpeg")},  # Use the mock file object here
+            files={
+                "query_image": (filename, mock_open_obj(), "image/jpeg")
+            },  # Use the mock file object here
             timeout=10,
         )
 
@@ -63,8 +66,7 @@ class TestBrickognizeService(unittest.TestCase):
         Test get_predictions when the API request fails.
         """
         # Mock an API error
-        mock_post.side_effect = requests.exceptions.RequestException(
-            "API Error")
+        mock_post.side_effect = requests.exceptions.RequestException("API Error")
 
         # Call the function
         file_path = "test_image.jpg"
@@ -84,9 +86,7 @@ class TestBrickognizeService(unittest.TestCase):
         Test get_predictions when the API returns invalid JSON.
         """
         # Mock a response with invalid JSON
-        mock_post.return_value = MagicMock(
-            status_code=200, json=lambda: None
-        )
+        mock_post.return_value = MagicMock(status_code=200, json=lambda: None)
         mock_post.return_value.json.side_effect = ValueError("Invalid JSON")
 
         # Call the function
@@ -127,8 +127,7 @@ class TestBrickognizeService(unittest.TestCase):
         # Validate the result
         self.assertIsNotNone(result)
         self.assertIn("items", result)
-        self.assertEqual(result["items"][0]
-                         ["category_name"], "Unknown Category")
+        self.assertEqual(result["items"][0]["category_name"], "Unknown Category")
 
 
 if __name__ == "__main__":

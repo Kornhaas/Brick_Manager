@@ -15,7 +15,7 @@ Models include:
 # pylint: disable=C0301,R0903,C0103
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, ForeignKey, Boolean, Text
+from sqlalchemy import Boolean, ForeignKey, Integer, Text
 
 db = SQLAlchemy()
 
@@ -24,76 +24,89 @@ class User_Set(db.Model):
     """
     Represents a user's collection of sets.
     """
-    __tablename__ = 'user_sets'
+
+    __tablename__ = "user_sets"
 
     id = db.Column(Integer, primary_key=True)
-    set_num = db.Column(Text, ForeignKey(
-        'rebrickable_sets.set_num'), nullable=False)
-    status = db.Column(Text, default='unknown', nullable=False)
+    set_num = db.Column(Text, ForeignKey("rebrickable_sets.set_num"), nullable=False)
+    status = db.Column(Text, default="unknown", nullable=False)
     label_printed = db.Column(Boolean, default=False, nullable=False)
 
     # Relationships
-    template_set = db.relationship('RebrickableSets', lazy='joined')
+    template_set = db.relationship("RebrickableSets", lazy="joined")
     parts_in_set = db.relationship(
-        'User_Parts', back_populates='user_set', cascade="all, delete-orphan", lazy=True)
+        "User_Parts", back_populates="user_set", cascade="all, delete-orphan", lazy=True
+    )
     minifigures_in_set = db.relationship(
-        'User_Minifigures', back_populates='user_set', cascade="all, delete-orphan", lazy=True)
+        "User_Minifigures",
+        back_populates="user_set",
+        cascade="all, delete-orphan",
+        lazy=True,
+    )
     user_minifigure_parts = db.relationship(
-        'UserMinifigurePart', back_populates='user_set', cascade="all, delete-orphan", lazy=True)
+        "UserMinifigurePart",
+        back_populates="user_set",
+        cascade="all, delete-orphan",
+        lazy=True,
+    )
 
     def __repr__(self):
-        return f'<User_Set {self.id} - {self.set_num}>'
+        return f"<User_Set {self.id} - {self.set_num}>"
 
     def to_dict(self):
         """Convert the User_Set object to a dictionary."""
-        return {'id': self.id, 'set_num': self.set_num, 'status': self.status, 'label_printed': self.label_printed}
+        return {
+            "id": self.id,
+            "set_num": self.set_num,
+            "status": self.status,
+            "label_printed": self.label_printed,
+        }
 
 
 class User_Minifigures(db.Model):
     """
     Represents a user's minifigures in a set.
     """
-    __tablename__ = 'user_minifigures'
+
+    __tablename__ = "user_minifigures"
 
     id = db.Column(Integer, primary_key=True)
-    fig_num = db.Column(Text, ForeignKey(
-        'rebrickable_minifigs.fig_num'), nullable=False)
+    fig_num = db.Column(
+        Text, ForeignKey("rebrickable_minifigs.fig_num"), nullable=False
+    )
     quantity = db.Column(Integer, nullable=False)
-    user_set_id = db.Column(Integer, ForeignKey(
-        'user_sets.id'), nullable=False)
+    user_set_id = db.Column(Integer, ForeignKey("user_sets.id"), nullable=False)
 
     # Relationships
-    user_set = db.relationship('User_Set', back_populates='minifigures_in_set')
-    rebrickable_minifig = db.relationship('RebrickableMinifigs', lazy='joined')
+    user_set = db.relationship("User_Set", back_populates="minifigures_in_set")
+    rebrickable_minifig = db.relationship("RebrickableMinifigs", lazy="joined")
 
     def __repr__(self):
-        return f'<User_Minifigures {self.fig_num} - Quantity: {self.quantity}>'
+        return f"<User_Minifigures {self.fig_num} - Quantity: {self.quantity}>"
 
 
 class User_Parts(db.Model):
     """
     Represents the relationship between parts and sets.
     """
-    __tablename__ = 'user_parts'
+
+    __tablename__ = "user_parts"
 
     id = db.Column(Integer, primary_key=True)
-    part_num = db.Column(Text, ForeignKey(
-        'rebrickable_parts.part_num'), nullable=False)
-    color_id = db.Column(Integer, ForeignKey(
-        'rebrickable_colors.id'), nullable=False)
+    part_num = db.Column(Text, ForeignKey("rebrickable_parts.part_num"), nullable=False)
+    color_id = db.Column(Integer, ForeignKey("rebrickable_colors.id"), nullable=False)
     quantity = db.Column(Integer, nullable=False)
     have_quantity = db.Column(Integer, default=0)
-    user_set_id = db.Column(Integer, ForeignKey(
-        'user_sets.id'), nullable=False)
+    user_set_id = db.Column(Integer, ForeignKey("user_sets.id"), nullable=False)
     is_spare = db.Column(Boolean, default=False, nullable=False)
 
     # Relationships
-    user_set = db.relationship('User_Set', back_populates='parts_in_set')
-    rebrickable_part = db.relationship('RebrickableParts', lazy='joined')
-    rebrickable_color = db.relationship('RebrickableColors', lazy='joined')
+    user_set = db.relationship("User_Set", back_populates="parts_in_set")
+    rebrickable_part = db.relationship("RebrickableParts", lazy="joined")
+    rebrickable_color = db.relationship("RebrickableColors", lazy="joined")
 
     def __repr__(self):
-        return f'<User_Parts {self.part_num} - Quantity: {self.quantity}>'
+        return f"<User_Parts {self.part_num} - Quantity: {self.quantity}>"
 
 
 class UserMinifigurePart(db.Model):
@@ -101,39 +114,37 @@ class UserMinifigurePart(db.Model):
     Represents a user's specific collection of minifigure parts.
     Uses RebrickableParts directly instead of MinifigurePart.
     """
-    __tablename__ = 'user_minifigure_parts'
+
+    __tablename__ = "user_minifigure_parts"
     id = db.Column(Integer, primary_key=True)
-    part_num = db.Column(Text, ForeignKey(
-        'rebrickable_parts.part_num'), nullable=False)
-    color_id = db.Column(Integer, ForeignKey(
-        'rebrickable_colors.id'), nullable=False)
+    part_num = db.Column(Text, ForeignKey("rebrickable_parts.part_num"), nullable=False)
+    color_id = db.Column(Integer, ForeignKey("rebrickable_colors.id"), nullable=False)
     quantity = db.Column(Integer, nullable=False)
     have_quantity = db.Column(Integer, default=0)  # Track ownership
-    user_set_id = db.Column(Integer, ForeignKey(
-        'user_sets.id'), nullable=False)
-    minifigure_id = db.Column(Integer, ForeignKey(
-        'user_minifigures.id'), nullable=False)  # Link to specific minifigure
+    user_set_id = db.Column(Integer, ForeignKey("user_sets.id"), nullable=False)
+    minifigure_id = db.Column(
+        Integer, ForeignKey("user_minifigures.id"), nullable=False
+    )  # Link to specific minifigure
     is_spare = db.Column(Boolean, default=False, nullable=False)
 
     # Relationships
-    user_set = db.relationship(
-        "User_Set", back_populates="user_minifigure_parts")
+    user_set = db.relationship("User_Set", back_populates="user_minifigure_parts")
     user_minifigure = db.relationship("User_Minifigures")
-    rebrickable_part = db.relationship('RebrickableParts', lazy='joined')
-    rebrickable_color = db.relationship('RebrickableColors', lazy='joined')
+    rebrickable_part = db.relationship("RebrickableParts", lazy="joined")
+    rebrickable_color = db.relationship("RebrickableColors", lazy="joined")
 
     def __repr__(self):
-        return f'<UserMinifigurePart {self.part_num} - Quantity: {self.quantity}>'
+        return f"<UserMinifigurePart {self.part_num} - Quantity: {self.quantity}>"
 
 
 class PartStorage(db.Model):
     """
     Represents the storage information for parts.
     """
-    __tablename__ = 'part_storage'
+
+    __tablename__ = "part_storage"
     id = db.Column(Integer, primary_key=True)
-    part_num = db.Column(Text, ForeignKey(
-        'rebrickable_parts.part_num'), nullable=False)
+    part_num = db.Column(Text, ForeignKey("rebrickable_parts.part_num"), nullable=False)
     location = db.Column(Text)
     level = db.Column(Text)
     box = db.Column(Text)
@@ -141,39 +152,42 @@ class PartStorage(db.Model):
 
     # Relationships
     rebrickable_part = db.relationship(
-        'RebrickableParts', backref='part_storage', lazy='joined')
+        "RebrickableParts", backref="part_storage", lazy="joined"
+    )
 
     def __repr__(self):
-        return f'<PartStorage {self.part_num} - Location: {self.location}, Level: {self.level}, Box: {self.box}>'
+        return f"<PartStorage {self.part_num} - Location: {self.location}, Level: {self.level}, Box: {self.box}>"
 
 
 class RebrickablePartCategories(db.Model):
     """
     Represents categories for Rebrickable parts.
-    
+
     This model stores the category information for brick parts as defined by Rebrickable,
     such as 'Brick', 'Plate', 'Technic', etc.
     """
-    __tablename__ = 'rebrickable_part_categories'
+
+    __tablename__ = "rebrickable_part_categories"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
 
     def __repr__(self):
-        return f'<RebrickablePartCategory {self.name}>'
+        return f"<RebrickablePartCategory {self.name}>"
 
     def to_dict(self):
         """Convert the RebrickablePartCategory object to a dictionary."""
-        return {'id': self.id, 'name': self.name}
+        return {"id": self.id, "name": self.name}
 
 
 class RebrickableColors(db.Model):
     """
     Represents colors available for brick parts from Rebrickable.
-    
+
     This model stores color information including RGB values, transparency status,
     and statistics about how many parts and sets use each color.
     """
-    __tablename__ = 'rebrickable_colors'
+
+    __tablename__ = "rebrickable_colors"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     rgb = db.Column(db.Text, nullable=False)
@@ -190,156 +204,173 @@ class RebrickableColors(db.Model):
     def to_dict(self):
         """Convert the RebrickableColor object to a dictionary."""
         return {
-            'id': self.id,
-            'name': self.name,
-            'rgb': self.rgb,
-            'is_trans': self.is_trans,
-            'num_parts': self.num_parts,
-            'num_sets': self.num_sets,
-            'y1': self.y1,
-            'y2': self.y2
+            "id": self.id,
+            "name": self.name,
+            "rgb": self.rgb,
+            "is_trans": self.is_trans,
+            "num_parts": self.num_parts,
+            "num_sets": self.num_sets,
+            "y1": self.y1,
+            "y2": self.y2,
         }
 
     # Relationships
     user_parts = db.relationship(
-        'User_Parts', back_populates='rebrickable_color', lazy='dynamic')
+        "User_Parts", back_populates="rebrickable_color", lazy="dynamic"
+    )
     user_minifigure_parts = db.relationship(
-        'UserMinifigurePart', back_populates='rebrickable_color', lazy='dynamic')
+        "UserMinifigurePart", back_populates="rebrickable_color", lazy="dynamic"
+    )
 
 
 class RebrickableParts(db.Model):
     """
     Represents individual brick parts from the Rebrickable database.
-    
+
     This model stores part information including part numbers, names, categories,
     materials, and image URLs for individual brick pieces.
     """
-    __tablename__ = 'rebrickable_parts'
+
+    __tablename__ = "rebrickable_parts"
     part_num = db.Column(db.Text, primary_key=True)
     name = db.Column(db.Text, nullable=False)
-    part_cat_id = db.Column(db.Integer, db.ForeignKey(
-        'rebrickable_part_categories.id'), nullable=False)
+    part_cat_id = db.Column(
+        db.Integer, db.ForeignKey("rebrickable_part_categories.id"), nullable=False
+    )
     part_material = db.Column(db.Text)
     part_img_url = db.Column(db.Text, nullable=True)
     part_url = db.Column(db.Text, nullable=True)
 
     # Relationships
-    category = db.relationship('RebrickablePartCategories', lazy='joined')
+    category = db.relationship("RebrickablePartCategories", lazy="joined")
     user_parts = db.relationship(
-        'User_Parts', back_populates='rebrickable_part', lazy='dynamic')
+        "User_Parts", back_populates="rebrickable_part", lazy="dynamic"
+    )
     user_minifigure_parts = db.relationship(
-        'UserMinifigurePart', back_populates='rebrickable_part', lazy='dynamic')
+        "UserMinifigurePart", back_populates="rebrickable_part", lazy="dynamic"
+    )
 
     def __repr__(self):
-        return f'<RebrickablePart {self.part_num}>'
+        return f"<RebrickablePart {self.part_num}>"
 
     def to_dict(self):
         """Convert the RebrickablePart object to a dictionary."""
         return {
-            'part_num': self.part_num,
-            'name': self.name,
-            'part_cat_id': self.part_cat_id,
-            'part_material': self.part_material,
-            'part_img_url': self.part_img_url,
-            'part_url': self.part_url
+            "part_num": self.part_num,
+            "name": self.name,
+            "part_cat_id": self.part_cat_id,
+            "part_material": self.part_material,
+            "part_img_url": self.part_img_url,
+            "part_url": self.part_url,
         }
 
 
 class RebrickablePartRelationships(db.Model):
     """
     Represents relationships between LEGO parts from Rebrickable.
-    
+
     This model stores parent-child relationships between parts, such as when
     one part is a variant or component of another part.
     """
-    __tablename__ = 'rebrickable_part_relationships'
+
+    __tablename__ = "rebrickable_part_relationships"
     rel_type = db.Column(db.Text, primary_key=True)
-    child_part_num = db.Column(db.Text, db.ForeignKey(
-        'rebrickable_parts.part_num'), primary_key=True)
-    parent_part_num = db.Column(db.Text, db.ForeignKey(
-        'rebrickable_parts.part_num'), primary_key=True)
+    child_part_num = db.Column(
+        db.Text, db.ForeignKey("rebrickable_parts.part_num"), primary_key=True
+    )
+    parent_part_num = db.Column(
+        db.Text, db.ForeignKey("rebrickable_parts.part_num"), primary_key=True
+    )
 
 
 class RebrickableElements(db.Model):
     """
     Represents LEGO elements from Rebrickable.
-    
+
     An element is a specific combination of a part in a particular color.
     This model maps element IDs to their corresponding parts and colors.
     """
-    __tablename__ = 'rebrickable_elements'
+
+    __tablename__ = "rebrickable_elements"
     element_id = db.Column(db.Text, primary_key=True)
-    part_num = db.Column(db.Text, db.ForeignKey(
-        'rebrickable_parts.part_num'), nullable=False)
-    color_id = db.Column(db.Integer, db.ForeignKey(
-        'rebrickable_colors.id'), nullable=False)
+    part_num = db.Column(
+        db.Text, db.ForeignKey("rebrickable_parts.part_num"), nullable=False
+    )
+    color_id = db.Column(
+        db.Integer, db.ForeignKey("rebrickable_colors.id"), nullable=False
+    )
     design_id = db.Column(db.Text)
 
 
 class RebrickableThemes(db.Model):
     """
     Represents LEGO themes from Rebrickable.
-    
+
     This model stores theme information such as 'Star Wars', 'City', 'Technic', etc.
     Themes can have parent-child relationships for sub-themes.
     """
-    __tablename__ = 'rebrickable_themes'
+
+    __tablename__ = "rebrickable_themes"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
-    parent_id = db.Column(db.Integer, db.ForeignKey('rebrickable_themes.id'))
+    parent_id = db.Column(db.Integer, db.ForeignKey("rebrickable_themes.id"))
 
     def __repr__(self):
         return f"<Theme {self.name} (ID: {self.id}, Parent: {self.parent_id})>"
 
     def to_dict(self):
         """Convert the Theme object to a dictionary."""
-        return {'id': self.id, 'name': self.name, 'parent_id': self.parent_id}
+        return {"id": self.id, "name": self.name, "parent_id": self.parent_id}
 
 
 class RebrickableSets(db.Model):
     """
     Represents LEGO sets from the Rebrickable database.
-    
+
     This model stores set information including set numbers, names, years,
     themes, part counts, and image URLs for complete LEGO sets.
     """
-    __tablename__ = 'rebrickable_sets'
+
+    __tablename__ = "rebrickable_sets"
     set_num = db.Column(db.Text, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     year = db.Column(db.Integer, nullable=False)
-    theme_id = db.Column(db.Integer, db.ForeignKey(
-        'rebrickable_themes.id'), nullable=False)
+    theme_id = db.Column(
+        db.Integer, db.ForeignKey("rebrickable_themes.id"), nullable=False
+    )
     num_parts = db.Column(db.Integer, nullable=False)
     img_url = db.Column(db.Text)
 
     # Relationships
     user_sets = db.relationship(
-        'User_Set', back_populates='template_set', lazy='dynamic')
-    theme = db.relationship('RebrickableThemes', lazy='joined')
+        "User_Set", back_populates="template_set", lazy="dynamic"
+    )
+    theme = db.relationship("RebrickableThemes", lazy="joined")
 
     def __repr__(self):
-        return f'<RebrickableSet {self.set_num} - {self.name}>'
+        return f"<RebrickableSet {self.set_num} - {self.name}>"
 
     def to_dict(self):
         """Convert the RebrickableSet object to a dictionary."""
         return {
-            'set_num': self.set_num,
-            'name': self.name,
-            'year': self.year,
-            'theme_id': self.theme_id,
-            'num_parts': self.num_parts,
-            'img_url': self.img_url
+            "set_num": self.set_num,
+            "name": self.name,
+            "year": self.year,
+            "theme_id": self.theme_id,
+            "num_parts": self.num_parts,
+            "img_url": self.img_url,
         }
 
 
 class RebrickableMinifigs(db.Model):
     """
     Represents LEGO minifigures from the Rebrickable database.
-    
+
     This model stores minifigure information including figure numbers, names,
     part counts, and image URLs for complete minifigures.
     """
-    __tablename__ = 'rebrickable_minifigs'
+
+    __tablename__ = "rebrickable_minifigs"
     fig_num = db.Column(db.Text, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     num_parts = db.Column(db.Integer, nullable=False)
@@ -347,20 +378,22 @@ class RebrickableMinifigs(db.Model):
 
     # Relationships
     user_minifigures = db.relationship(
-        'User_Minifigures', back_populates='rebrickable_minifig', lazy='dynamic')
+        "User_Minifigures", back_populates="rebrickable_minifig", lazy="dynamic"
+    )
 
     def __repr__(self):
-        return f'<RebrickableMinifig {self.fig_num} - {self.name}>'
+        return f"<RebrickableMinifig {self.fig_num} - {self.name}>"
 
 
 class RebrickableInventories(db.Model):
     """
     Represents inventories from Rebrickable.
-    
+
     This model stores inventory information which tracks different versions
     of set contents and their associated parts and minifigures.
     """
-    __tablename__ = 'rebrickable_inventories'
+
+    __tablename__ = "rebrickable_inventories"
     id = db.Column(db.Integer, primary_key=True)
     version = db.Column(db.Integer, nullable=False)
     set_num = db.Column(db.Text, nullable=False)
@@ -369,85 +402,98 @@ class RebrickableInventories(db.Model):
 class RebrickableInventoryParts(db.Model):
     """
     Represents parts within specific inventories from Rebrickable.
-    
+
     This model stores the relationship between inventories and the parts they contain,
     including quantities, colors, spare part status, and part-specific images.
     """
-    __tablename__ = 'rebrickable_inventory_parts'
-    inventory_id = db.Column(db.Integer, db.ForeignKey(
-        'rebrickable_inventories.id'), primary_key=True)
-    part_num = db.Column(db.Text, db.ForeignKey(
-        'rebrickable_parts.part_num'), primary_key=True)
-    color_id = db.Column(db.Integer, db.ForeignKey(
-        'rebrickable_colors.id'), primary_key=True)
+
+    __tablename__ = "rebrickable_inventory_parts"
+    inventory_id = db.Column(
+        db.Integer, db.ForeignKey("rebrickable_inventories.id"), primary_key=True
+    )
+    part_num = db.Column(
+        db.Text, db.ForeignKey("rebrickable_parts.part_num"), primary_key=True
+    )
+    color_id = db.Column(
+        db.Integer, db.ForeignKey("rebrickable_colors.id"), primary_key=True
+    )
     quantity = db.Column(db.Integer, nullable=False)
-    is_spare = db.Column(db.Boolean, nullable=False,
-                         default=False, primary_key=True)
+    is_spare = db.Column(db.Boolean, nullable=False, default=False, primary_key=True)
     img_url = db.Column(db.Text)
 
 
 class RebrickableInventorySets(db.Model):
     """
     Represents sets within specific inventories from Rebrickable.
-    
+
     This model stores the relationship between inventories and the sets they contain,
     including quantities of each set within the inventory.
     """
-    __tablename__ = 'rebrickable_inventory_sets'
-    inventory_id = db.Column(db.Integer, db.ForeignKey(
-        'rebrickable_inventories.id'), primary_key=True)
-    set_num = db.Column(db.Text, db.ForeignKey(
-        'rebrickable_sets.set_num'), primary_key=True)
+
+    __tablename__ = "rebrickable_inventory_sets"
+    inventory_id = db.Column(
+        db.Integer, db.ForeignKey("rebrickable_inventories.id"), primary_key=True
+    )
+    set_num = db.Column(
+        db.Text, db.ForeignKey("rebrickable_sets.set_num"), primary_key=True
+    )
     quantity = db.Column(db.Integer, nullable=False)
 
 
 class RebrickableInventoryMinifigs(db.Model):
     """
     Represents minifigures within specific inventories from Rebrickable.
-    
+
     This model stores the relationship between inventories and the minifigures they contain,
     including quantities of each minifigure within the inventory.
     """
-    __tablename__ = 'rebrickable_inventory_minifigs'
-    inventory_id = db.Column(db.Integer, db.ForeignKey(
-        'rebrickable_inventories.id'), primary_key=True)
-    fig_num = db.Column(db.Text, db.ForeignKey(
-        'rebrickable_minifigs.fig_num'), primary_key=True)
+
+    __tablename__ = "rebrickable_inventory_minifigs"
+    inventory_id = db.Column(
+        db.Integer, db.ForeignKey("rebrickable_inventories.id"), primary_key=True
+    )
+    fig_num = db.Column(
+        db.Text, db.ForeignKey("rebrickable_minifigs.fig_num"), primary_key=True
+    )
     quantity = db.Column(db.Integer, nullable=False)
 
 
 class ConfigSettings(db.Model):
     """
     Stores application configuration settings including API tokens and other preferences.
-    
+
     This model provides a secure way to store configuration data including encrypted
     API tokens for external services like Rebrickable. Settings are stored as key-value
     pairs with optional encryption for sensitive data.
     """
-    __tablename__ = 'config_settings'
-    
+
+    __tablename__ = "config_settings"
+
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.Text, nullable=False, unique=True)
     value = db.Column(db.Text, nullable=True)
     encrypted = db.Column(db.Boolean, default=False, nullable=False)
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), 
-                          onupdate=db.func.current_timestamp())
-    
+    updated_at = db.Column(
+        db.DateTime,
+        default=db.func.current_timestamp(),
+        onupdate=db.func.current_timestamp(),
+    )
+
     def __repr__(self):
-        return f'<ConfigSettings {self.key}>'
-    
+        return f"<ConfigSettings {self.key}>"
+
     def to_dict(self):
         """Convert the ConfigSettings object to a dictionary."""
         return {
-            'id': self.id,
-            'key': self.key,
-            'value': '***' if self.encrypted else self.value,
-            'encrypted': self.encrypted,
-            'description': self.description,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            "id": self.id,
+            "key": self.key,
+            "value": "***" if self.encrypted else self.value,
+            "encrypted": self.encrypted,
+            "description": self.description,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
 

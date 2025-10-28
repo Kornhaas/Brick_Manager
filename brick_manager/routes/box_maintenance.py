@@ -3,26 +3,26 @@ This module provides routes for managing boxes, including filtering, fetching co
 and generating labels for boxes.
 """
 import os
-from flask import Blueprint, jsonify, render_template, request, current_app, send_file
-from werkzeug.exceptions import BadRequest, NotFound
-from models import db, PartStorage, RebrickableParts, RebrickableInventoryParts
+
+from flask import Blueprint, current_app, jsonify, render_template, request, send_file
+from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
 from services.label_service import create_box_label_jpg
-
+from werkzeug.exceptions import BadRequest, NotFound
 
 # pylint: disable=C0301,W0718,W0719
-box_maintenance_bp = Blueprint('box_maintenance', __name__)
+box_maintenance_bp = Blueprint("box_maintenance", __name__)
 
 
-@box_maintenance_bp.route('/box_maintenance', methods=['GET'])
+@box_maintenance_bp.route("/box_maintenance", methods=["GET"])
 def box_maintenance_page():
     """
     Renders the Box Maintenance page.
     """
-    return render_template('box_maintenance.html')
+    return render_template("box_maintenance.html")
 
 
-@box_maintenance_bp.route('/box_maintenance/filter', methods=['POST'])
+@box_maintenance_bp.route("/box_maintenance/filter", methods=["POST"])
 def filter_box_data():
     """
     Filters levels and boxes based on the selected location and level.
@@ -36,13 +36,21 @@ def filter_box_data():
         level = data.get("level")
 
         if location and not level:
-            levels = db.session.query(PartStorage.level).filter_by(
-                location=location).distinct().all()
+            levels = (
+                db.session.query(PartStorage.level)
+                .filter_by(location=location)
+                .distinct()
+                .all()
+            )
             return jsonify({"levels": sorted([lvl[0] for lvl in levels])})
 
         if location and level:
-            boxes = db.session.query(PartStorage.box).filter_by(
-                location=location, level=level).distinct().all()
+            boxes = (
+                db.session.query(PartStorage.box)
+                .filter_by(location=location, level=level)
+                .distinct()
+                .all()
+            )
             return jsonify({"boxes": sorted([box[0] for box in boxes])})
 
         raise BadRequest("Invalid parameters provided.")
@@ -54,7 +62,7 @@ def filter_box_data():
         return jsonify({"error": "An unexpected error occurred."}), 500
 
 
-@box_maintenance_bp.route('/box_maintenance/data', methods=['GET'])
+@box_maintenance_bp.route("/box_maintenance/data", methods=["GET"])
 def get_box_data():
     """
     Fetches dropdown data for location, level, and box.
@@ -64,17 +72,19 @@ def get_box_data():
         levels = db.session.query(PartStorage.level).distinct().all()
         boxes = db.session.query(PartStorage.box).distinct().all()
 
-        return jsonify({
-            "locations": sorted([loc[0] for loc in locations]),
-            "levels": sorted([lvl[0] for lvl in levels]),
-            "boxes": sorted([box[0] for box in boxes]),
-        })
+        return jsonify(
+            {
+                "locations": sorted([loc[0] for loc in locations]),
+                "levels": sorted([lvl[0] for lvl in levels]),
+                "boxes": sorted([box[0] for box in boxes]),
+            }
+        )
     except Exception as e:
         current_app.logger.error("Error in get_box_data: %s", e)
         return jsonify({"error": "Failed to retrieve box data."}), 500
 
 
-@box_maintenance_bp.route('/box_contents', methods=['POST'])
+@box_maintenance_bp.route("/box_contents", methods=["POST"])
 def get_box_contents():
     """
     Fetches the content of a specific box based on location, level, and box.
@@ -91,16 +101,20 @@ def get_box_contents():
         if not (location and level and box):
             raise BadRequest("All fields are required.")
 
-        contents = db.session.query(RebrickableParts, PartStorage).join(
-            PartStorage, RebrickableParts.part_num == PartStorage.part_num
-        ).filter(
-            PartStorage.location == location,
-            PartStorage.level == level,
-            PartStorage.box == box
-        ).all()
+        contents = (
+            db.session.query(RebrickableParts, PartStorage)
+            .join(PartStorage, RebrickableParts.part_num == PartStorage.part_num)
+            .filter(
+                PartStorage.location == location,
+                PartStorage.level == level,
+                PartStorage.box == box,
+            )
+            .all()
+        )
 
         current_app.logger.info(
-            f"Found {len(contents)} parts in box {location}-{level}-{box}")
+            f"Found {len(contents)} parts in box {location}-{level}-{box}"
+        )
 
         result = []
         for part, storage in contents:
@@ -109,8 +123,8 @@ def get_box_contents():
             inventory_part = RebrickableInventoryParts.query.filter(
                 RebrickableInventoryParts.part_num == part.part_num,
                 RebrickableInventoryParts.img_url.isnot(None),
-                RebrickableInventoryParts.img_url != '',
-                RebrickableInventoryParts.img_url != 'None'
+                RebrickableInventoryParts.img_url != "",
+                RebrickableInventoryParts.img_url != "None",
             ).first()
 
             # Use inventory image if available, otherwise fall back to generic part image
@@ -120,22 +134,29 @@ def get_box_contents():
                 original_img_url = part.part_img_url
 
             # Handle various "empty" cases: None, empty string, or literal 'None' string
-            if original_img_url and original_img_url.strip() and original_img_url.strip().lower() != 'none':
+            if (
+                original_img_url
+                and original_img_url.strip()
+                and original_img_url.strip().lower() != "none"
+            ):
                 cached_img_url = cache_image(original_img_url)
             else:
-                cached_img_url = '/static/default_image.png'
+                cached_img_url = "/static/default_image.png"
 
             current_app.logger.debug(
-                f"Part {part.part_num}: original_url='{original_img_url}', cached_url='{cached_img_url}'")
+                f"Part {part.part_num}: original_url='{original_img_url}', cached_url='{cached_img_url}'"
+            )
 
-            result.append({
-                "part_num": part.part_num,
-                "image": cached_img_url,
-                "category": part.category.name if part.category else "Unknown",
-                "name": part.name,
-                "storage_id": storage.id,
-                "label_printed": storage.label_printed,
-            })
+            result.append(
+                {
+                    "part_num": part.part_num,
+                    "image": cached_img_url,
+                    "category": part.category.name if part.category else "Unknown",
+                    "name": part.name,
+                    "storage_id": storage.id,
+                    "label_printed": storage.label_printed,
+                }
+            )
 
         return jsonify(result)
     except BadRequest as e:
@@ -146,7 +167,7 @@ def get_box_contents():
         return jsonify({"error": "An unexpected error occurred."}), 500
 
 
-@box_maintenance_bp.route('/box_maintenance/update_label_status', methods=['POST'])
+@box_maintenance_bp.route("/box_maintenance/update_label_status", methods=["POST"])
 def update_label_status():
     """
     Updates the label_printed status for a part storage entry.
@@ -181,7 +202,7 @@ def update_label_status():
         return jsonify({"error": "An unexpected error occurred."}), 500
 
 
-@box_maintenance_bp.route('/box_maintenance/label', methods=['POST'])
+@box_maintenance_bp.route("/box_maintenance/label", methods=["POST"])
 def generate_box_label():
     """
     Generates a label for a specific box containing its contents.
@@ -198,23 +219,21 @@ def generate_box_label():
         if not (location and level and box):
             raise BadRequest("All fields are required.")
 
-        contents = db.session.query(RebrickableParts).join(
-            PartStorage, RebrickableParts.part_num == PartStorage.part_num
-        ).filter(
-            PartStorage.location == location,
-            PartStorage.level == level,
-            PartStorage.box == box
-        ).all()
+        contents = (
+            db.session.query(RebrickableParts)
+            .join(PartStorage, RebrickableParts.part_num == PartStorage.part_num)
+            .filter(
+                PartStorage.location == location,
+                PartStorage.level == level,
+                PartStorage.box == box,
+            )
+            .all()
+        )
 
         if not contents:
             raise NotFound("No items found in the specified box.")
 
-        box_info = {
-            "location": location,
-            "level": level,
-            "box": box,
-            "items": []
-        }
+        box_info = {"location": location, "level": level, "box": box, "items": []}
 
         # Apply the same improved image logic for label generation
         for part in contents:
@@ -222,8 +241,8 @@ def generate_box_label():
             inventory_part = RebrickableInventoryParts.query.filter(
                 RebrickableInventoryParts.part_num == part.part_num,
                 RebrickableInventoryParts.img_url.isnot(None),
-                RebrickableInventoryParts.img_url != '',
-                RebrickableInventoryParts.img_url != 'None'
+                RebrickableInventoryParts.img_url != "",
+                RebrickableInventoryParts.img_url != "None",
             ).first()
 
             # Use inventory image if available, otherwise fall back to generic part image
@@ -232,12 +251,14 @@ def generate_box_label():
             else:
                 img_url = part.part_img_url
 
-            box_info["items"].append({
-                "part_num": part.part_num,
-                "name": part.name,
-                "category": part.category.name if part.category else "Unknown",
-                "img_url": img_url
-            })
+            box_info["items"].append(
+                {
+                    "part_num": part.part_num,
+                    "name": part.name,
+                    "category": part.category.name if part.category else "Unknown",
+                    "img_url": img_url,
+                }
+            )
 
         label_path = create_box_label_jpg(box_info)
 
@@ -248,7 +269,7 @@ def generate_box_label():
             label_path,
             as_attachment=True,
             download_name=f"box_label_{box}.jpg",
-            mimetype="image/jpeg"
+            mimetype="image/jpeg",
         )
 
     except BadRequest as e:

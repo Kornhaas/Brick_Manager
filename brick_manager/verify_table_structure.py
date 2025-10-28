@@ -6,11 +6,13 @@ Run this script to check if your tables have the correct structure
 after importing data from Rebrickable.
 """
 
-import sqlite3
-from models import db, RebrickableParts
-from app import app
-import sys
 import os
+import sqlite3
+import sys
+
+from app import app
+from models import RebrickableParts, db
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -27,12 +29,13 @@ def check_table_structure():
             return False
 
         # Check database structure directly
-        conn = sqlite3.connect('instance/brick_manager.db')
+        conn = sqlite3.connect("instance/brick_manager.db")
         cursor = conn.cursor()
 
         # Check table structure
         cursor.execute(
-            'SELECT sql FROM sqlite_master WHERE type="table" AND name="rebrickable_parts";')
+            'SELECT sql FROM sqlite_master WHERE type="table" AND name="rebrickable_parts";'
+        )
         result = cursor.fetchone()
 
         if result:
@@ -40,15 +43,21 @@ def check_table_structure():
             print(f"\n📋 Current table structure:\n{create_sql}")
 
             # Check if PRIMARY KEY is present
-            if 'PRIMARY KEY' in create_sql:
+            if "PRIMARY KEY" in create_sql:
                 print("✅ PRIMARY KEY constraint found")
             else:
                 print("❌ PRIMARY KEY constraint missing")
                 return False
 
             # Check if required columns exist
-            required_columns = ['part_num', 'name', 'part_cat_id',
-                                'part_material', 'part_img_url', 'part_url']
+            required_columns = [
+                "part_num",
+                "name",
+                "part_cat_id",
+                "part_material",
+                "part_img_url",
+                "part_url",
+            ]
             for col in required_columns:
                 if col in create_sql:
                     print(f"✅ Column '{col}' found")

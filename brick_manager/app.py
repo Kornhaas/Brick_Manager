@@ -4,63 +4,70 @@ This module sets up and runs the Brick Manager Flask application.
 It configures the application, registers blueprints, and loads the master lookup data.
 """
 
+import atexit
+import logging
 import os
 import shutil
-import logging
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
-import atexit
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from config import Config
 from flask import Flask
 from flask_migrate import Migrate
-
-from config import Config
 from models import db  # Import the db instance from models
 
 # Import service functions that tests expect to be available at module level
 try:
-    from services.token_service import get_rebrickable_user_token, get_rebrickable_api_key
     from services.rebrickable_sync_service import (
-        sync_missing_parts_with_rebrickable, 
         sync_missing_minifigure_parts_with_rebrickable,
-        sync_user_sets_with_rebrickable
+        sync_missing_parts_with_rebrickable,
+        sync_user_sets_with_rebrickable,
+    )
+    from services.token_service import (
+        get_rebrickable_api_key,
+        get_rebrickable_user_token,
     )
 except ImportError:
     # Graceful fallback if services aren't available
     def get_rebrickable_user_token():
         return None
+
     def get_rebrickable_api_key():
         return None
-    def sync_missing_parts_with_rebrickable(*args, **kwargs):
-        return {'success': False, 'message': 'Service not available'}
-    def sync_missing_minifigure_parts_with_rebrickable(*args, **kwargs):
-        return {'success': False, 'message': 'Service not available'}
-    def sync_user_sets_with_rebrickable(*args, **kwargs):
-        return {'success': False, 'message': 'Service not available'}
 
-from routes.upload import upload_bp
-from routes.main import main_bp
-from routes.storage import storage_bp
-from routes.manual_entry import manual_entry_bp
-from routes.part_lookup import part_lookup_bp
-from routes.set_search import set_search_bp
-from routes.import_rebrickable_data import import_rebrickable_data_bp
-from routes.box_maintenance import box_maintenance_bp
-from routes.set_maintain import set_maintain_bp
-from routes.missing_parts import missing_parts_bp
-from routes.dashboard import dashboard_bp
-from routes.part_location import part_location_bp
-from routes.token_management import token_management_bp
-from routes.rebrickable_sync import rebrickable_sync_bp
+    def sync_missing_parts_with_rebrickable(*args, **kwargs):
+        return {"success": False, "message": "Service not available"}
+
+    def sync_missing_minifigure_parts_with_rebrickable(*args, **kwargs):
+        return {"success": False, "message": "Service not available"}
+
+    def sync_user_sets_with_rebrickable(*args, **kwargs):
+        return {"success": False, "message": "Service not available"}
+
+
 from routes.admin_sync import admin_sync_bp
+from routes.box_maintenance import box_maintenance_bp
+from routes.dashboard import dashboard_bp
+from routes.import_rebrickable_data import import_rebrickable_data_bp
+from routes.main import main_bp
+from routes.manual_entry import manual_entry_bp
+from routes.missing_parts import missing_parts_bp
+from routes.part_location import part_location_bp
+from routes.part_lookup import part_lookup_bp
+from routes.rebrickable_sync import rebrickable_sync_bp
+from routes.set_maintain import set_maintain_bp
+from routes.set_search import set_search_bp
+from routes.storage import storage_bp
+from routes.token_management import token_management_bp
+from routes.upload import upload_bp
 from services.part_lookup_service import load_part_lookup
 
-#pylint: disable=W0718
+# pylint: disable=W0718
 
 # Initialize the Flask application
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'  # Set your secret key here
+app.secret_key = "supersecretkey"  # Set your secret key here
 app.config.from_object(Config)  # Load the configuration
 
 # Configure database using Config class
@@ -70,12 +77,12 @@ app.config.from_object(Config)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # For Docker environment, ensure instance directory exists
-if os.path.exists('/app/data'):
+if os.path.exists("/app/data"):
     # Docker environment - ensure mounted volume directory exists
-    os.makedirs('/app/data/instance', exist_ok=True)
+    os.makedirs("/app/data/instance", exist_ok=True)
 else:
     # Local development - ensure local instance directory exists
-    instances_dir = os.path.join(basedir, 'instance')
+    instances_dir = os.path.join(basedir, "instance")
     os.makedirs(instances_dir, exist_ok=True)
 
 # Initialize the db instance with the app
@@ -85,18 +92,16 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 # Configure logging
-log_path = os.path.join(basedir, 'brick_manager.log')
+log_path = os.path.join(basedir, "brick_manager.log")
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 rotating_file_handler = RotatingFileHandler(
     log_path, maxBytes=1024 * 1024 * 5, backupCount=3
 )
 rotating_file_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 rotating_file_handler.setFormatter(formatter)
 app.logger.addHandler(rotating_file_handler)
 
@@ -106,19 +111,19 @@ def backup_database():
     Backup the database at regular intervals.
     """
     try:
-        db_uri = app.config['SQLALCHEMY_DATABASE_URI']
-        if db_uri.startswith('sqlite:////'):
+        db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+        if db_uri.startswith("sqlite:////"):
             # Absolute path format
-            db_source_path = db_uri.replace('sqlite:////', '')
+            db_source_path = db_uri.replace("sqlite:////", "")
         else:
             # Relative path format
-            db_source_path = db_uri.replace('sqlite:///', '')
-        
-        backup_db_path = f"{db_source_path}.{
-            datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
+            db_source_path = db_uri.replace("sqlite:///", "")
+
+        backup_db_path = (
+            f"{db_source_path}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.backup.db"
+        )
         shutil.copyfile(db_source_path, backup_db_path)
-        app.logger.info(
-            "Database backed up successfully to %s", backup_db_path)
+        app.logger.info("Database backed up successfully to %s", backup_db_path)
     except Exception as e:
         app.logger.error("Failed to backup database: %s", e)
 
@@ -129,52 +134,74 @@ def scheduled_sync_missing_parts():
     Only runs if tokens are configured.
     """
     try:
-        from services.token_service import get_rebrickable_user_token, get_rebrickable_api_key
-        from services.rebrickable_sync_service import sync_missing_parts_with_rebrickable, sync_missing_minifigure_parts_with_rebrickable
-        
+        from services.rebrickable_sync_service import (
+            sync_missing_minifigure_parts_with_rebrickable,
+            sync_missing_parts_with_rebrickable,
+        )
+        from services.token_service import (
+            get_rebrickable_api_key,
+            get_rebrickable_user_token,
+        )
+
         # Check if tokens are configured
         user_token = get_rebrickable_user_token()
         api_key = get_rebrickable_api_key()
-        
+
         if not user_token or not api_key:
-            app.logger.info("Scheduled missing parts sync skipped - no API credentials configured")
+            app.logger.info(
+                "Scheduled missing parts sync skipped - no API credentials configured"
+            )
             return
-        
-        app.logger.info("Starting scheduled sync for both regular and minifigure missing parts")
+
+        app.logger.info(
+            "Starting scheduled sync for both regular and minifigure missing parts"
+        )
         batch_size = 500  # Use moderate batch size for scheduled runs
-        
+
         # Sync regular parts
         app.logger.info("Syncing regular missing parts...")
         regular_result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
-        
+
         # Sync minifigure parts
         app.logger.info("Syncing minifigure missing parts...")
-        minifig_result = sync_missing_minifigure_parts_with_rebrickable(batch_size=batch_size)
-        
+        minifig_result = sync_missing_minifigure_parts_with_rebrickable(
+            batch_size=batch_size
+        )
+
         # Log combined results
-        if regular_result['success'] and minifig_result['success']:
-            regular_summary = regular_result.get('summary', {})
-            minifig_summary = minifig_result.get('summary', {})
-            
-            total_regular = regular_summary.get('local_missing_count', 0)
-            total_minifig = minifig_summary.get('local_missing_count', 0)
-            added_regular = regular_summary.get('actual_added', 0)
-            added_minifig = minifig_summary.get('actual_added', 0)
-            removed_regular = regular_summary.get('actual_removed', 0)
-            removed_minifig = minifig_summary.get('actual_removed', 0)
-            
+        if regular_result["success"] and minifig_result["success"]:
+            regular_summary = regular_result.get("summary", {})
+            minifig_summary = minifig_result.get("summary", {})
+
+            total_regular = regular_summary.get("local_missing_count", 0)
+            total_minifig = minifig_summary.get("local_missing_count", 0)
+            added_regular = regular_summary.get("actual_added", 0)
+            added_minifig = minifig_summary.get("actual_added", 0)
+            removed_regular = regular_summary.get("actual_removed", 0)
+            removed_minifig = minifig_summary.get("actual_removed", 0)
+
             app.logger.info(f"Scheduled sync completed successfully:")
-            app.logger.info(f"  Regular parts: {total_regular} local, {added_regular} added, {removed_regular} removed")
-            app.logger.info(f"  Minifig parts: {total_minifig} local, {added_minifig} added, {removed_minifig} removed")
-            app.logger.info(f"  Total: {total_regular + total_minifig} parts across both lists")
+            app.logger.info(
+                f"  Regular parts: {total_regular} local, {added_regular} added, {removed_regular} removed"
+            )
+            app.logger.info(
+                f"  Minifig parts: {total_minifig} local, {added_minifig} added, {removed_minifig} removed"
+            )
+            app.logger.info(
+                f"  Total: {total_regular + total_minifig} parts across both lists"
+            )
         else:
             error_messages = []
-            if not regular_result['success']:
-                error_messages.append(f"Regular parts: {regular_result.get('message', 'Unknown error')}")
-            if not minifig_result['success']:
-                error_messages.append(f"Minifig parts: {minifig_result.get('message', 'Unknown error')}")
+            if not regular_result["success"]:
+                error_messages.append(
+                    f"Regular parts: {regular_result.get('message', 'Unknown error')}"
+                )
+            if not minifig_result["success"]:
+                error_messages.append(
+                    f"Minifig parts: {minifig_result.get('message', 'Unknown error')}"
+                )
             app.logger.error(f"Scheduled sync failed - {'; '.join(error_messages)}")
-            
+
     except Exception as e:
         app.logger.error(f"Error during scheduled missing parts sync: {e}")
 
@@ -185,26 +212,37 @@ def scheduled_sync_user_sets():
     Only runs if tokens are configured.
     """
     try:
-        from services.token_service import get_rebrickable_user_token, get_rebrickable_api_key
-        from services.rebrickable_sets_sync_service import sync_user_sets_with_rebrickable
-        
+        from services.rebrickable_sets_sync_service import (
+            sync_user_sets_with_rebrickable,
+        )
+        from services.token_service import (
+            get_rebrickable_api_key,
+            get_rebrickable_user_token,
+        )
+
         # Check if tokens are configured
         user_token = get_rebrickable_user_token()
         api_key = get_rebrickable_api_key()
-        
+
         if not user_token or not api_key:
-            app.logger.info("Scheduled user sets sync skipped - no API credentials configured")
+            app.logger.info(
+                "Scheduled user sets sync skipped - no API credentials configured"
+            )
             return
-        
+
         app.logger.info("Starting scheduled user sets sync")
         result = sync_user_sets_with_rebrickable()
-        
-        if result['success']:
-            summary = result.get('summary', {})
-            app.logger.info(f"Scheduled user sets sync completed - {summary.get('sets_added', 0)} sets added, {summary.get('sets_removed', 0)} sets removed")
+
+        if result["success"]:
+            summary = result.get("summary", {})
+            app.logger.info(
+                f"Scheduled user sets sync completed - {summary.get('sets_added', 0)} sets added, {summary.get('sets_removed', 0)} sets removed"
+            )
         else:
-            app.logger.error(f"Scheduled user sets sync failed: {result.get('message', 'Unknown error')}")
-            
+            app.logger.error(
+                f"Scheduled user sets sync failed: {result.get('message', 'Unknown error')}"
+            )
+
     except Exception as e:
         app.logger.error(f"Error during scheduled user sets sync: {e}")
 
@@ -239,20 +277,31 @@ app.register_blueprint(admin_sync_bp)
 scheduler = BackgroundScheduler()
 
 # Database backup every 6 hours
-scheduler.add_job(func=backup_database, trigger="interval",
-                  hours=6, id='backup_database')
+scheduler.add_job(
+    func=backup_database, trigger="interval", hours=6, id="backup_database"
+)
 
 # Rebrickable sync tasks every 6 hours (offset by 30 minutes to avoid conflicts)
-scheduler.add_job(func=scheduled_sync_missing_parts, trigger="interval",
-                  hours=6, minutes=30, id='sync_missing_parts')
+scheduler.add_job(
+    func=scheduled_sync_missing_parts,
+    trigger="interval",
+    hours=6,
+    minutes=30,
+    id="sync_missing_parts",
+)
 
-scheduler.add_job(func=scheduled_sync_user_sets, trigger="interval", 
-                  hours=6, minutes=35, id='sync_user_sets')
+scheduler.add_job(
+    func=scheduled_sync_user_sets,
+    trigger="interval",
+    hours=6,
+    minutes=35,
+    id="sync_user_sets",
+)
 
 scheduler.start()
 
 # Shut down the scheduler when exiting the app
 atexit.register(scheduler.shutdown)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=True)

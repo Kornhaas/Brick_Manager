@@ -4,16 +4,18 @@ levels, and boxes for specific parts. It integrates with Rebrickable API and the
 """
 
 import logging
-from flask import Blueprint, render_template, request, jsonify
-from services.rebrickable_service import RebrickableService
-from services.part_lookup_service import load_part_lookup, save_part_lookup
+
+from flask import Blueprint, jsonify, render_template, request
 from services.cache_service import cache_image
 from services.label_service import create_label_image
-#pylint: disable=C0301,W0718
-part_location_bp = Blueprint('part_location', __name__)
+from services.part_lookup_service import load_part_lookup, save_part_lookup
+from services.rebrickable_service import RebrickableService
+
+# pylint: disable=C0301,W0718
+part_location_bp = Blueprint("part_location", __name__)
 
 
-@part_location_bp.route('/part_location', methods=['GET', 'POST'])
+@part_location_bp.route("/part_location", methods=["GET", "POST"])
 def part_location():
     """
     Page to manage part locations. Fetches categories and allows the user to input locations.
@@ -25,69 +27,79 @@ def part_location():
         master_lookup = load_part_lookup()
     except Exception as error:
         logging.error("Error loading categories or master lookup: %s", error)
-        return render_template('error.html', message=str(error))
+        return render_template("error.html", message=str(error))
 
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            selected_category_id = request.form.get('category_id')
-            page = int(request.form.get('page', 1))
+            selected_category_id = request.form.get("category_id")
+            page = int(request.form.get("page", 1))
             card_state = request.form.get(
-                'card_state', 'expanded')  # Preserve card state
+                "card_state", "expanded"
+            )  # Preserve card state
 
             logging.debug(
                 "Fetching parts for category %s, page %d", selected_category_id, page
             )
             selected_category_name = next(
-                (category[1] for category in categories if category[0]
-                 == int(selected_category_id)),
-                None
+                (
+                    category[1]
+                    for category in categories
+                    if category[0] == int(selected_category_id)
+                ),
+                None,
             )
             parts_data = RebrickableService.get_parts_by_category(
                 selected_category_id, page_size=5000, page=page
             )
-            parts = parts_data.get('results', [])
+            parts = parts_data.get("results", [])
 
             # Enrich parts with master lookup and cached images
             for part in parts:
-                part_num = part['part_num']
-                part['category'] = next(
-                    (cat[1] for cat in categories if cat[0]
-                     == part.get('part_cat_id')), "Unknown"
+                part_num = part["part_num"]
+                part["category"] = next(
+                    (cat[1] for cat in categories if cat[0] == part.get("part_cat_id")),
+                    "Unknown",
                 )
                 part_info = master_lookup.get(part_num, {})
-                part.update({
-                    'location': part_info.get('location', ''),
-                    'level': part_info.get('level', ''),
-                    'box': part_info.get('box', ''),
-                    'cached_img_url': cache_image(part.get('part_image_url', "/static/default_image.png"))
-                })
+                part.update(
+                    {
+                        "location": part_info.get("location", ""),
+                        "level": part_info.get("level", ""),
+                        "box": part_info.get("box", ""),
+                        "cached_img_url": cache_image(
+                            part.get("part_image_url", "/static/default_image.png")
+                        ),
+                    }
+                )
 
             pagination = {
-                'count': parts_data.get('count', 0),
-                'next': parts_data.get('next'),
-                'previous': parts_data.get('previous')
+                "count": parts_data.get("count", 0),
+                "next": parts_data.get("next"),
+                "previous": parts_data.get("previous"),
             }
 
         except Exception as error:
             logging.error("Error fetching parts: %s", error)
-            return render_template('error.html', message=str(error))
+            return render_template("error.html", message=str(error))
 
         return render_template(
-            'part_location.html',
+            "part_location.html",
             categories=categories,
             selected_category_name=selected_category_name,
             selected_category_id=selected_category_id,
             card_state=card_state,  # Pass card state
             parts=parts,
             pagination=pagination,
-            page=page
+            page=page,
         )
 
     # First load defaults card state to "expanded"
-    return render_template('part_location.html', categories=categories, parts=[], card_state="expanded")
+    return render_template(
+        "part_location.html", categories=categories, parts=[], card_state="expanded"
+    )
 
 
-@part_location_bp.route('/save_locations', methods=['POST'])
+@part_location_bp.route("/save_locations", methods=["POST"])
 def save_locations():
     """
     Save part location data (location, level, box) to the master lookup.
@@ -107,7 +119,7 @@ def save_locations():
         return jsonify({"error": "An error occurred while saving locations."}), 400
 
 
-@part_location_bp.route('/create_label', methods=['POST'])
+@part_location_bp.route("/create_label", methods=["POST"])
 def create_label():
     """
     Create a label for the specified part.
@@ -118,4 +130,12 @@ def create_label():
         return jsonify({"success": True, "image_path": label_image_path}), 200
     except Exception as error:
         logging.error("Error creating label: %s", error, exc_info=True)
-        return jsonify({"success": False, "error": "An error occurred while creating the label."}), 500
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "An error occurred while creating the label.",
+                }
+            ),
+            500,
+        )

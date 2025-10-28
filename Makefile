@@ -19,6 +19,17 @@ help:
 	@echo "  make dev         - Start in development mode"
 	@echo "  make shell       - Access container shell"
 	@echo ""
+	@echo "🎯 Code Quality & Testing:"
+	@echo "  make install     - Install Python dependencies"
+	@echo "  make hooks       - Install Git hooks"
+	@echo "  make pre-commit  - Run full pre-commit analysis with auto-fixes"
+	@echo "  make check       - Run all checks without auto-fixes"
+	@echo "  make format      - Format code (Black + isort)"
+	@echo "  make lint        - Run linters (flake8 + pylint)"
+	@echo "  make security    - Run security analysis"
+	@echo "  make test        - Run test suite"
+	@echo "  make test-cov    - Run tests with coverage report"
+	@echo ""
 	@echo "🗄️ Database & Data:"
 	@echo "  make backup      - Backup all data"
 	@echo "  make restore     - Restore from latest backup"
@@ -149,3 +160,53 @@ setup:
 	@echo "📁 Created data directories"
 	make up
 	@echo "🎉 Setup completed! Please edit .env file and restart with 'make restart'"
+
+# Code Quality & Development Commands
+.PHONY: install test lint format check security clean-code hooks pre-commit
+
+install:
+	@echo "📦 Installing dependencies with Poetry..."
+	poetry install
+
+hooks:
+	@echo "🔗 Installing Git hooks..."
+	./scripts/install_hooks.sh
+
+pre-commit:
+	@echo "🔍 Running full pre-commit analysis with auto-fixes..."
+	poetry run python scripts/pre_commit_analysis.py
+
+check:
+	@echo "🔍 Running all checks without auto-fixes..."
+	poetry run python scripts/pre_commit_analysis.py --no-fix
+
+format:
+	@echo "🎨 Formatting code..."
+	poetry run black brick_manager/ scripts/
+	poetry run isort brick_manager/ scripts/
+
+lint:
+	@echo "🔍 Running linters..."
+	poetry run flake8 brick_manager/
+	poetry run pylint brick_manager/ --output-format=text --reports=no
+
+security:
+	@echo "🔒 Running security analysis..."
+	poetry run bandit -r brick_manager/ -f json -o bandit-report.json || true
+	poetry run python scripts/security_check.py brick_manager/**/*.py
+
+test:
+	@echo "🧪 Running tests..."
+	poetry run pytest --tb=short -v
+
+test-cov:
+	@echo "📊 Running tests with coverage..."
+	poetry run pytest --cov=brick_manager --cov-report=term-missing --cov-report=html
+
+clean-code:
+	@echo "🧹 Cleaning up generated files..."
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name "__pycache__" -delete
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+	rm -rf .coverage htmlcov/ .pytest_cache/ bandit-report.json
+	rm -rf build/ dist/

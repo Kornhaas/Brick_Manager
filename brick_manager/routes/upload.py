@@ -9,18 +9,20 @@ It includes:
 """
 
 import os  # Standard library import
-# Third-party imports
-from flask import Blueprint, request, redirect, url_for, flash, render_template
-from werkzeug.utils import secure_filename
-from services.part_lookup_service import load_part_lookup
-from services.brickognize_service import get_predictions
-from services.sqlite_service import get_category_name_from_db
+
 from config import Config
 
-upload_bp = Blueprint('upload', __name__)
+# Third-party imports
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from services.brickognize_service import get_predictions
+from services.part_lookup_service import load_part_lookup
+from services.sqlite_service import get_category_name_from_db
+from werkzeug.utils import secure_filename
+
+upload_bp = Blueprint("upload", __name__)
 
 
-@upload_bp.route('/upload', methods=['POST'])
+@upload_bp.route("/upload", methods=["POST"])
 def upload():
     """
     Handle file upload, validate the file, and process predictions.
@@ -30,14 +32,14 @@ def upload():
     """
     master_lookup = load_part_lookup()
 
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(url_for('main.index'))
+    if "file" not in request.files:
+        flash("No file part")
+        return redirect(url_for("main.index"))
 
-    file = request.files['file']
-    if file.filename == '':
-        flash('No selected file')
-        return redirect(url_for('main.index'))
+    file = request.files["file"]
+    if file.filename == "":
+        flash("No selected file")
+        return redirect(url_for("main.index"))
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -47,25 +49,24 @@ def upload():
         result = get_predictions(file_path, filename)
 
         if result:
-            for item in result.get('items', []):
-                item_id = item.get('id')
+            for item in result.get("items", []):
+                item_id = item.get("id")
                 if item_id in master_lookup:
-                    item['lookup_info'] = master_lookup[item_id]
+                    item["lookup_info"] = master_lookup[item_id]
 
                 # Add category information from the database
                 # Ensure your prediction result includes 'category_id'
-                part_cat_id = item.get('category_id')
+                part_cat_id = item.get("category_id")
                 if part_cat_id:
-                    item['category_name'] = get_category_name_from_db(
-                        part_cat_id)
+                    item["category_name"] = get_category_name_from_db(part_cat_id)
 
-            return render_template('results.html', result=result)
+            return render_template("results.html", result=result)
 
         flash("Invalid result structure or no items found")
-        return redirect(url_for('main.index'))
+        return redirect(url_for("main.index"))
 
-    flash('Allowed file types are png, jpg, jpeg, gif')
-    return redirect(url_for('main.index'))
+    flash("Allowed file types are png, jpg, jpeg, gif")
+    return redirect(url_for("main.index"))
 
 
 def allowed_file(filename):
@@ -78,4 +79,7 @@ def allowed_file(filename):
     Returns:
         bool: True if the file is of an allowed type, False otherwise.
     """
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+    )

@@ -19,6 +19,13 @@
 		"ghcr.io/hspaans/devcontainer-features/pymarkdownlnt:2": {},
 		"ghcr.io/devcontainers-extra/features/poetry:2": {},
 		"ghcr.io/devcontainers-extra/features/pylint:2": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.pylint"
+			]
+		}
 	}
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},

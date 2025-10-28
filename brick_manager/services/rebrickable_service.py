@@ -9,10 +9,16 @@ It includes functions to:
 
 import logging
 import time
-from typing import List, Optional, Dict, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
+
 import requests
 from config import Config
-from models import RebrickablePartCategories, RebrickableParts, RebrickableInventoryParts
+from models import (
+    RebrickableInventoryParts,
+    RebrickablePartCategories,
+    RebrickableParts,
+)
+
 #pylint: disable=W0107,C0301
 
 class RebrickableAPIException(Exception):

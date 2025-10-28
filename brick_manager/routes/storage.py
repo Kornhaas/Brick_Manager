@@ -8,13 +8,13 @@ It includes:
 - Rendering the storage template for user interaction.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, current_app
+from flask import Blueprint, current_app, redirect, render_template, request, url_for
 from services.part_lookup_service import load_part_lookup, save_part_lookup
 
-storage_bp = Blueprint('storage', __name__)
+storage_bp = Blueprint("storage", __name__)
 
 
-@storage_bp.route('/add_to_storage/<part_id>', methods=['GET', 'POST'])
+@storage_bp.route("/add_to_storage/<part_id>", methods=["GET", "POST"])
 def add_to_storage(part_id):
     """
     Handle the addition or update of storage information for a specific part.
@@ -25,30 +25,27 @@ def add_to_storage(part_id):
     Returns:
         Response: Redirects to the main index page after processing the form data.
     """
-    if request.method == 'POST':
-        location = request.form.get('location')
-        level = request.form.get('level')
-        box = request.form.get('box')
+    if request.method == "POST":
+        location = request.form.get("location")
+        level = request.form.get("level")
+        box = request.form.get("box")
 
         # Load the current master_lookup.json data
         master_lookup = load_part_lookup()
 
         # Update the entry for the given part_id
-        master_lookup[part_id] = {
-            'location': location,
-            'level': level,
-            'box': box
-        }
+        master_lookup[part_id] = {"location": location, "level": level, "box": box}
 
         # Save the updated data back to master_lookup.json
         save_part_lookup(master_lookup)
 
         # Update the in-memory data in the application if needed
-        current_app.config['MASTER_LOOKUP'] = master_lookup
+        current_app.config["MASTER_LOOKUP"] = master_lookup
 
-        print(f"Stored item {part_id} at Location: {
-              location}, Level: {level}, Box: {box}")
+        print(
+            f"Stored item {part_id} at Location: {location}, Level: {level}, Box: {box}"
+        )
 
-        return redirect(url_for('main.index'))
+        return redirect(url_for("main.index"))
 
-    return render_template('storage.html', item_id=part_id)
+    return render_template("storage.html", item_id=part_id)

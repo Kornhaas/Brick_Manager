@@ -4,6 +4,7 @@ This module handles caching of images locally to optimize retrieval and reduce r
 
 import os
 from urllib.parse import urlparse
+
 import requests
 from flask import current_app, url_for
 from werkzeug.utils import secure_filename
@@ -26,7 +27,7 @@ def is_valid_url(url):
         return False
 
 
-def cache_image(image_url, cache_dir='static/cache/images'):
+def cache_image(image_url, cache_dir="static/cache/images"):
     """
     Download and cache an image locally if not already cached.
 
@@ -38,13 +39,13 @@ def cache_image(image_url, cache_dir='static/cache/images'):
         str: Path to the cached image or fallback image if the download fails.
     """
     # Define the fallback image using Flask's url_for
-    fallback_image = url_for(
-        'static', filename='default_image.png', _external=True)
+    fallback_image = url_for("static", filename="default_image.png", _external=True)
 
     # Validate the image URL
     if not image_url or not isinstance(image_url, str) or not is_valid_url(image_url):
         current_app.logger.warning(
-            "Invalid or missing image URL. Using fallback image.")
+            "Invalid or missing image URL. Using fallback image."
+        )
         return fallback_image
 
     try:
@@ -57,8 +58,9 @@ def cache_image(image_url, cache_dir='static/cache/images'):
         filename = secure_filename(raw_filename)  # Sanitize the filename
 
         if not filename:
-            current_app.logger.warning(f"Invalid filename from URL: {
-                                       image_url}. Using fallback image.")
+            current_app.logger.warning(
+                f"Invalid filename from URL: {image_url}. Using fallback image."
+            )
             return fallback_image
 
         # Generate the full local file path for caching
@@ -70,16 +72,18 @@ def cache_image(image_url, cache_dir='static/cache/images'):
         # Cross-platform validation to ensure cached path resides within cache_dir
         if not abs_cached_path.startswith(abs_cache_dir):
             current_app.logger.error(
-                f"Potential path traversal detected: {abs_cached_path}")
+                f"Potential path traversal detected: {abs_cached_path}"
+            )
             return fallback_image
 
         # Check for drive mismatch on Windows
-        if os.name == 'nt':  # Windows-specific drive validation
+        if os.name == "nt":  # Windows-specific drive validation
             cache_drive, _ = os.path.splitdrive(abs_cache_dir)
             cached_drive, _ = os.path.splitdrive(abs_cached_path)
             if cache_drive != cached_drive:
-                current_app.logger.error(f"Paths are on different drives: {
-                                         abs_cached_path} vs {abs_cache_dir}")
+                current_app.logger.error(
+                    f"Paths are on different drives: {abs_cached_path} vs {abs_cache_dir}"
+                )
                 return fallback_image
 
         # Check if the image is already cached
@@ -87,50 +91,53 @@ def cache_image(image_url, cache_dir='static/cache/images'):
             current_app.logger.info(f"Downloading image: {image_url}")
             response = requests.get(image_url, stream=True, timeout=10)
             if response.status_code == 200:
-                with open(abs_cached_path, 'wb') as f:
+                with open(abs_cached_path, "wb") as f:
                     for chunk in response.iter_content(chunk_size=1024):
                         f.write(chunk)
-                current_app.logger.info(
-                    f"Image successfully cached: {abs_cached_path}")
+                current_app.logger.info(f"Image successfully cached: {abs_cached_path}")
             else:
-                current_app.logger.error(f"Failed to download image {
-                                         image_url}. Status Code: {response.status_code}")
+                current_app.logger.error(
+                    f"Failed to download image {image_url}. Status Code: {response.status_code}"
+                )
                 return fallback_image
 
         # Return the URL for the cached image
-        rel_cached_path = os.path.relpath(
-            abs_cached_path, os.path.abspath('static'))
-        return url_for('static', filename=rel_cached_path.replace(os.sep, '/'), _external=True)
+        rel_cached_path = os.path.relpath(abs_cached_path, os.path.abspath("static"))
+        return url_for(
+            "static", filename=rel_cached_path.replace(os.sep, "/"), _external=True
+        )
 
     except requests.exceptions.RequestException as req_err:
-        current_app.logger.error(f"Request error while downloading image {
-                                 image_url}: {req_err}")
+        current_app.logger.error(
+            f"Request error while downloading image {image_url}: {req_err}"
+        )
     except Exception as e:
         current_app.logger.error(
-            f"Unexpected error while caching image {image_url}: {e}")
+            f"Unexpected error while caching image {image_url}: {e}"
+        )
 
     # Return fallback image in case of errors
     return fallback_image
 
 
-def get_cached_image_path(image_url, cache_dir='static/cache/images'):
+def get_cached_image_path(image_url, cache_dir="static/cache/images"):
     """
     Get the path to a cached image without downloading it.
-    
+
     Args:
         image_url (str): The URL of the image
         cache_dir (str): Directory where cached images are stored
-        
+
     Returns:
         str: Path to the cached image if it exists, None otherwise
     """
     if not is_valid_url(image_url):
         return None
-        
-    filename = image_url.split('/')[-1]
-    if not filename or '.' not in filename:
+
+    filename = image_url.split("/")[-1]
+    if not filename or "." not in filename:
         return None
-        
+
     cache_path = os.path.join(cache_dir, filename)
     if os.path.exists(cache_path):
         return cache_path

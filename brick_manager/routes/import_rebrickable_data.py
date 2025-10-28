@@ -3,17 +3,18 @@ This module handles the loading and updating of Brick data (categories, parts, c
 from Rebrickable CSV files into the local SQLite database.
 """
 
-import logging
-from flask import Blueprint, render_template, request, jsonify
-from models import db
-import os
-import requests
 import gzip
+import logging
+import os
 import shutil
+
 import pandas as pd
+import requests
+from flask import Blueprint, jsonify, render_template, request
+from models import db
 
 # pylint: disable=C0301,W0718
-import_rebrickable_data_bp = Blueprint('import_rebrickable_data', __name__)
+import_rebrickable_data_bp = Blueprint("import_rebrickable_data", __name__)
 
 BASE_URL = "https://cdn.rebrickable.com/media/downloads"
 IMPORT_DIR = "import"
@@ -37,17 +38,17 @@ FILES = [
 def download_and_extract_csv(file_name):
     os.makedirs(IMPORT_DIR, exist_ok=True)
     gz_path = os.path.join(IMPORT_DIR, file_name)
-    csv_path = os.path.join(IMPORT_DIR, file_name.replace('.gz', ''))
+    csv_path = os.path.join(IMPORT_DIR, file_name.replace(".gz", ""))
     url = f"{BASE_URL}/{file_name}"
     logging.info(f"Downloading {url} ...")
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        with open(gz_path, 'wb') as f:
+        with open(gz_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
     logging.info(f"Extracting {gz_path} ...")
-    with gzip.open(gz_path, 'rb') as f_in:
-        with open(csv_path, 'wb') as f_out:
+    with gzip.open(gz_path, "rb") as f_in:
+        with open(csv_path, "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
     os.remove(gz_path)
     return csv_path
@@ -80,41 +81,49 @@ def import_csv_to_sqlite(csv_path, model_class):
         db.session.commit()
         logging.info(f"Cleared existing data from {model_class.__tablename__}")
     except Exception as e:
-        logging.warning(
-            f"Could not clear table {model_class.__tablename__}: {e}")
+        logging.warning(f"Could not clear table {model_class.__tablename__}: {e}")
         db.session.rollback()
 
     # Import data while preserving table structure
     # Use 'append' instead of 'replace' to keep the SQLAlchemy-created structure
-    df.to_sql(model_class.__tablename__, db.engine,
-              if_exists='append', index=False)
+    df.to_sql(model_class.__tablename__, db.engine, if_exists="append", index=False)
 
     # Clean up the CSV file
     os.remove(csv_path)
 
     logging.info(
-        f"Successfully imported {len(df)} records into {model_class.__tablename__}")
+        f"Successfully imported {len(df)} records into {model_class.__tablename__}"
+    )
 
 
-@import_rebrickable_data_bp.route('/import_data', methods=['GET', 'POST'])
+@import_rebrickable_data_bp.route("/import_data", methods=["GET", "POST"])
 def import_data():
     """
-    Load and update Brick data (categories, parts, colors, and themes) 
+    Load and update Brick data (categories, parts, colors, and themes)
     from the Rebrickable API into the local database.
 
     Handles POST requests to fetch and store categories, parts, colors, and themes in the database.
     """
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             # First ensure all tables have proper structure
             ensure_table_structure()
 
             from models import (
-                RebrickablePartCategories, RebrickableColors, RebrickableParts,
-                RebrickablePartRelationships, RebrickableElements, RebrickableThemes,
-                RebrickableSets, RebrickableMinifigs, RebrickableInventories,
-                RebrickableInventoryParts, RebrickableInventorySets, RebrickableInventoryMinifigs
+                RebrickableColors,
+                RebrickableElements,
+                RebrickableInventories,
+                RebrickableInventoryMinifigs,
+                RebrickableInventoryParts,
+                RebrickableInventorySets,
+                RebrickableMinifigs,
+                RebrickablePartCategories,
+                RebrickablePartRelationships,
+                RebrickableParts,
+                RebrickableSets,
+                RebrickableThemes,
             )
+
             MODEL_MAP = {
                 "part_categories.csv.gz": RebrickablePartCategories,
                 "colors.csv.gz": RebrickableColors,
@@ -132,12 +141,25 @@ def import_data():
             for file in FILES:
                 csv_path = download_and_extract_csv(file)
                 import_csv_to_sqlite(csv_path, MODEL_MAP[file])
-            return jsonify({'status': 'success', 'message': 'CSV data imported into SQLite!'}), 200
+            return (
+                jsonify(
+                    {"status": "success", "message": "CSV data imported into SQLite!"}
+                ),
+                200,
+            )
         except Exception as e:
             logging.error("Unexpected error: %s", str(e))
             db.session.rollback()
-            return jsonify({'status': 'error', 'message': 'An unexpected error occurred. Changes rolled back.'}), 500
-    return render_template('import_data.html')
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": "An unexpected error occurred. Changes rolled back.",
+                    }
+                ),
+                500,
+            )
+    return render_template("import_data.html")
 
 
 def main():

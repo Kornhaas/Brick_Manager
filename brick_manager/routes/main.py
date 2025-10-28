@@ -7,14 +7,14 @@ It includes:
 """
 
 
-from flask import Blueprint, render_template, jsonify
-from sqlalchemy import text
+from flask import Blueprint, jsonify, render_template
 from models import db
+from sqlalchemy import text
 
-main_bp = Blueprint('main', __name__)
+main_bp = Blueprint("main", __name__)
 
 
-@main_bp.route('/')
+@main_bp.route("/")
 def index():
     """
     Render the index (home) page.
@@ -22,30 +22,40 @@ def index():
     Returns:
         Response: Renders the index.html template.
     """
-    return render_template('index.html')
+    return render_template("index.html")
 
 
-@main_bp.route('/health')
+@main_bp.route("/health")
 def health_check():
     """
     Health check endpoint for Docker monitoring.
-    
+
     Returns:
         JSON response indicating application health status.
     """
     try:
         # Test database connection
-        db.session.execute(text('SELECT 1'))
+        db.session.execute(text("SELECT 1"))
         db.session.commit()
-        
-        return jsonify({
-            'status': 'healthy',
-            'message': 'Application is running properly',
-            'database': 'connected'
-        }), 200
+
+        return (
+            jsonify(
+                {
+                    "status": "healthy",
+                    "message": "Application is running properly",
+                    "database": "connected",
+                }
+            ),
+            200,
+        )
     except Exception as e:
-        return jsonify({
-            'status': 'unhealthy',
-            'message': f'Health check failed: {str(e)}',
-            'database': 'disconnected'
-        }), 500
+        return (
+            jsonify(
+                {
+                    "status": "unhealthy",
+                    "message": f"Health check failed: {str(e)}",
+                    "database": "disconnected",
+                }
+            ),
+            500,
+        )

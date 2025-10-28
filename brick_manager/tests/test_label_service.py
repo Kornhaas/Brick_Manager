@@ -9,7 +9,8 @@ processing and PDF generation.
 """
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from brick_manager.services.label_service import save_image_as_pdf
 
 
@@ -28,8 +29,7 @@ class TestLabelService(unittest.TestCase):
 
         save_image_as_pdf("fake_image_path", "fake_pdf_path")
 
-        mock_canvas.assert_called_once_with(
-            "fake_pdf_path", pagesize=(100, 100))
+        mock_canvas.assert_called_once_with("fake_pdf_path", pagesize=(100, 100))
         self.assertTrue(mock_canvas.return_value.drawImage.called)
         self.assertTrue(mock_canvas.return_value.save.called)
 
