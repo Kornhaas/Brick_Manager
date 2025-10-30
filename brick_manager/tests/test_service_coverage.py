@@ -52,6 +52,7 @@ class TestCacheServiceCoverage:
     @patch("services.cache_service.os.path.exists")
     @patch("builtins.open", new_callable=mock_open)
     def test_cache_image_success_scenarios(
+        """TODO: Add docstring for test_cache_image_success_scenarios."""
         self, mock_file, mock_exists, mock_makedirs, mock_get
     ):
         """Test successful image caching scenarios."""

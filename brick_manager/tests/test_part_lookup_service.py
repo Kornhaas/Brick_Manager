@@ -144,6 +144,7 @@ class TestPartLookupService:
         mock_existing_entry.box = "B1"
 
         def mock_filter_by(part_num):
+            """Mock filter_by method for testing storage lookups."""
             if part_num == "3001":
                 mock_query = MagicMock()
                 mock_query.first.return_value = mock_existing_entry

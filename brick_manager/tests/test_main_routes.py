@@ -113,6 +113,7 @@ class TestMainRoutes:
         import concurrent.futures
 
         def make_request():
+            """Make a simple request to the index route."""
             return client.get("/")
 
         # Make 5 concurrent requests

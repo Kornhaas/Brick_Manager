@@ -19,12 +19,13 @@ class TestRebrickableSyncServiceLarge:
                 sync_part_colors_with_rebrickable,
                 sync_themes_with_rebrickable,
             )
+
             assert True  # Successfully imported
         except ImportError:
             pytest.skip("Module not available")
 
-    @patch('brick_manager.services.rebrickable_sync_service.get_rebrickable_user_token')
-    @patch('brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key')
+    @patch("brick_manager.services.rebrickable_sync_service.get_rebrickable_user_token")
+    @patch("brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key")
     def test_sync_missing_parts_no_credentials(self, mock_api_key, mock_token):
         """Test sync when no credentials available."""
         mock_token.return_value = None
@@ -36,11 +37,11 @@ class TestRebrickableSyncServiceLarge:
 
         result = sync_missing_parts_with_rebrickable()
         assert result is not None
-        assert 'success' in result
-        assert result['success'] is False
+        assert "success" in result
+        assert result["success"] is False
 
-    @patch('brick_manager.services.rebrickable_sync_service.get_rebrickable_user_token')
-    @patch('brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key')
+    @patch("brick_manager.services.rebrickable_sync_service.get_rebrickable_user_token")
+    @patch("brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key")
     def test_sync_minifigure_parts_no_credentials(self, mock_api_key, mock_token):
         """Test minifigure sync when no credentials available."""
         mock_token.return_value = None
@@ -52,10 +53,10 @@ class TestRebrickableSyncServiceLarge:
 
         result = sync_missing_minifigure_parts_with_rebrickable()
         assert result is not None
-        assert 'success' in result
-        assert result['success'] is False
+        assert "success" in result
+        assert result["success"] is False
 
-    @patch('brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key')
+    @patch("brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key")
     def test_sync_part_colors_no_api_key(self, mock_api_key):
         """Test part colors sync when no API key."""
         mock_api_key.return_value = None
@@ -66,10 +67,10 @@ class TestRebrickableSyncServiceLarge:
 
         result = sync_part_colors_with_rebrickable()
         assert result is not None
-        assert 'success' in result
-        assert result['success'] is False
+        assert "success" in result
+        assert result["success"] is False
 
-    @patch('brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key')
+    @patch("brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key")
     def test_sync_categories_no_api_key(self, mock_api_key):
         """Test categories sync when no API key."""
         mock_api_key.return_value = None
@@ -80,10 +81,10 @@ class TestRebrickableSyncServiceLarge:
 
         result = sync_categories_with_rebrickable()
         assert result is not None
-        assert 'success' in result
-        assert result['success'] is False
+        assert "success" in result
+        assert result["success"] is False
 
-    @patch('brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key')
+    @patch("brick_manager.services.rebrickable_sync_service.get_rebrickable_api_key")
     def test_sync_themes_no_api_key(self, mock_api_key):
         """Test themes sync when no API key."""
         mock_api_key.return_value = None
@@ -94,8 +95,8 @@ class TestRebrickableSyncServiceLarge:
 
         result = sync_themes_with_rebrickable()
         assert result is not None
-        assert 'success' in result
-        assert result['success'] is False
+        assert "success" in result
+        assert result["success"] is False
 
 
 class TestRebrickableSetsServiceLarge:
@@ -107,12 +108,17 @@ class TestRebrickableSetsServiceLarge:
             from brick_manager.services.rebrickable_sets_sync_service import (
                 sync_user_sets_with_rebrickable,
             )
+
             assert True  # Successfully imported
         except ImportError:
             pytest.skip("Module not available")
 
-    @patch('brick_manager.services.rebrickable_sets_sync_service.get_rebrickable_user_token')
-    @patch('brick_manager.services.rebrickable_sets_sync_service.get_rebrickable_api_key')
+    @patch(
+        "brick_manager.services.rebrickable_sets_sync_service.get_rebrickable_user_token"
+    )
+    @patch(
+        "brick_manager.services.rebrickable_sets_sync_service.get_rebrickable_api_key"
+    )
     def test_sync_user_sets_no_credentials(self, mock_api_key, mock_token):
         """Test user sets sync when no credentials."""
         mock_token.return_value = None
@@ -124,8 +130,8 @@ class TestRebrickableSetsServiceLarge:
 
         result = sync_user_sets_with_rebrickable()
         assert result is not None
-        assert 'success' in result
-        assert result['success'] is False
+        assert "success" in result
+        assert result["success"] is False
 
 
 class TestRoutesCoverageBoost:
@@ -135,7 +141,8 @@ class TestRoutesCoverageBoost:
         """Test missing parts routes (275 statements)."""
         try:
             from brick_manager.routes import missing_parts
-            assert hasattr(missing_parts, 'missing_parts_bp')
+
+            assert hasattr(missing_parts, "missing_parts_bp")
         except ImportError:
             pytest.skip("Module not available")
 
@@ -143,7 +150,8 @@ class TestRoutesCoverageBoost:
         """Test set search routes (174 statements)."""
         try:
             from brick_manager.routes import set_search
-            assert hasattr(set_search, 'set_search_bp')
+
+            assert hasattr(set_search, "set_search_bp")
         except ImportError:
             pytest.skip("Module not available")
 
@@ -151,7 +159,8 @@ class TestRoutesCoverageBoost:
         """Test set maintain routes (174 statements)."""
         try:
             from brick_manager.routes import set_maintain
-            assert hasattr(set_maintain, 'set_maintain_bp')
+
+            assert hasattr(set_maintain, "set_maintain_bp")
         except ImportError:
             pytest.skip("Module not available")
 
@@ -159,7 +168,8 @@ class TestRoutesCoverageBoost:
         """Test box maintenance routes (131 statements)."""
         try:
             from brick_manager.routes import box_maintenance
-            assert hasattr(box_maintenance, 'box_maintenance_bp')
+
+            assert hasattr(box_maintenance, "box_maintenance_bp")
         except ImportError:
             pytest.skip("Module not available")
 
@@ -167,7 +177,8 @@ class TestRoutesCoverageBoost:
         """Test token management routes (124 statements)."""
         try:
             from brick_manager.routes import token_management
-            assert hasattr(token_management, 'token_management_bp')
+
+            assert hasattr(token_management, "token_management_bp")
         except ImportError:
             pytest.skip("Module not available")
 
@@ -175,7 +186,8 @@ class TestRoutesCoverageBoost:
         """Test admin sync routes (121 statements)."""
         try:
             from brick_manager.routes import admin_sync
-            assert hasattr(admin_sync, 'admin_sync_bp')
+
+            assert hasattr(admin_sync, "admin_sync_bp")
         except ImportError:
             pytest.skip("Module not available")
 
@@ -192,11 +204,12 @@ class TestLabelServiceLarge:
                 create_storage_label,
                 generate_qr_code,
             )
+
             assert True  # Successfully imported
         except ImportError:
             pytest.skip("Module not available")
 
-    @patch('brick_manager.services.label_service.qrcode.QRCode')
+    @patch("brick_manager.services.label_service.qrcode.QRCode")
     def test_generate_qr_code_function(self, mock_qr):
         """Test QR code generation."""
         mock_qr_instance = Mock()
@@ -205,18 +218,20 @@ class TestLabelServiceLarge:
 
         from brick_manager.services.label_service import generate_qr_code
 
-        result = generate_qr_code('test_data')
+        result = generate_qr_code("test_data")
         assert mock_qr.called
         assert mock_qr_instance.add_data.called
         assert mock_qr_instance.make.called
 
-    @patch('brick_manager.services.label_service.generate_qr_code')
-    @patch('brick_manager.services.label_service.Image.new')
-    @patch('brick_manager.services.label_service.ImageDraw.Draw')
-    @patch('brick_manager.services.label_service.ImageFont.truetype')
-    @patch('brick_manager.services.label_service.ImageFont.load_default')
-    def test_create_storage_label_function(self, mock_default_font, mock_font,
-                                   mock_draw, mock_new, mock_qr):
+    @patch("brick_manager.services.label_service.generate_qr_code")
+    @patch("brick_manager.services.label_service.Image.new")
+    @patch("brick_manager.services.label_service.ImageDraw.Draw")
+    @patch("brick_manager.services.label_service.ImageFont.truetype")
+    @patch("brick_manager.services.label_service.ImageFont.load_default")
+    def test_create_storage_label_function(
+        """TODO: Add docstring for test_create_storage_label_function."""
+        self, mock_default_font, mock_font, mock_draw, mock_new, mock_qr
+    ):
         """Test storage label creation."""
         # Setup mocks
         mock_img = Mock()
@@ -236,7 +251,7 @@ class TestLabelServiceLarge:
 
         from brick_manager.services.label_service import create_storage_label
 
-        result = create_storage_label('B1', 'A-1-1', 'Test Description')
+        result = create_storage_label("B1", "A-1-1", "Test Description")
         assert mock_new.called
         assert mock_qr.called
         assert mock_draw.called
@@ -252,6 +267,7 @@ class TestBrickognizeServiceCoverageBoost:
                 get_brickognize_api_key,
                 predict_part,
             )
+
             assert True  # Successfully imported
         except ImportError:
             pytest.skip("Module not available")
@@ -264,14 +280,14 @@ class TestBrickognizeServiceCoverageBoost:
         result = get_brickognize_api_key()
         assert result is None or isinstance(result, str)
 
-    @patch('brick_manager.services.brickognize_service.get_brickognize_api_key')
+    @patch("brick_manager.services.brickognize_service.get_brickognize_api_key")
     def test_predict_part_no_api_key(self, mock_api_key):
         """Test prediction when no API key."""
         mock_api_key.return_value = None
 
         from brick_manager.services.brickognize_service import predict_part
 
-        result = predict_part(b'fake_image_data')
+        result = predict_part(b"fake_image_data")
         # Should handle gracefully
 
 
@@ -296,6 +312,7 @@ class TestModelsAdditionalCoverage:
                 UserTokens,
                 db,
             )
+
             assert True  # Successfully imported all models
         except ImportError:
             pytest.skip("Module not available")
@@ -305,14 +322,14 @@ class TestModelsAdditionalCoverage:
         from brick_manager.models import Parts, Sets, Storage
 
         # Test that classes have expected attributes
-        assert hasattr(Parts, '__tablename__')
-        assert hasattr(Sets, '__tablename__')
-        assert hasattr(Storage, '__tablename__')
+        assert hasattr(Parts, "__tablename__")
+        assert hasattr(Sets, "__tablename__")
+        assert hasattr(Storage, "__tablename__")
 
         # Test that classes have __repr__ methods
-        assert hasattr(Parts, '__repr__')
-        assert hasattr(Sets, '__repr__')
-        assert hasattr(Storage, '__repr__')
+        assert hasattr(Parts, "__repr__")
+        assert hasattr(Sets, "__repr__")
+        assert hasattr(Storage, "__repr__")
 
 
 class TestConfigAdditionalCoverage:
@@ -327,10 +344,13 @@ class TestConfigAdditionalCoverage:
         assert config is not None
 
         # Test attribute access
-        if hasattr(config, 'SQLALCHEMY_DATABASE_URI'):
-            assert config.SQLALCHEMY_DATABASE_URI is not None or config.SQLALCHEMY_DATABASE_URI is None
+        if hasattr(config, "SQLALCHEMY_DATABASE_URI"):
+            assert (
+                config.SQLALCHEMY_DATABASE_URI is not None
+                or config.SQLALCHEMY_DATABASE_URI is None
+            )
 
-        if hasattr(config, 'SECRET_KEY'):
+        if hasattr(config, "SECRET_KEY"):
             assert config.SECRET_KEY is not None or config.SECRET_KEY is None
 
 
@@ -350,8 +370,8 @@ class TestAppModuleAdditionalCoverage:
         from brick_manager.app import app
 
         with app.app_context():
-            assert 'SQLALCHEMY_DATABASE_URI' in app.config
-            assert app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] is False
+            assert "SQLALCHEMY_DATABASE_URI" in app.config
+            assert app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] is False
 
     def test_app_scheduler_setup(self):
         """Test scheduler configuration."""
@@ -360,7 +380,7 @@ class TestAppModuleAdditionalCoverage:
         # Test that scheduler exists
         assert scheduler is not None
         # Test that it has jobs (may be empty initially)
-        assert hasattr(scheduler, 'get_jobs')
+        assert hasattr(scheduler, "get_jobs")
 
 
 class TestImportCoverageBoost:
@@ -369,15 +389,28 @@ class TestImportCoverageBoost:
     def test_import_all_routes(self):
         """Test importing all route modules."""
         route_modules = [
-            'upload', 'main', 'storage', 'manual_entry', 'part_lookup',
-            'set_search', 'import_rebrickable_data', 'box_maintenance',
-            'set_maintain', 'missing_parts', 'dashboard', 'part_location',
-            'token_management', 'rebrickable_sync', 'admin_sync'
+            "upload",
+            "main",
+            "storage",
+            "manual_entry",
+            "part_lookup",
+            "set_search",
+            "import_rebrickable_data",
+            "box_maintenance",
+            "set_maintain",
+            "missing_parts",
+            "dashboard",
+            "part_location",
+            "token_management",
+            "rebrickable_sync",
+            "admin_sync",
         ]
 
         for module_name in route_modules:
             try:
-                module = __import__(f'brick_manager.routes.{module_name}', fromlist=[module_name])
+                module = __import__(
+                    f"brick_manager.routes.{module_name}", fromlist=[module_name]
+                )
                 assert module is not None
             except ImportError:
                 continue  # Skip if module not available
@@ -385,14 +418,22 @@ class TestImportCoverageBoost:
     def test_import_all_services(self):
         """Test importing all service modules."""
         service_modules = [
-            'brickognize_service', 'cache_service', 'label_service',
-            'part_lookup_service', 'rebrickable_service', 'rebrickable_sets_sync_service',
-            'rebrickable_sync_service', 'sqlite_service', 'token_service'
+            "brickognize_service",
+            "cache_service",
+            "label_service",
+            "part_lookup_service",
+            "rebrickable_service",
+            "rebrickable_sets_sync_service",
+            "rebrickable_sync_service",
+            "sqlite_service",
+            "token_service",
         ]
 
         for module_name in service_modules:
             try:
-                module = __import__(f'brick_manager.services.{module_name}', fromlist=[module_name])
+                module = __import__(
+                    f"brick_manager.services.{module_name}", fromlist=[module_name]
+                )
                 assert module is not None
             except ImportError:
                 continue  # Skip if module not available

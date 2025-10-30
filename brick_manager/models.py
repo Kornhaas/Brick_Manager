@@ -51,6 +51,7 @@ class User_Set(db.Model):
     )
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<User_Set {self.id} - {self.set_num}>"
 
     def to_dict(self):
@@ -82,6 +83,7 @@ class User_Minifigures(db.Model):
     rebrickable_minifig = db.relationship("RebrickableMinifigs", lazy="joined")
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<User_Minifigures {self.fig_num} - Quantity: {self.quantity}>"
 
 
@@ -106,6 +108,7 @@ class User_Parts(db.Model):
     rebrickable_color = db.relationship("RebrickableColors", lazy="joined")
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<User_Parts {self.part_num} - Quantity: {self.quantity}>"
 
 
@@ -134,6 +137,7 @@ class UserMinifigurePart(db.Model):
     rebrickable_color = db.relationship("RebrickableColors", lazy="joined")
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<UserMinifigurePart {self.part_num} - Quantity: {self.quantity}>"
 
 
@@ -156,6 +160,7 @@ class PartStorage(db.Model):
     )
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<PartStorage {self.part_num} - Location: {self.location}, Level: {self.level}, Box: {self.box}>"
 
 
@@ -172,6 +177,7 @@ class RebrickablePartCategories(db.Model):
     name = db.Column(db.Text, nullable=False)
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<RebrickablePartCategory {self.name}>"
 
     def to_dict(self):
@@ -198,6 +204,7 @@ class RebrickableColors(db.Model):
     y2 = db.Column(db.Float, nullable=True)
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         # return f'<RebrickableColor {self.name}>'
         return f"<Color {self.name} (ID: {self.id})>"
 
@@ -251,6 +258,7 @@ class RebrickableParts(db.Model):
     )
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<RebrickablePart {self.part_num}>"
 
     def to_dict(self):
@@ -316,6 +324,7 @@ class RebrickableThemes(db.Model):
     parent_id = db.Column(db.Integer, db.ForeignKey("rebrickable_themes.id"))
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<Theme {self.name} (ID: {self.id}, Parent: {self.parent_id})>"
 
     def to_dict(self):
@@ -348,6 +357,7 @@ class RebrickableSets(db.Model):
     theme = db.relationship("RebrickableThemes", lazy="joined")
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<RebrickableSet {self.set_num} - {self.name}>"
 
     def to_dict(self):
@@ -382,6 +392,7 @@ class RebrickableMinifigs(db.Model):
     )
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<RebrickableMinifig {self.fig_num} - {self.name}>"
 
 
@@ -482,6 +493,7 @@ class ConfigSettings(db.Model):
     )
 
     def __repr__(self):
+        """TODO: Add docstring for __repr__."""
         return f"<ConfigSettings {self.key}>"
 
     def to_dict(self):

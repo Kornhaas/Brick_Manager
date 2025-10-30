@@ -36,6 +36,15 @@ FILES = [
 
 
 def download_and_extract_csv(file_name):
+    """
+    Download and extract a gzipped CSV file from Rebrickable.
+
+    Args:
+        file_name (str): Name of the gzipped file to download
+
+    Returns:
+        str: Path to the extracted CSV file
+    """
     os.makedirs(IMPORT_DIR, exist_ok=True)
     gz_path = os.path.join(IMPORT_DIR, file_name)
     csv_path = os.path.join(IMPORT_DIR, file_name.replace(".gz", ""))
@@ -65,6 +74,13 @@ def ensure_table_structure():
 
 
 def import_csv_to_sqlite(csv_path, model_class):
+    """
+    Import CSV data into SQLite database using SQLAlchemy model.
+
+    Args:
+        csv_path (str): Path to the CSV file to import
+        model_class: SQLAlchemy model class to import data into
+    """
     logging.info(f"Importing {csv_path} into {model_class.__tablename__} ...")
 
     # Read the CSV data
@@ -163,6 +179,10 @@ def import_data():
 
 
 def main():
+    """
+    Main function to import all Rebrickable CSV files.
+    Downloads and imports all required data files from Rebrickable.
+    """
     logging.basicConfig(level=logging.INFO)
 
     for file in FILES:

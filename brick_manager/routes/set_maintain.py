@@ -127,6 +127,15 @@ def get_user_set_details(user_set_id):
     )
 
     def enrich_item(part):
+        """
+        Enrich a part with additional data from storage and part information.
+
+        Args:
+            part: Part object to enrich with storage and color data
+
+        Returns:
+            dict: Enriched part data with storage location, color name, and image URL
+        """
         storage_data = (
             db.session.query(PartStorage).filter_by(part_num=part.part_num).first()
         )
@@ -187,6 +196,15 @@ def get_user_set_details(user_set_id):
         }
 
     def enrich_minifigure_part(part):
+        """
+        Enrich a minifigure part with additional data from storage and part information.
+
+        Args:
+            part: Minifigure part object to enrich with storage and color data
+
+        Returns:
+            dict: Enriched minifigure part data with storage location, color name, and image URL
+        """
         storage_data = (
             db.session.query(PartStorage).filter_by(part_num=part.part_num).first()
         )

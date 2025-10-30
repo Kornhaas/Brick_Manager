@@ -277,24 +277,15 @@ class PreCommitAnalyzer:
                 while j < len(lines) and not lines[j].strip():
                     new_lines.append(lines[j])
                     j += 1
-
-                if j < len(lines) and not (
-                    lines[j].strip().startswith('"""')
-                    or lines[j].strip().startswith("'''")
-                ):
-                    # Add a basic docstring
-                    indent = len(line) - len(line.lstrip())
-                    if line.strip().startswith("def"):
-                        func_name = re.search(r"def\s+(\w+)", line)
-                        if func_name:
-                            docstring = f'{" " * (indent + 4)}"""TODO: Add docstring for {func_name.group(1)}."""'
-                            new_lines.append(docstring)
-                    elif line.strip().startswith("class"):
-                        class_name = re.search(r"class\s+(\w+)", line)
-                        if class_name:
-                            docstring = f'{" " * (indent + 4)}"""TODO: Add docstring for {class_name.group(1)}."""'
-                            new_lines.append(docstring)
-
+                
+                if (j < len(lines) and 
+                    not (lines[j].strip().startswith('"""') or 
+                         lines[j].strip().startswith("'''"))):
+                    
+                    # Skip adding TODO docstrings to prevent syntax errors
+                    # Docstring requirements are handled by flake8 configuration
+                    pass
+                
                 i = j - 1 if j > i else i
             else:
                 new_lines.append(line)

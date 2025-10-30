@@ -242,6 +242,7 @@ class TestApplicationIntegration:
         results = []
 
         def database_operation():
+            """Database operation for concurrent testing."""
             with app.app_context():
                 from models import PartStorage, db
 

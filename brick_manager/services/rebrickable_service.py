@@ -19,17 +19,19 @@ from models import (
     RebrickableParts,
 )
 
-#pylint: disable=W0107,C0301
+# pylint: disable=W0107,C0301
+
 
 class RebrickableAPIException(Exception):
     """Custom exception for errors interacting with the Rebrickable API."""
+
     pass
 
 
 class RebrickableService:
     """Service class for interacting with the Rebrickable API."""
 
-    BASE_URL = 'https://rebrickable.com/api/v3/lego/'
+    BASE_URL = "https://rebrickable.com/api/v3/lego/"
     DEFAULT_TIMEOUT = 30
     MAX_RETRIES = 3
     INITIAL_RETRY_DELAY = 30
@@ -38,12 +40,15 @@ class RebrickableService:
     def _get_headers() -> Dict[str, str]:
         """Return common headers for Rebrickable API requests."""
         return {
-            'Accept': 'application/json',
-            'Authorization': f'key {Config.REBRICKABLE_TOKEN}'
+            "Accept": "application/json",
+            "Authorization": f"key {Config.REBRICKABLE_TOKEN}",
         }
 
     @staticmethod
-    def _make_request(endpoint: str, params: Optional[Dict] = None, retries: int = MAX_RETRIES) -> Union[Dict, None]:
+    def _make_request(
+        """TODO: Add docstring for _make_request."""
+        endpoint: str, params: Optional[Dict] = None, retries: int = MAX_RETRIES
+    ) -> Union[Dict, None]:
         """
         Make a request to the Rebrickable API with retry logic.
 
@@ -65,30 +70,40 @@ class RebrickableService:
 
         for attempt in range(retries):
             try:
-                logging.info("Attempt %d: Fetching %s with params %s",
-                             attempt + 1, url, params)
+                logging.info(
+                    "Attempt %d: Fetching %s with params %s", attempt + 1, url, params
+                )
                 response = requests.get(
-                    url, headers=headers, params=params, timeout=RebrickableService.DEFAULT_TIMEOUT
+                    url,
+                    headers=headers,
+                    params=params,
+                    timeout=RebrickableService.DEFAULT_TIMEOUT,
                 )
 
                 if response.status_code == 200:
                     return response.json()
 
-                if response.status_code == 404 and response.json().get("detail") == "Invalid page.":
+                if (
+                    response.status_code == 404
+                    and response.json().get("detail") == "Invalid page."
+                ):
                     logging.warning("No more data available at %s", url)
                     return None
 
                 if response.status_code == 429:  # Rate limiting
-                    retry_after = int(response.headers.get(
-                        "Retry-After", retry_delay))
+                    retry_after = int(response.headers.get("Retry-After", retry_delay))
                     logging.warning(
-                        "Rate limit hit. Retrying in %d seconds...", retry_after)
+                        "Rate limit hit. Retrying in %d seconds...", retry_after
+                    )
                     time.sleep(retry_after)
                     retry_delay *= 2
 
             except requests.exceptions.ReadTimeout:
-                logging.error("Read timeout on attempt %d. Retrying in %d seconds...",
-                              attempt + 1, retry_delay)
+                logging.error(
+                    "Read timeout on attempt %d. Retrying in %d seconds...",
+                    attempt + 1,
+                    retry_delay,
+                )
                 time.sleep(retry_delay)
                 retry_delay *= 2
 
@@ -96,8 +111,9 @@ class RebrickableService:
                 logging.error("Request failed: %s", error)
                 raise RebrickableAPIException("Request failed") from error
 
-        raise RebrickableAPIException(f"Failed to fetch data from {
-                                      url} after {retries} retries.")
+        raise RebrickableAPIException(
+            f"Failed to fetch data from {url} after {retries} retries."
+        )
 
     @staticmethod
     def get_all_category_ids() -> List[Tuple[int, str]]:
@@ -122,7 +138,7 @@ class RebrickableService:
             dict: The JSON response containing part details.
         """
         logging.info("Fetching part details for part number: %s", part_num)
-        endpoint = f'parts/{part_num}/'
+        endpoint = f"parts/{part_num}/"
         return RebrickableService._make_request(endpoint)
 
     @staticmethod
@@ -159,7 +175,10 @@ class RebrickableService:
         return img_map
 
     @staticmethod
-    def get_parts_by_category(part_cat_id: Union[int, str], page_size: int = 1000, page: int = 1) -> Optional[Dict]:
+    def get_parts_by_category(
+        """TODO: Add docstring for get_parts_by_category."""
+        part_cat_id: Union[int, str], page_size: int = 1000, page: int = 1
+    ) -> Optional[Dict]:
         """
         Fetch parts for a given category from the local database table rebrickable_parts.
 
@@ -186,23 +205,29 @@ class RebrickableService:
         img_map = RebrickableService.get_part_images_bulk(part_nums)
         parts_list = [
             {
-                'part_num': part.part_num,
-                'name': part.name,
-                'part_cat_id': part.part_cat_id,
-                'part_material': part.part_material,
-                'part_image_url': img_map.get(part.part_num)
+                "part_num": part.part_num,
+                "name": part.name,
+                "part_cat_id": part.part_cat_id,
+                "part_material": part.part_material,
+                "part_image_url": img_map.get(part.part_num),
             }
             for part in results
         ]
         return {
-            'count': total,
-            'page': page,
-            'page_size': page_size,
-            'results': parts_list
+            "count": total,
+            "page": page,
+            "page_size": page_size,
+            "results": parts_list,
         }
 
     @staticmethod
-    def get_parts(filters: Optional[Dict] = None, page: int = 1, page_size: int = 1000, inc_part_details: bool = False) -> Dict:
+    def get_parts(
+        """TODO: Add docstring for get_parts."""
+        filters: Optional[Dict] = None,
+        page: int = 1,
+        page_size: int = 1000,
+        inc_part_details: bool = False,
+    ) -> Dict:
         """
         Fetch a list of parts from the Rebrickable API.
 
@@ -216,11 +241,20 @@ class RebrickableService:
             dict: A dictionary with parts data and pagination info.
         """
         logging.info(
-            "Fetching parts, Page: %d, Page Size: %d, Filters: %s", page, page_size, filters)
-        endpoint = 'parts/'
+            "Fetching parts, Page: %d, Page Size: %d, Filters: %s",
+            page,
+            page_size,
+            filters,
+        )
+        endpoint = "parts/"
         params = filters or {}
-        params.update({'page': page, 'page_size': page_size,
-                      'inc_part_details': int(inc_part_details)})
+        params.update(
+            {
+                "page": page,
+                "page_size": page_size,
+                "inc_part_details": int(inc_part_details),
+            }
+        )
         return RebrickableService._make_request(endpoint, params=params)
 
     @staticmethod
@@ -235,10 +269,9 @@ class RebrickableService:
         Returns:
             dict: A dictionary with color data and pagination info.
         """
-        logging.info("Fetching colors, Page: %d, Page Size: %d",
-                     page, page_size)
-        endpoint = 'colors/'
-        params = {'page': page, 'page_size': page_size}
+        logging.info("Fetching colors, Page: %d, Page Size: %d", page, page_size)
+        endpoint = "colors/"
+        params = {"page": page, "page_size": page_size}
         return RebrickableService._make_request(endpoint, params=params)
 
     @staticmethod
@@ -253,16 +286,21 @@ class RebrickableService:
         Returns:
             dict: A dictionary with theme data and pagination info.
         """
-        logging.info("Fetching themes, Page: %d, Page Size: %d",
-                     page, page_size)
-        endpoint = 'themes/'
-        params = {'page': page, 'page_size': page_size}
+        logging.info("Fetching themes, Page: %d, Page Size: %d", page, page_size)
+        endpoint = "themes/"
+        params = {"page": page, "page_size": page_size}
         return RebrickableService._make_request(endpoint, params=params)
 
 
 # Add aliases for backward compatibility with tests
 make_request = RebrickableService._make_request
-get_user_sets = RebrickableService.get_parts  # Placeholder - needs actual implementation
-get_set_parts = RebrickableService.get_parts  # Placeholder - needs actual implementation
-get_missing_parts = RebrickableService.get_parts  # Placeholder - needs actual implementation
+get_user_sets = (
+    RebrickableService.get_parts
+)  # Placeholder - needs actual implementation
+get_set_parts = (
+    RebrickableService.get_parts
+)  # Placeholder - needs actual implementation
+get_missing_parts = (
+    RebrickableService.get_parts
+)  # Placeholder - needs actual implementation
 get_part_image_url = RebrickableService.get_part_image_url

@@ -31,18 +31,23 @@ try:
 except ImportError:
     # Graceful fallback if services aren't available
     def get_rebrickable_user_token():
+        """Get the Rebrickable user token (fallback implementation)."""
         return None
 
     def get_rebrickable_api_key():
+        """Get the Rebrickable API key (fallback implementation)."""
         return None
 
     def sync_missing_parts_with_rebrickable(*args, **kwargs):
+        """Sync missing parts with Rebrickable (fallback implementation)."""
         return {"success": False, "message": "Service not available"}
 
     def sync_missing_minifigure_parts_with_rebrickable(*args, **kwargs):
+        """Sync missing minifigure parts with Rebrickable (fallback implementation)."""
         return {"success": False, "message": "Service not available"}
 
     def sync_user_sets_with_rebrickable(*args, **kwargs):
+        """Sync user sets with Rebrickable (fallback implementation)."""
         return {"success": False, "message": "Service not available"}
 
 

@@ -299,6 +299,7 @@ class TestMaxCoverageBoost:
     @patch("brick_manager.services.cache_service.os.makedirs")
     @patch("builtins.open", new_callable=mock_open)
     def test_cache_service_comprehensive(
+        """TODO: Add docstring for test_cache_service_comprehensive."""
         self, mock_file, mock_makedirs, mock_exists, mock_get
     ):
         """Test cache service comprehensive coverage."""

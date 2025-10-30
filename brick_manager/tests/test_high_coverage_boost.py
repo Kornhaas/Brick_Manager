@@ -56,6 +56,7 @@ class TestAppModuleCoverage:
     @patch("brick_manager.app.sync_missing_parts_with_rebrickable")
     @patch("brick_manager.app.sync_missing_minifigure_parts_with_rebrickable")
     def test_scheduled_sync_missing_parts_success(
+        """TODO: Add docstring for test_scheduled_sync_missing_parts_success."""
         self, mock_minifig, mock_regular, mock_api, mock_token
     ):
         """Test scheduled sync success path."""
@@ -87,6 +88,7 @@ class TestAppModuleCoverage:
     @patch("brick_manager.app.sync_missing_parts_with_rebrickable")
     @patch("brick_manager.app.sync_missing_minifigure_parts_with_rebrickable")
     def test_scheduled_sync_missing_parts_failure(
+        """TODO: Add docstring for test_scheduled_sync_missing_parts_failure."""
         self, mock_minifig, mock_regular, mock_api, mock_token
     ):
         """Test scheduled sync failure path."""
