@@ -684,8 +684,8 @@ def missing_parts_category(category_name):
             master_lookup = load_part_lookup()
             missing_items = bulk_enrich_missing_parts(category_parts, master_lookup)
 
-        # Sort by color
-        missing_items.sort(key=lambda x: x["color"])
+        # Sort by Color, Part Name, Internal ID
+        missing_items.sort(key=lambda x: (x["color"], x["name"], x["internal_id"]))
 
         total_time = time.time() - start_time
         current_app.logger.info(

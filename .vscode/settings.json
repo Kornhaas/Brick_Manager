@@ -1,6 +1,6 @@
 {
     "python.testing.pytestArgs": [
-        "."
+        "brick_manager/tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
@@ -9,7 +9,8 @@
     ],
     "python.testing.cwd": "${workspaceFolder}",
     "python.testing.pytestPath": "poetry run pytest",
-    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "python.defaultInterpreterPath": "/home/vscode/.cache/pypoetry/virtualenvs/brick-manager-D32Xuhof-py3.12/bin/python",
+    "python.pythonPath": "/home/vscode/.cache/pypoetry/virtualenvs/brick-manager-D32Xuhof-py3.12/bin/python",
     "python.terminal.activateEnvironment": true,
     "python.envFile": "${workspaceFolder}/.env",
     "python.analysis.autoImportCompletions": true,
