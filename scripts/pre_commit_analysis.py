@@ -277,15 +277,15 @@ class PreCommitAnalyzer:
                 while j < len(lines) and not lines[j].strip():
                     new_lines.append(lines[j])
                     j += 1
-                
-                if (j < len(lines) and 
-                    not (lines[j].strip().startswith('"""') or 
-                         lines[j].strip().startswith("'''"))):
-                    
+
+                if j < len(lines) and not (
+                    lines[j].strip().startswith('"""')
+                    or lines[j].strip().startswith("'''")
+                ):
                     # Skip adding TODO docstrings to prevent syntax errors
                     # Docstring requirements are handled by flake8 configuration
                     pass
-                
+
                 i = j - 1 if j > i else i
             else:
                 new_lines.append(line)

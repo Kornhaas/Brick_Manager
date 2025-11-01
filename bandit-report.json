@@ -1,26 +1,17 @@
 {
-  "errors": [
-    {
-      "filename": "brick_manager/services/rebrickable_service.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "brick_manager/services/rebrickable_sync_service.py",
-      "reason": "syntax error while parsing AST from file"
-    }
-  ],
-  "generated_at": "2025-10-30T09:04:42Z",
+  "errors": [],
+  "generated_at": "2025-11-01T11:56:09Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 15,
+      "CONFIDENCE.HIGH": 16,
       "CONFIDENCE.LOW": 1,
       "CONFIDENCE.MEDIUM": 3,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 1,
-      "SEVERITY.LOW": 16,
+      "SEVERITY.LOW": 17,
       "SEVERITY.MEDIUM": 2,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 7082,
+      "loc": 7243,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -33,7 +24,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 237,
+      "loc": 264,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -72,7 +63,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 398,
+      "loc": 386,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -150,7 +141,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 49,
+      "loc": 132,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -176,7 +167,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 647,
+      "loc": 714,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -332,7 +323,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 105,
+      "loc": 141,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -363,7 +354,15 @@
       "skipped_tests": 0
     },
     "brick_manager/services/rebrickable_service.py": {
-      "loc": 257,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 254,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -381,7 +380,15 @@
       "skipped_tests": 0
     },
     "brick_manager/services/rebrickable_sync_service.py": {
-      "loc": 1475,
+      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 1,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 1438,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -473,7 +480,7 @@
       "test_name": "hardcoded_password_string"
     },
     {
-      "code": "311 if __name__ == \"__main__\":\n312     app.run(host=\"0.0.0.0\", port=5001, debug=True)\n",
+      "code": "356 if __name__ == \"__main__\":\n357     app.run(host=\"0.0.0.0\", port=5001, debug=True)\n",
       "col_offset": 4,
       "end_col_offset": 50,
       "filename": "brick_manager/app.py",
@@ -484,16 +491,16 @@
       },
       "issue_severity": "HIGH",
       "issue_text": "A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger and allows the execution of arbitrary code.",
-      "line_number": 312,
+      "line_number": 357,
       "line_range": [
-        312
+        357
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b201_flask_debug_true.html",
       "test_id": "B201",
       "test_name": "flask_debug_true"
     },
     {
-      "code": "311 if __name__ == \"__main__\":\n312     app.run(host=\"0.0.0.0\", port=5001, debug=True)\n",
+      "code": "356 if __name__ == \"__main__\":\n357     app.run(host=\"0.0.0.0\", port=5001, debug=True)\n",
       "col_offset": 17,
       "end_col_offset": 26,
       "filename": "brick_manager/app.py",
@@ -504,9 +511,9 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible binding to all interfaces.",
-      "line_number": 312,
+      "line_number": 357,
       "line_range": [
-        312
+        357
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b104_hardcoded_bind_all_interfaces.html",
       "test_id": "B104",
@@ -531,6 +538,27 @@
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b113_request_without_timeout.html",
       "test_id": "B113",
       "test_name": "request_without_timeout"
+    },
+    {
+      "code": "103                 # Continue with just the user_set_num if we have it\n104         except:\n105             pass  # If backup lookup fails, continue with what we have\n106 \n",
+      "col_offset": 8,
+      "end_col_offset": 16,
+      "filename": "brick_manager/services/rebrickable_sync_service.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Try, Except, Pass detected.",
+      "line_number": 104,
+      "line_range": [
+        104,
+        105
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
+      "test_id": "B110",
+      "test_name": "try_except_pass"
     },
     {
       "code": "21     # User_Set attributes\n22     assert hasattr(User_Set, \"set_num\"), \"User_Set missing set_num\"\n23     assert hasattr(User_Set, \"status\"), \"User_Set missing status\"\n",

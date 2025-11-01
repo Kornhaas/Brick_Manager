@@ -83,9 +83,7 @@ def find_inventory_part_id_from_user_sets(part_num, color_id, user_set_num=None)
 
         # Also get a few other sets that contain this part as backup
         try:
-            backup_sets_url = (
-                f"https://rebrickable.com/api/v3/lego/parts/{part_num}/colors/{color_id}/sets/"
-            )
+            backup_sets_url = f"https://rebrickable.com/api/v3/lego/parts/{part_num}/colors/{color_id}/sets/"
             backup_response = make_rate_limited_request(
                 backup_sets_url, headers, {"page_size": 5}, timeout=20
             )
@@ -487,9 +485,7 @@ def add_lost_parts_to_rebrickable(parts_to_add):
                         break
 
                 else:
-                    error_msg = (
-                        f"Batch {batch_num} failed: {response.status_code} - {response.text}"
-                    )
+                    error_msg = f"Batch {batch_num} failed: {response.status_code} - {response.text}"
                     logger.error(error_msg)
                     total_errors.append(error_msg)
 
@@ -553,9 +549,7 @@ def add_lost_parts_individually(parts_data, headers, user_token):
                     )
                     # Don't treat this as an error - just note it for summary
                 else:
-                    error_msg = (
-                        f"Failed to add part {part_data.get('inv_part_id')}: {response.text}"
-                    )
+                    error_msg = f"Failed to add part {part_data.get('inv_part_id')}: {response.text}"
                     logger.warning(error_msg)
                     errors.append(error_msg)
 
@@ -607,9 +601,7 @@ def remove_lost_parts_from_rebrickable(parts_to_remove):
             if not lost_part_id:
                 continue
 
-            url = (
-                f"https://rebrickable.com/api/v3/users/{user_token}/lost_parts/{lost_part_id}/"
-            )
+            url = f"https://rebrickable.com/api/v3/users/{user_token}/lost_parts/{lost_part_id}/"
             response = requests.delete(url, headers=headers, timeout=30)
 
             if response.status_code == 204:
@@ -748,9 +740,7 @@ def get_part_list_parts(list_id):
             logger.error("Missing Rebrickable credentials for part list parts lookup")
             return []
 
-        url = (
-            f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/"
-        )
+        url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/"
         headers = {"Accept": "application/json", "Authorization": f"key {api_key}"}
 
         all_parts = []
@@ -802,9 +792,7 @@ def add_parts_to_part_list(list_id, parts_to_add):
         if not user_token or not api_key:
             return {"success": False, "message": "Missing Rebrickable credentials"}
 
-        url = (
-            f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/"
-        )
+        url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/"
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -883,9 +871,7 @@ def add_parts_to_part_list(list_id, parts_to_add):
                         break
 
                 else:
-                    error_msg = (
-                        f"Batch {batch_num} failed: {response.status_code} - {response.text}"
-                    )
+                    error_msg = f"Batch {batch_num} failed: {response.status_code} - {response.text}"
                     logger.error(error_msg)
                     total_errors.append(error_msg)
 
@@ -916,9 +902,7 @@ def add_parts_to_part_list(list_id, parts_to_add):
         else:
             result[
                 "message"
-            ] = (
-                f"Failed to add parts to part list. Errors: {'; '.join(total_errors[:3])}"
-            )
+            ] = f"Failed to add parts to part list. Errors: {'; '.join(total_errors[:3])}"
 
         return result
 
@@ -940,9 +924,7 @@ def add_parts_individually_to_list(list_id, parts_data, headers, user_token):
             continue
 
         try:
-            url = (
-                f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/"
-            )
+            url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/"
             data = {
                 "part_num": part["part_num"],
                 "color_id": part["color_id"],
@@ -1008,9 +990,7 @@ def clear_part_list(list_id):
         # Strategy 1: Try to delete and recreate the entire list (most efficient)
         try:
             # First, get the list details to recreate it
-            list_url = (
-                f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/"
-            )
+            list_url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/"
             list_response = make_rate_limited_request(list_url, headers, timeout=20)
 
             if list_response and list_response.status_code == 200:
@@ -1077,9 +1057,7 @@ def clear_part_list(list_id):
                 part_num = part["part"]["part_num"]
                 color_id = part["color"]["id"]
 
-                url = (
-                    f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/{part_num}/{color_id}/"
-                )
+                url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/{part_num}/{color_id}/"
 
                 response = make_rate_limited_request(
                     url, headers, method="DELETE", timeout=20
@@ -1100,9 +1078,7 @@ def clear_part_list(list_id):
                     update_rate_limit_tracker(True)
                     # Continue trying with rate limiting delays
                 else:
-                    error_msg = (
-                        f"Failed to remove {part_num}/{color_id}: {response.status_code if response else 'No response'}"
-                    )
+                    error_msg = f"Failed to remove {part_num}/{color_id}: {response.status_code if response else 'No response'}"
                     errors.append(error_msg)
                     logger.debug(error_msg)
 
@@ -1125,17 +1101,13 @@ def clear_part_list(list_id):
         if success:
             result[
                 "message"
-            ] = (
-                f"Successfully removed {removed_count}/{len(current_parts)} parts from part list"
-            )
+            ] = f"Successfully removed {removed_count}/{len(current_parts)} parts from part list"
             if len(errors) > 0:
                 result["message"] += f" ({len(errors)} parts had errors)"
         else:
             result[
                 "message"
-            ] = (
-                f"Failed to remove parts from part list. Errors: {'; '.join(errors[:3])}"
-            )
+            ] = f"Failed to remove parts from part list. Errors: {'; '.join(errors[:3])}"
 
         return result
 
@@ -1281,9 +1253,7 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
                 part_num = part["part_num"]
                 color_id = part["color_id"]
 
-                url = (
-                    f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/{part_num}/{color_id}/"
-                )
+                url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/{part_num}/{color_id}/"
 
                 response = make_rate_limited_request(
                     url, headers, method="DELETE", timeout=20
@@ -1304,9 +1274,7 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
                     update_rate_limit_tracker(True)
                     # Continue trying with rate limiting delays
                 else:
-                    error_msg = (
-                        f"Failed to remove {part_num}/{color_id}: {response.status_code if response else 'No response'}"
-                    )
+                    error_msg = f"Failed to remove {part_num}/{color_id}: {response.status_code if response else 'No response'}"
                     errors.append(error_msg)
                     logger.debug(error_msg)
 
@@ -1328,17 +1296,13 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
         if success:
             result[
                 "message"
-            ] = (
-                f"Successfully removed {removed_count}/{len(parts_to_remove)} parts from part list"
-            )
+            ] = f"Successfully removed {removed_count}/{len(parts_to_remove)} parts from part list"
             if len(errors) > 0:
                 result["message"] += f" ({len(errors)} parts had errors)"
         else:
             result[
                 "message"
-            ] = (
-                f"Failed to remove parts from part list. Errors: {'; '.join(errors[:3])}"
-            )
+            ] = f"Failed to remove parts from part list. Errors: {'; '.join(errors[:3])}"
 
         return result
 

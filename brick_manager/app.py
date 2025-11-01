@@ -133,24 +133,24 @@ def backup_database():
         # Create backup directory
         backup_dir = os.path.join(os.path.dirname(db_source_path), "backups")
         os.makedirs(backup_dir, exist_ok=True)
-        
+
         # Verify backup directory is writable
         if not os.access(backup_dir, os.W_OK):
             app.logger.error("Backup directory is not writable: %s", backup_dir)
             return
 
         # Create backup filename with timestamp
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_filename = f"brick_manager_{timestamp}.backup.db"
         backup_db_path = os.path.join(backup_dir, backup_filename)
 
         # Create the backup
         shutil.copyfile(db_source_path, backup_db_path)
         app.logger.info("Database backed up successfully to %s", backup_db_path)
-        
+
         # Cleanup old backups (keep last 7 days)
         cleanup_old_backups(backup_dir)
-        
+
     except Exception as e:
         app.logger.error("Failed to backup database: %s", e)
 
@@ -158,22 +158,22 @@ def backup_database():
 def cleanup_old_backups(backup_dir):
     """
     Remove backup files older than 7 days to prevent disk space issues.
-    
+
     Args:
         backup_dir (str): Directory containing backup files
     """
     try:
         cutoff_time = datetime.now() - timedelta(days=7)
-        
+
         for filename in os.listdir(backup_dir):
             if filename.endswith(".backup.db"):
                 file_path = os.path.join(backup_dir, filename)
                 file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
-                
+
                 if file_mtime < cutoff_time:
                     os.remove(file_path)
                     app.logger.info("Removed old backup: %s", filename)
-                    
+
     except Exception as e:
         app.logger.warning("Failed to cleanup old backups: %s", e)
 

@@ -15,14 +15,14 @@ from werkzeug.utils import secure_filename
 def get_cache_directory():
     """
     Get the configured cache directory from Flask config.
-    
+
     Returns:
         str: Path to the cache directory
     """
-    if hasattr(current_app, 'config') and 'CACHE_FOLDER' in current_app.config:
-        cache_dir = current_app.config['CACHE_FOLDER']
+    if hasattr(current_app, "config") and "CACHE_FOLDER" in current_app.config:
+        cache_dir = current_app.config["CACHE_FOLDER"]
         # Ensure images subdirectory exists
-        images_cache_dir = os.path.join(cache_dir, 'images')
+        images_cache_dir = os.path.join(cache_dir, "images")
         os.makedirs(images_cache_dir, exist_ok=True)
         return images_cache_dir
     else:
@@ -53,7 +53,7 @@ def cache_image(image_url, cache_dir=None):
 
     Args:
         image_url (str): URL of the image to cache.
-        cache_dir (str, optional): Directory to store cached images. 
+        cache_dir (str, optional): Directory to store cached images.
                                  If None, uses configured CACHE_FOLDER.
 
     Returns:
@@ -120,7 +120,9 @@ def cache_image(image_url, cache_dir=None):
                     with open(abs_cached_path, "wb") as f:
                         for chunk in response.iter_content(chunk_size=1024):
                             f.write(chunk)
-                    current_app.logger.info(f"Image successfully cached: {abs_cached_path}")
+                    current_app.logger.info(
+                        f"Image successfully cached: {abs_cached_path}"
+                    )
                 else:
                     current_app.logger.error(
                         f"Failed to download image {image_url}. Status Code: {response.status_code}"
@@ -136,12 +138,14 @@ def cache_image(image_url, cache_dir=None):
 
         # Return the URL for the cached image
         # Use the cache serving route for Docker environment
-        if hasattr(current_app, 'config') and 'CACHE_FOLDER' in current_app.config:
+        if hasattr(current_app, "config") and "CACHE_FOLDER" in current_app.config:
             # Docker environment - use cache serving route
-            return url_for('main.serve_cached_image', filename=filename, _external=True)
+            return url_for("main.serve_cached_image", filename=filename, _external=True)
         else:
             # Local development - use static file serving
-            rel_cached_path = os.path.relpath(abs_cached_path, os.path.abspath("static"))
+            rel_cached_path = os.path.relpath(
+                abs_cached_path, os.path.abspath("static")
+            )
             return url_for(
                 "static", filename=rel_cached_path.replace(os.sep, "/"), _external=True
             )
