@@ -1,5 +1,7 @@
 """
+
 This module defines the main route for the Brick Manager application.
+
 
 It includes:
 - A route to render the index (home) page.
@@ -19,7 +21,9 @@ main_bp = Blueprint("main", __name__)
 @main_bp.route("/")
 def index():
     """
+
     Render the index (home) page.
+
 
     Returns:
         Response: Renders the index.html template.
@@ -30,7 +34,9 @@ def index():
 @main_bp.route("/health")
 def health_check():
     """
+
     Health check endpoint for Docker monitoring.
+
 
     Returns:
         JSON response indicating application health status.
@@ -66,7 +72,9 @@ def health_check():
 @main_bp.route("/cache/images/<filename>")
 def serve_cached_image(filename):
     """
+
     Serve cached images from the cache directory.
+
 
     Args:
         filename (str): Name of the cached image file
@@ -103,7 +111,9 @@ def serve_cached_image(filename):
 @main_bp.route("/debug/cache")
 def debug_cache():
     """
+
     Debug endpoint to test cache functionality.
+
 
     Returns:
         JSON: Cache status and test results

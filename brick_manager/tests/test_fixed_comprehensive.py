@@ -1,12 +1,11 @@
 """
+
 Fixed and expanded test suite to achieve 70%+ coverage.
+
 Addresses all failing tests and adds comprehensive coverage for routes, services, and models.
 """
 
-import os
-import tempfile
-from datetime import datetime
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -17,6 +16,7 @@ class TestFixedWorkingCoverage:
     @pytest.mark.unit
     def test_config_module_real_attributes(self):
         """Test actual config attributes that exist."""
+
         from config import Config
 
         # Test actual attributes that exist
@@ -29,12 +29,13 @@ class TestFixedWorkingCoverage:
         assert Config.UPLOAD_FOLDER == "uploads/"
         assert "png" in Config.ALLOWED_EXTENSIONS
         assert "jpg" in Config.ALLOWED_EXTENSIONS
-        assert Config.SQLALCHEMY_TRACK_MODIFICATIONS == False
+        assert Config.SQLALCHEMY_TRACK_MODIFICATIONS is False
         assert "sqlite:" in Config.SQLALCHEMY_DATABASE_URI
 
     @pytest.mark.unit
     def test_cache_service_url_validation_comprehensive(self):
         """Comprehensive test of URL validation function."""
+
         from services.cache_service import is_valid_url
 
         # Test many URL variations to boost coverage
@@ -61,7 +62,7 @@ class TestFixedWorkingCoverage:
 
         for test_url, expected in test_cases:
             if test_url is not None:
-                result = is_valid_url(test_url)
+                _result = is_valid_url(test_url)
                 assert (
                     result == expected
                 ), f"URL '{test_url}' should be {expected}, got {result}"
@@ -70,6 +71,7 @@ class TestFixedWorkingCoverage:
     @patch("services.rebrickable_service.Config")
     def test_rebrickable_service_with_mocked_config(self, mock_config):
         """Test rebrickable service with properly mocked config."""
+
         from services.rebrickable_service import RebrickableService
 
         # Mock the config to have the required attribute
@@ -88,6 +90,7 @@ class TestFixedWorkingCoverage:
     @patch("services.rebrickable_service.requests.get")
     def test_rebrickable_make_request_with_mocked_config(self, mock_get, mock_config):
         """Test rebrickable _make_request with proper mocking."""
+
         from services.rebrickable_service import RebrickableService
 
         # Mock config
@@ -100,7 +103,7 @@ class TestFixedWorkingCoverage:
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
 
-        result = RebrickableService._make_request("test/")
+        _result = RebrickableService._make_request("test/")
 
         assert result == {"success": True}
         mock_get.assert_called_once()
@@ -108,6 +111,7 @@ class TestFixedWorkingCoverage:
     @pytest.mark.unit
     def test_part_lookup_service_coverage(self):
         """Test part lookup service functions to boost coverage."""
+
         from services.part_lookup_service import load_part_lookup, save_part_lookup
 
         # Test that functions are callable
@@ -121,16 +125,17 @@ class TestFixedWorkingCoverage:
                 mock_storage.query.all.return_value = []
 
                 # Test load function
-                result = load_part_lookup()
+                _result = load_part_lookup()
                 assert isinstance(result, dict)
 
                 # Test save function with empty data
-                save_result = save_part_lookup({})
+                save_part_lookup({})
                 # Function should complete without error
 
     @pytest.mark.unit
     def test_model_methods_coverage(self):
         """Test model methods to increase coverage."""
+
         from models import (
             PartStorage,
             RebrickableColors,
@@ -190,6 +195,7 @@ class TestFixedWorkingCoverage:
     @pytest.mark.unit
     def test_route_module_imports(self):
         """Test route module imports for coverage."""
+
         route_modules = [
             "routes.main",
             "routes.dashboard",
@@ -218,11 +224,12 @@ class TestFixedWorkingCoverage:
     @patch("services.cache_service.current_app")
     def test_cache_image_none_handling(self, mock_app, mock_url_for):
         """Test cache_image handling of None input."""
+
         from services.cache_service import cache_image
 
         mock_url_for.return_value = "/static/default_image.png"
 
-        result = cache_image(None)
+        _result = cache_image(None)
 
         assert result == "/static/default_image.png"
         mock_url_for.assert_called_once()
@@ -230,6 +237,7 @@ class TestFixedWorkingCoverage:
     @pytest.mark.unit
     def test_label_service_functions_fixed(self):
         """Test label service functions with correct mocking."""
+
         from services.label_service import save_image_as_pdf
 
         assert callable(save_image_as_pdf)
@@ -240,7 +248,7 @@ class TestFixedWorkingCoverage:
             mock_canvas.Canvas = mock_canvas_class
 
             try:
-                result = save_image_as_pdf("test.jpg", "output.pdf")
+                save_image_as_pdf("test.jpg", "output.pd")
                 # Function should complete
             except Exception:
                 # Expected - function may have complex dependencies
@@ -249,6 +257,7 @@ class TestFixedWorkingCoverage:
     @pytest.mark.unit
     def test_brickognize_service_functions(self):
         """Test brickognize service functions."""
+
         from services.brickognize_service import get_predictions
 
         assert callable(get_predictions)
@@ -267,7 +276,7 @@ class TestFixedWorkingCoverage:
 
             try:
                 # Test with correct parameters
-                result = get_predictions(mock_file, "test.jpg")
+                _result = get_predictions(mock_file, "test.jpg")
                 assert result is not None
             except Exception:
                 # Expected - function may have database dependencies
@@ -287,6 +296,7 @@ class TestFixedWorkingCoverage:
     @pytest.mark.unit
     def test_rebrickable_service_constants_coverage(self):
         """Comprehensive test of rebrickable service constants."""
+
         from services.rebrickable_service import (
             RebrickableAPIException,
             RebrickableService,
@@ -311,6 +321,7 @@ class TestFixedWorkingCoverage:
     @patch("app.datetime")
     def test_backup_database_success(self, mock_datetime, mock_copyfile, mock_app):
         """Test successful database backup."""
+
         from app import backup_database
 
         # Mock datetime for consistent filename
@@ -334,6 +345,7 @@ class TestFixedWorkingCoverage:
     @patch("app.shutil.copyfile")
     def test_backup_database_failure(self, mock_copyfile, mock_app):
         """Test database backup failure handling."""
+
         from app import backup_database
 
         # Mock app config and logger
@@ -352,6 +364,7 @@ class TestFixedWorkingCoverage:
     @pytest.mark.unit
     def test_config_class_comprehensive(self):
         """Comprehensive config class testing."""
+
         from config import Config
 
         # Test all known attributes
@@ -366,7 +379,7 @@ class TestFixedWorkingCoverage:
         for attr in config_attrs:
             if hasattr(Config, attr):
                 value = getattr(Config, attr)
-                assert value is not None or value == False  # Allow False values
+                assert value is not None or value is False  # Allow False values
 
         # Test specific value types
         assert isinstance(Config.ALLOWED_EXTENSIONS, set)

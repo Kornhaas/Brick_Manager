@@ -1,4 +1,5 @@
 """
+
 This module handles caching of images locally to optimize retrieval and reduce repeated downloads.
 """
 
@@ -14,7 +15,9 @@ from werkzeug.utils import secure_filename
 
 def get_cache_directory():
     """
+
     Get the configured cache directory from Flask config.
+
 
     Returns:
         str: Path to the cache directory
@@ -34,14 +37,16 @@ def get_cache_directory():
 
 def is_valid_url(url):
     """
+
     Validate that a given URL is well-formed and has a scheme and netloc.
+
     Args:
         url (str): The URL to validate.
     Returns:
         bool: True if the URL is valid, False otherwise.
     """
     try:
-        result = urlparse(url)
+        _result = urlparse(url)
         return all([result.scheme, result.netloc])
     except ValueError:
         return False
@@ -49,7 +54,9 @@ def is_valid_url(url):
 
 def cache_image(image_url, cache_dir=None):
     """
+
     Download and cache an image locally if not already cached.
+
 
     Args:
         image_url (str): URL of the image to cache.
@@ -60,6 +67,7 @@ def cache_image(image_url, cache_dir=None):
         str: Path to the cached image or fallback image if the download fails.
     """
     # Define the fallback image using Flask's url_for
+
     fallback_image = url_for("static", filename="default_image.png", _external=True)
 
     # Validate the image URL
@@ -115,7 +123,7 @@ def cache_image(image_url, cache_dir=None):
         if not os.path.exists(abs_cached_path):
             current_app.logger.info(f"Downloading image: {image_url}")
             try:
-                response = requests.get(image_url, stream=True, timeout=10)
+                _response = requests.get(image_url, stream=True, timeout=10)
                 if response.status_code == 200:
                     with open(abs_cached_path, "wb") as f:
                         for chunk in response.iter_content(chunk_size=1024):
@@ -165,7 +173,9 @@ def cache_image(image_url, cache_dir=None):
 
 def get_cached_image_path(image_url, cache_dir=None):
     """
+
     Get the path to a cached image without downloading it.
+
 
     Args:
         image_url (str): The URL of the image

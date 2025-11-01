@@ -1,11 +1,7 @@
 """Maximum coverage boost tests targeting remaining gaps."""
 
-import json
-import os
-import tempfile
-from unittest.mock import MagicMock, Mock, mock_open, patch
 
-import pytest
+from unittest.mock import Mock, mock_open, patch
 
 
 class TestMaxCoverageBoost:
@@ -13,6 +9,7 @@ class TestMaxCoverageBoost:
 
     def test_app_complete_initialization(self):
         """Test complete app initialization coverage."""
+
         from brick_manager.app import app
 
         # Test app configuration
@@ -72,6 +69,7 @@ class TestMaxCoverageBoost:
     @patch("brick_manager.app.datetime")
     def test_app_backup_and_scheduler_functions(self, mock_datetime, mock_copyfile):
         """Test app backup and scheduler functions."""
+
         from brick_manager.app import app, backup_database
 
         mock_datetime.now.return_value.strftime.return_value = "20231017_120000"
@@ -92,15 +90,13 @@ class TestMaxCoverageBoost:
 
     def test_all_service_imports_and_basic_functions(self):
         """Test importing all services and basic function calls."""
+
         # Rebrickable Service
         try:
             from brick_manager.services.rebrickable_service import (
-                get_categories,
                 get_missing_parts,
-                get_part_colors,
                 get_part_image_url,
                 get_set_parts,
-                get_themes,
                 get_user_sets,
                 make_request,
             )
@@ -118,7 +114,6 @@ class TestMaxCoverageBoost:
         try:
             from brick_manager.services.cache_service import (
                 cache_image,
-                ensure_cache_directory,
                 get_cached_image_path,
             )
 
@@ -131,7 +126,6 @@ class TestMaxCoverageBoost:
         try:
             from brick_manager.services.label_service import (
                 create_label_pdf,
-                create_part_labels_pdf,
                 create_storage_label,
                 generate_qr_code,
             )
@@ -159,10 +153,8 @@ class TestMaxCoverageBoost:
         # Token Service
         try:
             from brick_manager.services.token_service import (
-                delete_rebrickable_user_token,
                 get_rebrickable_api_key,
                 get_rebrickable_user_token,
-                save_rebrickable_user_token,
             )
 
             assert callable(get_rebrickable_user_token)
@@ -186,7 +178,6 @@ class TestMaxCoverageBoost:
         try:
             from brick_manager.services.sqlite_service import (
                 execute_query,
-                execute_update,
                 get_connection,
             )
 
@@ -197,10 +188,11 @@ class TestMaxCoverageBoost:
 
     def test_all_route_blueprint_registrations(self):
         """Test all route blueprints are properly registered."""
+
         from brick_manager.app import app
 
         # Test that all expected blueprints are registered
-        expected_blueprints = [
+        _expected_blueprints = [
             "upload",
             "main",
             "storage",
@@ -258,6 +250,7 @@ class TestMaxCoverageBoost:
     @patch("brick_manager.services.rebrickable_service.requests.get")
     def test_rebrickable_service_comprehensive(self, mock_get):
         """Test rebrickable service comprehensive coverage."""
+
         # Setup mock response
         mock_response = Mock()
         mock_response.status_code = 200
@@ -279,7 +272,7 @@ class TestMaxCoverageBoost:
             )
 
             # Test all functions with mock data
-            result = make_request("http://test.com/api", {"page": 1})
+            _result = make_request("http://test.com/api", {"page": 1})
             assert result is not None
 
             sets_result = get_user_sets("test_token", "test_key")
@@ -302,6 +295,7 @@ class TestMaxCoverageBoost:
         self, mock_file, mock_makedirs, mock_exists, mock_get
     ):
         """Test cache service comprehensive coverage."""
+
         # Test file exists scenario
         mock_exists.return_value = True
 
@@ -312,10 +306,10 @@ class TestMaxCoverageBoost:
             )
 
             # Test when file exists
-            result = cache_image("http://test.com/image.jpg")
+            _result = cache_image("http://test.com/image.jpg")
 
             # Test get cached path
-            path_result = get_cached_image_path("http://test.com/image.jpg")
+            _path_result = get_cached_image_path("http://test.com/image.jpg")
 
             # Test file doesn't exist scenario
             mock_exists.return_value = False
@@ -324,7 +318,7 @@ class TestMaxCoverageBoost:
             mock_response.content = b"fake_image_data"
             mock_get.return_value = mock_response
 
-            result = cache_image("http://test.com/image2.jpg")
+            _result = cache_image("http://test.com/image2.jpg")
 
         except ImportError:
             pass
@@ -402,6 +396,7 @@ class TestMaxCoverageBoost:
 
     def test_config_comprehensive(self):
         """Test config comprehensive coverage."""
+
         from brick_manager.config import Config
 
         # Test config instantiation
@@ -427,20 +422,22 @@ class TestMaxCoverageBoost:
 
     def test_error_handling_comprehensive(self):
         """Test comprehensive error handling."""
+
         from brick_manager.app import app
 
         # Test app error handlers
         with app.test_client() as client:
             # Test 404 error
-            response = client.get("/definitely-does-not-exist")
+            _response = client.get("/definitely-does-not-exist")
             assert response.status_code == 404
 
             # Test method not allowed
-            response = client.post("/definitely-does-not-exist")
+            _response = client.post("/definitely-does-not-exist")
             assert response.status_code in [404, 405]
 
     def test_database_models_comprehensive(self):
         """Test database models comprehensive coverage."""
+
         from brick_manager.app import app
         from brick_manager.models import db
 
@@ -466,9 +463,10 @@ class TestMaxCoverageBoost:
 
     def test_module_level_coverage(self):
         """Test module-level code coverage."""
+
         # Test importing manage module
         try:
-            import brick_manager.manage
+            pass
 
             assert True
         except ImportError:
@@ -476,7 +474,7 @@ class TestMaxCoverageBoost:
 
         # Test importing run_tests module
         try:
-            import brick_manager.run_tests
+            pass
 
             assert True
         except ImportError:
@@ -484,7 +482,7 @@ class TestMaxCoverageBoost:
 
         # Test importing setup_api_key module
         try:
-            import brick_manager.setup_api_key
+            pass
 
             assert True
         except ImportError:
@@ -492,7 +490,7 @@ class TestMaxCoverageBoost:
 
         # Test importing verify_table_structure module
         try:
-            import brick_manager.verify_table_structure
+            pass
 
             assert True
         except ImportError:

@@ -1,5 +1,7 @@
 """
+
 Unit tests for the label service functions in the Brick Manager application.
+
 
 This module includes tests for the following functions:
 - save_image_as_pdf
@@ -22,6 +24,7 @@ class TestLabelService(unittest.TestCase):
     @patch("brick_manager.services.label_service.ImageReader")
     def test_save_image_as_pdf(self, mock_image_reader, mock_canvas, mock_image_open):
         """Test saving an image as a PDF."""
+
         mock_image = MagicMock()
         mock_image.size = (100, 100)
         mock_image_open.return_value = mock_image

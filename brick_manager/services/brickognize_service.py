@@ -1,5 +1,7 @@
 """
+
 This module provides services for interacting with the Brickognize API.
+
 
 It includes functions to:
 
@@ -16,7 +18,9 @@ from services.sqlite_service import get_category_name_from_part_num
 
 def get_predictions(file_path, filename):
     """
+
     Get part predictions from the Brickognize API based on an uploaded image.
+
 
     Args:
         file_path (str): The file path to the image.
@@ -43,7 +47,7 @@ def get_predictions(file_path, filename):
         with open(file_path, "rb") as file:
             files = {"query_image": (filename, file, "image/jpeg")}
             logging.info("Sending POST request to Brickognize API...")
-            response = requests.post(api_url, headers=headers, files=files, timeout=10)
+            _response = requests.post(api_url, headers=headers, files=files, timeout=10)
 
         logging.info(
             "Received response from Brickognize API - Status Code: %s",
@@ -136,7 +140,9 @@ def get_predictions(file_path, filename):
 
 def predict_part(image_path):
     """
+
     Predict part from image using Brickognize API.
+
 
     Args:
         image_path (str): Path to the image file
@@ -152,7 +158,9 @@ def predict_part(image_path):
 
 def identify_lego_part(image_path):
     """
+
     Identify LEGO part from image (alias for predict_part).
+
 
     Args:
         image_path (str): Path to the image file
@@ -165,7 +173,9 @@ def identify_lego_part(image_path):
 
 def get_part_details(part_id):
     """
+
     Get detailed information about a part.
+
 
     Args:
         part_id (str): Part identifier
@@ -174,4 +184,5 @@ def get_part_details(part_id):
         dict: Part details
     """
     # This would typically fetch from database or API
+
     return {"part_id": part_id, "name": f"Part {part_id}", "category": "Unknown"}

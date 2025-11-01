@@ -1,5 +1,7 @@
 """
+
 This module provides routes and logic for managing storage
+
 operations in the Brick Manager application.
 
 It includes:
@@ -17,7 +19,9 @@ storage_bp = Blueprint("storage", __name__)
 @storage_bp.route("/add_to_storage/<part_id>", methods=["GET", "POST"])
 def add_to_storage(part_id):
     """
+
     Handle the addition or update of storage information for a specific part.
+
 
     Args:
         part_id (str): The ID of the part being stored or updated.

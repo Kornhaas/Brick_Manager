@@ -1,5 +1,7 @@
 """
+
 This module provides routes for managing boxes, including filtering, fetching contents,
+
 and generating labels for boxes.
 """
 import os
@@ -16,17 +18,13 @@ box_maintenance_bp = Blueprint("box_maintenance", __name__)
 
 @box_maintenance_bp.route("/box_maintenance", methods=["GET"])
 def box_maintenance_page():
-    """
-    Renders the Box Maintenance page.
-    """
+    """Renders the Box Maintenance page."""
     return render_template("box_maintenance.html")
 
 
 @box_maintenance_bp.route("/box_maintenance/filter", methods=["POST"])
 def filter_box_data():
-    """
-    Filters levels and boxes based on the selected location and level.
-    """
+    """Filters levels and boxes based on the selected location and level."""
     try:
         data = request.get_json()
         if not data:
@@ -64,9 +62,7 @@ def filter_box_data():
 
 @box_maintenance_bp.route("/box_maintenance/data", methods=["GET"])
 def get_box_data():
-    """
-    Fetches dropdown data for location, level, and box.
-    """
+    """Fetches dropdown data for location, level, and box."""
     try:
         locations = db.session.query(PartStorage.location).distinct().all()
         levels = db.session.query(PartStorage.level).distinct().all()
@@ -87,6 +83,7 @@ def get_box_data():
 @box_maintenance_bp.route("/box_contents", methods=["POST"])
 def get_box_contents():
     """
+
     Fetches the content of a specific box based on location, level, and box.
     """
     try:
@@ -169,9 +166,7 @@ def get_box_contents():
 
 @box_maintenance_bp.route("/box_maintenance/update_label_status", methods=["POST"])
 def update_label_status():
-    """
-    Updates the label_printed status for a part storage entry.
-    """
+    """Updates the label_printed status for a part storage entry."""
     try:
         data = request.get_json()
         if not data:
@@ -204,9 +199,7 @@ def update_label_status():
 
 @box_maintenance_bp.route("/box_maintenance/label", methods=["POST"])
 def generate_box_label():
-    """
-    Generates a label for a specific box containing its contents.
-    """
+    """Generates a label for a specific box containing its contents."""
     try:
         data = request.get_json()
         if not data:

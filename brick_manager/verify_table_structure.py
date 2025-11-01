@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
+
 Utility script to verify that database tables match model definitions
+
 
 Run this script to check if your tables have the correct structure
 after importing data from Rebrickable.
@@ -17,8 +19,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
 def check_table_structure():
-    """Check if the database tables match the model definitions"""
-
+    """Check if the database tables match the model definitions."""
     with app.app_context():
         # Check if we can query the model
         try:
@@ -36,7 +37,7 @@ def check_table_structure():
         cursor.execute(
             'SELECT sql FROM sqlite_master WHERE type="table" AND name="rebrickable_parts";'
         )
-        result = cursor.fetchone()
+        _result = cursor.fetchone()
 
         if result:
             create_sql = result[0]
@@ -73,7 +74,8 @@ def check_table_structure():
 
 
 def fix_table_structure():
-    """Fix table structure if needed"""
+    """Fix table structure if needed."""
+
     print("\n🔧 Ensuring proper table structure...")
 
     with app.app_context():

@@ -1,10 +1,10 @@
 """Comprehensive tests for app.py to achieve high coverage."""
 
+
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
-import pytest
 from flask import Flask
 
 # Add the parent directory to the path to import brick_manager modules
@@ -24,18 +24,21 @@ class TestAppConfiguration:
 
     def test_app_instance_creation(self):
         """Test that app instance is created correctly."""
+
         assert isinstance(app, Flask)
         # App name can be either 'app' (when run directly) or 'brick_manager.app' (when imported)
         assert app.name in ["app", "brick_manager.app"]
 
     def test_secret_key_configured(self):
         """Test that secret key is configured."""
+
         # The app sets secret key to 'supersecretkey', but config may have different value
         # Accept either the hardcoded value or the config value
         assert app.secret_key in ["supersecretkey", "dev-secret-key"]
 
     def test_database_configuration(self):
         """Test database configuration."""
+
         assert "SQLALCHEMY_DATABASE_URI" in app.config
         assert app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] is False
         assert "sqlite:///" in app.config["SQLALCHEMY_DATABASE_URI"]
@@ -43,6 +46,7 @@ class TestAppConfiguration:
 
     def test_instance_directory_created(self):
         """Test that instance directory is created."""
+
         # The instance directory is created within the brick_manager directory
         basedir = os.path.abspath(
             os.path.dirname(__file__)
@@ -62,6 +66,7 @@ class TestBackupDatabase:
     @patch("brick_manager.app.datetime")
     def test_backup_database_success(self, mock_datetime, mock_copyfile):
         """Test successful database backup."""
+
         # Setup - the backup function uses strftime('%Y%m%d_%H%M%S')
         mock_datetime.now.return_value.strftime.return_value = "20231017_120000"
 
@@ -81,6 +86,7 @@ class TestBackupDatabase:
     @patch("app.app.logger")
     def test_backup_database_failure(self, mock_logger, mock_copyfile):
         """Test database backup failure handling."""
+
         # Setup
         mock_copyfile.side_effect = Exception("File not found")
 
@@ -102,6 +108,7 @@ class TestScheduledSyncMissingParts:
     @patch("app.app.logger")
     def test_scheduled_sync_no_tokens(self, mock_logger, mock_api_key, mock_user_token):
         """Test scheduled sync skips when no tokens configured."""
+
         # Setup
         mock_user_token.return_value = None
         mock_api_key.return_value = "test_key"
@@ -131,6 +138,7 @@ class TestScheduledSyncMissingParts:
         mock_user_token,
     ):
         """Test successful scheduled sync."""
+
         # Setup
         mock_user_token.return_value = "test_token"
         mock_api_key.return_value = "test_key"
@@ -185,6 +193,7 @@ class TestScheduledSyncMissingParts:
         mock_user_token,
     ):
         """Test scheduled sync with partial failure."""
+
         # Setup
         mock_user_token.return_value = "test_token"
         mock_api_key.return_value = "test_key"
@@ -208,6 +217,7 @@ class TestScheduledSyncMissingParts:
     @patch("app.app.logger")
     def test_scheduled_sync_exception(self, mock_logger, mock_api_key, mock_user_token):
         """Test scheduled sync exception handling."""
+
         # Setup
         mock_user_token.side_effect = Exception("Token service error")
 
@@ -232,6 +242,7 @@ class TestScheduledSyncUserSets:
         self, mock_logger, mock_api_key, mock_user_token
     ):
         """Test scheduled user sets sync skips when no tokens configured."""
+
         # Setup
         mock_user_token.return_value = "test_token"
         mock_api_key.return_value = None
@@ -253,6 +264,7 @@ class TestScheduledSyncUserSets:
         self, mock_logger, mock_sync, mock_api_key, mock_user_token
     ):
         """Test successful scheduled user sets sync."""
+
         # Setup
         mock_user_token.return_value = "test_token"
         mock_api_key.return_value = "test_key"
@@ -285,6 +297,7 @@ class TestScheduledSyncUserSets:
         self, mock_logger, mock_sync, mock_api_key, mock_user_token
     ):
         """Test scheduled user sets sync failure."""
+
         # Setup
         mock_user_token.return_value = "test_token"
         mock_api_key.return_value = "test_key"
@@ -307,6 +320,7 @@ class TestScheduledSyncUserSets:
         self, mock_logger, mock_api_key, mock_user_token
     ):
         """Test scheduled user sets sync exception handling."""
+
         # Setup
         mock_user_token.side_effect = Exception("Token service error")
 
@@ -326,6 +340,7 @@ class TestAppInitialization:
 
     def test_blueprints_registered(self):
         """Test that all blueprints are registered."""
+
         blueprint_names = [bp.name for bp in app.blueprints.values()]
 
         expected_blueprints = [
@@ -353,6 +368,7 @@ class TestAppInitialization:
     @patch("brick_manager.app.db.create_all")
     def test_database_initialization_success(self, mock_create_all, mock_load_lookup):
         """Test successful database initialization."""
+
         mock_load_lookup.return_value = {"test": "data"}
 
         # This is tested implicitly when the app starts
@@ -362,12 +378,13 @@ class TestAppInitialization:
     @patch("brick_manager.app.app.logger")
     def test_master_lookup_load_failure(self, mock_logger, mock_load_lookup):
         """Test master lookup load failure handling."""
+
         mock_load_lookup.side_effect = Exception("Failed to load lookup data")
 
         with app.app_context():
             try:
                 from brick_manager.app import master_lookup  # This triggers the load
-            except:
+            except Exception:
                 pass  # Expected if it fails
 
         # The error should be logged during app initialization
@@ -379,6 +396,7 @@ class TestLoggingConfiguration:
 
     def test_logger_configured(self):
         """Test that logger is properly configured."""
+
         assert app.logger is not None
         assert len(app.logger.handlers) > 0
 
@@ -394,11 +412,13 @@ class TestSchedulerSetup:
     @patch("brick_manager.app.scheduler")
     def test_scheduler_jobs_added(self, mock_scheduler):
         """Test that scheduler jobs are properly configured."""
+
         # The jobs are added during module import, so we test the setup indirectly
         assert hasattr(mock_scheduler, "add_job") or True
 
     def test_app_run_configuration(self):
         """Test app run configuration for main execution."""
+
         # This tests the if __name__ == '__main__' block indirectly
         # by checking that the app can be configured to run
         assert app.config.get("DEBUG") is not None
@@ -428,15 +448,17 @@ class TestFilePaths:
 
     def test_instance_directory_path(self):
         """Test instance directory path construction."""
+
         basedir = os.path.abspath(os.path.dirname(app.root_path))
         instances_dir = os.path.join(basedir, "brick_manager", "instance")
-        db_path = os.path.join(instances_dir, "brick_manager.db")
+        os.path.join(instances_dir, "brick_manager.db")
 
         assert "instance" in app.config["SQLALCHEMY_DATABASE_URI"]
         assert "brick_manager.db" in app.config["SQLALCHEMY_DATABASE_URI"]
 
     def test_log_file_path(self):
         """Test log file path configuration."""
+
         basedir = os.path.abspath(os.path.dirname(app.root_path))
         expected_log_path = os.path.join(basedir, "brick_manager.log")
 

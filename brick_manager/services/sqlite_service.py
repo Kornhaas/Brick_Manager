@@ -1,4 +1,5 @@
 """
+
 This module provides services for interacting with the SQLite database.
 
 """
@@ -9,7 +10,9 @@ from models import RebrickablePartCategories, RebrickableParts
 
 def get_category_name_from_db(part_cat_id):
     """
+
     Fetch the category name from the local database based on the category ID.
+
 
     Args:
         part_cat_id (int): The category ID.
@@ -44,7 +47,9 @@ def get_category_name_from_db(part_cat_id):
 
 def get_category_name_from_part_num(part_num):
     """
+
     Fetch the category name based on the part number.
+
 
     Args:
         part_num (str): The part number.
@@ -124,6 +129,7 @@ def get_connection():
 
 def execute_query(query, params=None):
     """Execute a query on the database."""
+
     conn = get_connection()
     if not conn:
         return None
@@ -136,7 +142,7 @@ def execute_query(query, params=None):
             cursor.execute(query)
 
         if query.strip().upper().startswith("SELECT"):
-            result = cursor.fetchall()
+            _result = cursor.fetchall()
         else:
             conn.commit()
             result = cursor.rowcount

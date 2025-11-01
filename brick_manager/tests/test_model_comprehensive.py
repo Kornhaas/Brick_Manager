@@ -1,9 +1,10 @@
 """
+
 Comprehensive model tests to significantly boost coverage.
+
 Focus on model methods, relationships, and database operations.
 """
 
-from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 

@@ -1,5 +1,7 @@
 """
+
 High-impact focused tests to boost coverage from 19.52% to 21%+.
+
 Target easily tested functions with high statement coverage.
 """
 
@@ -19,6 +21,7 @@ class TestCoverageBoosters:
         self, mock_app, mock_datetime, mock_copyfile
     ):
         """Test backup database with comprehensive coverage."""
+
         from app import backup_database
 
         # Test successful backup
@@ -102,6 +105,7 @@ class TestCoverageBoosters:
     @patch("services.cache_service.current_app")
     def test_cache_service_is_valid_url_comprehensive(self, mock_app):
         """Test cache service URL validation comprehensively."""
+
         from services.cache_service import is_valid_url
 
         # Test valid URLs
@@ -119,9 +123,9 @@ class TestCoverageBoosters:
 
         for url in invalid_urls:
             try:
-                result = is_valid_url(url)
+                _result = is_valid_url(url)
                 assert result is False
-            except:
+            except Exception:
                 # Some invalid inputs might raise exceptions, which is also valid
                 pass
 
@@ -129,6 +133,7 @@ class TestCoverageBoosters:
     @patch("services.rebrickable_service.Config")
     def test_rebrickable_service_basic_functions(self, mock_config):
         """Test rebrickable service basic functionality."""
+
         mock_config.REBRICKABLE_TOKEN = "test_token"
 
         try:
@@ -163,7 +168,7 @@ class TestCoverageBoosters:
                 mock_query_result.all.return_value = []
                 mock_db.session.query.return_value = mock_query_result
 
-                result = load_part_lookup()
+                _result = load_part_lookup()
                 assert isinstance(result, dict)
 
         except ImportError:
@@ -274,6 +279,7 @@ class TestCoverageBoosters:
     @patch("app.app")
     def test_scheduled_sync_error_paths(self, mock_app, mock_user_token, mock_api_key):
         """Test scheduled sync error handling paths."""
+
         from app import scheduled_sync_missing_parts, scheduled_sync_user_sets
 
         mock_app.logger = MagicMock()

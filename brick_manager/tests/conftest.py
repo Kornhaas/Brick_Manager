@@ -1,6 +1,4 @@
-"""
-Pytest configuration and fixtures for the Bricks Manager test suite.
-"""
+"""Pytest configuration and fixtures for the Bricks Manager test suite."""
 
 import os
 import sys
@@ -17,6 +15,7 @@ from models import db
 
 def create_test_app():
     """Create and configure a new app instance for testing."""
+
     # Set template and static folders relative to the main app
     import os
 
@@ -73,7 +72,7 @@ def create_test_app():
         app.register_blueprint(token_management_bp)
         app.register_blueprint(rebrickable_sync_bp)
         app.register_blueprint(admin_sync_bp)
-    except ImportError as e:
+    except ImportError:
         # If blueprints can't be imported, continue without them
         pass
 
@@ -83,6 +82,7 @@ def create_test_app():
 @pytest.fixture(scope="session")
 def app():
     """Create and configure a new app instance for testing."""
+
     test_app, db_fd, db_path = create_test_app()
 
     with test_app.app_context():
@@ -98,12 +98,14 @@ def app():
 @pytest.fixture
 def client(app):
     """Create a test client for the app."""
+
     return app.test_client()
 
 
 @pytest.fixture
 def runner(app):
     """Create a test runner for the app's Click commands."""
+
     return app.test_cli_runner()
 
 

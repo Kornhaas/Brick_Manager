@@ -1,5 +1,7 @@
 """
+
 Service modules for the Brick Manager application.
+
 
 This package contains service layer classes that handle business logic,
 external API interactions, caching, and data processing operations.

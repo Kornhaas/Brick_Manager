@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
+
 Script to set up initial configuration for the Rebrickable API key.
+
 This should be run once to initialize the API key in the database.
 """
 
-import os
 import sys
 
 # Add the current directory to the path so we can import models

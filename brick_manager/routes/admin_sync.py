@@ -1,5 +1,7 @@
 """
+
 Admin sync routes for managing Rebrickable synchronization.
+
 This module handles syncing missing parts and user sets with Rebrickable.
 """
 
@@ -20,9 +22,7 @@ admin_sync_bp = Blueprint("admin_sync", __name__)
 
 @admin_sync_bp.route("/admin/sync")
 def admin_sync_page():
-    """
-    Display the admin synchronization page.
-    """
+    """Display the admin synchronization page."""
     try:
         # Check if tokens are configured
         user_token = get_rebrickable_user_token()
@@ -46,9 +46,7 @@ def admin_sync_page():
 
 @admin_sync_bp.route("/admin/sync/check_availability")
 def check_sync_availability():
-    """
-    Check if synchronization is available (tokens configured).
-    """
+    """Check if synchronization is available (tokens configured)."""
     try:
         user_token = get_rebrickable_user_token()
         api_key = get_rebrickable_api_key()
@@ -84,7 +82,9 @@ def check_sync_availability():
 @admin_sync_bp.route("/admin/sync/missing_parts", methods=["POST"])
 def sync_missing_parts():
     """
+
     Synchronize missing parts with Rebrickable Lost Parts.
+
     Accepts optional batch_size parameter to control how many parts to process.
     """
     try:
@@ -108,7 +108,7 @@ def sync_missing_parts():
         batch_size = data.get("batch_size")
 
         # Perform the synchronization
-        result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
+        _result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
 
         # Enhance the response with rate limiting information if available
         if result["success"] and "summary" in result:
@@ -140,7 +140,9 @@ def sync_missing_parts():
 @admin_sync_bp.route("/admin/sync/missing_minifigure_parts", methods=["POST"])
 def sync_missing_minifigure_parts():
     """
+
     Synchronize missing minifigure parts with Rebrickable Part Lists.
+
     Accepts optional batch_size parameter to control how many parts to process.
     """
     try:
@@ -164,7 +166,7 @@ def sync_missing_minifigure_parts():
         batch_size = data.get("batch_size")
 
         # Perform the synchronization
-        result = sync_missing_minifigure_parts_with_rebrickable(batch_size=batch_size)
+        _result = sync_missing_minifigure_parts_with_rebrickable(batch_size=batch_size)
 
         # Enhance the response with rate limiting information if available
         if result["success"] and "summary" in result:
@@ -196,7 +198,9 @@ def sync_missing_minifigure_parts():
 @admin_sync_bp.route("/admin/sync/all_missing_parts", methods=["POST"])
 def sync_all_missing_parts():
     """
+
     Synchronize both regular and minifigure missing parts with Rebrickable Part Lists.
+
     This is a convenience endpoint that calls both sync functions.
     """
     try:
@@ -295,7 +299,9 @@ def sync_all_missing_parts():
 @admin_sync_bp.route("/admin/sync/user_sets", methods=["POST"])
 def sync_user_sets():
     """
+
     Synchronize user sets with Rebrickable 'Brick_Manager' list.
+
     Creates the list if it doesn't exist.
     """
     try:
@@ -320,7 +326,7 @@ def sync_user_sets():
         )
 
         # Perform the synchronization
-        result = sync_user_sets_with_rebrickable()
+        _result = sync_user_sets_with_rebrickable()
 
         # Enhance the response with rate limiting information if available
         if result["success"] and "summary" in result:

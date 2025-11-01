@@ -1,5 +1,7 @@
 """
+
 This module handles the file upload functionality for the Brick Manager application.
+
 
 It includes:
 - Uploading and saving files to the server.
@@ -25,7 +27,9 @@ upload_bp = Blueprint("upload", __name__)
 @upload_bp.route("/upload", methods=["POST"])
 def upload():
     """
+
     Handle file upload, validate the file, and process predictions.
+
 
     Returns:
         Response: Renders the results template if successful, otherwise redirects to the main index.
@@ -46,7 +50,7 @@ def upload():
         file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
         file.save(file_path)
 
-        result = get_predictions(file_path, filename)
+        _result = get_predictions(file_path, filename)
 
         if result:
             for item in result.get("items", []):
@@ -65,13 +69,15 @@ def upload():
         flash("Invalid result structure or no items found")
         return redirect(url_for("main.index"))
 
-    flash("Allowed file types are png, jpg, jpeg, gif")
+    flash("Allowed file types are png, jpg, jpeg, gi")
     return redirect(url_for("main.index"))
 
 
 def allowed_file(filename):
     """
+
     Check if the uploaded file is of an allowed type.
+
 
     Args:
         filename (str): The name of the uploaded file.

@@ -1,12 +1,13 @@
 """
+
 Final coverage push - targeting routes and remaining high-impact areas.
+
 Focus on simple, working tests that cover the most lines possible.
 """
 
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flask import Flask
 
 
 class TestFinalCoveragePush:
@@ -257,7 +258,7 @@ class TestFinalCoveragePush:
 
                     # Test prediction (may fail due to dependencies, but exercises import)
                     try:
-                        result = get_predictions(mock_file, "test.jpg")
+                        get_predictions(mock_file, "test.jpg")
                     except Exception:
                         # Expected due to complex dependencies
                         pass
@@ -290,6 +291,7 @@ class TestFinalCoveragePush:
     @pytest.mark.unit
     def test_cache_service_comprehensive_coverage(self):
         """Comprehensive cache service testing for maximum coverage."""
+
         from services.cache_service import is_valid_url
 
         # Test edge cases and various URL patterns
@@ -311,12 +313,13 @@ class TestFinalCoveragePush:
         ]
 
         for url, expected in edge_cases:
-            result = is_valid_url(url.strip() if url else url)
+            _result = is_valid_url(url.strip() if url else url)
             assert result == expected, f"URL '{url}' should be {expected}"
 
     @pytest.mark.unit
     def test_models_comprehensive_coverage(self):
         """Comprehensive models testing for maximum coverage."""
+
         from models import (
             PartStorage,
             RebrickableColors,
@@ -372,6 +375,7 @@ class TestFinalCoveragePush:
     @pytest.mark.unit
     def test_config_class_comprehensive(self):
         """Comprehensive config class testing."""
+
         from config import Config
 
         # Test all known attributes
@@ -386,7 +390,7 @@ class TestFinalCoveragePush:
         for attr in config_attrs:
             if hasattr(Config, attr):
                 value = getattr(Config, attr)
-                assert value is not None or value == False  # Allow False values
+                assert value is not None or value is False  # Allow False values
 
         # Test specific value types
         assert isinstance(Config.ALLOWED_EXTENSIONS, set)
@@ -396,6 +400,7 @@ class TestFinalCoveragePush:
     @pytest.mark.unit
     def test_all_service_imports_coverage(self):
         """Test importing all services for coverage boost."""
+
         service_modules = [
             "services.brickognize_service",
             "services.cache_service",
@@ -424,6 +429,7 @@ class TestFinalCoveragePush:
     @pytest.mark.unit
     def test_all_route_imports_coverage(self):
         """Test importing all routes for coverage boost."""
+
         route_modules = [
             "routes.main",
             "routes.dashboard",

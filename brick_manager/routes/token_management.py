@@ -1,5 +1,7 @@
 """
+
 This module handles the management of API tokens for external services like Rebrickable.
+
 
 It provides functionality to generate, store, and manage user tokens securely
 in the database configuration table.
@@ -7,7 +9,6 @@ in the database configuration table.
 
 import base64
 import logging
-import os
 
 import requests
 from cryptography.fernet import Fernet
@@ -25,6 +26,7 @@ logger = logging.getLogger(__name__)
 # Encryption key for securing tokens (in production, this should be in environment variables)
 def get_encryption_key():
     """Get or create encryption key for token storage."""
+
     key_config = ConfigSettings.query.filter_by(key="encryption_key").first()
     if not key_config:
         # Generate new key
@@ -44,6 +46,7 @@ def get_encryption_key():
 
 def encrypt_token(token):
     """Encrypt a token for secure storage."""
+
     key = get_encryption_key()
     fernet = Fernet(key)
     return fernet.encrypt(token.encode()).decode()
@@ -51,6 +54,7 @@ def encrypt_token(token):
 
 def decrypt_token(encrypted_token):
     """Decrypt a stored token."""
+
     key = get_encryption_key()
     fernet = Fernet(key)
     return fernet.decrypt(encrypted_token.encode()).decode()
@@ -121,7 +125,7 @@ def generate_token():
         data = {"username": username, "password": password}
 
         # Make the request to Rebrickable
-        response = requests.post(url, headers=headers, data=data, timeout=30)
+        _response = requests.post(url, headers=headers, data=data, timeout=30)
 
         if response.status_code in [200, 201]:
             # Success - extract the token
@@ -260,7 +264,7 @@ def test_token():
         test_url = f"https://rebrickable.com/api/v3/users/{user_token}/profile/"
         headers = {"Accept": "application/json", "Authorization": f"key {api_key}"}
 
-        response = requests.get(test_url, headers=headers, timeout=30)
+        _response = requests.get(test_url, headers=headers, timeout=30)
 
         if response.status_code == 200:
             profile_data = response.json()

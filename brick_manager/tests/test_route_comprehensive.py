@@ -1,12 +1,13 @@
 """
+
 Comprehensive route tests to achieve 70%+ coverage.
+
 Focus on actual working routes and their core functionality.
 """
 
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
-from flask import Flask
 
 
 class TestRouteComprehensive:
@@ -246,6 +247,7 @@ class TestRouteComprehensive:
     @pytest.mark.unit
     def test_all_route_blueprints_registration(self):
         """Test that all route blueprints can be imported and have proper structure."""
+
         route_blueprints = [
             ("routes.main", "main_bp"),
             ("routes.dashboard", "dashboard_bp"),
@@ -283,6 +285,7 @@ class TestServiceComprehensive:
     @pytest.mark.unit
     def test_all_service_module_imports(self):
         """Test importing all service modules for coverage boost."""
+
         service_modules = [
             "services.brickognize_service",
             "services.cache_service",
@@ -340,7 +343,7 @@ class TestServiceComprehensive:
                     with patch("services.cache_service.url_for") as mock_url_for:
                         mock_url_for.return_value = "/cached/image.jpg"
 
-                        result = cache_image("https://example.com/image.jpg")
+                        _result = cache_image("https://example.com/image.jpg")
 
                         # Should return cached URL
                         assert result is not None
@@ -435,7 +438,7 @@ class TestServiceComprehensive:
             from services.label_service import download_image
 
             # Test with None URL
-            result = download_image(None)
+            _result = download_image(None)
             assert result is None
 
             # Test with successful download
@@ -448,7 +451,7 @@ class TestServiceComprehensive:
                 mock_image.open.return_value = MagicMock()
                 mock_get.return_value = mock_response
 
-                result = download_image("https://example.com/image.jpg")
+                _result = download_image("https://example.com/image.jpg")
                 # Should attempt to download
                 mock_get.assert_called_once()
 
@@ -482,7 +485,7 @@ class TestServiceComprehensive:
                     mock_storage.query.all.return_value = mock_parts
 
                     # Test load function with data
-                    result = load_part_lookup()
+                    _result = load_part_lookup()
                     assert isinstance(result, dict)
 
                     # Test save function with data

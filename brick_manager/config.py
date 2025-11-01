@@ -1,5 +1,7 @@
 """
+
 This module defines the configuration settings for the Brick Manager application.
+
 
 It includes paths for file uploads, allowed file types, and tokens for external APIs.
 Supports both local development and Docker environments.
@@ -10,7 +12,9 @@ import os
 
 class Config:  # pylint: disable=R0903
     """
+
     Configuration settings for the Brick Manager application.
+
 
     Attributes:
         UPLOAD_FOLDER (str): The directory where uploaded files are stored.
@@ -19,6 +23,7 @@ class Config:  # pylint: disable=R0903
     """
 
     # Dynamic paths - use environment variables for Docker, fallback for local dev
+
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
     # Check if running in Docker (data volumes are mounted)
@@ -44,7 +49,7 @@ class Config:  # pylint: disable=R0903
         )
 
     # Application settings
-    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gi"}
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REBRICKABLE_TOKEN = os.getenv("REBRICKABLE_TOKEN", "test-token")
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")

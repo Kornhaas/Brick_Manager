@@ -1,5 +1,7 @@
 """
+
 This module defines the SQLAlchemy models for the Brick Manager application.
+
 
 Models include:
 - User_Set (replaces UserSet)
@@ -14,6 +16,7 @@ Models include:
 """
 # pylint: disable=C0301,R0903,C0103
 
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Boolean, ForeignKey, Integer, Text
 
@@ -21,9 +24,7 @@ db = SQLAlchemy()
 
 
 class User_Set(db.Model):
-    """
-    Represents a user's collection of sets.
-    """
+    """Represents a user's collection of sets."""
 
     __tablename__ = "user_sets"
 
@@ -55,6 +56,7 @@ class User_Set(db.Model):
 
     def to_dict(self):
         """Convert the User_Set object to a dictionary."""
+
         return {
             "id": self.id,
             "set_num": self.set_num,
@@ -64,9 +66,7 @@ class User_Set(db.Model):
 
 
 class User_Minifigures(db.Model):
-    """
-    Represents a user's minifigures in a set.
-    """
+    """Represents a user's minifigures in a set."""
 
     __tablename__ = "user_minifigures"
 
@@ -86,9 +86,7 @@ class User_Minifigures(db.Model):
 
 
 class User_Parts(db.Model):
-    """
-    Represents the relationship between parts and sets.
-    """
+    """Represents the relationship between parts and sets."""
 
     __tablename__ = "user_parts"
 
@@ -111,11 +109,14 @@ class User_Parts(db.Model):
 
 class UserMinifigurePart(db.Model):
     """
+
     Represents a user's specific collection of minifigure parts.
+
     Uses RebrickableParts directly instead of MinifigurePart.
     """
 
     __tablename__ = "user_minifigure_parts"
+
     id = db.Column(Integer, primary_key=True)
     part_num = db.Column(Text, ForeignKey("rebrickable_parts.part_num"), nullable=False)
     color_id = db.Column(Integer, ForeignKey("rebrickable_colors.id"), nullable=False)
@@ -138,11 +139,10 @@ class UserMinifigurePart(db.Model):
 
 
 class PartStorage(db.Model):
-    """
-    Represents the storage information for parts.
-    """
+    """Represents the storage information for parts."""
 
     __tablename__ = "part_storage"
+
     id = db.Column(Integer, primary_key=True)
     part_num = db.Column(Text, ForeignKey("rebrickable_parts.part_num"), nullable=False)
     location = db.Column(Text)
@@ -161,13 +161,16 @@ class PartStorage(db.Model):
 
 class RebrickablePartCategories(db.Model):
     """
+
     Represents categories for Rebrickable parts.
+
 
     This model stores the category information for brick parts as defined by Rebrickable,
     such as 'Brick', 'Plate', 'Technic', etc.
     """
 
     __tablename__ = "rebrickable_part_categories"
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
 
@@ -176,18 +179,22 @@ class RebrickablePartCategories(db.Model):
 
     def to_dict(self):
         """Convert the RebrickablePartCategory object to a dictionary."""
+
         return {"id": self.id, "name": self.name}
 
 
 class RebrickableColors(db.Model):
     """
+
     Represents colors available for brick parts from Rebrickable.
+
 
     This model stores color information including RGB values, transparency status,
     and statistics about how many parts and sets use each color.
     """
 
     __tablename__ = "rebrickable_colors"
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     rgb = db.Column(db.Text, nullable=False)
@@ -203,6 +210,7 @@ class RebrickableColors(db.Model):
 
     def to_dict(self):
         """Convert the RebrickableColor object to a dictionary."""
+
         return {
             "id": self.id,
             "name": self.name,
@@ -225,13 +233,16 @@ class RebrickableColors(db.Model):
 
 class RebrickableParts(db.Model):
     """
+
     Represents individual brick parts from the Rebrickable database.
+
 
     This model stores part information including part numbers, names, categories,
     materials, and image URLs for individual brick pieces.
     """
 
     __tablename__ = "rebrickable_parts"
+
     part_num = db.Column(db.Text, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     part_cat_id = db.Column(
@@ -255,6 +266,7 @@ class RebrickableParts(db.Model):
 
     def to_dict(self):
         """Convert the RebrickablePart object to a dictionary."""
+
         return {
             "part_num": self.part_num,
             "name": self.name,
@@ -267,13 +279,16 @@ class RebrickableParts(db.Model):
 
 class RebrickablePartRelationships(db.Model):
     """
+
     Represents relationships between LEGO parts from Rebrickable.
+
 
     This model stores parent-child relationships between parts, such as when
     one part is a variant or component of another part.
     """
 
     __tablename__ = "rebrickable_part_relationships"
+
     rel_type = db.Column(db.Text, primary_key=True)
     child_part_num = db.Column(
         db.Text, db.ForeignKey("rebrickable_parts.part_num"), primary_key=True
@@ -285,13 +300,16 @@ class RebrickablePartRelationships(db.Model):
 
 class RebrickableElements(db.Model):
     """
+
     Represents LEGO elements from Rebrickable.
+
 
     An element is a specific combination of a part in a particular color.
     This model maps element IDs to their corresponding parts and colors.
     """
 
     __tablename__ = "rebrickable_elements"
+
     element_id = db.Column(db.Text, primary_key=True)
     part_num = db.Column(
         db.Text, db.ForeignKey("rebrickable_parts.part_num"), nullable=False
@@ -304,13 +322,16 @@ class RebrickableElements(db.Model):
 
 class RebrickableThemes(db.Model):
     """
+
     Represents LEGO themes from Rebrickable.
+
 
     This model stores theme information such as 'Star Wars', 'City', 'Technic', etc.
     Themes can have parent-child relationships for sub-themes.
     """
 
     __tablename__ = "rebrickable_themes"
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey("rebrickable_themes.id"))
@@ -320,18 +341,22 @@ class RebrickableThemes(db.Model):
 
     def to_dict(self):
         """Convert the Theme object to a dictionary."""
+
         return {"id": self.id, "name": self.name, "parent_id": self.parent_id}
 
 
 class RebrickableSets(db.Model):
     """
+
     Represents LEGO sets from the Rebrickable database.
+
 
     This model stores set information including set numbers, names, years,
     themes, part counts, and image URLs for complete LEGO sets.
     """
 
     __tablename__ = "rebrickable_sets"
+
     set_num = db.Column(db.Text, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     year = db.Column(db.Integer, nullable=False)
@@ -352,6 +377,7 @@ class RebrickableSets(db.Model):
 
     def to_dict(self):
         """Convert the RebrickableSet object to a dictionary."""
+
         return {
             "set_num": self.set_num,
             "name": self.name,
@@ -364,13 +390,16 @@ class RebrickableSets(db.Model):
 
 class RebrickableMinifigs(db.Model):
     """
+
     Represents LEGO minifigures from the Rebrickable database.
+
 
     This model stores minifigure information including figure numbers, names,
     part counts, and image URLs for complete minifigures.
     """
 
     __tablename__ = "rebrickable_minifigs"
+
     fig_num = db.Column(db.Text, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     num_parts = db.Column(db.Integer, nullable=False)
@@ -387,13 +416,16 @@ class RebrickableMinifigs(db.Model):
 
 class RebrickableInventories(db.Model):
     """
+
     Represents inventories from Rebrickable.
+
 
     This model stores inventory information which tracks different versions
     of set contents and their associated parts and minifigures.
     """
 
     __tablename__ = "rebrickable_inventories"
+
     id = db.Column(db.Integer, primary_key=True)
     version = db.Column(db.Integer, nullable=False)
     set_num = db.Column(db.Text, nullable=False)
@@ -401,13 +433,16 @@ class RebrickableInventories(db.Model):
 
 class RebrickableInventoryParts(db.Model):
     """
+
     Represents parts within specific inventories from Rebrickable.
+
 
     This model stores the relationship between inventories and the parts they contain,
     including quantities, colors, spare part status, and part-specific images.
     """
 
     __tablename__ = "rebrickable_inventory_parts"
+
     inventory_id = db.Column(
         db.Integer, db.ForeignKey("rebrickable_inventories.id"), primary_key=True
     )
@@ -424,13 +459,16 @@ class RebrickableInventoryParts(db.Model):
 
 class RebrickableInventorySets(db.Model):
     """
+
     Represents sets within specific inventories from Rebrickable.
+
 
     This model stores the relationship between inventories and the sets they contain,
     including quantities of each set within the inventory.
     """
 
     __tablename__ = "rebrickable_inventory_sets"
+
     inventory_id = db.Column(
         db.Integer, db.ForeignKey("rebrickable_inventories.id"), primary_key=True
     )
@@ -442,13 +480,16 @@ class RebrickableInventorySets(db.Model):
 
 class RebrickableInventoryMinifigs(db.Model):
     """
+
     Represents minifigures within specific inventories from Rebrickable.
+
 
     This model stores the relationship between inventories and the minifigures they contain,
     including quantities of each minifigure within the inventory.
     """
 
     __tablename__ = "rebrickable_inventory_minifigs"
+
     inventory_id = db.Column(
         db.Integer, db.ForeignKey("rebrickable_inventories.id"), primary_key=True
     )
@@ -460,7 +501,9 @@ class RebrickableInventoryMinifigs(db.Model):
 
 class ConfigSettings(db.Model):
     """
+
     Stores application configuration settings including API tokens and other preferences.
+
 
     This model provides a secure way to store configuration data including encrypted
     API tokens for external services like Rebrickable. Settings are stored as key-value
@@ -486,6 +529,7 @@ class ConfigSettings(db.Model):
 
     def to_dict(self):
         """Convert the ConfigSettings object to a dictionary."""
+
         return {
             "id": self.id,
             "key": self.key,

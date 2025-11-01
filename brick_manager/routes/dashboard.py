@@ -1,5 +1,7 @@
 """
+
 This module provides routes for the dashboard,
+
 including viewing summaries, details, and updating quantities.
 """
 from flask import Blueprint, current_app, jsonify, render_template, request
@@ -14,7 +16,9 @@ dashboard_bp = Blueprint("dashboard", __name__)
 
 def enrich_part(item, master_lookup):
     """
+
     Enrich part data with additional information.
+
 
     Args:
         item (User_Parts | UserMinifigurePart): The part or minifigure part to enrich.
@@ -24,6 +28,7 @@ def enrich_part(item, master_lookup):
         dict: Enriched part data.
     """
     part_info = RebrickableParts.query.filter_by(part_num=item.part_num).first()
+
     part_data = master_lookup.get(item.part_num, {})
     category = (
         part_info.category.name if part_info and part_info.category else "No Category"
@@ -58,9 +63,7 @@ def enrich_part(item, master_lookup):
 
 @dashboard_bp.route("/dashboard", methods=["GET"])
 def dashboard():
-    """
-    Displays an overview of total and missing parts/minifigure parts.
-    """
+    """Displays an overview of total and missing parts/minifigure parts."""
     parts_in_sets = (
         User_Parts.query.join(User_Set)
         .filter(~User_Set.status.in_(["assembled", "konvolut"]))
@@ -130,10 +133,9 @@ def dashboard():
 
 @dashboard_bp.route("/update_quantity", methods=["POST"])
 def update_quantity():
-    """
-    Batch update `have_quantity` for parts or minifigure parts.
-    """
+    """Batch update `have_quantity` for parts or minifigure parts."""
     data = request.get_json()
+
     changes = data.get("changes", [])
 
     if not changes:
@@ -184,10 +186,9 @@ def update_quantity():
 
 @dashboard_bp.route("/details/<category>", methods=["GET"])
 def details(category):
-    """
-    Displays detailed data for parts or minifigure parts.
-    """
+    """Displays detailed data for parts or minifigure parts."""
     category = category.lower()
+
     master_lookup = load_part_lookup()
 
     if category == "missing_parts":
@@ -235,10 +236,9 @@ def details(category):
 
 @dashboard_bp.route("/api/missing_parts", methods=["GET"])
 def api_missing_parts():
-    """
-    API endpoint to retrieve missing parts.
-    """
+    """API endpoint to retrieve missing parts."""
     master_lookup = load_part_lookup()
+
     missing_parts = (
         User_Parts.query.join(User_Set)
         .filter(
@@ -254,10 +254,9 @@ def api_missing_parts():
 
 @dashboard_bp.route("/api/missing_minifigure_parts", methods=["GET"])
 def api_missing_minifigure_parts():
-    """
-    API endpoint to retrieve missing minifigure parts.
-    """
+    """API endpoint to retrieve missing minifigure parts."""
     master_lookup = load_part_lookup()
+
     missing_minifigure_parts = (
         UserMinifigurePart.query.join(User_Set)
         .filter(

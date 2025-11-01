@@ -1,5 +1,7 @@
 """
+
 This module provides functions to load and save the master lookup data
+
 from the `PartStorage` table used in the Brick Manager application.
 
 It interacts with the database to query and update data, ensuring that the
@@ -14,13 +16,16 @@ _cache_timestamp = None
 
 def load_part_lookup():
     """
+
     Load the master lookup data from the PartStorage table with caching.
+
     Cache is maintained across requests to avoid repeated database queries.
 
     Returns:
         dict: The master lookup data loaded from the database.
     """
     global _part_lookup_cache, _cache_timestamp
+
     import time
 
     current_time = time.time()
@@ -52,7 +57,9 @@ def load_part_lookup():
 
 def save_part_lookup(master_lookup):
     """
+
     Save the master lookup data to the PartStorage table and clear cache.
+
 
     Args:
         master_lookup (dict): The master lookup data to save.
@@ -87,7 +94,9 @@ def save_part_lookup(master_lookup):
 
 def search_parts(query, limit=10):
     """
+
     Search for parts based on a query string.
+
 
     Args:
         query (str): Search query

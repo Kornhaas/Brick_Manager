@@ -1,5 +1,7 @@
 """
+
 This module sets up and runs the Brick Manager Flask application.
+
 
 It configures the application, registers blueprints, and loads the master lookup data.
 """
@@ -32,22 +34,27 @@ except ImportError:
     # Graceful fallback if services aren't available
     def get_rebrickable_user_token():
         """Get the Rebrickable user token (fallback implementation)."""
+
         return None
 
     def get_rebrickable_api_key():
         """Get the Rebrickable API key (fallback implementation)."""
+
         return None
 
     def sync_missing_parts_with_rebrickable(*args, **kwargs):
         """Sync missing parts with Rebrickable (fallback implementation)."""
+
         return {"success": False, "message": "Service not available"}
 
     def sync_missing_minifigure_parts_with_rebrickable(*args, **kwargs):
         """Sync missing minifigure parts with Rebrickable (fallback implementation)."""
+
         return {"success": False, "message": "Service not available"}
 
     def sync_user_sets_with_rebrickable(*args, **kwargs):
         """Sync user sets with Rebrickable (fallback implementation)."""
+
         return {"success": False, "message": "Service not available"}
 
 
@@ -113,7 +120,9 @@ app.logger.addHandler(rotating_file_handler)
 
 def backup_database():
     """
+
     Backup the database at regular intervals.
+
     Creates backups in a dedicated directory and maintains rotation.
     """
     try:
@@ -157,7 +166,9 @@ def backup_database():
 
 def cleanup_old_backups(backup_dir):
     """
+
     Remove backup files older than 7 days to prevent disk space issues.
+
 
     Args:
         backup_dir (str): Directory containing backup files
@@ -180,7 +191,9 @@ def cleanup_old_backups(backup_dir):
 
 def scheduled_sync_missing_parts():
     """
+
     Scheduled task to sync both regular and minifigure missing parts with Rebrickable every 6 hours.
+
     Only runs if tokens are configured.
     """
     try:
@@ -230,7 +243,7 @@ def scheduled_sync_missing_parts():
             removed_regular = regular_summary.get("actual_removed", 0)
             removed_minifig = minifig_summary.get("actual_removed", 0)
 
-            app.logger.info(f"Scheduled sync completed successfully:")
+            app.logger.info("Scheduled sync completed successfully:")
             app.logger.info(
                 f"  Regular parts: {total_regular} local, {added_regular} added, {removed_regular} removed"
             )
@@ -238,7 +251,8 @@ def scheduled_sync_missing_parts():
                 f"  Minifig parts: {total_minifig} local, {added_minifig} added, {removed_minifig} removed"
             )
             app.logger.info(
-                f"  Total: {total_regular + total_minifig} parts across both lists"
+                f"  Total: {total_regular + \
+                    total_minifig} parts across both lists"
             )
         else:
             error_messages = []
@@ -258,7 +272,9 @@ def scheduled_sync_missing_parts():
 
 def scheduled_sync_user_sets():
     """
+
     Scheduled task to sync user sets with Rebrickable every 6 hours.
+
     Only runs if tokens are configured.
     """
     try:
@@ -281,7 +297,7 @@ def scheduled_sync_user_sets():
             return
 
         app.logger.info("Starting scheduled user sets sync")
-        result = sync_user_sets_with_rebrickable()
+        _result = sync_user_sets_with_rebrickable()
 
         if result["success"]:
             summary = result.get("summary", {})

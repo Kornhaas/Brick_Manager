@@ -1,8 +1,11 @@
 """
+
 This module manages the maintenance of user sets, including adding, updating, deleting,
+
 and generating labels for sets and their parts.
 """
 # pylint: disable=C0301,W0718
+
 
 import os
 
@@ -21,7 +24,6 @@ from models import (
     PartStorage,
     RebrickablePartCategories,
     RebrickableParts,
-    RebrickableThemes,
     User_Set,
     UserMinifigurePart,
     db,
@@ -35,6 +37,7 @@ set_maintain_bp = Blueprint("set_maintain", __name__)
 @set_maintain_bp.route("/set_maintain", methods=["GET"])
 def set_maintain():
     """
+
     Displays the list of user sets with enhanced information including theme data.
     """
     user_sets = (
@@ -94,6 +97,7 @@ def set_maintain():
 @set_maintain_bp.route("/set_maintain/<int:user_set_id>", methods=["GET"])
 def get_user_set_details(user_set_id):
     """
+
     Returns the details of a specific User_Set, including its parts, minifigures, and user minifigure parts.
     """
     from models import (
@@ -128,7 +132,9 @@ def get_user_set_details(user_set_id):
 
     def enrich_item(part):
         """
+
         Enrich a part with additional data from storage and part information.
+
 
         Args:
             part: Part object to enrich with storage and color data
@@ -197,7 +203,9 @@ def get_user_set_details(user_set_id):
 
     def enrich_minifigure_part(part):
         """
+
         Enrich a minifigure part with additional data from storage and part information.
+
 
         Args:
             part: Minifigure part object to enrich with storage and color data
@@ -317,9 +325,11 @@ def get_user_set_details(user_set_id):
 @set_maintain_bp.route("/set_maintain/update", methods=["POST"])
 def update_user_set():
     """
+
     Updates the parts, minifigures, and user minifigure parts owned for a specific User_Set.
     """
     user_set_id = request.form.get("user_set_id")
+
     status = request.form.get("status")
     user_set = User_Set.query.get_or_404(user_set_id)
 
@@ -358,9 +368,7 @@ def update_user_set():
 
 @set_maintain_bp.route("/set_maintain/update_label_status", methods=["POST"])
 def update_set_label_status():
-    """
-    Updates the label_printed status for a user set.
-    """
+    """Updates the label_printed status for a user set."""
     try:
         current_app.logger.info("update_set_label_status endpoint called")
         data = request.get_json()
@@ -407,9 +415,7 @@ def update_set_label_status():
 
 @set_maintain_bp.route("/set_maintain/delete/<int:user_set_id>", methods=["POST"])
 def delete_user_set(user_set_id):
-    """
-    Deletes a specific User_Set from the database.
-    """
+    """Deletes a specific User_Set from the database."""
     try:
         user_set = User_Set.query.options(joinedload(User_Set.template_set)).get_or_404(
             user_set_id
@@ -429,9 +435,11 @@ def delete_user_set(user_set_id):
 @set_maintain_bp.route("/set_maintain/generate_label", methods=["POST"])
 def generate_label():
     """
+
     Generate a DrawIO file for a Brick set label and provide it for download.
     """
     set_id = request.json.get("set_id")
+
     box_size = request.json.get("box_size")
     current_app.logger.info(
         "Generating label for set %s with box size %s", set_id, box_size

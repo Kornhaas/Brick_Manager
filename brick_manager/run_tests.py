@@ -1,5 +1,7 @@
 """
+
 Test runner script for comprehensive test coverage.
+
 
 This script runs all tests and generates coverage reports.
 """
@@ -15,6 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 def run_tests():
     """Run all tests with coverage reporting."""
+
     args = [
         "--cov=.",
         "--cov-report=html:htmlcov",

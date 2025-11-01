@@ -1,5 +1,7 @@
 """
+
 This module provides functions to create label images and save them as PDFs
+
 for the Brick Manager application.
 
 It includes functionalities to:
@@ -23,7 +25,9 @@ CM = 28.35  # 1 cm in points
 
 def download_image(img_url):
     """
+
     Fetch and open an image from a URL or local cache.
+
 
     Args:
         img_url (str): The URL or local path of the image.
@@ -35,7 +39,7 @@ def download_image(img_url):
         return None
 
     try:
-        response = requests.get(img_url, stream=True, timeout=10)
+        _response = requests.get(img_url, stream=True, timeout=10)
         response.raise_for_status()
         return Image.open(response.raw)
     except Exception as error:
@@ -45,7 +49,9 @@ def download_image(img_url):
 
 def wrap_text(text, font, max_width):
     """
+
     Wrap the text to fit within the specified maximum width.
+
 
     Args:
         text (str): The text to wrap.
@@ -56,6 +62,7 @@ def wrap_text(text, font, max_width):
         list: A list of lines that fit within the max_width.
     """
     lines = []
+
     words = text.split()
     draw = ImageDraw.Draw(Image.new("RGB", (1, 1)))  # Temporary draw object
 
@@ -71,16 +78,18 @@ def wrap_text(text, font, max_width):
 
 def load_fonts():
     """
+
     Load fonts for the label.
+
 
     Returns:
         tuple: A tuple containing three different font sizes.
     """
     try:
-        font = ImageFont.truetype("arial.ttf", 16)
-        font2 = ImageFont.truetype("arial.ttf", 24)
-        font3 = ImageFont.truetype("arial.ttf", 26)
-        font4 = ImageFont.truetype("arial.ttf", 10)
+        font = ImageFont.truetype("arial.tt", 16)
+        font2 = ImageFont.truetype("arial.tt", 24)
+        font3 = ImageFont.truetype("arial.tt", 26)
+        font4 = ImageFont.truetype("arial.tt", 10)
     except IOError:
         logging.warning("Font not found. Using default fonts.")
         font = ImageFont.load_default()
@@ -92,7 +101,9 @@ def load_fonts():
 
 def draw_text(draw, text_info):
     """
+
     Draw wrapped text on the image.
+
 
     Args:
         draw (ImageDraw.Draw): The draw object.
@@ -102,6 +113,7 @@ def draw_text(draw, text_info):
         int: The new y position after drawing the text.
     """
     x, y = text_info["position"]
+
     font = text_info["font"]
     max_width = text_info["max_width"]
     y_offset = text_info.get("y_offset", 0)
@@ -131,7 +143,9 @@ def draw_text(draw, text_info):
 
 def draw_text_dynamic(draw, text_info):
     """
+
     Draw wrapped text on the image with dynamic font size.
+
 
     Args:
         draw (ImageDraw.Draw): The draw object.
@@ -141,6 +155,7 @@ def draw_text_dynamic(draw, text_info):
         int: The new y position after drawing the text.
     """
     x, y = text_info["position"]
+
     max_width = text_info["max_width"]
     y_offset = text_info.get("y_offset", 0)
     text = text_info["text"]
@@ -149,7 +164,7 @@ def draw_text_dynamic(draw, text_info):
         "Drawing text: %s at position (%d, %d) with max_width %d", text, x, y, max_width
     )
 
-    base_font_path = "arial.ttf"
+    base_font_path = "arial.tt"
     max_font_size = 24
     min_font_size = 8
 
@@ -181,7 +196,9 @@ def draw_text_dynamic(draw, text_info):
 
 def create_label_image(label_info):
     """
+
     Create a label image with part details.
+
 
     Args:
         label_info (dict): A dictionary containing label details.
@@ -190,6 +207,7 @@ def create_label_image(label_info):
         str: The path to the saved label image.
     """
     logging.info("Creating label for item %s", label_info["item_id"])
+
     width, height = int(12 * CM), int(8 * CM)
     image = Image.new("RGB", (width, height), color="white")
     draw = ImageDraw.Draw(image)
@@ -231,13 +249,16 @@ def create_label_image(label_info):
 
 def save_image_as_pdf(image_path, pdf_path):
     """
+
     Save the provided image file as a PDF.
+
 
     Args:
         image_path (str): The path to the image file.
         pdf_path (str): The path where the PDF will be saved.
     """
     img = Image.open(image_path)
+
     img_width, img_height = img.size
 
     c = canvas.Canvas(pdf_path, pagesize=(img_width, img_height))
@@ -249,7 +270,9 @@ def save_image_as_pdf(image_path, pdf_path):
 
 def create_box_label_image(box_info):
     """
+
     Create a label image for a box containing multiple items.
+
 
     Args:
         box_info (dict): A dictionary containing box details such as
@@ -387,7 +410,9 @@ def create_box_label_image(box_info):
 
 def create_box_label_jpg(box_info):
     """
+
     Generate a JPG label for a box containing multiple items.
+
 
     Args:
         box_info (dict): A dictionary containing box details.
@@ -436,7 +461,9 @@ def create_box_label_jpg(box_info):
 
 def generate_qr_code(data, size=100):
     """
+
     Generate a QR code for the given data.
+
 
     Args:
         data (str): Data to encode in QR code
@@ -461,7 +488,9 @@ def generate_qr_code(data, size=100):
 
 def create_label_pdf(label_info, output_path):
     """
+
     Create a PDF label from label information.
+
 
     Args:
         label_info (dict): Label information
@@ -471,6 +500,7 @@ def create_label_pdf(label_info, output_path):
         str: Path to the created PDF
     """
     # Create the label image first
+
     image_path = create_label_image(label_info)
 
     # Convert to PDF
@@ -485,7 +515,9 @@ def create_label_pdf(label_info, output_path):
 
 def create_storage_label(storage_info):
     """
+
     Create a storage label for boxes or storage locations.
+
 
     Args:
         storage_info (dict): Storage information including location, contents, etc.
@@ -494,4 +526,5 @@ def create_storage_label(storage_info):
         str: Path to the created label image
     """
     # Use the box label creation function as a base
+
     return create_box_label_image(storage_info)

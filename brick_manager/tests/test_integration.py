@@ -1,12 +1,12 @@
 """
+
 Integration tests for the Bricks Manager application.
+
 
 These tests check the integration between different components
 and the overall application flow.
 """
 
-import os
-import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -76,6 +76,7 @@ class TestApplicationIntegration:
 
     def test_full_set_workflow(self, client):
         """Test the complete workflow of adding and managing a set."""
+
         # Step 1: Search for a set
         with patch("routes.set_search.RebrickableSets") as mock_sets:
             mock_set = MagicMock()
@@ -83,7 +84,7 @@ class TestApplicationIntegration:
             mock_set.name = "Test Set"
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            response = client.post("/search_set", data={"set_number": "10001-1"})
+            _response = client.post("/search_set", data={"set_number": "10001-1"})
             assert response.status_code == 200
 
         # Step 2: Add the set
@@ -93,17 +94,18 @@ class TestApplicationIntegration:
             mock_set.id = 1
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            response = client.post(
+            _response = client.post(
                 "/add_set", data={"set_num": "10001-1", "status": "complete"}
             )
             assert response.status_code in [200, 302]
 
         # Step 3: View set maintenance
-        response = client.get("/set_maintain")
+        _response = client.get("/set_maintain")
         assert response.status_code == 200
 
     def test_part_lookup_workflow(self, client):
         """Test the complete part lookup workflow."""
+
         # Search for a part
         with patch("routes.part_lookup.RebrickableParts") as mock_parts:
             mock_part = MagicMock()
@@ -111,21 +113,23 @@ class TestApplicationIntegration:
             mock_part.name = "Brick 2 x 4"
             mock_parts.query.filter_by.return_value.first.return_value = mock_part
 
-            response = client.post("/lookup_part", data={"part_number": "3001"})
+            _response = client.post("/lookup_part", data={"part_number": "3001"})
             assert response.status_code == 200
 
     def test_missing_parts_workflow(self, client):
         """Test the missing parts workflow."""
+
         # View missing parts main page
-        response = client.get("/missing_parts")
+        _response = client.get("/missing_parts")
         assert response.status_code == 200
 
         # View missing parts by category
-        response = client.get("/missing_parts_category/Brick")
+        _response = client.get("/missing_parts_category/Brick")
         assert response.status_code in [200, 404]
 
     def test_navigation_between_pages(self, client):
         """Test navigation between different pages."""
+
         pages = [
             "/",
             "/set_search",
@@ -136,12 +140,13 @@ class TestApplicationIntegration:
         ]
 
         for page in pages:
-            response = client.get(page)
+            _response = client.get(page)
             assert response.status_code == 200
 
     @patch("services.cache_service.requests.get")
     def test_image_caching_integration(self, mock_get):
         """Test integration of image caching service."""
+
         from services.cache_service import cache_image
 
         # Mock successful response
@@ -152,7 +157,7 @@ class TestApplicationIntegration:
         mock_get.return_value = mock_response
 
         # Test caching
-        result = cache_image("http://example.com/test.jpg")
+        _result = cache_image("http://example.com/test.jpg")
         assert result.startswith("/static/cache/images/")
 
     def test_part_lookup_service_integration(self, app):
@@ -183,21 +188,23 @@ class TestApplicationIntegration:
 
     def test_error_handling_integration(self, client):
         """Test error handling across the application."""
+
         # Test 404 handling
-        response = client.get("/non-existent-page")
+        _response = client.get("/non-existent-page")
         assert response.status_code == 404
 
         # Test method not allowed
-        response = client.post("/set_maintain")
+        _response = client.post("/set_maintain")
         assert response.status_code == 405
 
     def test_security_headers_integration(self, client):
         """Test that security measures are in place."""
-        response = client.get("/")
+
+        _response = client.get("/")
         assert response.status_code == 200
 
         # Check for potential security headers
-        headers = response.headers
+        response.headers
         # Note: These tests depend on implementation
         # Common security headers include:
         # - X-Content-Type-Options
@@ -206,8 +213,9 @@ class TestApplicationIntegration:
 
     def test_static_files_integration(self, client):
         """Test that static files are served correctly."""
+
         # Test that static files route works
-        response = client.get("/static/default_image.png")
+        _response = client.get("/static/default_image.png")
         assert response.status_code in [200, 404]  # File may or may not exist
 
     def test_database_transaction_rollback(self, app):
@@ -231,13 +239,13 @@ class TestApplicationIntegration:
                 pass
 
             # Verify rollback occurred
-            result = RebrickableSets.query.filter_by(set_num="test-1").first()
+            _result = RebrickableSets.query.filter_by(set_num="test-1").first()
             assert result is None
 
     def test_concurrent_database_access(self, app):
         """Test concurrent database access doesn't cause issues."""
+
         import threading
-        import time
 
         results = []
 
@@ -256,7 +264,7 @@ class TestApplicationIntegration:
                     db.session.add(storage)
                     db.session.commit()
                     results.append(True)
-                except Exception as e:
+                except Exception:
                     results.append(False)
 
         # Create multiple threads
@@ -281,6 +289,7 @@ class TestAPIIntegration:
     @patch("services.rebrickable_service.requests.get")
     def test_rebrickable_api_integration(self, mock_get):
         """Test integration with Rebrickable API service."""
+
         # Mock API response
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -291,12 +300,13 @@ class TestAPIIntegration:
 
         # This would require the actual service functions to be implemented
         # from services.rebrickable_service import get_rebrickable_sets
-        # result = get_rebrickable_sets(api_key='test')
+        # _result = get_rebrickable_sets(api_key='test')
         # assert len(result) == 1
 
     @patch("services.brickognize_service.requests.post")
     def test_brickognize_api_integration(self, mock_post):
         """Test integration with Brickognize API service."""
+
         # Mock API response
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -313,7 +323,7 @@ class TestAPIIntegration:
                 b"fake_image"
             )
 
-            result = get_predictions("test_image.jpg", "test.jpg")
+            _result = get_predictions("test_image.jpg", "test.jpg")
             assert result is not None
 
 
@@ -324,13 +334,14 @@ class TestPerformanceIntegration:
 
     def test_page_load_performance(self, client):
         """Test that pages load within acceptable time limits."""
+
         import time
 
         pages = ["/", "/set_search", "/lookup_part", "/dashboard"]
 
         for page in pages:
             start_time = time.time()
-            response = client.get(page)
+            _response = client.get(page)
             end_time = time.time()
 
             assert response.status_code == 200
@@ -339,6 +350,7 @@ class TestPerformanceIntegration:
 
     def test_database_query_performance(self, app):
         """Test database query performance."""
+
         import time
 
         with app.app_context():

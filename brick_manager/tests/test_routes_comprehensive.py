@@ -1,10 +1,9 @@
 """Route function tests for maximum coverage boost."""
 
-from unittest.mock import MagicMock, Mock, patch
+
+from unittest.mock import Mock, patch
 
 import pytest
-from flask import Flask
-from werkzeug.test import Client
 
 
 class TestRoutesFunctionsCoverage:
@@ -13,13 +12,7 @@ class TestRoutesFunctionsCoverage:
     def test_dashboard_functions(self):
         """Test dashboard route functions."""
         try:
-            from brick_manager.routes.dashboard import (
-                dashboard_bp,
-                get_missing_parts_count,
-                get_recent_activity,
-                get_storage_stats,
-                get_user_sets_count,
-            )
+            from brick_manager.routes.dashboard import dashboard_bp
 
             assert dashboard_bp is not None
         except ImportError:
@@ -28,13 +21,7 @@ class TestRoutesFunctionsCoverage:
     def test_missing_parts_functions(self):
         """Test missing parts route functions."""
         try:
-            from brick_manager.routes.missing_parts import (
-                export_missing_parts_csv,
-                missing_minifigure_parts_view,
-                missing_parts_bp,
-                missing_parts_view,
-                sync_missing_parts_route,
-            )
+            from brick_manager.routes.missing_parts import missing_parts_bp
 
             assert missing_parts_bp is not None
         except ImportError:
@@ -43,13 +30,7 @@ class TestRoutesFunctionsCoverage:
     def test_set_search_functions(self):
         """Test set search route functions."""
         try:
-            from brick_manager.routes.set_search import (
-                get_set_details,
-                get_user_set_status,
-                search_sets,
-                search_sets_ajax,
-                set_search_bp,
-            )
+            from brick_manager.routes.set_search import set_search_bp
 
             assert set_search_bp is not None
         except ImportError:
@@ -58,13 +39,7 @@ class TestRoutesFunctionsCoverage:
     def test_set_maintain_functions(self):
         """Test set maintain route functions."""
         try:
-            from brick_manager.routes.set_maintain import (
-                add_user_set,
-                get_set_progress,
-                remove_user_set,
-                set_maintain_bp,
-                set_maintain_view,
-            )
+            from brick_manager.routes.set_maintain import set_maintain_bp
 
             assert set_maintain_bp is not None
         except ImportError:
@@ -73,13 +48,7 @@ class TestRoutesFunctionsCoverage:
     def test_box_maintenance_functions(self):
         """Test box maintenance route functions."""
         try:
-            from brick_manager.routes.box_maintenance import (
-                box_maintenance_bp,
-                box_maintenance_view,
-                create_storage_box,
-                delete_storage_box,
-                update_storage_box,
-            )
+            from brick_manager.routes.box_maintenance import box_maintenance_bp
 
             assert box_maintenance_bp is not None
         except ImportError:
@@ -88,13 +57,7 @@ class TestRoutesFunctionsCoverage:
     def test_token_management_functions(self):
         """Test token management route functions."""
         try:
-            from brick_manager.routes.token_management import (
-                delete_rebrickable_token,
-                save_rebrickable_token,
-                test_rebrickable_connection,
-                token_management_bp,
-                token_management_view,
-            )
+            from brick_manager.routes.token_management import token_management_bp
 
             assert token_management_bp is not None
         except ImportError:
@@ -103,14 +66,7 @@ class TestRoutesFunctionsCoverage:
     def test_admin_sync_functions(self):
         """Test admin sync route functions."""
         try:
-            from brick_manager.routes.admin_sync import (
-                admin_sync_bp,
-                admin_sync_view,
-                sync_all_data,
-                sync_categories,
-                sync_part_colors,
-                sync_themes,
-            )
+            from brick_manager.routes.admin_sync import admin_sync_bp
 
             assert admin_sync_bp is not None
         except ImportError:
@@ -119,12 +75,7 @@ class TestRoutesFunctionsCoverage:
     def test_storage_functions(self):
         """Test storage route functions."""
         try:
-            from brick_manager.routes.storage import (
-                create_label,
-                download_label,
-                storage_bp,
-                storage_view,
-            )
+            from brick_manager.routes.storage import storage_bp
 
             assert storage_bp is not None
         except ImportError:
@@ -133,11 +84,7 @@ class TestRoutesFunctionsCoverage:
     def test_part_lookup_functions(self):
         """Test part lookup route functions."""
         try:
-            from brick_manager.routes.part_lookup import (
-                part_lookup_bp,
-                part_lookup_view,
-                search_parts_ajax,
-            )
+            from brick_manager.routes.part_lookup import part_lookup_bp
 
             assert part_lookup_bp is not None
         except ImportError:
@@ -146,11 +93,7 @@ class TestRoutesFunctionsCoverage:
     def test_manual_entry_functions(self):
         """Test manual entry route functions."""
         try:
-            from brick_manager.routes.manual_entry import (
-                manual_entry_bp,
-                manual_entry_view,
-                save_part,
-            )
+            from brick_manager.routes.manual_entry import manual_entry_bp
 
             assert manual_entry_bp is not None
         except ImportError:
@@ -159,12 +102,7 @@ class TestRoutesFunctionsCoverage:
     def test_upload_functions(self):
         """Test upload route functions."""
         try:
-            from brick_manager.routes.upload import (
-                identify_part,
-                process_upload,
-                upload_bp,
-                upload_view,
-            )
+            from brick_manager.routes.upload import upload_bp
 
             assert upload_bp is not None
         except ImportError:
@@ -173,11 +111,7 @@ class TestRoutesFunctionsCoverage:
     def test_part_location_functions(self):
         """Test part location route functions."""
         try:
-            from brick_manager.routes.part_location import (
-                part_location_bp,
-                part_location_view,
-                update_part_location,
-            )
+            from brick_manager.routes.part_location import part_location_bp
 
             assert part_location_bp is not None
         except ImportError:
@@ -187,9 +121,7 @@ class TestRoutesFunctionsCoverage:
         """Test import rebrickable data route functions."""
         try:
             from brick_manager.routes.import_rebrickable_data import (
-                import_data_view,
                 import_rebrickable_data_bp,
-                process_csv_import,
             )
 
             assert import_rebrickable_data_bp is not None
@@ -199,11 +131,7 @@ class TestRoutesFunctionsCoverage:
     def test_rebrickable_sync_functions(self):
         """Test rebrickable sync route functions."""
         try:
-            from brick_manager.routes.rebrickable_sync import (
-                rebrickable_sync_bp,
-                rebrickable_sync_view,
-                trigger_sync,
-            )
+            from brick_manager.routes.rebrickable_sync import rebrickable_sync_bp
 
             assert rebrickable_sync_bp is not None
         except ImportError:
@@ -215,11 +143,12 @@ class TestRouteEndpointsCoverage:
 
     def test_main_route_endpoint(self):
         """Test main route endpoint."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             try:
-                response = client.get("/")
+                _response = client.get("/")
                 # Accept any response (200, 302, 404, 500) - just test execution
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
@@ -228,77 +157,84 @@ class TestRouteEndpointsCoverage:
 
     def test_dashboard_route_endpoint(self):
         """Test dashboard route endpoint."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             try:
-                response = client.get("/dashboard")
+                _response = client.get("/dashboard")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
 
     def test_storage_route_endpoint(self):
         """Test storage route endpoint."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             try:
-                response = client.get("/storage")
+                _response = client.get("/storage")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
 
     def test_missing_parts_route_endpoint(self):
         """Test missing parts route endpoint."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             try:
-                response = client.get("/missing-parts")
+                _response = client.get("/missing-parts")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
 
     def test_set_search_route_endpoint(self):
         """Test set search route endpoint."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             try:
-                response = client.get("/set-search")
+                _response = client.get("/set-search")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
 
     def test_part_lookup_route_endpoint(self):
         """Test part lookup route endpoint."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             try:
-                response = client.get("/part-lookup")
+                _response = client.get("/part-lookup")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
 
     def test_upload_route_endpoint(self):
         """Test upload route endpoint."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             try:
-                response = client.get("/upload")
+                _response = client.get("/upload")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
 
     def test_manual_entry_route_endpoint(self):
         """Test manual entry route endpoint."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             try:
-                response = client.get("/manual-entry")
+                _response = client.get("/manual-entry")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
@@ -310,6 +246,7 @@ class TestServiceFunctionsCoverage:
     @patch("brick_manager.services.rebrickable_service.requests.get")
     def test_rebrickable_service_through_routes(self, mock_get):
         """Test rebrickable service functions."""
+
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"results": []}
@@ -319,35 +256,38 @@ class TestServiceFunctionsCoverage:
         from brick_manager.services.rebrickable_service import make_request
 
         # Test basic request functionality
-        result = make_request("http://test.com/api", {"key": "test"})
+        _result = make_request("http://test.com/api", {"key": "test"})
         assert result is not None
 
     @patch("brick_manager.services.cache_service.requests.get")
     @patch("brick_manager.services.cache_service.os.path.exists")
     def test_cache_service_through_routes(self, mock_exists, mock_get):
         """Test cache service functions."""
+
         mock_exists.return_value = True
 
         from brick_manager.services.cache_service import get_cached_image_path
 
-        result = get_cached_image_path("http://test.com/image.jpg")
+        _result = get_cached_image_path("http://test.com/image.jpg")
         # Should execute without error
 
     def test_label_service_through_routes(self):
         """Test label service functions."""
+
         from brick_manager.services.label_service import generate_qr_code
 
-        result = generate_qr_code("test_data")
+        _result = generate_qr_code("test_data")
         assert result is not None
 
     @patch("brick_manager.services.part_lookup_service.open")
     def test_part_lookup_service_through_routes(self, mock_open):
         """Test part lookup service functions."""
+
         mock_open.side_effect = FileNotFoundError()
 
         from brick_manager.services.part_lookup_service import load_part_lookup
 
-        result = load_part_lookup()
+        load_part_lookup()
         # Should handle missing file gracefully
 
 
@@ -356,8 +296,9 @@ class TestModelFunctionsCoverage:
 
     def test_model_creation_and_repr(self):
         """Test model creation and representation."""
+
         from brick_manager.app import app
-        from brick_manager.models import PartLookup, Parts, Sets, Storage
+        from brick_manager.models import Parts, Sets, Storage
 
         with app.app_context():
             # Test model instantiation
@@ -387,6 +328,7 @@ class TestModelFunctionsCoverage:
 
     def test_additional_model_methods(self):
         """Test additional model methods."""
+
         from brick_manager.app import app
         from brick_manager.models import MissingParts, RebrickableParts, RebrickableSets
 
@@ -421,22 +363,24 @@ class TestErrorHandlingPaths:
 
     def test_app_error_handling(self):
         """Test app error handling."""
+
         from brick_manager.app import app
 
         with app.test_client() as client:
             # Test non-existent route
-            response = client.get("/non-existent-route")
+            _response = client.get("/non-existent-route")
             assert response.status_code == 404
 
     @patch("brick_manager.services.rebrickable_service.requests.get")
     def test_service_error_handling(self, mock_get):
         """Test service error handling."""
+
         mock_get.side_effect = Exception("Network error")
 
         from brick_manager.services.rebrickable_service import make_request
 
         try:
-            result = make_request("http://test.com/api", {})
+            _result = make_request("http://test.com/api", {})
             # Should handle error gracefully
         except Exception:
             # Expected behavior for error handling
@@ -444,6 +388,7 @@ class TestErrorHandlingPaths:
 
     def test_model_validation_errors(self):
         """Test model validation error paths."""
+
         from brick_manager.app import app
         from brick_manager.models import Parts
 
@@ -463,6 +408,7 @@ class TestConfigurationCoverage:
 
     def test_config_environment_variables(self):
         """Test config with environment variables."""
+
         from brick_manager.config import Config
 
         config = Config()
@@ -476,6 +422,7 @@ class TestConfigurationCoverage:
 
     def test_app_config_loading(self):
         """Test app config loading."""
+
         from brick_manager.app import app
 
         # Test that config is loaded

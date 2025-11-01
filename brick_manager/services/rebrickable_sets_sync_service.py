@@ -1,5 +1,7 @@
 """
+
 Rebrickable user sets synchronization service.
+
 
 This service handles the synchronization of user sets with Rebrickable's Lists feature,
 specifically creating and maintaining a "Brick_Manager" list.
@@ -16,7 +18,9 @@ logger = logging.getLogger(__name__)
 
 def get_rebrickable_lists():
     """
+
     Get all lists for the authenticated user from Rebrickable.
+
 
     Returns:
         list: List of user lists from Rebrickable
@@ -32,7 +36,7 @@ def get_rebrickable_lists():
         headers = {"Accept": "application/json", "Authorization": f"key {api_key}"}
 
         url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/"
-        response = requests.get(url, headers=headers, timeout=20)
+        _response = requests.get(url, headers=headers, timeout=20)
 
         if response.status_code == 200:
             data = response.json()
@@ -50,7 +54,9 @@ def get_rebrickable_lists():
 
 def create_brick_manager_list():
     """
+
     Create the "Brick_Manager" list on Rebrickable.
+
 
     Returns:
         dict: Result of list creation with list ID if successful
@@ -71,7 +77,10 @@ def create_brick_manager_list():
         list_data = {"name": "Brick_Manager", "is_buildable": True}
 
         url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/"
-        response = requests.post(url, json=list_data, headers=headers, timeout=20)
+        _response = requests.post(url,
+            json=list_data,
+            headers=headers,
+            timeout=20)
 
         if response.status_code == 201:
             created_list = response.json()
@@ -97,7 +106,9 @@ def create_brick_manager_list():
 
 def get_brick_manager_list():
     """
+
     Get the "Brick_Manager" list from Rebrickable, creating it if it doesn't exist.
+
 
     Returns:
         dict: Result with list information
@@ -124,7 +135,7 @@ def get_brick_manager_list():
             }
         else:
             # Create the list
-            result = create_brick_manager_list()
+            _result = create_brick_manager_list()
             if result["success"]:
                 result["created"] = True
             return result
@@ -136,7 +147,9 @@ def get_brick_manager_list():
 
 def get_list_sets(list_id):
     """
+
     Get all sets in a specific Rebrickable list.
+
 
     Args:
         list_id: The ID of the list to query
@@ -161,7 +174,10 @@ def get_list_sets(list_id):
             url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
             params = {"page": page, "page_size": 100}
 
-            response = requests.get(url, headers=headers, params=params, timeout=20)
+            _response = requests.get(url,
+                headers=headers,
+                params=params,
+                timeout=20)
 
             if response.status_code == 200:
                 data = response.json()
@@ -186,7 +202,9 @@ def get_list_sets(list_id):
 
 def add_sets_to_list(list_id, set_data):
     """
+
     Add sets to a Rebrickable list using bulk operations.
+
 
     Args:
         list_id: The ID of the list
@@ -210,7 +228,8 @@ def add_sets_to_list(list_id, set_data):
 
         # Handle both dictionary (set_num -> quantity) and list (set_nums) formats
         if isinstance(set_data, dict):
-            sets_to_process = list(set_data.items())  # (set_num, quantity) pairs
+            sets_to_process = list(set_data.items())  # (set_num,
+                quantity) pairs
         else:
             # Backward compatibility: treat as list of set numbers with quantity 1
             sets_to_process = [(set_num, 1) for set_num in set_data]
@@ -237,11 +256,15 @@ def add_sets_to_list(list_id, set_data):
 
         try:
             # Try bulk addition
-            response = requests.post(url, json=bulk_data, headers=headers, timeout=60)
+            _response = requests.post(url,
+                json=bulk_data,
+                headers=headers,
+                timeout=60)
 
             if response.status_code == 201:
                 added_sets = response.json()
-                added_count = len(added_sets) if isinstance(added_sets, list) else 1
+                added_count = len(added_sets) if isinstance(added_sets,
+                    list) else 1
                 logger.info(
                     f"Successfully added {added_count} sets to list via bulk operation"
                 )
@@ -282,7 +305,9 @@ def add_sets_to_list(list_id, set_data):
 
 def add_sets_individually(list_id, sets_to_process, headers, user_token):
     """
+
     Add sets individually when bulk operation fails or is rate limited.
+
 
     Args:
         list_id: The ID of the list
@@ -294,6 +319,7 @@ def add_sets_individually(list_id, sets_to_process, headers, user_token):
         dict: Result of the operation
     """
     added_count = 0
+
     errors = []
     rate_limited_count = 0
 
@@ -302,7 +328,10 @@ def add_sets_individually(list_id, sets_to_process, headers, user_token):
             url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
             data = {"set_num": set_num, "quantity": quantity}
 
-            response = requests.post(url, json=data, headers=headers, timeout=20)
+            _response = requests.post(url,
+                json=data,
+                headers=headers,
+                timeout=20)
 
             if response.status_code == 201:
                 added_count += 1
@@ -338,7 +367,9 @@ def add_sets_individually(list_id, sets_to_process, headers, user_token):
 
 def update_set_quantity_in_list(list_id, set_num, new_quantity):
     """
+
     Update the quantity of a specific set in a Rebrickable list.
+
     Since there's no direct update API, we need to remove and re-add the set.
 
     Args:
@@ -364,7 +395,9 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
 
         # First, remove the set from the list
         delete_url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/{set_num}/"
-        delete_response = requests.delete(delete_url, headers=headers, timeout=20)
+        delete_response = requests.delete(delete_url,
+            headers=headers,
+            timeout=20)
 
         if delete_response.status_code not in [
             204,
@@ -414,7 +447,9 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
 
 def remove_sets_from_list(list_id, set_nums):
     """
+
     Remove sets from a Rebrickable list.
+
 
     Args:
         list_id: The ID of the list
@@ -439,7 +474,7 @@ def remove_sets_from_list(list_id, set_nums):
             try:
                 url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/{set_num}/"
 
-                response = requests.delete(url, headers=headers, timeout=20)
+                _response = requests.delete(url, headers=headers, timeout=20)
 
                 if response.status_code == 204:
                     removed_count += 1
@@ -469,7 +504,9 @@ def remove_sets_from_list(list_id, set_nums):
 
 def sync_user_sets_with_rebrickable():
     """
+
     Synchronize local user sets with the Rebrickable "Brick_Manager" list.
+
 
     This function:
     1. Gets or creates the "Brick_Manager" list on Rebrickable
@@ -576,7 +613,9 @@ def sync_user_sets_with_rebrickable():
         update_rate_limited_count = 0
         if sets_to_update:
             for set_num, local_qty, rebrickable_qty in sets_to_update:
-                update_result = update_set_quantity_in_list(list_id, set_num, local_qty)
+                update_result = update_set_quantity_in_list(list_id,
+                    set_num,
+                    local_qty)
                 if update_result.get("success"):
                     updated_count += 1
                     logger.debug(
@@ -604,7 +643,8 @@ def sync_user_sets_with_rebrickable():
 
         # Step 7: Remove old sets
         if sets_to_remove:
-            remove_result = remove_sets_from_list(list_id, list(sets_to_remove))
+            remove_result = remove_sets_from_list(list_id,
+                list(sets_to_remove))
             results["operations"].append(
                 {"operation": "remove_sets", "result": remove_result}
             )
@@ -642,7 +682,7 @@ def sync_user_sets_with_rebrickable():
 
         # Enhanced message with quantity and rate limiting information
         message_parts = [
-            f"Synchronization completed! ",
+            "Synchronization completed! ",
             f"List {'created' if list_result.get('created') else 'found'} successfully. ",
             f"Added {total_added} sets, updated {total_updated} quantities, removed {total_removed} sets.",
         ]

@@ -1,5 +1,7 @@
 """
+
 Rebrickable synchronization service for syncing missing parts with Rebrickable's Lost Parts feature.
+
 
 This service handles the synchronization of missing parts from the local database
 with the user's Lost Parts list on Rebrickable.
@@ -9,7 +11,7 @@ import logging
 import time
 
 import requests
-from models import RebrickableParts, User_Parts, User_Set, UserMinifigurePart, db
+from models import User_Set, UserMinifigurePart
 from services.token_service import get_rebrickable_api_key, get_rebrickable_user_token
 
 logger = logging.getLogger(__name__)
@@ -24,6 +26,7 @@ _rate_limit_tracker = {
 
 def update_rate_limit_tracker(was_rate_limited):
     """Update the global rate limiting tracker."""
+
     global _rate_limit_tracker
 
     if was_rate_limited:
@@ -39,6 +42,7 @@ def update_rate_limit_tracker(was_rate_limited):
 
 def should_skip_api_calls():
     """Check if we should skip API calls due to rate limiting."""
+
     global _rate_limit_tracker
 
     if _rate_limit_tracker["should_throttle"]:
@@ -53,7 +57,9 @@ def should_skip_api_calls():
 
 def find_inventory_part_id_from_user_sets(part_num, color_id, user_set_num=None):
     """
+
     Find an inventory part ID for a given part number and color ID from the user's actual sets.
+
     This is the most accurate method since we're looking in sets the user actually owns.
 
     Args:
@@ -101,7 +107,7 @@ def find_inventory_part_id_from_user_sets(part_num, color_id, user_set_num=None)
                 )
                 update_rate_limit_tracker(True)  # Rate limited
                 # Continue with just the user_set_num if we have it
-        except:
+        except Exception:
             pass  # If backup lookup fails, continue with what we have
 
         # Try each set until we find the part
@@ -163,7 +169,9 @@ def make_rate_limited_request(
     url, headers, params=None, timeout=20, max_retries=3, method="GET"
 ):
     """
+
     Make an HTTP request with automatic rate limiting and retry logic.
+
 
     Args:
         url: Request URL
@@ -181,19 +189,19 @@ def make_rate_limited_request(
     for attempt in range(max_retries + 1):
         try:
             if method.upper() == "GET":
-                response = requests.get(
+                _response = requests.get(
                     url, headers=headers, params=params, timeout=timeout
                 )
             elif method.upper() == "DELETE":
-                response = requests.delete(
+                _response = requests.delete(
                     url, headers=headers, params=params, timeout=timeout
                 )
             elif method.upper() == "POST":
-                response = requests.post(
+                _response = requests.post(
                     url, headers=headers, params=params, timeout=timeout
                 )
             elif method.upper() == "PUT":
-                response = requests.put(
+                _response = requests.put(
                     url, headers=headers, params=params, timeout=timeout
                 )
             else:
@@ -205,13 +213,16 @@ def make_rate_limited_request(
                     # Exponential backoff: 2^attempt seconds
                     wait_time = 2**attempt
                     logger.debug(
-                        f"Rate limited (attempt {attempt + 1}/{max_retries + 1}), waiting {wait_time}s before retry"
+                        f"Rate limited (attempt {attempt + \
+                            1}/{max_retries + \
+                            1}), waiting {wait_time}s before retry"
                     )
                     time.sleep(wait_time)
                     continue
                 else:
                     logger.debug(
-                        f"Rate limited after {max_retries + 1} attempts, giving up"
+                        f"Rate limited after {max_retries + \
+                            1} attempts, giving up"
                     )
                     return response  # Return the 429 response
             else:
@@ -225,7 +236,9 @@ def make_rate_limited_request(
 
 def get_local_missing_parts(include_spare=False, include_minifig=True):
     """
+
     Get all missing parts from the local database (excluding spare parts by default).
+
     Returns a list of parts with their missing quantities.
 
     Args:
@@ -295,7 +308,9 @@ def get_local_missing_parts(include_spare=False, include_minifig=True):
 
 def get_local_missing_minifigure_parts(include_spare=False):
     """
+
     Get only missing minifigure parts from the local database.
+
     Returns a list of minifigure parts with their missing quantities.
     """
     missing_parts = []
@@ -333,9 +348,7 @@ def get_local_missing_minifigure_parts(include_spare=False):
 
 
 def get_rebrickable_lost_parts():
-    """
-    Get all lost parts from Rebrickable for the current user.
-    """
+    """Get all lost parts from Rebrickable for the current user."""
     try:
         user_token = get_rebrickable_user_token()
         api_key = get_rebrickable_api_key()
@@ -351,7 +364,7 @@ def get_rebrickable_lost_parts():
         page = 1
 
         while True:
-            response = requests.get(
+            _response = requests.get(
                 url, headers=headers, params={"page": page}, timeout=30
             )
 
@@ -379,7 +392,9 @@ def get_rebrickable_lost_parts():
 
 def add_lost_parts_to_rebrickable(parts_to_add):
     """
+
     Add multiple lost parts to Rebrickable using bulk operations.
+
     Each part should have inv_part_id and missing_quantity.
     Uses intelligent batching for large numbers of parts to avoid timeouts.
     """
@@ -442,7 +457,7 @@ def add_lost_parts_to_rebrickable(parts_to_add):
             )
 
             try:
-                response = requests.post(
+                _response = requests.post(
                     url, headers=headers, json=batch, timeout=60
                 )  # Longer timeout for batches
 
@@ -514,7 +529,9 @@ def add_lost_parts_to_rebrickable(parts_to_add):
 
 def add_lost_parts_individually(parts_data, headers, user_token):
     """
+
     Add lost parts individually when bulk operation is rate limited.
+
 
     Args:
         parts_data: List of part dictionaries to add
@@ -532,7 +549,7 @@ def add_lost_parts_individually(parts_data, headers, user_token):
 
         for i, part_data in enumerate(parts_data):
             try:
-                response = requests.post(
+                _response = requests.post(
                     url, headers=headers, json=[part_data], timeout=20
                 )
 
@@ -578,9 +595,7 @@ def add_lost_parts_individually(parts_data, headers, user_token):
 
 
 def remove_lost_parts_from_rebrickable(parts_to_remove):
-    """
-    Remove multiple lost parts from Rebrickable.
-    """
+    """Remove multiple lost parts from Rebrickable."""
     if not parts_to_remove:
         return {"success": True, "removed": 0, "message": "No parts to remove"}
 
@@ -602,7 +617,7 @@ def remove_lost_parts_from_rebrickable(parts_to_remove):
                 continue
 
             url = f"https://rebrickable.com/api/v3/users/{user_token}/lost_parts/{lost_part_id}/"
-            response = requests.delete(url, headers=headers, timeout=30)
+            _response = requests.delete(url, headers=headers, timeout=30)
 
             if response.status_code == 204:
                 removed_count += 1
@@ -628,7 +643,9 @@ def remove_lost_parts_from_rebrickable(parts_to_remove):
 
 def get_user_part_lists():
     """
+
     Get all part lists for the user.
+
     Returns a list of part lists or empty list if none found.
     """
     try:
@@ -647,7 +664,7 @@ def get_user_part_lists():
 
         while True:
             params = {"page": page, "page_size": 100}
-            response = make_rate_limited_request(url, headers, params, timeout=20)
+            _response = make_rate_limited_request(url, headers, params, timeout=20)
 
             if not response or response.status_code != 200:
                 logger.error(
@@ -672,7 +689,9 @@ def get_user_part_lists():
 
 def find_or_create_missing_parts_list(list_name="Brick_Manager-Missing_Parts"):
     """
+
     Find existing missing parts list or create it if it doesn't exist.
+
     Returns the list ID or None if creation failed.
     """
     try:
@@ -705,7 +724,7 @@ def find_or_create_missing_parts_list(list_name="Brick_Manager-Missing_Parts"):
 
         data = {"name": list_name, "is_buildable": False, "num_parts": 0}
 
-        response = requests.post(url, headers=headers, data=data, timeout=30)
+        _response = requests.post(url, headers=headers, data=data, timeout=30)
 
         if response.status_code == 201:
             created_list = response.json()
@@ -729,7 +748,9 @@ def find_or_create_missing_parts_list(list_name="Brick_Manager-Missing_Parts"):
 
 def get_part_list_parts(list_id):
     """
+
     Get all parts from a specific part list.
+
     Returns a list of parts or empty list if none found.
     """
     try:
@@ -748,7 +769,7 @@ def get_part_list_parts(list_id):
 
         while True:
             params = {"page": page, "page_size": 100}
-            response = make_rate_limited_request(url, headers, params, timeout=20)
+            _response = make_rate_limited_request(url, headers, params, timeout=20)
 
             if not response or response.status_code != 200:
                 logger.error(
@@ -773,7 +794,9 @@ def get_part_list_parts(list_id):
 
 def add_parts_to_part_list(list_id, parts_to_add):
     """
+
     Add multiple parts to a part list using bulk operations.
+
     Each part should have part_num, color_id, and quantity.
     Uses intelligent batching for large numbers of parts to avoid timeouts.
     """
@@ -830,7 +853,7 @@ def add_parts_to_part_list(list_id, parts_to_add):
             )
 
             try:
-                response = requests.post(url, headers=headers, json=batch, timeout=60)
+                _response = requests.post(url, headers=headers, json=batch, timeout=60)
 
                 if response.status_code == 201:
                     added_parts = response.json()
@@ -913,9 +936,11 @@ def add_parts_to_part_list(list_id, parts_to_add):
 
 def add_parts_individually_to_list(list_id, parts_data, headers, user_token):
     """
+
     Fallback function to add parts individually when bulk operations are rate limited.
     """
     added_count = 0
+
     rate_limited_count = 0
 
     for part in parts_data:
@@ -935,7 +960,7 @@ def add_parts_individually_to_list(list_id, parts_data, headers, user_token):
             headers_form = headers.copy()
             headers_form["Content-Type"] = "application/x-www-form-urlencoded"
 
-            response = requests.post(url, headers=headers_form, data=data, timeout=30)
+            _response = requests.post(url, headers=headers_form, data=data, timeout=30)
 
             if response.status_code == 201:
                 added_count += 1
@@ -960,7 +985,9 @@ def add_parts_individually_to_list(list_id, parts_data, headers, user_token):
 
 def clear_part_list(list_id):
     """
+
     Remove all parts from a part list using the most efficient method available.
+
     First tries to delete and recreate the list (fastest), falls back to individual deletions.
     Returns success status and count of removed parts.
     """
@@ -1059,7 +1086,7 @@ def clear_part_list(list_id):
 
                 url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/{part_num}/{color_id}/"
 
-                response = make_rate_limited_request(
+                _response = make_rate_limited_request(
                     url, headers, method="DELETE", timeout=20
                 )
 
@@ -1069,7 +1096,10 @@ def clear_part_list(list_id):
 
                     # Progress feedback for every 50 parts
                     if (i + 1) % 50 == 0:
-                        logger.info(f"Removed {i + 1}/{len(current_parts)} parts")
+                        logger.info(
+                            f"Removed {i + \
+                            1}/{len(current_parts)} parts"
+                        )
 
                 elif response and response.status_code == 429:
                     logger.warning(
@@ -1118,7 +1148,9 @@ def clear_part_list(list_id):
 
 def find_inventory_part_ids_bulk(missing_parts):
     """
+
     Find inventory part IDs for multiple parts using bulk API operations.
+
     This dramatically reduces the number of API calls by using set-level queries
     instead of individual part lookups.
 
@@ -1159,7 +1191,7 @@ def find_inventory_part_ids_bulk(missing_parts):
         # Process each set's parts in bulk
         for set_num, set_parts in parts_by_set.items():
             if should_skip_api_calls():
-                logger.warning(f"Stopping bulk processing due to rate limiting")
+                logger.warning("Stopping bulk processing due to rate limiting")
                 break
 
             try:
@@ -1167,7 +1199,7 @@ def find_inventory_part_ids_bulk(missing_parts):
                 url = f"https://rebrickable.com/api/v3/lego/sets/{set_num}/parts/"
                 params = {"page_size": 1000}  # Get all parts at once
 
-                response = make_rate_limited_request(url, headers, params, timeout=30)
+                _response = make_rate_limited_request(url, headers, params, timeout=30)
 
                 if response and response.status_code == 200:
                     set_inventory = response.json()
@@ -1220,7 +1252,9 @@ def find_inventory_part_ids_bulk(missing_parts):
 
 def remove_parts_from_part_list(list_id, parts_to_remove):
     """
+
     Remove specific parts from a part list.
+
     Each part should have part_num, color_id, and optionally list_part_id.
     """
     if not parts_to_remove:
@@ -1255,7 +1289,7 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
 
                 url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/{part_num}/{color_id}/"
 
-                response = make_rate_limited_request(
+                _response = make_rate_limited_request(
                     url, headers, method="DELETE", timeout=20
                 )
 
@@ -1265,7 +1299,10 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
 
                     # Progress feedback for every 25 parts
                     if (i + 1) % 25 == 0:
-                        logger.info(f"Removed {i + 1}/{len(parts_to_remove)} parts")
+                        logger.info(
+                            f"Removed {i + \
+                            1}/{len(parts_to_remove)} parts"
+                        )
 
                 elif response and response.status_code == 429:
                     logger.warning(
@@ -1313,7 +1350,9 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
 
 def update_part_quantities_in_list(list_id, parts_to_update):
     """
+
     Update quantities for existing parts in a part list.
+
     Since Rebrickable Part Lists API doesn't support direct quantity updates,
     we remove and re-add the parts with new quantities.
     """
@@ -1375,7 +1414,7 @@ def update_part_quantities_in_list(list_id, parts_to_update):
                 "message"
             ] = f"Successfully updated quantities for {updated_count} parts"
             if updated_count < len(parts_to_update):
-                result["message"] += f" (some updates may have been rate limited)"
+                result["message"] += " (some updates may have been rate limited)"
         else:
             result["message"] = "Failed to update part quantities"
 
@@ -1388,7 +1427,9 @@ def update_part_quantities_in_list(list_id, parts_to_update):
 
 def sync_missing_parts_with_rebrickable(batch_size=None):
     """
+
     Synchronize missing parts from local database with Rebrickable's Part Lists feature using smart diff-based updates.
+
 
     This function:
     1. Gets all missing parts from the local database (excluding spare parts)
@@ -1447,7 +1488,8 @@ def sync_missing_parts_with_rebrickable(batch_size=None):
 
                 # Log the quantity summing for debugging
                 logger.debug(
-                    f"Part {part['part_num']}/{part['color_id']} found in multiple sets: {old_quantity} + {part['missing_quantity']} = {new_quantity}"
+                    f"Part {part['part_num']}/{part['color_id']} found in multiple sets: {old_quantity} + \
+                        {part['missing_quantity']} = {new_quantity}"
                 )
                 duplicate_parts_count += 1
             else:
@@ -1587,7 +1629,7 @@ def sync_missing_parts_with_rebrickable(batch_size=None):
 
         # Enhanced message with smart sync information
         message_parts = [
-            f"Smart synchronization completed! ",
+            "Smart synchronization completed! ",
             f"Found {len(local_missing)} missing parts locally vs {len(current_list_parts)} in list. ",
         ]
 
@@ -1616,7 +1658,9 @@ def sync_missing_parts_with_rebrickable(batch_size=None):
 
 def sync_missing_minifigure_parts_with_rebrickable(batch_size=None):
     """
+
     Synchronize missing minifigure parts from local database with Rebrickable's Part Lists feature using smart diff-based updates.
+
 
     This function:
     1. Gets all missing minifigure parts from the local database (excluding spare parts)
@@ -1677,7 +1721,8 @@ def sync_missing_minifigure_parts_with_rebrickable(batch_size=None):
 
                 # Log the quantity summing for debugging
                 logger.debug(
-                    f"Minifig part {part['part_num']}/{part['color_id']} found in multiple minifigures: {old_quantity} + {part['missing_quantity']} = {new_quantity}"
+                    f"Minifig part {part['part_num']}/{part['color_id']} found in multiple minifigures: {old_quantity} + \
+                        {part['missing_quantity']} = {new_quantity}"
                 )
                 duplicate_parts_count += 1
             else:
@@ -1819,7 +1864,7 @@ def sync_missing_minifigure_parts_with_rebrickable(batch_size=None):
 
         # Enhanced message with smart sync information
         message_parts = [
-            f"Smart minifigure synchronization completed! ",
+            "Smart minifigure synchronization completed! ",
             f"Found {len(local_missing)} missing minifigure parts locally vs {len(current_list_parts)} in list. ",
         ]
 

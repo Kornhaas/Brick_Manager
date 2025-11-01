@@ -1,5 +1,7 @@
 """
+
 This module handles the loading and updating of Brick data (categories, parts, colors, and themes)
+
 from Rebrickable CSV files into the local SQLite database.
 """
 
@@ -37,7 +39,9 @@ FILES = [
 
 def download_and_extract_csv(file_name):
     """
+
     Download and extract a gzipped CSV file from Rebrickable.
+
 
     Args:
         file_name (str): Name of the gzipped file to download
@@ -46,6 +50,7 @@ def download_and_extract_csv(file_name):
         str: Path to the extracted CSV file
     """
     os.makedirs(IMPORT_DIR, exist_ok=True)
+
     gz_path = os.path.join(IMPORT_DIR, file_name)
     csv_path = os.path.join(IMPORT_DIR, file_name.replace(".gz", ""))
     url = f"{BASE_URL}/{file_name}"
@@ -65,17 +70,22 @@ def download_and_extract_csv(file_name):
 
 def ensure_table_structure():
     """
+
     Ensures all tables are created with proper SQLAlchemy model definitions
+
     This preserves primary keys, foreign keys, and other constraints
     """
     logging.info("Ensuring database tables match model definitions...")
+
     db.create_all()
     logging.info("✅ All tables are properly structured")
 
 
 def import_csv_to_sqlite(csv_path, model_class):
     """
+
     Import CSV data into SQLite database using SQLAlchemy model.
+
 
     Args:
         csv_path (str): Path to the CSV file to import
@@ -115,7 +125,9 @@ def import_csv_to_sqlite(csv_path, model_class):
 @import_rebrickable_data_bp.route("/import_data", methods=["GET", "POST"])
 def import_data():
     """
+
     Load and update Brick data (categories, parts, colors, and themes)
+
     from the Rebrickable API into the local database.
 
     Handles POST requests to fetch and store categories, parts, colors, and themes in the database.
@@ -180,7 +192,9 @@ def import_data():
 
 def main():
     """
+
     Main function to import all Rebrickable CSV files.
+
     Downloads and imports all required data files from Rebrickable.
     """
     logging.basicConfig(level=logging.INFO)

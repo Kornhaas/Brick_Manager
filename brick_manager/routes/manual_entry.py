@@ -1,5 +1,7 @@
 """
+
 This module handles the manual entry of Brick parts into the master lookup.
+
 Users can manually enter part details such as part ID, location (schrank), level (fach), and box.
 The data is either added to or updated in the master lookup.
 """
@@ -15,7 +17,9 @@ manual_entry_bp = Blueprint("manual_entry", __name__)
 @manual_entry_bp.route("/manual_entry", methods=["GET", "POST"])
 def manual_entry():
     """
+
     Handles manual entry of part information. If the part ID already exists in the master lookup,
+
     it shows a confirmation dialog before overwriting the entry.
     """
     try:

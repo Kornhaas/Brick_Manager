@@ -1,9 +1,10 @@
 """
+
 High-impact tests to quickly boost coverage.
+
 Focus on easily testable components.
 """
 
-import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,6 +16,7 @@ class TestConfigModule:
     @pytest.mark.unit
     def test_config_class_exists(self):
         """Test that Config class can be imported and has required attributes."""
+
         from config import Config
 
         # Test that the class exists
@@ -28,10 +30,11 @@ class TestConfigModule:
     @pytest.mark.unit
     def test_config_sqlalchemy_track_modifications(self):
         """Test SQLAlchemy configuration."""
+
         from config import Config
 
         # This should be False for performance
-        assert Config.SQLALCHEMY_TRACK_MODIFICATIONS == False
+        assert Config.SQLALCHEMY_TRACK_MODIFICATIONS is False
 
 
 class TestMainRoutesModule:
@@ -55,6 +58,7 @@ class TestServiceConstants:
     @pytest.mark.unit
     def test_rebrickable_service_constants(self):
         """Test all RebrickableService constants."""
+
         from services.rebrickable_service import RebrickableService
 
         assert RebrickableService.BASE_URL == "https://rebrickable.com/api/v3/lego/"
@@ -65,6 +69,7 @@ class TestServiceConstants:
     @pytest.mark.unit
     def test_rebrickable_exception_class(self):
         """Test RebrickableAPIException class."""
+
         from services.rebrickable_service import RebrickableAPIException
 
         # Test exception creation
@@ -85,6 +90,7 @@ class TestPartLookupServiceReal:
     @pytest.mark.unit
     def test_part_lookup_service_import(self):
         """Test part lookup service can be imported."""
+
         from services.part_lookup_service import load_part_lookup, save_part_lookup
 
         assert callable(load_part_lookup)
@@ -94,6 +100,7 @@ class TestPartLookupServiceReal:
     @patch("services.part_lookup_service.PartStorage")
     def test_load_part_lookup_function(self, mock_part_storage):
         """Test load_part_lookup function."""
+
         from services.part_lookup_service import load_part_lookup
 
         # Mock database query
@@ -101,7 +108,7 @@ class TestPartLookupServiceReal:
         mock_query.all.return_value = []
         mock_part_storage.query = mock_query
 
-        result = load_part_lookup()
+        _result = load_part_lookup()
 
         assert isinstance(result, dict)
         mock_query.all.assert_called_once()
@@ -111,10 +118,11 @@ class TestPartLookupServiceReal:
     @patch("services.part_lookup_service.PartStorage")
     def test_save_part_lookup_function(self, mock_part_storage, mock_db):
         """Test save_part_lookup function."""
+
         from services.part_lookup_service import save_part_lookup
 
         # Test with empty data (function returns None, not True)
-        result = save_part_lookup({})
+        _result = save_part_lookup({})
         assert result is None
 
         # Test with actual data
@@ -125,7 +133,7 @@ class TestPartLookupServiceReal:
         mock_part_storage.return_value = mock_storage_instance
         mock_part_storage.query.filter_by.return_value.first.return_value = None
 
-        result = save_part_lookup(test_data)
+        _result = save_part_lookup(test_data)
 
         # Should attempt to save
         assert result is True
@@ -137,6 +145,7 @@ class TestCacheServiceReal:
     @pytest.mark.unit
     def test_url_validation_comprehensive(self):
         """Test URL validation function thoroughly."""
+
         from services.cache_service import is_valid_url
 
         # Test comprehensive set of URLs
@@ -157,7 +166,7 @@ class TestCacheServiceReal:
         ]
 
         for url, expected in test_cases:
-            result = is_valid_url(url)
+            _result = is_valid_url(url)
             assert result == expected, f"URL '{url}' should be {expected}"
 
     @pytest.mark.unit
@@ -165,11 +174,12 @@ class TestCacheServiceReal:
     @patch("services.cache_service.url_for")
     def test_cache_image_with_none(self, mock_url_for, mock_app):
         """Test cache_image function with None input."""
+
         from services.cache_service import cache_image
 
         mock_url_for.return_value = "/static/default_image.png"
 
-        result = cache_image(None)
+        _result = cache_image(None)
 
         assert result == "/static/default_image.png"
         mock_url_for.assert_called_once()
@@ -179,11 +189,12 @@ class TestCacheServiceReal:
     @patch("services.cache_service.current_app")
     def test_cache_image_with_invalid_url(self, mock_app, mock_url_for):
         """Test cache_image with invalid URL."""
+
         from services.cache_service import cache_image
 
         mock_url_for.return_value = "/static/default_image.png"
 
-        result = cache_image("invalid-url")
+        _result = cache_image("invalid-url")
 
         # Should return the fallback image when invalid
         assert result == "/static/default_image.png"
@@ -211,6 +222,7 @@ class TestBrickognizeServiceIntegration:
     @patch("services.brickognize_service.requests.post")
     def test_brickognize_success_detailed(self, mock_post):
         """Test Brickognize service success scenario with details."""
+
         from services.brickognize_service import get_predictions
 
         # Mock successful API response
@@ -232,7 +244,7 @@ class TestBrickognizeServiceIntegration:
             "services.brickognize_service.get_category_name_from_part_num",
             return_value="Brick",
         ):
-            result = get_predictions(mock_file, "test.jpg")
+            _result = get_predictions(mock_file, "test.jpg")
 
             assert result is not None
             assert "items" in result
@@ -258,6 +270,7 @@ class TestLabelServiceIntegration:
     @patch("services.label_service.canvas")
     def test_save_image_as_pdf_error_handling(self, mock_canvas, mock_image_open):
         """Test PDF generation error handling."""
+
         from services.label_service import save_image_as_pdf
 
         # Mock Image.open to return a mock image
@@ -268,7 +281,7 @@ class TestLabelServiceIntegration:
         # Mock canvas to raise an exception
         mock_canvas.Canvas.side_effect = Exception("PDF generation failed")
 
-        result = save_image_as_pdf("test.jpg", "output.pdf")
+        _result = save_image_as_pdf("test.jpg", "output.pd")
 
         # Should handle error gracefully
         assert result is not None or result is None  # Depending on implementation
@@ -280,6 +293,7 @@ class TestModelValidation:
     @pytest.mark.unit
     def test_model_imports(self):
         """Test that all models can be imported."""
+
         from models import (
             PartStorage,
             RebrickableColors,
@@ -335,6 +349,7 @@ class TestDatabaseFunctions:
     @pytest.mark.unit
     def test_database_model_representations(self):
         """Test model __repr__ methods exist."""
+
         from models import (
             PartStorage,
             RebrickableColors,
@@ -353,6 +368,7 @@ class TestDatabaseFunctions:
     @pytest.mark.unit
     def test_database_model_to_dict_methods(self):
         """Test model to_dict methods exist."""
+
         from models import (
             RebrickableColors,
             RebrickablePartCategories,

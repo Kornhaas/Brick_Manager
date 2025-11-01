@@ -1,5 +1,7 @@
 """
+
 This module provides a route for looking up part information in the Brick Manager application.
+
 
 It includes:
 - Loading and displaying part details from the database (RebrickableParts and PartStorage).
@@ -7,12 +9,7 @@ It includes:
 """
 
 from flask import Blueprint, flash, render_template, request
-from models import (
-    PartStorage,
-    RebrickableInventoryParts,
-    RebrickablePartCategories,
-    RebrickableParts,
-)
+from models import PartStorage, RebrickableInventoryParts, RebrickableParts
 
 part_lookup_bp = Blueprint("part_lookup", __name__)
 
@@ -20,7 +17,9 @@ part_lookup_bp = Blueprint("part_lookup", __name__)
 @part_lookup_bp.route("/lookup_part", methods=["GET", "POST"])
 def lookup_part():
     """
+
     Handle the part lookup process.
+
 
     If a POST request is received, the function attempts to retrieve the part's storage location
     and details from the database (RebrickableParts and PartStorage tables). If the part is not found,
@@ -30,6 +29,7 @@ def lookup_part():
         Response: Renders the lookup_part.html template with part details and storage location.
     """
     part_details = None
+
     schrank = fach = box = None
 
     if request.method == "POST":

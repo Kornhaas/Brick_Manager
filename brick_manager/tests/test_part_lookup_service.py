@@ -1,5 +1,7 @@
 """
+
 Unit tests for the part_lookup_service module.
+
 
 This test suite validates the functionality of the part lookup service
 including loading and saving part lookup data.
@@ -17,6 +19,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_load_part_lookup_success(self, mock_part_storage):
         """Test successful loading of part lookup data."""
+
         # Setup
         mock_entry1 = MagicMock()
         mock_entry1.part_num = "3001"
@@ -33,7 +36,7 @@ class TestPartLookupService:
         mock_part_storage.query.all.return_value = [mock_entry1, mock_entry2]
 
         # Execute
-        result = load_part_lookup()
+        _result = load_part_lookup()
 
         # Verify
         expected = {
@@ -45,11 +48,12 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_load_part_lookup_empty(self, mock_part_storage):
         """Test loading part lookup data when no entries exist."""
+
         # Setup
         mock_part_storage.query.all.return_value = []
 
         # Execute
-        result = load_part_lookup()
+        _result = load_part_lookup()
 
         # Verify
         assert result == {}
@@ -57,6 +61,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_load_part_lookup_with_cache(self, mock_part_storage):
         """Test that caching works properly."""
+
         # Setup
         mock_entry = MagicMock()
         mock_entry.part_num = "3001"
@@ -78,6 +83,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_save_part_lookup_new_entries(self, mock_part_storage, mock_db):
         """Test saving new part lookup entries."""
+
         # Setup
         master_lookup = {
             "3001": {"location": "Shelf A", "level": "2", "box": "B1"},
@@ -99,6 +105,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_save_part_lookup_update_existing(self, mock_part_storage, mock_db):
         """Test updating existing part lookup entries."""
+
         # Setup
         master_lookup = {
             "3001": {"location": "Shelf A Updated", "level": "3", "box": "B1"}
@@ -127,6 +134,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_save_part_lookup_mixed_operations(self, mock_part_storage, mock_db):
         """Test saving with both new and existing entries."""
+
         # Setup
         master_lookup = {
             "3001": {  # Existing entry
@@ -166,6 +174,7 @@ class TestPartLookupService:
 
     def test_save_part_lookup_empty_data(self):
         """Test saving empty part lookup data."""
+
         # Execute
         save_part_lookup({})
 
@@ -175,6 +184,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_save_part_lookup_partial_data(self, mock_part_storage, mock_db):
         """Test saving part lookup data with missing fields."""
+
         # Setup
         master_lookup = {
             "3001": {
@@ -194,6 +204,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.db")
     def test_save_part_lookup_database_error(self, mock_db):
         """Test handling database errors during save."""
+
         # Setup
         master_lookup = {"3001": {"location": "Shelf A"}}
         mock_db.session.commit.side_effect = Exception("Database error")
@@ -205,6 +216,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_load_part_lookup_database_error(self, mock_part_storage):
         """Test handling database errors during load."""
+
         # Setup
         mock_part_storage.query.all.side_effect = Exception("Database error")
 
@@ -215,6 +227,7 @@ class TestPartLookupService:
     @patch("services.part_lookup_service.PartStorage")
     def test_load_part_lookup_cache_invalidation(self, mock_part_storage):
         """Test that cache is properly invalidated after save."""
+
         # Setup
         mock_entry = MagicMock()
         mock_entry.part_num = "3001"
@@ -225,13 +238,13 @@ class TestPartLookupService:
         mock_part_storage.query.all.return_value = [mock_entry]
 
         # Execute
-        result1 = load_part_lookup()
+        load_part_lookup()
 
         # Save new data (should invalidate cache)
         save_part_lookup({"3002": {"location": "Shelf B"}})
 
         # Load again (should query database again)
-        result2 = load_part_lookup()
+        load_part_lookup()
 
         # Verify database was queried multiple times
         assert mock_part_storage.query.all.call_count >= 2

@@ -1,4 +1,5 @@
 """
+
 This module handles the search, retrieval, and addition of Brick sets, parts, and minifigures.
 """
 import re
@@ -33,10 +34,9 @@ set_search_bp = Blueprint("set_search", __name__)
 
 
 def get_or_create(session, model, defaults=None, **kwargs):
-    """
-    Utility function to fetch or create a database entry.
-    """
+    """Utility function to fetch or create a database entry."""
     instance = session.query(model).filter_by(**kwargs).first()
+
     if instance:
         return instance, False
     params = {**kwargs, **(defaults or {})}
@@ -49,9 +49,11 @@ def get_or_create(session, model, defaults=None, **kwargs):
 @set_search_bp.route("/set_search", methods=["GET", "POST"])
 def set_search():
     """
+
     Search for Brick sets by their number and display the results, including minifigure parts.
     """
     set_info = {}
+
     parts_info = []
     minifigs_info = []
 
@@ -107,9 +109,11 @@ def set_search():
 @set_search_bp.route("/add_set", methods=["POST"])
 def add_set():
     """
+
     Add a Brick set instance (User_Set) to the database, including its parts, minifigures, and minifigure parts.
     """
     set_number = request.form.get("set_number")
+
     status = request.form.get("status", "unknown")
     current_app.logger.debug(
         "Adding set %s to the database with status %s.", set_number, status
@@ -271,6 +275,7 @@ def add_set():
 
 def fetch_set_info(set_number):
     """
+
     Fetches basic set information from the internal database (rebrickable_sets table).
     """
     try:
@@ -299,7 +304,9 @@ def fetch_set_info(set_number):
 
 def fetch_set_parts_info(set_number):
     """
+
     Fetches the parts information for a given set number from the internal database.
+
     Uses RebrickableInventories, RebrickableInventoryParts, RebrickableParts, and RebrickableColors tables.
     """
     master_lookup = load_part_lookup()
@@ -362,7 +369,9 @@ def fetch_set_parts_info(set_number):
 
 def fetch_minifigs_info(set_number):
     """
+
     Fetches the minifigures information for a given set number from the internal database.
+
     Uses RebrickableInventories, RebrickableInventoryMinifigs, and RebrickableMinifigs tables.
     """
     try:
@@ -413,7 +422,9 @@ def fetch_minifigs_info(set_number):
 
 def fetch_minifigure_parts(fig_num):
     """
+
     Fetches parts information for a specific minifigure from the internal database.
+
     Uses fig_num to find inventory in rebrickable_inventories (where set_num = fig_num),
     then gets parts from rebrickable_inventory_parts using the inventory_id.
     """
@@ -474,9 +485,7 @@ def fetch_minifigure_parts(fig_num):
 
 
 def format_location(location_data):
-    """
-    Formats the location data for display.
-    """
+    """Formats the location data for display."""
     if not location_data:
         return "Not Specified"
     return f"Location: {location_data.get('location', 'Unknown')}, Level: {location_data.get('level', 'Unknown')}, Box: {location_data.get('box', 'Unknown')}"

@@ -1,6 +1,4 @@
-"""
-Route for synchronizing missing parts with Rebrickable Lost Parts.
-"""
+"""Route for synchronizing missing parts with Rebrickable Lost Parts."""
 
 import logging
 
@@ -15,9 +13,7 @@ rebrickable_sync_bp = Blueprint("rebrickable_sync", __name__)
 
 @rebrickable_sync_bp.route("/check_sync_availability", methods=["GET"])
 def check_sync_availability():
-    """
-    Check if Rebrickable sync is available (user token exists).
-    """
+    """Check if Rebrickable sync is available (user token exists)."""
     try:
         user_token = get_rebrickable_user_token()
         api_key = get_rebrickable_api_key()
@@ -44,7 +40,9 @@ def check_sync_availability():
 @rebrickable_sync_bp.route("/sync_missing_parts", methods=["POST"])
 def sync_missing_parts():
     """
+
     Synchronize missing parts with Rebrickable Lost Parts.
+
     Accepts optional batch_size parameter to control how many parts to process.
     """
     try:
@@ -68,7 +66,7 @@ def sync_missing_parts():
         batch_size = data.get("batch_size")
 
         # Perform the synchronization
-        result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
+        _result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
 
         if result["success"]:
             return jsonify(result)

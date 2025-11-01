@@ -1,16 +1,13 @@
 """High coverage tests to reach 80% coverage target."""
 
-import os
-import sys
-from unittest.mock import MagicMock, Mock, patch
+
+from unittest.mock import Mock, patch
 
 import pytest
 from flask import Flask
 
 # Import modules directly to boost coverage
 import brick_manager.app as app_module
-from brick_manager.routes import dashboard, main, storage
-from brick_manager.services import cache_service, label_service, rebrickable_service
 
 
 class TestAppModuleCoverage:
@@ -18,6 +15,7 @@ class TestAppModuleCoverage:
 
     def test_app_exists(self):
         """Test app instance exists."""
+
         assert hasattr(app_module, "app")
         assert isinstance(app_module.app, Flask)
 
@@ -25,6 +23,7 @@ class TestAppModuleCoverage:
     @patch("brick_manager.app.datetime")
     def test_backup_database_function(self, mock_datetime, mock_copyfile):
         """Test backup database function."""
+
         mock_datetime.now.return_value.strftime.return_value = "20231017_120000"
 
         with app_module.app.app_context():
@@ -35,6 +34,7 @@ class TestAppModuleCoverage:
     @patch("brick_manager.app.shutil.copyfile")
     def test_backup_database_exception(self, mock_copyfile):
         """Test backup database exception handling."""
+
         mock_copyfile.side_effect = Exception("Test error")
 
         with app_module.app.app_context():
@@ -59,6 +59,7 @@ class TestAppModuleCoverage:
         self, mock_minifig, mock_regular, mock_api, mock_token
     ):
         """Test scheduled sync success path."""
+
         mock_regular.return_value = {
             "success": True,
             "summary": {
@@ -90,6 +91,7 @@ class TestAppModuleCoverage:
         self, mock_minifig, mock_regular, mock_api, mock_token
     ):
         """Test scheduled sync failure path."""
+
         mock_regular.return_value = {"success": False, "message": "Failed"}
         mock_minifig.return_value = {"success": False, "message": "Failed"}
 
@@ -113,6 +115,7 @@ class TestAppModuleCoverage:
     @patch("brick_manager.app.sync_user_sets_with_rebrickable")
     def test_scheduled_sync_user_sets_success(self, mock_sync, mock_api, mock_token):
         """Test scheduled user sets sync success."""
+
         mock_sync.return_value = {
             "success": True,
             "summary": {"sets_added": 5, "sets_removed": 2},
@@ -128,6 +131,7 @@ class TestAppModuleCoverage:
     @patch("brick_manager.app.sync_user_sets_with_rebrickable")
     def test_scheduled_sync_user_sets_failure(self, mock_sync, mock_api, mock_token):
         """Test scheduled user sets sync failure."""
+
         mock_sync.return_value = {"success": False, "message": "Failed"}
 
         with app_module.app.app_context():
@@ -142,6 +146,7 @@ class TestServicesCoverage:
     @patch("brick_manager.services.rebrickable_service.requests.get")
     def test_rebrickable_service_coverage(self, mock_get):
         """Test rebrickable service functions."""
+
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"results": []}
@@ -153,7 +158,7 @@ class TestServicesCoverage:
             make_request,
         )
 
-        result = make_request("test_url", {})
+        _result = make_request("test_url", {})
         assert result is not None
 
         sets_result = get_user_sets("test_token", "test_key")
@@ -164,6 +169,7 @@ class TestServicesCoverage:
     @patch("brick_manager.services.cache_service.os.makedirs")
     def test_cache_service_coverage(self, mock_makedirs, mock_exists, mock_get):
         """Test cache service functions."""
+
         mock_exists.return_value = False
         mock_response = Mock()
         mock_response.status_code = 200
@@ -172,7 +178,7 @@ class TestServicesCoverage:
 
         from brick_manager.services.cache_service import cache_image
 
-        result = cache_image("http://test.com/image.jpg")
+        _result = cache_image("http://test.com/image.jpg")
         # Just test that function runs without error
         assert result is not None or result is None
 
@@ -181,6 +187,7 @@ class TestServicesCoverage:
     @patch("brick_manager.services.label_service.ImageFont.truetype")
     def test_label_service_coverage(self, mock_font, mock_draw, mock_image):
         """Test label service functions."""
+
         mock_img = Mock()
         mock_img.size = (100, 100)
         mock_image.return_value = mock_img
@@ -201,7 +208,7 @@ class TestServicesCoverage:
 
         # Test label PDF creation
         try:
-            pdf_result = create_label_pdf("Test Label", "test_data", 1, 1, 1)
+            create_label_pdf("Test Label", "test_data", 1, 1, 1)
             # Just test that function runs
         except Exception:
             pass  # Expected due to mocking
@@ -214,7 +221,7 @@ class TestRoutesCoverage:
         """Test dashboard route functions."""
         with app_module.app.test_client() as client:
             # Test main dashboard endpoint
-            response = client.get("/")
+            _response = client.get("/")
             assert response.status_code in [
                 200,
                 302,
@@ -226,14 +233,14 @@ class TestRoutesCoverage:
         """Test main route functions."""
         with app_module.app.test_client() as client:
             # Test main routes
-            response = client.get("/main")
+            _response = client.get("/main")
             assert response.status_code in [200, 302, 404, 500]
 
     def test_storage_routes(self):
         """Test storage route functions."""
         with app_module.app.test_client() as client:
             # Test storage routes
-            response = client.get("/storage")
+            _response = client.get("/storage")
             assert response.status_code in [200, 302, 404, 500]
 
 
@@ -243,7 +250,7 @@ class TestManageModule:
     def test_manage_module_imports(self):
         """Test that manage module can be imported."""
         try:
-            import brick_manager.manage
+            pass
 
             assert True
         except ImportError:
@@ -255,6 +262,7 @@ class TestConfigCoverage:
 
     def test_config_attributes(self):
         """Test config class attributes."""
+
         from brick_manager.config import Config
 
         config = Config()
@@ -274,20 +282,8 @@ class TestModelsCoverage:
 
     def test_model_imports(self):
         """Test model imports and basic functionality."""
-        from brick_manager.models import (
-            Categories,
-            Colors,
-            MissingParts,
-            PartLookup,
-            Parts,
-            RebrickableParts,
-            RebrickableSets,
-            Sets,
-            Storage,
-            Themes,
-            UserSets,
-            db,
-        )
+
+        from brick_manager.models import PartLookup, Parts, Storage
 
         # Test that models can be instantiated (coverage boost)
         with app_module.app.app_context():
@@ -303,7 +299,8 @@ class TestModelsCoverage:
 
     def test_model_repr_methods(self):
         """Test model __repr__ methods."""
-        from brick_manager.models import Parts, Sets, Storage
+
+        from brick_manager.models import Parts, Storage
 
         with app_module.app.app_context():
             # Test __repr__ methods
@@ -322,6 +319,7 @@ class TestErrorHandlingCoverage:
     @patch("brick_manager.app.get_rebrickable_user_token")
     def test_scheduled_sync_exception_handling(self, mock_token):
         """Test exception handling in scheduled sync."""
+
         mock_token.side_effect = Exception("Test exception")
 
         with app_module.app.app_context():
@@ -337,12 +335,14 @@ class TestUtilityFunctions:
 
     def test_app_configuration(self):
         """Test app configuration settings."""
+
         assert app_module.app.config is not None
         assert "SQLALCHEMY_DATABASE_URI" in app_module.app.config
         assert app_module.app.secret_key is not None
 
     def test_blueprints_registration(self):
         """Test that blueprints are registered."""
+
         blueprint_names = list(app_module.app.blueprints.keys())
         assert len(blueprint_names) > 0
 

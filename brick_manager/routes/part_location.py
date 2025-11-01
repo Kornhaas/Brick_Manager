@@ -1,5 +1,7 @@
 """
+
 This module manages part locations, allowing users to view and update locations,
+
 levels, and boxes for specific parts. It integrates with Rebrickable API and the master lookup.
 """
 
@@ -18,6 +20,7 @@ part_location_bp = Blueprint("part_location", __name__)
 @part_location_bp.route("/part_location", methods=["GET", "POST"])
 def part_location():
     """
+
     Page to manage part locations. Fetches categories and allows the user to input locations.
     """
     try:
@@ -101,9 +104,7 @@ def part_location():
 
 @part_location_bp.route("/save_locations", methods=["POST"])
 def save_locations():
-    """
-    Save part location data (location, level, box) to the master lookup.
-    """
+    """Save part location data (location, level, box) to the master lookup."""
     try:
         locations_data = request.json  # Expecting a JSON payload with part locations
         master_lookup = load_part_lookup()  # Load current master lookup
@@ -121,9 +122,7 @@ def save_locations():
 
 @part_location_bp.route("/create_label", methods=["POST"])
 def create_label():
-    """
-    Create a label for the specified part.
-    """
+    """Create a label for the specified part."""
     try:
         label_data = request.json  # Expecting label details in JSON format
         label_image_path = create_label_image(label_data)

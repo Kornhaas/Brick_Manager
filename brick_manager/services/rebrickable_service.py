@@ -1,5 +1,7 @@
 """
+
 This module provides services for interacting with the Rebrickable API.
+
 
 It includes functions to:
 - Fetch part details from the Rebrickable API.
@@ -25,8 +27,6 @@ from models import (
 class RebrickableAPIException(Exception):
     """Custom exception for errors interacting with the Rebrickable API."""
 
-    pass
-
 
 class RebrickableService:
     """Service class for interacting with the Rebrickable API."""
@@ -39,6 +39,7 @@ class RebrickableService:
     @staticmethod
     def _get_headers() -> Dict[str, str]:
         """Return common headers for Rebrickable API requests."""
+
         return {
             "Accept": "application/json",
             "Authorization": f"key {Config.REBRICKABLE_TOKEN}",
@@ -49,7 +50,9 @@ class RebrickableService:
         endpoint: str, params: Optional[Dict] = None, retries: int = MAX_RETRIES
     ) -> Union[Dict, None]:
         """
+
         Make a request to the Rebrickable API with retry logic.
+
 
         Args:
             endpoint (str): API endpoint.
@@ -64,6 +67,7 @@ class RebrickableService:
             RebrickableAPIException: If the request fails after retries.
         """
         url = f"{RebrickableService.BASE_URL}{endpoint}"
+
         headers = RebrickableService._get_headers()
         retry_delay = RebrickableService.INITIAL_RETRY_DELAY
 
@@ -72,7 +76,7 @@ class RebrickableService:
                 logging.info(
                     "Attempt %d: Fetching %s with params %s", attempt + 1, url, params
                 )
-                response = requests.get(
+                _response = requests.get(
                     url,
                     headers=headers,
                     params=params,
@@ -117,18 +121,23 @@ class RebrickableService:
     @staticmethod
     def get_all_category_ids() -> List[Tuple[int, str]]:
         """
+
         Fetch all category IDs and names from the local database table rebrickable_part_categories.
+
 
         Returns:
             list: A list of tuples containing category IDs and names.
         """
         categories = RebrickablePartCategories.query.all()
+
         return [(cat.id, cat.name) for cat in categories]
 
     @staticmethod
     def get_part_details(part_num: str) -> Dict:
         """
+
         Fetch part details from the Rebrickable API.
+
 
         Args:
             part_num (str): The part number to fetch details for.
@@ -137,16 +146,20 @@ class RebrickableService:
             dict: The JSON response containing part details.
         """
         logging.info("Fetching part details for part number: %s", part_num)
+
         endpoint = f"parts/{part_num}/"
         return RebrickableService._make_request(endpoint)
 
     @staticmethod
     def get_part_image_url(part_num: str) -> Optional[str]:
         """
+
         Lookup the first img_url for a part_num in rebrickable_inventory_parts.
+
         Returns None if not found.
         """
         part_img = RebrickableInventoryParts.query.filter_by(part_num=part_num).first()
+
         if part_img and part_img.img_url:
             return part_img.img_url
         return None
@@ -154,7 +167,9 @@ class RebrickableService:
     @staticmethod
     def get_part_images_bulk(part_nums: List[str]) -> Dict[str, Optional[str]]:
         """
+
         Bulk lookup img_url for a list of part_nums in rebrickable_inventory_parts.
+
         Returns a dict mapping part_num to the first found img_url (or None).
         """
         if not part_nums:
@@ -178,7 +193,9 @@ class RebrickableService:
         part_cat_id: Union[int, str], page_size: int = 1000, page: int = 1
     ) -> Optional[Dict]:
         """
+
         Fetch parts for a given category from the local database table rebrickable_parts.
+
 
         Args:
             part_cat_id (Union[int, str]): The category ID (can be string or integer).
@@ -226,7 +243,9 @@ class RebrickableService:
         inc_part_details: bool = False,
     ) -> Dict:
         """
+
         Fetch a list of parts from the Rebrickable API.
+
 
         Args:
             filters (dict): Filters such as part_num, part_cat_id, etc.
@@ -257,7 +276,9 @@ class RebrickableService:
     @staticmethod
     def get_colors(page: int = 1, page_size: int = 100) -> Dict:
         """
+
         Fetch a list of colors from the Rebrickable API.
+
 
         Args:
             page (int): Page number to fetch.
@@ -267,6 +288,7 @@ class RebrickableService:
             dict: A dictionary with color data and pagination info.
         """
         logging.info("Fetching colors, Page: %d, Page Size: %d", page, page_size)
+
         endpoint = "colors/"
         params = {"page": page, "page_size": page_size}
         return RebrickableService._make_request(endpoint, params=params)
@@ -274,7 +296,9 @@ class RebrickableService:
     @staticmethod
     def get_themes(page: int = 1, page_size: int = 100) -> Dict:
         """
+
         Fetch a list of themes from the Rebrickable API.
+
 
         Args:
             page (int): Page number to fetch.
@@ -284,6 +308,7 @@ class RebrickableService:
             dict: A dictionary with theme data and pagination info.
         """
         logging.info("Fetching themes, Page: %d, Page Size: %d", page, page_size)
+
         endpoint = "themes/"
         params = {"page": page, "page_size": page_size}
         return RebrickableService._make_request(endpoint, params=params)
