@@ -162,7 +162,6 @@ def find_inventory_part_id_from_user_sets(part_num, color_id, user_set_num=None)
 
 
 def make_rate_limited_request(
-    """TODO: Add docstring for make_rate_limited_request."""
     url, headers, params=None, timeout=20, max_retries=3, method="GET"
 ):
     """

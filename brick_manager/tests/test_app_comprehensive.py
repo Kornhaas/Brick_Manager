@@ -123,7 +123,6 @@ class TestScheduledSyncMissingParts:
     )
     @patch("app.app.logger")
     def test_scheduled_sync_success(
-        """TODO: Add docstring for test_scheduled_sync_success."""
         self,
         mock_logger,
         mock_sync_minifig,
@@ -178,7 +177,6 @@ class TestScheduledSyncMissingParts:
     )
     @patch("app.app.logger")
     def test_scheduled_sync_partial_failure(
-        """TODO: Add docstring for test_scheduled_sync_partial_failure."""
         self,
         mock_logger,
         mock_sync_minifig,
@@ -231,7 +229,6 @@ class TestScheduledSyncUserSets:
     @patch("services.token_service.get_rebrickable_api_key")
     @patch("app.app.logger")
     def test_scheduled_user_sets_sync_no_tokens(
-        """TODO: Add docstring for test_scheduled_user_sets_sync_no_tokens."""
         self, mock_logger, mock_api_key, mock_user_token
     ):
         """Test scheduled user sets sync skips when no tokens configured."""
@@ -253,7 +250,6 @@ class TestScheduledSyncUserSets:
     @patch("services.rebrickable_sets_sync_service.sync_user_sets_with_rebrickable")
     @patch("app.app.logger")
     def test_scheduled_user_sets_sync_success(
-        """TODO: Add docstring for test_scheduled_user_sets_sync_success."""
         self, mock_logger, mock_sync, mock_api_key, mock_user_token
     ):
         """Test successful scheduled user sets sync."""
@@ -286,7 +282,6 @@ class TestScheduledSyncUserSets:
     @patch("services.rebrickable_sets_sync_service.sync_user_sets_with_rebrickable")
     @patch("app.app.logger")
     def test_scheduled_user_sets_sync_failure(
-        """TODO: Add docstring for test_scheduled_user_sets_sync_failure."""
         self, mock_logger, mock_sync, mock_api_key, mock_user_token
     ):
         """Test scheduled user sets sync failure."""
@@ -309,7 +304,6 @@ class TestScheduledSyncUserSets:
     @patch("services.token_service.get_rebrickable_api_key")
     @patch("app.app.logger")
     def test_scheduled_user_sets_sync_exception(
-        """TODO: Add docstring for test_scheduled_user_sets_sync_exception."""
         self, mock_logger, mock_api_key, mock_user_token
     ):
         """Test scheduled user sets sync exception handling."""

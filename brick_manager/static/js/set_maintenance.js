@@ -613,3 +613,12 @@ setLabelCheckboxes.forEach(checkbox => {
       });
   });
 });
+
+// Add event listeners for clickable set images in the master list
+document.addEventListener('click', function(event) {
+  if (event.target.classList.contains('set-image-clickable')) {
+    const imageSrc = event.target.getAttribute('data-image-src');
+    const imageName = event.target.getAttribute('data-image-name');
+    showImageModal(imageSrc, imageName);
+  }
+});

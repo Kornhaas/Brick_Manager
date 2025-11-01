@@ -46,7 +46,6 @@ class RebrickableService:
 
     @staticmethod
     def _make_request(
-        """TODO: Add docstring for _make_request."""
         endpoint: str, params: Optional[Dict] = None, retries: int = MAX_RETRIES
     ) -> Union[Dict, None]:
         """
@@ -176,7 +175,6 @@ class RebrickableService:
 
     @staticmethod
     def get_parts_by_category(
-        """TODO: Add docstring for get_parts_by_category."""
         part_cat_id: Union[int, str], page_size: int = 1000, page: int = 1
     ) -> Optional[Dict]:
         """
@@ -222,7 +220,6 @@ class RebrickableService:
 
     @staticmethod
     def get_parts(
-        """TODO: Add docstring for get_parts."""
         filters: Optional[Dict] = None,
         page: int = 1,
         page_size: int = 1000,

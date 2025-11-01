@@ -171,7 +171,10 @@
                                     src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
                                     alt="{{ entry.set_num }}"
                                     width="60"
-                                    class="img-thumbnail"
+                                    class="img-thumbnail set-image-clickable"
+                                    style="cursor: pointer;"
+                                    data-image-src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
+                                    data-image-name="{{ entry.set_name }} ({{ entry.set_num }})"
                                     onerror="this.src='{{ url_for('static', filename='default_image.png') }}'"
                                 >
                             </td>

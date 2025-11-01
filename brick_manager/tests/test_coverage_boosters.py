@@ -16,7 +16,6 @@ class TestCoverageBoosters:
     @patch("app.datetime")
     @patch("app.app")
     def test_backup_database_comprehensive(
-        """TODO: Add docstring for test_backup_database_comprehensive."""
         self, mock_app, mock_datetime, mock_copyfile
     ):
         """Test backup database with comprehensive coverage."""

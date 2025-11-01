@@ -432,7 +432,7 @@ def enrich_missing_part(part, user_set, part_type="Regular Part"):
 
 
 def get_missing_parts_categories(include_spare=True, set_filter=""):
-    """Get summary of missing parts grouped by category"""
+    """Get summary of missing parts grouped by category with total statistics"""
     start_time = time.time()
     current_app.logger.info("Starting category summary analysis")
 
@@ -444,6 +444,11 @@ def get_missing_parts_categories(include_spare=True, set_filter=""):
         )
 
     categories = {}
+    
+    # Initialize counters for statistics
+    total_missing_parts = 0
+    total_missing_spare_parts = 0
+    total_missing_regular_parts = 0
 
     try:
         # Query all User_Sets to get missing regular parts by category
@@ -479,9 +484,18 @@ def get_missing_parts_categories(include_spare=True, set_filter=""):
             for part in user_set.parts_in_set:
                 if part.quantity > part.have_quantity:
                     missing_parts_count += 1
+                    missing_quantity = part.quantity - part.have_quantity
+                    
+                    # Track statistics for all missing parts
+                    is_spare = getattr(part, "is_spare", False)
+                    if is_spare:
+                        total_missing_spare_parts += missing_quantity
+                    else:
+                        total_missing_regular_parts += missing_quantity
+                    total_missing_parts += missing_quantity
 
                     # Skip spare parts if not requested
-                    if not include_spare and getattr(part, "is_spare", False):
+                    if not include_spare and is_spare:
                         continue
 
                     # Get category information efficiently
@@ -530,8 +544,18 @@ def get_missing_parts_categories(include_spare=True, set_filter=""):
                     continue
 
             if minifig_part.quantity > minifig_part.have_quantity:
+                missing_quantity = minifig_part.quantity - minifig_part.have_quantity
+                
+                # Track statistics for minifigure parts (usually not spare parts)
+                is_spare = getattr(minifig_part, "is_spare", False)
+                if is_spare:
+                    total_missing_spare_parts += missing_quantity
+                else:
+                    total_missing_regular_parts += missing_quantity
+                total_missing_parts += missing_quantity
+                
                 # Skip spare parts if not requested
-                if not include_spare and getattr(minifig_part, "is_spare", False):
+                if not include_spare and is_spare:
                     continue
 
                 # Get category information efficiently
@@ -573,13 +597,38 @@ def get_missing_parts_categories(include_spare=True, set_filter=""):
         current_app.logger.info(
             f"Category summary complete in {total_time:.2f} seconds. Found {len(category_list)} categories"
         )
+        
+        # Log statistics
+        current_app.logger.info(
+            f"Missing parts statistics - Total: {total_missing_parts}, Regular: {total_missing_regular_parts}, Spare: {total_missing_spare_parts}"
+        )
 
-        return category_list
+        return {
+            "categories": category_list,
+            "statistics": {
+                "total_missing_parts": total_missing_parts,
+                "total_missing_regular_parts": total_missing_regular_parts,
+                "total_missing_spare_parts": total_missing_spare_parts,
+                "total_sets_checked": total_sets_checked,
+                "filtered_sets_count": filtered_sets_count,
+                "has_filter": bool(allowed_internal_ids)
+            }
+        }
 
     except Exception as e:
         current_app.logger.error(f"Error in get_missing_parts_categories: {str(e)}")
         current_app.logger.exception("Full traceback:")
-        return []
+        return {
+            "categories": [],
+            "statistics": {
+                "total_missing_parts": 0,
+                "total_missing_regular_parts": 0,
+                "total_missing_spare_parts": 0,
+                "total_sets_checked": 0,
+                "filtered_sets_count": 0,
+                "has_filter": False
+            }
+        }
 
 
 @missing_parts_bp.route("/missing_parts_category/<path:category_name>", methods=["GET"])
@@ -715,9 +764,13 @@ def missing_parts():
         # Get set filtering parameters
         set_filter = request.args.get("set_filter", "").strip()
 
-        categories = get_missing_parts_categories(
+        result = get_missing_parts_categories(
             include_spare=include_spare, set_filter=set_filter
         )
+        
+        categories = result["categories"]
+        statistics = result["statistics"]
+        
         total_time = time.time() - start_time
         current_app.logger.info(
             f"Missing parts category analysis complete in {total_time:.2f} seconds"
@@ -726,6 +779,7 @@ def missing_parts():
         return render_template(
             "missing_parts.html",
             categories=categories,
+            statistics=statistics,
             include_spare=include_spare,
             set_filter=set_filter,
         )
@@ -733,9 +787,21 @@ def missing_parts():
     except Exception as e:
         current_app.logger.error(f"Error in missing_parts route: {str(e)}")
         current_app.logger.exception("Full traceback:")
-        # Return empty categories to prevent crash
+        # Return empty categories and statistics to prevent crash
+        empty_statistics = {
+            "total_missing_parts": 0,
+            "total_missing_regular_parts": 0,
+            "total_missing_spare_parts": 0,
+            "total_sets_checked": 0,
+            "filtered_sets_count": 0,
+            "has_filter": False
+        }
         return render_template(
-            "missing_parts.html", categories=[], include_spare=True, set_filter=""
+            "missing_parts.html", 
+            categories=[], 
+            statistics=empty_statistics,
+            include_spare=True, 
+            set_filter=""
         )
 
 
@@ -747,15 +813,25 @@ def missing_parts_categories_api():
     try:
         include_spare = request.args.get("include_spare", "true").lower() == "true"
         set_filter = request.args.get("set_filter", "").strip()
-        categories = get_missing_parts_categories(
+        result = get_missing_parts_categories(
             include_spare=include_spare, set_filter=set_filter
         )
-        return jsonify(categories)
+        return jsonify(result)
     except Exception as e:
         current_app.logger.error(
             f"Error in missing_parts_categories_api route: {str(e)}"
         )
-        return jsonify([])
+        return jsonify({
+            "categories": [],
+            "statistics": {
+                "total_missing_parts": 0,
+                "total_missing_regular_parts": 0,
+                "total_missing_spare_parts": 0,
+                "total_sets_checked": 0,
+                "filtered_sets_count": 0,
+                "has_filter": False
+            }
+        })
 
 
 @missing_parts_bp.route("/update_part_quantity", methods=["POST"])

@@ -12,6 +12,26 @@ from werkzeug.utils import secure_filename
 # pylint: disable=W0718
 
 
+def get_cache_directory():
+    """
+    Get the configured cache directory from Flask config.
+    
+    Returns:
+        str: Path to the cache directory
+    """
+    if hasattr(current_app, 'config') and 'CACHE_FOLDER' in current_app.config:
+        cache_dir = current_app.config['CACHE_FOLDER']
+        # Ensure images subdirectory exists
+        images_cache_dir = os.path.join(cache_dir, 'images')
+        os.makedirs(images_cache_dir, exist_ok=True)
+        return images_cache_dir
+    else:
+        # Fallback to static directory for local development
+        fallback_dir = "static/cache/images"
+        os.makedirs(fallback_dir, exist_ok=True)
+        return fallback_dir
+
+
 def is_valid_url(url):
     """
     Validate that a given URL is well-formed and has a scheme and netloc.
@@ -27,13 +47,14 @@ def is_valid_url(url):
         return False
 
 
-def cache_image(image_url, cache_dir="static/cache/images"):
+def cache_image(image_url, cache_dir=None):
     """
     Download and cache an image locally if not already cached.
 
     Args:
         image_url (str): URL of the image to cache.
-        cache_dir (str): Directory to store cached images.
+        cache_dir (str, optional): Directory to store cached images. 
+                                 If None, uses configured CACHE_FOLDER.
 
     Returns:
         str: Path to the cached image or fallback image if the download fails.
@@ -47,6 +68,10 @@ def cache_image(image_url, cache_dir="static/cache/images"):
             "Invalid or missing image URL. Using fallback image."
         )
         return fallback_image
+
+    # Use configured cache directory if not specified
+    if cache_dir is None:
+        cache_dir = get_cache_directory()
 
     try:
         # Normalize the cache directory path
@@ -89,23 +114,37 @@ def cache_image(image_url, cache_dir="static/cache/images"):
         # Check if the image is already cached
         if not os.path.exists(abs_cached_path):
             current_app.logger.info(f"Downloading image: {image_url}")
-            response = requests.get(image_url, stream=True, timeout=10)
-            if response.status_code == 200:
-                with open(abs_cached_path, "wb") as f:
-                    for chunk in response.iter_content(chunk_size=1024):
-                        f.write(chunk)
-                current_app.logger.info(f"Image successfully cached: {abs_cached_path}")
-            else:
+            try:
+                response = requests.get(image_url, stream=True, timeout=10)
+                if response.status_code == 200:
+                    with open(abs_cached_path, "wb") as f:
+                        for chunk in response.iter_content(chunk_size=1024):
+                            f.write(chunk)
+                    current_app.logger.info(f"Image successfully cached: {abs_cached_path}")
+                else:
+                    current_app.logger.error(
+                        f"Failed to download image {image_url}. Status Code: {response.status_code}"
+                    )
+                    return fallback_image
+            except requests.exceptions.RequestException as req_err:
                 current_app.logger.error(
-                    f"Failed to download image {image_url}. Status Code: {response.status_code}"
+                    f"Request error while downloading image {image_url}: {req_err}"
                 )
                 return fallback_image
+        else:
+            current_app.logger.debug(f"Using cached image: {abs_cached_path}")
 
         # Return the URL for the cached image
-        rel_cached_path = os.path.relpath(abs_cached_path, os.path.abspath("static"))
-        return url_for(
-            "static", filename=rel_cached_path.replace(os.sep, "/"), _external=True
-        )
+        # Use the cache serving route for Docker environment
+        if hasattr(current_app, 'config') and 'CACHE_FOLDER' in current_app.config:
+            # Docker environment - use cache serving route
+            return url_for('main.serve_cached_image', filename=filename, _external=True)
+        else:
+            # Local development - use static file serving
+            rel_cached_path = os.path.relpath(abs_cached_path, os.path.abspath("static"))
+            return url_for(
+                "static", filename=rel_cached_path.replace(os.sep, "/"), _external=True
+            )
 
     except requests.exceptions.RequestException as req_err:
         current_app.logger.error(
@@ -120,13 +159,14 @@ def cache_image(image_url, cache_dir="static/cache/images"):
     return fallback_image
 
 
-def get_cached_image_path(image_url, cache_dir="static/cache/images"):
+def get_cached_image_path(image_url, cache_dir=None):
     """
     Get the path to a cached image without downloading it.
 
     Args:
         image_url (str): The URL of the image
-        cache_dir (str): Directory where cached images are stored
+        cache_dir (str, optional): Directory where cached images are stored.
+                                  If None, uses configured CACHE_FOLDER.
 
     Returns:
         str: Path to the cached image if it exists, None otherwise
@@ -137,6 +177,10 @@ def get_cached_image_path(image_url, cache_dir="static/cache/images"):
     filename = image_url.split("/")[-1]
     if not filename or "." not in filename:
         return None
+
+    # Use configured cache directory if not specified
+    if cache_dir is None:
+        cache_dir = get_cache_directory()
 
     cache_path = os.path.join(cache_dir, filename)
     if os.path.exists(cache_path):

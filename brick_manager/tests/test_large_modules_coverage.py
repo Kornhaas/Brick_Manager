@@ -229,7 +229,6 @@ class TestLabelServiceLarge:
     @patch("brick_manager.services.label_service.ImageFont.truetype")
     @patch("brick_manager.services.label_service.ImageFont.load_default")
     def test_create_storage_label_function(
-        """TODO: Add docstring for test_create_storage_label_function."""
         self, mock_default_font, mock_font, mock_draw, mock_new, mock_qr
     ):
         """Test storage label creation."""
