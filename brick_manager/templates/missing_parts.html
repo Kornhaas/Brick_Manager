@@ -42,12 +42,57 @@
         .parts-section {
             display: none;
         }
+        
+        /* Page Loading Spinner */
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .page-loading-text {
+            font-size: 1.1rem;
+            color: #6c757d;
+            text-align: center;
+        }
+        
+        .loading-progress {
+            margin-top: 1rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 
 <body>
     <!-- Include the navigation bar -->
     {% include 'navbar.html' %}
+
+    <!-- Page Loading Overlay -->
+    <div id="pageLoadingOverlay" class="page-loading-overlay">
+        <div class="spinner-border page-loading-spinner text-primary" role="status"></div>
+        <div class="page-loading-text">
+            <strong>Analyzing Missing Parts...</strong><br>
+            <small>Processing inventory across all your sets</small>
+            <div class="loading-progress">
+                <small>This may take up to 15 seconds</small>
+            </div>
+        </div>
+    </div>
 
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -926,6 +971,35 @@
             
             window.location.href = url.toString();
         }
+        
+        // Page Loading Control
+        window.addEventListener('load', function() {
+            const loadingOverlay = document.getElementById('pageLoadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+        
+        // Show spinner on navigation away or form submit
+        window.addEventListener('beforeunload', function() {
+            const loadingOverlay = document.getElementById('pageLoadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+            }
+        });
+        
+        // Show spinner when submitting forms (filters)
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    const loadingOverlay = document.getElementById('pageLoadingOverlay');
+                    if (loadingOverlay) {
+                        loadingOverlay.style.display = 'flex';
+                    }
+                });
+            });
+        });
 
     </script>
 </body>
