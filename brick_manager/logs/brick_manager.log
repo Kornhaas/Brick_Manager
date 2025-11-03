@@ -141,3 +141,4 @@ NameError: name '_result' is not defined. Did you mean: 'result'?
 2025-11-01 18:23:44,567 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2546p01.png
 2025-11-01 18:23:44,568 - app - INFO - Successfully bulk enriched 11 parts
 2025-11-01 18:23:44,571 - app - INFO - Retrieved 11 missing parts for category 'Animals / Creatures' in 7.84 seconds
+2025-11-03 12:49:41,547 - app - ERROR - Source database does not exist: workspaces/Brick_Manager/brick_manager/instance/brick_manager.db
