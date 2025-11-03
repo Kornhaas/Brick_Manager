@@ -1,0 +1,143 @@
+2025-11-01 16:13:13,604 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 16:13:25,108 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 16:14:09,638 - app - DEBUG - Minifigure part enriched: 25972, name: Hair Swept Back with Slight Widow's Peak and Short Side Burns [Plain], img_url: https://cdn.rebrickable.com/media/parts/elements/6223146.jpg
+2025-11-01 16:14:09,645 - app - DEBUG - Minifigure part enriched: 28974, name: Minifig Neckwear Bracket [One Stud] - Reinforced, img_url: https://cdn.rebrickable.com/media/parts/elements/6170808.jpg
+2025-11-01 16:14:09,652 - app - DEBUG - Minifigure part enriched: 3626cpr3968, name: Minifig Head Rocket Racer, Dark Brown Eyebrows, Goatee, and Sideburns, Open Mouth Smile / Wink Print, img_url: https://cdn.rebrickable.com/media/parts/elements/6429581.jpg
+2025-11-01 16:14:09,659 - app - DEBUG - Minifigure part enriched: 970c03, name: Hips and Black Legs, img_url: https://cdn.rebrickable.com/media/parts/elements/4569093.jpg
+2025-11-01 16:14:09,670 - app - DEBUG - Minifigure part enriched: 973e107pr6519, name: Torso, Odd Arms, Race Jacket with Red and Blue Trim, Flaming 'RR' Print, Left Red Arm, Right Blue Arm, White Hands, img_url: https://cdn.rebrickable.com/media/parts/elements/6436215.jpg
+2025-11-01 16:14:09,679 - app - DEBUG - Minifigure part enriched: 3626cpr9824, name: Minifig Head Jessica Sharpe / Knight, Headband, Smirk, img_url: https://cdn.rebrickable.com/media/parts/photos/14/3626cpr9824-14-27f93437-1da1-44ad-bd14-59b10c4a536b.jpg
+2025-11-01 16:14:09,691 - app - DEBUG - Minifigure part enriched: 3838a, name: Minifig Neckwear Airtanks with Large Holes, img_url: https://cdn.rebrickable.com/media/parts/elements/6417691.jpg
+2025-11-01 16:14:09,700 - app - DEBUG - Minifigure part enriched: 79687, name: Hair Short Curly, No Sides, img_url: https://cdn.rebrickable.com/media/parts/elements/6356860.jpg
+2025-11-01 16:14:09,709 - app - DEBUG - Minifigure part enriched: 970c46, name: Hips and Dark Turquoise Legs, img_url: https://cdn.rebrickable.com/media/parts/elements/6237133.jpg
+2025-11-01 16:14:09,719 - app - DEBUG - Minifigure part enriched: 973c15h46pr6518, name: Torso, Dark Turquoise/Light Aqua Armor, Gold Decorations print, Light Aqua Arms, Dark Turquoise Hands, img_url: https://cdn.rebrickable.com/media/parts/elements/6436212.jpg
+2025-11-01 16:14:09,733 - app - DEBUG - Minifigure part enriched: 3626cpr2113, name: Minifig Head Joey / Chamille, Raised Eyebrow, Eyelashes, Peach Lips, Smirk Print, img_url: https://cdn.rebrickable.com/media/parts/elements/6174813.jpg
+2025-11-01 16:14:09,747 - app - DEBUG - Minifigure part enriched: 80577pat0002, name: Hair and Hat, Long Wavy Hair, Beanie Bright Light Yellow Pattern, img_url: https://cdn.rebrickable.com/media/parts/elements/6382877.jpg
+2025-11-01 16:14:09,760 - app - DEBUG - Minifigure part enriched: 970c12pr2432, name: Hips and Dark Bluish Gray Legs with Torn Pants, Yellow Skin, Lime Belt print, img_url: https://cdn.rebrickable.com/media/parts/elements/6429741.jpg
+2025-11-01 16:14:09,781 - app - DEBUG - Minifigure part enriched: 973c46h01pr5207, name: Torso Jacket, Dark Purple Undershirt, Zipper Print, Dark Turquoise Arms, Yellow Hands, img_url: https://cdn.rebrickable.com/media/parts/elements/6310580.jpg
+2025-11-01 16:14:09,798 - app - DEBUG - Minifigure part enriched: 3626cpr3904, name: Minifig Head, Black Glasses, Smirk/Shocked print, img_url: https://cdn.rebrickable.com/media/parts/elements/6419146.jpg
+2025-11-01 16:14:09,817 - app - DEBUG - Minifigure part enriched: 87991, name: Hair Tousled with Side Part, img_url: https://cdn.rebrickable.com/media/parts/elements/4563721.jpg
+2025-11-01 16:14:09,848 - app - DEBUG - Minifigure part enriched: 970c14, name: Hips and Light Bluish Gray Legs, img_url: https://cdn.rebrickable.com/media/parts/elements/4227657.jpg
+2025-11-01 16:14:09,879 - app - DEBUG - Minifigure part enriched: 973c22h01pr4807, name: Torso Letterman Jacket with Buttons and Pockets, over White Shirt Print, Red Arms, Yellow Hands, img_url: https://cdn.rebrickable.com/media/parts/elements/6271140.jpg
+2025-11-01 16:14:17,935 - app - INFO - Starting missing parts category analysis
+2025-11-01 16:14:17,935 - app - INFO - Starting category summary analysis
+2025-11-01 16:14:17,958 - app - INFO - Queried 229 user sets in 0.02 seconds
+2025-11-01 16:14:18,014 - app - DEBUG - Processed set 1 (set_num: 6010-1) - 22 total parts, 2 missing parts
+2025-11-01 16:14:18,019 - app - DEBUG - Processed set 2 (set_num: 6601-1) - 15 total parts, 0 missing parts
+2025-11-01 16:14:18,024 - app - DEBUG - Processed set 3 (set_num: 688-1) - 23 total parts, 0 missing parts
+2025-11-01 16:14:18,035 - app - DEBUG - Processed set 4 (set_num: 4005-1) - 40 total parts, 3 missing parts
+2025-11-01 16:14:18,053 - app - DEBUG - Processed set 5 (set_num: 6505-1) - 16 total parts, 0 missing parts
+2025-11-01 16:14:25,304 - app - INFO - Checked 229 user sets, 229 matched filter
+2025-11-01 16:14:25,304 - app - INFO - Processed regular parts in 7.35 seconds
+2025-11-01 16:14:26,951 - app - INFO - Processed minifigure parts in 1.65 seconds
+2025-11-01 16:14:26,951 - app - INFO - Category summary complete in 9.02 seconds. Found 67 categories
+2025-11-01 16:14:26,951 - app - INFO - Missing parts statistics - Total: 6697, Regular: 5763, Spare: 934
+2025-11-01 16:14:26,970 - app - ERROR - Error in missing_parts route: name '_result' is not defined
+2025-11-01 16:14:26,970 - app - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "/workspaces/Brick_Manager/brick_manager/routes/missing_parts.py", line 771, in missing_parts
+    categories = _result["categories"]
+                 ^^^^^^^
+NameError: name '_result' is not defined. Did you mean: 'result'?
+2025-11-01 16:15:35,287 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 16:15:41,151 - app - INFO - Starting missing parts category analysis
+2025-11-01 16:15:41,154 - app - INFO - Starting category summary analysis
+2025-11-01 16:15:41,212 - app - INFO - Queried 229 user sets in 0.06 seconds
+2025-11-01 16:15:41,273 - app - DEBUG - Processed set 1 (set_num: 6010-1) - 22 total parts, 2 missing parts
+2025-11-01 16:15:41,285 - app - DEBUG - Processed set 2 (set_num: 6601-1) - 15 total parts, 0 missing parts
+2025-11-01 16:15:41,291 - app - DEBUG - Processed set 3 (set_num: 688-1) - 23 total parts, 0 missing parts
+2025-11-01 16:15:41,299 - app - DEBUG - Processed set 4 (set_num: 4005-1) - 40 total parts, 3 missing parts
+2025-11-01 16:15:41,302 - app - DEBUG - Processed set 5 (set_num: 6505-1) - 16 total parts, 0 missing parts
+2025-11-01 16:15:52,243 - app - INFO - Checked 229 user sets, 229 matched filter
+2025-11-01 16:15:52,244 - app - INFO - Processed regular parts in 11.03 seconds
+2025-11-01 16:15:53,585 - app - INFO - Processed minifigure parts in 1.34 seconds
+2025-11-01 16:15:53,585 - app - INFO - Category summary complete in 12.43 seconds. Found 67 categories
+2025-11-01 16:15:53,585 - app - INFO - Missing parts statistics - Total: 6697, Regular: 5763, Spare: 934
+2025-11-01 16:15:53,605 - app - INFO - Missing parts category analysis complete in 12.45 seconds
+2025-11-01 16:17:49,391 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 16:17:49,476 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6317714.jpg
+2025-11-01 16:17:49,615 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6317714.jpg
+2025-11-01 16:18:41,573 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 16:25:08,673 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 16:25:08,779 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6300350.jpg
+2025-11-01 16:25:08,910 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6300350.jpg
+2025-11-01 16:25:08,920 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4632918.jpg
+2025-11-01 16:25:09,039 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4632918.jpg
+2025-11-01 16:31:15,117 - app - INFO - Starting missing parts category analysis
+2025-11-01 16:31:15,117 - app - INFO - Starting category summary analysis
+2025-11-01 16:31:15,144 - app - INFO - Queried 229 user sets in 0.03 seconds
+2025-11-01 16:31:15,175 - app - DEBUG - Processed set 1 (set_num: 6010-1) - 22 total parts, 2 missing parts
+2025-11-01 16:31:15,179 - app - DEBUG - Processed set 2 (set_num: 6601-1) - 15 total parts, 0 missing parts
+2025-11-01 16:31:15,184 - app - DEBUG - Processed set 3 (set_num: 688-1) - 23 total parts, 0 missing parts
+2025-11-01 16:31:15,192 - app - DEBUG - Processed set 4 (set_num: 4005-1) - 40 total parts, 3 missing parts
+2025-11-01 16:31:15,195 - app - DEBUG - Processed set 5 (set_num: 6505-1) - 16 total parts, 0 missing parts
+2025-11-01 16:31:22,903 - app - INFO - Checked 229 user sets, 229 matched filter
+2025-11-01 16:31:22,904 - app - INFO - Processed regular parts in 7.76 seconds
+2025-11-01 16:31:23,706 - app - INFO - Processed minifigure parts in 0.80 seconds
+2025-11-01 16:31:23,706 - app - INFO - Category summary complete in 8.59 seconds. Found 67 categories
+2025-11-01 16:31:23,706 - app - INFO - Missing parts statistics - Total: 6697, Regular: 5763, Spare: 934
+2025-11-01 16:31:23,726 - app - INFO - Missing parts category analysis complete in 8.61 seconds
+2025-11-01 16:32:28,159 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 16:32:56,285 - app - INFO - Getting missing parts for category: 'Animals / Creatures' (original: 'Animals / Creatures')
+2025-11-01 16:32:59,811 - app - INFO - Bulk querying categories for 1335 unique parts
+2025-11-01 16:33:00,073 - app - INFO - Found categories for 1335 parts
+2025-11-01 16:33:00,250 - app - INFO - Bulk enriching 11 parts
+2025-11-01 16:33:04,792 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4121830.jpg
+2025-11-01 16:33:04,795 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/elements/4121830.jpg: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,807 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/6/4493c04.png
+2025-11-01 16:33:04,809 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/ldraw/6/4493c04.png: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,818 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6021081.jpg
+2025-11-01 16:33:04,819 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/elements/6021081.jpg: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,855 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6034425.jpg
+2025-11-01 16:33:04,858 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/elements/6034425.jpg: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,868 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6099712.jpg
+2025-11-01 16:33:04,870 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/elements/6099712.jpg: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,877 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4157270.jpg
+2025-11-01 16:33:04,879 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/elements/4157270.jpg: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,889 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6179268.jpg
+2025-11-01 16:33:04,891 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/elements/6179268.jpg: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,898 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6213761.jpg
+2025-11-01 16:33:04,900 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/elements/6213761.jpg: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,907 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/4/2546p01.png
+2025-11-01 16:33:04,909 - app - ERROR - Unexpected error while caching image https://cdn.rebrickable.com/media/parts/ldraw/4/2546p01.png: Could not find a suitable TLS CA certificate bundle, invalid path: /workspaces/Brick_Manager/.venv/lib/python3.12/site-packages/certifi/cacert.pem
+2025-11-01 16:33:04,909 - app - INFO - Successfully bulk enriched 11 parts
+2025-11-01 16:33:04,910 - app - INFO - Retrieved 11 missing parts for category 'Animals / Creatures' in 8.62 seconds
+2025-11-01 18:23:03,622 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 18:23:05,965 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-01 18:23:22,944 - app - INFO - Starting missing parts category analysis
+2025-11-01 18:23:22,944 - app - INFO - Starting category summary analysis
+2025-11-01 18:23:22,980 - app - INFO - Queried 229 user sets in 0.04 seconds
+2025-11-01 18:23:23,010 - app - DEBUG - Processed set 1 (set_num: 6010-1) - 22 total parts, 2 missing parts
+2025-11-01 18:23:23,014 - app - DEBUG - Processed set 2 (set_num: 6601-1) - 15 total parts, 0 missing parts
+2025-11-01 18:23:23,019 - app - DEBUG - Processed set 3 (set_num: 688-1) - 23 total parts, 0 missing parts
+2025-11-01 18:23:23,026 - app - DEBUG - Processed set 4 (set_num: 4005-1) - 40 total parts, 3 missing parts
+2025-11-01 18:23:23,029 - app - DEBUG - Processed set 5 (set_num: 6505-1) - 16 total parts, 0 missing parts
+2025-11-01 18:23:29,235 - app - INFO - Checked 229 user sets, 229 matched filter
+2025-11-01 18:23:29,235 - app - INFO - Processed regular parts in 6.25 seconds
+2025-11-01 18:23:30,641 - app - INFO - Processed minifigure parts in 1.40 seconds
+2025-11-01 18:23:30,641 - app - INFO - Category summary complete in 7.70 seconds. Found 67 categories
+2025-11-01 18:23:30,641 - app - INFO - Missing parts statistics - Total: 6697, Regular: 5763, Spare: 934
+2025-11-01 18:23:30,661 - app - INFO - Missing parts category analysis complete in 7.72 seconds
+2025-11-01 18:23:36,732 - app - INFO - Getting missing parts for category: 'Animals / Creatures' (original: 'Animals / Creatures')
+2025-11-01 18:23:38,779 - app - INFO - Bulk querying categories for 1335 unique parts
+2025-11-01 18:23:38,954 - app - INFO - Found categories for 1335 parts
+2025-11-01 18:23:38,955 - app - INFO - Bulk enriching 11 parts
+2025-11-01 18:23:42,819 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4121830.jpg
+2025-11-01 18:23:42,910 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4121830.jpg
+2025-11-01 18:23:42,932 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/6/4493c04.png
+2025-11-01 18:23:43,192 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4493c04.png
+2025-11-01 18:23:43,249 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6021081.jpg
+2025-11-01 18:23:43,334 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6021081.jpg
+2025-11-01 18:23:43,341 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6034425.jpg
+2025-11-01 18:23:43,409 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6034425.jpg
+2025-11-01 18:23:43,428 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6099712.jpg
+2025-11-01 18:23:44,111 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6099712.jpg
+2025-11-01 18:23:44,132 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4157270.jpg
+2025-11-01 18:23:44,182 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4157270.jpg
+2025-11-01 18:23:44,188 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6179268.jpg
+2025-11-01 18:23:44,249 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6179268.jpg
+2025-11-01 18:23:44,267 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6213761.jpg
+2025-11-01 18:23:44,476 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6213761.jpg
+2025-11-01 18:23:44,504 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/4/2546p01.png
+2025-11-01 18:23:44,567 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2546p01.png
+2025-11-01 18:23:44,568 - app - INFO - Successfully bulk enriched 11 parts
+2025-11-01 18:23:44,571 - app - INFO - Retrieved 11 missing parts for category 'Animals / Creatures' in 7.84 seconds

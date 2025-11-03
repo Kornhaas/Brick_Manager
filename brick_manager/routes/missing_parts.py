@@ -1,5 +1,4 @@
 """
-
 This module handles the display of all missing parts and missing minifigure parts across all sets.
 """
 
@@ -9,7 +8,7 @@ import time
 import urllib.parse
 from urllib.parse import urlparse
 
-from flask import Blueprint, current_app, jsonify, render_template, request
+from flask import Blueprint, current_app, jsonify, render_template, request, url_for
 from models import (
     PartStorage,
     RebrickableColors,
@@ -22,6 +21,7 @@ from models import (
     UserMinifigurePart,
     db,
 )
+from services.cache_service import cache_image
 from services.part_lookup_service import load_part_lookup
 
 # pylint: disable=C0301
@@ -34,9 +34,7 @@ _image_url_cache = {}
 
 def parse_internal_id_filter(id_filter):
     """
-
     Parse internal ID filter string and return a list of internal IDs to filter by.
-
 
     Supports formats:
     - Single ID: "229"
@@ -93,9 +91,7 @@ def parse_internal_id_filter(id_filter):
 
 def should_include_set(user_set, allowed_internal_ids):
     """
-
     Check if a user set should be included based on the internal ID filter.
-
 
     Args:
         user_set: The user set object
@@ -133,10 +129,8 @@ def should_include_set(user_set, allowed_internal_ids):
 
 def get_cached_image_url(image_url):
     """
-
-    Optimized image URL getter that avoids repeated filesystem checks.
-
-    Uses in-memory cache to remember which images are already cached.
+    Get cached image URL, downloading and caching the image if not already cached.
+    Uses the cache service to ensure images are actually cached.
     """
     if not image_url:
         return "/static/default_image.png"
@@ -146,35 +140,28 @@ def get_cached_image_url(image_url):
         return _image_url_cache[image_url]
 
     try:
-        # Quick filesystem check for cached file
-        raw_filename = os.path.basename(urlparse(image_url).path)
-        if not raw_filename:
-            _image_url_cache[image_url] = "/static/default_image.png"
-            return "/static/default_image.png"
-
-        cache_dir = "/workspaces/Bricks_Manager/brick_manager/static/cache/images"
-        cached_path = os.path.join(cache_dir, raw_filename)
-
-        if os.path.exists(cached_path):
-            # File is cached, return the static URL
-            cached_url = f"/static/cache/images/{raw_filename}"
-            _image_url_cache[image_url] = cached_url
-            return cached_url
+        # Use the cache service to download and cache the image
+        from services.cache_service import cache_image
+        cached_result = cache_image(image_url)
+        
+        # Cache result could be a URL or file path
+        if cached_result:
+            _image_url_cache[image_url] = cached_result
+            return cached_result
         else:
-            # File not cached - return original URL to avoid synchronous download delay
-            # Images will be cached lazily when first accessed by the browser
-            _image_url_cache[image_url] = image_url
-            return image_url
+            fallback = "/static/default_image.png"
+            _image_url_cache[image_url] = fallback
+            return fallback
 
     except Exception as e:
-        current_app.logger.warning(f"Error checking cached image {image_url}: {e}")
+        current_app.logger.warning(f"Error caching image {image_url}: {e}")
         fallback = "/static/default_image.png"
         _image_url_cache[image_url] = fallback
         return fallback
 
 
 def bulk_enrich_missing_parts(parts_list, master_lookup):
-    """Bulk enrich multiple parts with single database queries instead of N individual queries."""
+    """Bulk enrich multiple parts with single database queries instead of N individual queries"""
     if not parts_list:
         return []
 
@@ -311,7 +298,7 @@ def bulk_enrich_missing_parts(parts_list, master_lookup):
 
 
 def enrich_missing_part(part, user_set, part_type="Regular Part"):
-    """Helper function to enrich part data with proper images and color information."""
+    """Helper function to enrich part data with proper images and color information"""
     try:
         current_app.logger.debug(
             f"Enriching {part_type} part: {part.part_num} for set {user_set.id}"
@@ -438,8 +425,7 @@ def enrich_missing_part(part, user_set, part_type="Regular Part"):
 
 
 def get_missing_parts_categories(include_spare=True, set_filter=""):
-    """Get summary of missing parts grouped by category with total statistics."""
-
+    """Get summary of missing parts grouped by category with total statistics"""
     start_time = time.time()
     current_app.logger.info("Starting category summary analysis")
 
@@ -640,8 +626,7 @@ def get_missing_parts_categories(include_spare=True, set_filter=""):
 
 @missing_parts_bp.route("/missing_parts_category/<path:category_name>", methods=["GET"])
 def missing_parts_category(category_name):
-    """Get missing parts for a specific category."""
-
+    """Get missing parts for a specific category"""
     start_time = time.time()
 
     # URL decode the category name to handle special characters
@@ -760,11 +745,9 @@ def missing_parts_category(category_name):
 @missing_parts_bp.route("/missing_parts", methods=["GET"])
 def missing_parts():
     """
-
     Displays category summary for missing parts and missing minifigure parts across all sets.
     """
     start_time = time.time()
-
     current_app.logger.info("Starting missing parts category analysis")
 
     try:
@@ -778,8 +761,8 @@ def missing_parts():
             include_spare=include_spare, set_filter=set_filter
         )
 
-        categories = result["categories"]
-        statistics = result["statistics"]
+        categories = _result["categories"]
+        statistics = _result["statistics"]
 
         total_time = time.time() - start_time
         current_app.logger.info(
@@ -817,11 +800,13 @@ def missing_parts():
 
 @missing_parts_bp.route("/missing_parts_categories", methods=["GET"])
 def missing_parts_categories_api():
-    """API endpoint to get category summary with spare parts filtering."""
+    """
+    API endpoint to get category summary with spare parts filtering.
+    """
     try:
         include_spare = request.args.get("include_spare", "true").lower() == "true"
         set_filter = request.args.get("set_filter", "").strip()
-        _result = get_missing_parts_categories(
+        result = get_missing_parts_categories(
             include_spare=include_spare, set_filter=set_filter
         )
         return jsonify(result)
@@ -846,7 +831,7 @@ def missing_parts_categories_api():
 
 @missing_parts_bp.route("/update_part_quantity", methods=["POST"])
 def update_part_quantity():
-    """Update the have_quantity for a specific part."""
+    """Update the have_quantity for a specific part"""
     try:
         data = request.get_json()
         part_id = data.get("part_id")

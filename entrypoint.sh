@@ -34,7 +34,6 @@ if [ ! -f "/app/data/instance/brick_manager.db" ]; then
     # Initialize the database
     python -c "
 from app import app, db
-from flask_migrate import upgrade
 import os
 
 with app.app_context():
@@ -42,11 +41,14 @@ with app.app_context():
     db.create_all()
     print('✅ Database tables created successfully!')
     
-    # Run any existing migrations
+    # Try to run migrations if flask-migrate is available
     try:
+        from flask_migrate import upgrade
         if os.path.exists('migrations'):
             upgrade()
             print('✅ Database migrations applied successfully!')
+    except ImportError:
+        print('ℹ️  flask-migrate not installed, skipping migrations (this is normal)')
     except Exception as e:
         print(f'ℹ️  No migrations to apply or migration error (this is normal for new setups): {e}')
 "
@@ -54,19 +56,21 @@ with app.app_context():
 else
     echo "✅ Database found, checking for migrations..."
     
-    # Apply any pending migrations
+    # Apply any pending migrations if flask-migrate is available
     python -c "
-from flask_migrate import upgrade
 from app import app
 import os
 
 with app.app_context():
     try:
+        from flask_migrate import upgrade
         if os.path.exists('migrations'):
             upgrade()
             print('✅ Database migrations applied successfully!')
         else:
             print('ℹ️  No migrations directory found')
+    except ImportError:
+        print('ℹ️  flask-migrate not installed, skipping migrations')
     except Exception as e:
         print(f'ℹ️  Migration check completed: {e}')
 "

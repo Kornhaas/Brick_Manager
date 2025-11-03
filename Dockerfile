@@ -32,6 +32,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Ensure python3.12 is the default python
+RUN update-alternatives --install /usr/bin/python python /usr/local/bin/python3.12 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.12 1
+
 # Set working directory
 WORKDIR /app
 
