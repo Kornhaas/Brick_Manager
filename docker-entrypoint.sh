@@ -3,8 +3,26 @@ set -e
 
 echo "=== Bricks Manager Docker Entrypoint ==="
 
-# Create data directories if they don't exist
-mkdir -p /app/data/uploads /app/data/cache /app/data/output /app/data/instance
+# Fix permissions if running as root
+if [ "$(id -u)" = "0" ]; then
+    echo "Running as root, fixing permissions for mounted volumes..."
+    
+    # Create data directories if they don't exist
+    mkdir -p /app/data/uploads /app/data/cache/images /app/data/output /app/data/instance /app/data/logs
+    
+    # Fix ownership and permissions
+    chown -R appuser:appuser /app/data 2>/dev/null || true
+    chmod -R 777 /app/data 2>/dev/null || true
+    
+    echo "Permissions fixed. Switching to appuser..."
+    # Use gosu to switch to appuser and re-execute this script
+    exec gosu appuser "$0" "$@"
+fi
+
+echo "Running as appuser ($(id -u):$(id -g))"
+
+# Create data directories (when running as appuser after switch)
+mkdir -p /app/data/uploads /app/data/cache/images /app/data/output /app/data/instance /app/data/logs
 
 # Check if database exists
 DB_PATH="/app/data/instance/brick_manager.db"
@@ -49,9 +67,6 @@ else
         flask db upgrade || echo "No migrations to run or migration failed"
     fi
 fi
-
-# Ensure proper permissions for data directories
-chmod 755 /app/data/uploads /app/data/cache /app/data/output /app/data/instance 2>/dev/null || true
 
 echo "Starting Bricks Manager application..."
 echo "Database: $SQLALCHEMY_DATABASE_URI"

@@ -27,9 +27,10 @@ FROM python:3.12-slim
 # Create app user for security
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /bin/bash appuser
 
-# Install runtime dependencies
+# Install runtime dependencies including gosu for user switching
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Ensure python3.12 is the default python
@@ -45,21 +46,22 @@ COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 # Copy application code
 COPY brick_manager/ ./brick_manager/
-COPY entrypoint.sh ./
+COPY docker-entrypoint.sh ./
 
 # Create directories for mounted volumes with correct permissions
 RUN mkdir -p /app/data/instance \
     /app/data/uploads \
     /app/data/output \
-    /app/data/cache \
-    /app/brick_manager/static/cache \
+    /app/data/cache/images \
+    /app/data/logs \
+    /app/brick_manager/static/cache/images \
     && chown -R appuser:appuser /app
 
 # Make entrypoint script executable
-RUN chmod +x entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
 
-# Switch to non-root user
-USER appuser
+# Don't switch to non-root user here - entrypoint will handle it
+# USER appuser
 
 # Expose port
 EXPOSE 5000
@@ -69,5 +71,8 @@ ENV FLASK_APP=brick_manager/app.py
 ENV FLASK_ENV=production
 ENV PYTHONPATH=/app
 
-# Use entrypoint script
-ENTRYPOINT ["./entrypoint.sh"]
+# Use docker-entrypoint script
+ENTRYPOINT ["./docker-entrypoint.sh"]
+
+# Default command
+CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
