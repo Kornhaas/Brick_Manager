@@ -118,12 +118,18 @@ def backup_database():
     """
     try:
         db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+        # Standard SQLite URI format:
+        # sqlite:////absolute/path -> /absolute/path (4 slashes)
+        # sqlite:///relative/path -> relative/path (3 slashes)
         if db_uri.startswith("sqlite:////"):
-            # Absolute path format
-            db_source_path = db_uri.replace("sqlite:////", "")
+            # Absolute path: sqlite:////app/... -> /app/...
+            db_source_path = db_uri[len("sqlite:///"):]  # Keep one slash
+        elif db_uri.startswith("sqlite:///"):
+            # Relative path: sqlite:///path -> path
+            db_source_path = db_uri[len("sqlite:///"):]
         else:
-            # Relative path format
-            db_source_path = db_uri.replace("sqlite:///", "")
+            # Non-SQLite or already a path
+            db_source_path = db_uri
 
         # Check if source database exists
         if not os.path.exists(db_source_path):
