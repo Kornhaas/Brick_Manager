@@ -36,7 +36,7 @@ def get_rebrickable_lists():
         headers = {"Accept": "application/json", "Authorization": f"key {api_key}"}
 
         url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/"
-        _response = requests.get(url, headers=headers, timeout=20)
+        response = requests.get(url, headers=headers, timeout=20)
 
         if response.status_code == 200:
             data = response.json()
@@ -77,7 +77,7 @@ def create_brick_manager_list():
         list_data = {"name": "Brick_Manager", "is_buildable": True}
 
         url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/"
-        _response = requests.post(url,
+        response = requests.post(url,
             json=list_data,
             headers=headers,
             timeout=20)
@@ -135,7 +135,7 @@ def get_brick_manager_list():
             }
         else:
             # Create the list
-            _result = create_brick_manager_list()
+            result = create_brick_manager_list()
             if result["success"]:
                 result["created"] = True
             return result
@@ -174,7 +174,7 @@ def get_list_sets(list_id):
             url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
             params = {"page": page, "page_size": 100}
 
-            _response = requests.get(url,
+            response = requests.get(url,
                 headers=headers,
                 params=params,
                 timeout=20)
@@ -228,8 +228,7 @@ def add_sets_to_list(list_id, set_data):
 
         # Handle both dictionary (set_num -> quantity) and list (set_nums) formats
         if isinstance(set_data, dict):
-            sets_to_process = list(set_data.items())  # (set_num,
-                quantity) pairs
+            sets_to_process = list(set_data.items())  # (set_num, quantity) pairs
         else:
             # Backward compatibility: treat as list of set numbers with quantity 1
             sets_to_process = [(set_num, 1) for set_num in set_data]
@@ -256,7 +255,7 @@ def add_sets_to_list(list_id, set_data):
 
         try:
             # Try bulk addition
-            _response = requests.post(url,
+            response = requests.post(url,
                 json=bulk_data,
                 headers=headers,
                 timeout=60)
@@ -328,7 +327,7 @@ def add_sets_individually(list_id, sets_to_process, headers, user_token):
             url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
             data = {"set_num": set_num, "quantity": quantity}
 
-            _response = requests.post(url,
+            response = requests.post(url,
                 json=data,
                 headers=headers,
                 timeout=20)
@@ -395,7 +394,7 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
 
         # First, remove the set from the list
         delete_url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/{set_num}/"
-        delete_response = requests.delete(delete_url,
+        deleteresponse = requests.delete(delete_url,
             headers=headers,
             timeout=20)
 
@@ -414,7 +413,7 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
         # Then add it back with the new quantity
         add_url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
         add_data = {"set_num": set_num, "quantity": new_quantity}
-        add_response = requests.post(
+        addresponse = requests.post(
             add_url, json=add_data, headers=headers, timeout=20
         )
 
@@ -474,7 +473,7 @@ def remove_sets_from_list(list_id, set_nums):
             try:
                 url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/{set_num}/"
 
-                _response = requests.delete(url, headers=headers, timeout=20)
+                response = requests.delete(url, headers=headers, timeout=20)
 
                 if response.status_code == 204:
                     removed_count += 1
