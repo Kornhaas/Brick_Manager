@@ -11,12 +11,13 @@ It includes:
 """
 
 import os  # Standard library import
+from typing import List, Dict
 
 from config import Config
 
 # Third-party imports
-from flask import Blueprint, flash, redirect, render_template, request, url_for
-from models import User_Parts, User_Set, RebrickableSets
+from flask import Blueprint, flash, redirect, render_template, request, url_for, jsonify
+from models import User_Parts
 from services.brickognize_service import get_predictions
 from services.part_lookup_service import load_part_lookup
 from services.sqlite_service import get_category_name_from_db
@@ -25,42 +26,39 @@ from werkzeug.utils import secure_filename
 upload_bp = Blueprint("upload", __name__)
 
 
-def get_missing_sets_for_part(part_num):
-    """
-    Get a list of sets where this part is missing (have_quantity < quantity).
-    
-    Args:
-        part_num (str): The part number to search for
-        
-    Returns:
-        list: List of dicts containing set information where part is missing
-    """
+def get_missing_sets_for_part(part_num: str) -> List[Dict]:
+    """Get list of user sets where this part is missing."""
     try:
-        # Query for all user parts where this part is missing
-        missing_parts = (
-            User_Parts.query
-            .filter(User_Parts.part_num == part_num)
-            .filter(User_Parts.have_quantity < User_Parts.quantity)
-            .all()
-        )
+        user_parts = User_Parts.query.filter_by(part_num=part_num).filter(
+            User_Parts.have_quantity < User_Parts.quantity
+        ).all()
         
         sets_missing = []
-        for user_part in missing_parts:
-            # Get the user set
-            user_set = User_Set.query.get(user_part.user_set_id)
-            if user_set:
-                # Get the rebrickable set details
-                rb_set = RebrickableSets.query.filter_by(set_num=user_set.set_num).first()
-                
+        for user_part in user_parts:
+            if user_part.user_set:
                 missing_qty = user_part.quantity - user_part.have_quantity
+                
+                # Debug: Check if rebrickable_color is loaded
+                color_hex = 'CCCCCC'
+                color_name = 'Unknown'
+                if user_part.rebrickable_color:
+                    color_hex = user_part.rebrickable_color.rgb
+                    color_name = user_part.rebrickable_color.name
+                    print(f"Color for part {part_num}: {color_name} = #{color_hex}")
+                else:
+                    print(f"Warning: No rebrickable_color for part {part_num}, color_id={user_part.color_id}")
+                
                 sets_missing.append({
-                    'set_num': user_set.set_num,
-                    'set_name': rb_set.name if rb_set else 'Unknown Set',
+                    'user_set_id': user_part.user_set.id,
+                    'set_num': user_part.user_set.set_num,
+                    'set_name': user_part.user_set.template_set.name if user_part.user_set.template_set else 'Unknown Set',
                     'needed': user_part.quantity,
                     'have': user_part.have_quantity,
                     'missing': missing_qty,
                     'color_id': user_part.color_id,
-                    'color_name': user_part.rebrickable_color.name if user_part.rebrickable_color else 'Unknown'
+                    'color_name': color_name,
+                    'color_hex': color_hex,
+                    'part_id': user_part.id
                 })
         
         return sets_missing
@@ -138,3 +136,50 @@ def allowed_file(filename):
         "." in filename
         and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_EXTENSIONS
     )
+
+
+@upload_bp.route("/upload/increment_part/<int:part_id>", methods=["POST"])
+def increment_part(part_id):
+    """Increment the have_quantity for a User_Part by 1."""
+    from app import db
+    try:
+        user_part = User_Parts.query.get_or_404(part_id)
+        user_part.have_quantity += 1
+        db.session.commit()
+        
+        return {
+            "success": True,
+            "new_have": user_part.have_quantity,
+            "new_missing": user_part.quantity - user_part.have_quantity
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}, 400
+
+
+@upload_bp.route("/upload/update_part_quantity/<int:part_id>", methods=["POST"])
+def update_part_quantity(part_id):
+    """Update the have_quantity for a User_Part to a specific value."""
+    from app import db
+    try:
+        user_part = User_Parts.query.get_or_404(part_id)
+        data = request.get_json()
+        new_have = int(data.get('have_quantity', 0))
+        
+        # Validate the new quantity
+        if new_have < 0:
+            return jsonify({"success": False, "error": "Quantity cannot be negative"}), 400
+        if new_have > user_part.quantity:
+            return jsonify({"success": False, "error": "Quantity cannot exceed needed amount"}), 400
+        
+        old_have = user_part.have_quantity
+        user_part.have_quantity = new_have
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "old_have": old_have,
+            "new_have": user_part.have_quantity,
+            "new_missing": user_part.quantity - user_part.have_quantity
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
