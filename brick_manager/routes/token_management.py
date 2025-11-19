@@ -125,7 +125,7 @@ def generate_token():
         data = {"username": username, "password": password}
 
         # Make the request to Rebrickable
-        _response = requests.post(url, headers=headers, data=data, timeout=30)
+        response = requests.post(url, headers=headers, data=data, timeout=30)
 
         if response.status_code in [200, 201]:
             # Success - extract the token
@@ -264,7 +264,7 @@ def test_token():
         test_url = f"https://rebrickable.com/api/v3/users/{user_token}/profile/"
         headers = {"Accept": "application/json", "Authorization": f"key {api_key}"}
 
-        _response = requests.get(test_url, headers=headers, timeout=30)
+        response = requests.get(test_url, headers=headers, timeout=30)
 
         if response.status_code == 200:
             profile_data = response.json()

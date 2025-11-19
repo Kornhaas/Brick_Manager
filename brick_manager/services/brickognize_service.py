@@ -47,7 +47,7 @@ def get_predictions(file_path, filename):
         with open(file_path, "rb") as file:
             files = {"query_image": (filename, file, "image/jpeg")}
             logging.info("Sending POST request to Brickognize API...")
-            _response = requests.post(api_url, headers=headers, files=files, timeout=10)
+            response = requests.post(api_url, headers=headers, files=files, timeout=10)
 
         logging.info(
             "Received response from Brickognize API - Status Code: %s",

@@ -76,7 +76,7 @@ class RebrickableService:
                 logging.info(
                     "Attempt %d: Fetching %s with params %s", attempt + 1, url, params
                 )
-                _response = requests.get(
+                response = requests.get(
                     url,
                     headers=headers,
                     params=params,

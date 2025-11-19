@@ -142,3 +142,16 @@ NameError: name '_result' is not defined. Did you mean: 'result'?
 2025-11-01 18:23:44,568 - app - INFO - Successfully bulk enriched 11 parts
 2025-11-01 18:23:44,571 - app - INFO - Retrieved 11 missing parts for category 'Animals / Creatures' in 7.84 seconds
 2025-11-03 12:49:41,547 - app - ERROR - Source database does not exist: workspaces/Brick_Manager/brick_manager/instance/brick_manager.db
+2025-11-19 15:11:29,841 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:11:31,170 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:13:46,268 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:20:29,521 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:20:45,992 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:21:09,451 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:21:52,955 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:23:23,496 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:23:31,581 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:23:43,890 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:23:57,409 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:33:43,109 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 15:33:52,744 - app - DEBUG - Master lookup data loaded successfully.

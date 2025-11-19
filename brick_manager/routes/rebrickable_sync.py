@@ -66,7 +66,7 @@ def sync_missing_parts():
         batch_size = data.get("batch_size")
 
         # Perform the synchronization
-        _result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
+        result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
 
         if result["success"]:
             return jsonify(result)

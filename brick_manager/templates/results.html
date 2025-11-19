@@ -54,6 +54,43 @@
         </p>
         {% endif %}
 
+        <!-- Missing Sets Table -->
+        {% if item['missing_sets'] and item['missing_sets']|length > 0 %}
+        <div class="mt-3">
+          <h6 class="text-danger">⚠️ This part is missing in {{ item['missing_sets']|length }} set(s):</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-striped table-bordered">
+              <thead class="table-dark">
+                <tr>
+                  <th>Set Number</th>
+                  <th>Set Name</th>
+                  <th>Color</th>
+                  <th>Needed</th>
+                  <th>Have</th>
+                  <th>Missing</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for set_info in item['missing_sets'] %}
+                <tr>
+                  <td><strong>{{ set_info['set_num'] }}</strong></td>
+                  <td>{{ set_info['set_name'] }}</td>
+                  <td>{{ set_info['color_name'] }}</td>
+                  <td>{{ set_info['needed'] }}</td>
+                  <td>{{ set_info['have'] }}</td>
+                  <td class="text-danger"><strong>{{ set_info['missing'] }}</strong></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% else %}
+        <div class="mt-3">
+          <p class="text-success">✓ This part is not missing in any of your sets.</p>
+        </div>
+        {% endif %}
+
         <!-- Action Buttons -->
         <a
           href="{{ url_for('storage.add_to_storage', part_id=item['id']) }}"

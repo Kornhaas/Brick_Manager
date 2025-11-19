@@ -39,7 +39,7 @@ def download_image(img_url):
         return None
 
     try:
-        _response = requests.get(img_url, stream=True, timeout=10)
+        response = requests.get(img_url, stream=True, timeout=10)
         response.raise_for_status()
         return Image.open(response.raw)
     except Exception as error:
