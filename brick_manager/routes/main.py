@@ -22,13 +22,26 @@ main_bp = Blueprint("main", __name__)
 def index():
     """
 
-    Render the index (home) page.
+    Render the landing page.
 
 
     Returns:
-        Response: Renders the index.html template.
+        Response: Renders the index_landing.html template.
     """
-    return render_template("index.html")
+    return render_template("index_landing.html")
+
+
+@main_bp.route("/ai_detection")
+def ai_detection():
+    """
+
+    Render the AI detection page for scanning parts.
+
+
+    Returns:
+        Response: Renders the ai_detection.html template.
+    """
+    return render_template("ai_detection.html")
 
 
 @main_bp.route("/health")

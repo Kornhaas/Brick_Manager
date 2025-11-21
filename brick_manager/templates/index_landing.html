@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brick Manager - Home</title>
+    {% include "favicon_links.html" %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .hero{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:100px 0;text-align:center}
+        .feature-card{transition:transform .3s,box-shadow .3s;height:100%;cursor:pointer}
+        .feature-card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,0,0,.2)}
+        .feature-icon{font-size:3rem;margin-bottom:1rem;color:#667eea}
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <section class="hero">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-4">Welcome to Brick Manager</h1>
+            <p class="lead mb-5">Your complete LEGO inventory management system</p>
+            <a href="{{ url_for('main.ai_detection') }}" class="btn btn-light btn-lg me-3">
+                <i class="bi bi-camera-fill"></i> Start Scanning
+            </a>
+            <a href="{{ url_for('set_maintain.set_maintain') }}" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-box-seam"></i> Manage Sets
+            </a>
+        </div>
+    </section>
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Features</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <a href="{{ url_for('main.ai_detection') }}" class="text-decoration-none">
+                        <div class="card feature-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-camera-fill feature-icon"></i>
+                                <h3 class="card-title">AI Part Detection</h3>
+                                <p class="card-text">Instantly identify LEGO parts using your camera</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('set_maintain.set_maintain') }}" class="text-decoration-none">
+                        <div class="card feature-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-box-seam feature-icon"></i>
+                                <h3 class="card-title">Set Management</h3>
+                                <p class="card-text">Track your LEGO sets and inventory</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('box_maintenance.box_maintenance_page') }}" class="text-decoration-none">
+                        <div class="card feature-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-archive-fill feature-icon"></i>
+                                <h3 class="card-title">Box Management</h3>
+                                <p class="card-text">Organize storage boxes and print labels</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('part_lookup.lookup_part') }}" class="text-decoration-none">
+                        <div class="card feature-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-search feature-icon"></i>
+                                <h3 class="card-title">Part Lookup</h3>
+                                <p class="card-text">Find parts with detailed information</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('set_search.set_search') }}" class="text-decoration-none">
+                        <div class="card feature-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-list-ul feature-icon"></i>
+                                <h3 class="card-title">Set Search</h3>
+                                <p class="card-text">Browse Rebrickable database</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('missing_parts.missing_parts') }}" class="text-decoration-none">
+                        <div class="card feature-card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-exclamation-triangle feature-icon"></i>
+                                <h3 class="card-title">Missing Parts</h3>
+                                <p class="card-text">View all missing parts</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Quick Actions</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="list-group">
+                        <a href="{{ url_for('manual_entry.manual_entry') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-plus-circle text-success me-2"></i>
+                                <strong>Add Set Manually</strong>
+                                <p class="mb-0 text-muted">Add a new LEGO set to your collection</p>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('main.ai_detection') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-camera text-primary me-2"></i>
+                                <strong>Quick Scan</strong>
+                                <p class="mb-0 text-muted">Scan parts with your camera instantly</p>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('missing_parts.missing_parts') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                                <strong>Missing Parts</strong>
+                                <p class="mb-0 text-muted">View all parts needed to complete your sets</p>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('box_maintenance.box_maintenance_page') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-printer text-info me-2"></i>
+                                <strong>Generate Labels</strong>
+                                <p class="mb-0 text-muted">Create labels for your storage boxes</p>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

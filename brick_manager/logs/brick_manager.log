@@ -168,3 +168,32 @@ NameError: name '_result' is not defined. Did you mean: 'result'?
 2025-11-19 18:39:16,394 - app - DEBUG - Master lookup data loaded successfully.
 2025-11-19 18:41:38,259 - app - DEBUG - Master lookup data loaded successfully.
 2025-11-19 18:41:38,259 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-19 19:23:24,536 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:10:01,567 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:10:03,384 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:11:08,408 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:19:51,730 - app - INFO - Found 2 parts in box 12-3-1
+2025-11-21 18:19:51,830 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4205293.jpg
+2025-11-21 18:19:51,931 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4205293.jpg
+2025-11-21 18:19:51,932 - app - DEBUG - Part 47225: original_url='https://cdn.rebrickable.com/media/parts/elements/4205293.jpg', cached_url='http://127.0.0.1:5001/cache/images/4205293.jpg'
+2025-11-21 18:19:52,290 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4205293.jpg
+2025-11-21 18:19:52,291 - app - DEBUG - Part 47225: original_url='https://cdn.rebrickable.com/media/parts/elements/4205293.jpg', cached_url='http://127.0.0.1:5001/cache/images/4205293.jpg'
+2025-11-21 18:20:23,049 - app - INFO - Found 1 parts in box 12-3-3
+2025-11-21 18:20:23,115 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/7/4692c01.png
+2025-11-21 18:20:23,246 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4692c01.png
+2025-11-21 18:20:23,252 - app - DEBUG - Part 4692c01: original_url='https://cdn.rebrickable.com/media/parts/ldraw/7/4692c01.png', cached_url='http://127.0.0.1:5001/cache/images/4692c01.png'
+2025-11-21 18:20:26,707 - app - INFO - Found 2 parts in box 12-3-2
+2025-11-21 18:20:26,779 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4237158.jpg
+2025-11-21 18:20:26,888 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4237158.jpg
+2025-11-21 18:20:26,889 - app - DEBUG - Part 47223a: original_url='https://cdn.rebrickable.com/media/parts/elements/4237158.jpg', cached_url='http://127.0.0.1:5001/cache/images/4237158.jpg'
+2025-11-21 18:20:27,470 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6131617.jpg
+2025-11-21 18:20:27,571 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6131617.jpg
+2025-11-21 18:20:27,573 - app - DEBUG - Part 47223b: original_url='https://cdn.rebrickable.com/media/parts/elements/6131617.jpg', cached_url='http://127.0.0.1:5001/cache/images/6131617.jpg'
+2025-11-21 18:20:34,453 - app - INFO - Found 1 parts in box 12-3-4
+2025-11-21 18:20:34,481 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/7/4694c01-f1.png
+2025-11-21 18:20:34,684 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4694c01-f1.png
+2025-11-21 18:20:34,685 - app - DEBUG - Part 75215: original_url='https://cdn.rebrickable.com/media/parts/ldraw/7/4694c01-f1.png', cached_url='http://127.0.0.1:5001/cache/images/4694c01-f1.png'
+2025-11-21 18:20:48,886 - app - INFO - Found 1 parts in box 4-3-26
+2025-11-21 18:20:48,891 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4220098.jpg
+2025-11-21 18:20:49,036 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4220098.jpg
+2025-11-21 18:20:49,036 - app - DEBUG - Part 47994: original_url='https://cdn.rebrickable.com/media/parts/elements/4220098.jpg', cached_url='http://127.0.0.1:5001/cache/images/4220098.jpg'
