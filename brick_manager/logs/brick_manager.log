@@ -197,3 +197,524 @@ NameError: name '_result' is not defined. Did you mean: 'result'?
 2025-11-21 18:20:48,891 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4220098.jpg
 2025-11-21 18:20:49,036 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4220098.jpg
 2025-11-21 18:20:49,036 - app - DEBUG - Part 47994: original_url='https://cdn.rebrickable.com/media/parts/elements/4220098.jpg', cached_url='http://127.0.0.1:5001/cache/images/4220098.jpg'
+2025-11-21 18:21:23,291 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:23:53,496 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:28:27,710 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:31:43,031 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:31:54,540 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:32:01,102 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:36:05,148 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:36:19,611 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:36:52,173 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4540435.jpg
+2025-11-21 18:36:52,284 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4540435.jpg
+2025-11-21 18:36:57,598 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/4/3183a.png
+2025-11-21 18:36:57,752 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/3183a.png
+2025-11-21 18:36:59,406 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6401210.jpg
+2025-11-21 18:36:59,492 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6401210.jpg
+2025-11-21 18:36:59,504 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4654577.jpg
+2025-11-21 18:36:59,614 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4654577.jpg
+2025-11-21 18:36:59,646 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4500878.jpg
+2025-11-21 18:36:59,810 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4500878.jpg
+2025-11-21 18:36:59,826 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4211748.jpg
+2025-11-21 18:36:59,916 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211748.jpg
+2025-11-21 18:36:59,930 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4261605.jpg
+2025-11-21 18:37:00,139 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4261605.jpg
+2025-11-21 18:37:00,202 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6157554.jpg
+2025-11-21 18:37:00,282 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6157554.jpg
+2025-11-21 18:37:00,318 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6043656.jpg
+2025-11-21 18:37:00,387 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6043656.jpg
+2025-11-21 18:37:00,419 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/250826.jpg
+2025-11-21 18:37:00,472 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/250826.jpg
+2025-11-21 18:37:00,545 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6089147.jpg
+2025-11-21 18:37:00,605 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6089147.jpg
+2025-11-21 18:37:00,616 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/459626.jpg
+2025-11-21 18:37:00,690 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/459626.jpg
+2025-11-21 18:37:00,723 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/373021.jpg
+2025-11-21 18:37:00,805 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/373021.jpg
+2025-11-21 18:37:00,812 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4211498.jpg
+2025-11-21 18:37:00,878 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211498.jpg
+2025-11-21 18:37:00,938 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6047218.jpg
+2025-11-21 18:37:01,096 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6047218.jpg
+2025-11-21 18:37:03,363 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6199908.jpg
+2025-11-21 18:37:03,456 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6199908.jpg
+2025-11-21 18:37:03,532 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4604304.jpg
+2025-11-21 18:37:03,640 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4604304.jpg
+2025-11-21 18:37:03,659 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6019987.jpg
+2025-11-21 18:37:03,767 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6019987.jpg
+2025-11-21 18:37:03,787 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4273590.jpg
+2025-11-21 18:37:03,866 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4273590.jpg
+2025-11-21 18:37:03,877 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/3003301.jpg
+2025-11-21 18:37:03,988 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/3003301.jpg
+2025-11-21 18:37:04,004 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/292602.jpg
+2025-11-21 18:37:04,071 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/292602.jpg
+2025-11-21 18:37:04,091 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6028812.jpg
+2025-11-21 18:37:04,188 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6028812.jpg
+2025-11-21 18:37:04,201 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/7/4623.png
+2025-11-21 18:37:04,355 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4623.png
+2025-11-21 18:37:04,365 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4530469.jpg
+2025-11-21 18:37:04,439 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4530469.jpg
+2025-11-21 18:37:04,458 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4113128.jpg
+2025-11-21 18:37:04,529 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4113128.jpg
+2025-11-21 18:37:04,552 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6046381.jpg
+2025-11-21 18:37:04,632 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6046381.jpg
+2025-11-21 18:37:04,650 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6043639.jpg
+2025-11-21 18:37:04,729 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6043639.jpg
+2025-11-21 18:37:04,749 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4100530.jpg
+2025-11-21 18:37:04,892 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4100530.jpg
+2025-11-21 18:37:04,903 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/408526.jpg
+2025-11-21 18:37:05,079 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/408526.jpg
+2025-11-21 18:37:05,093 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/601926.jpg
+2025-11-21 18:37:05,158 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/601926.jpg
+2025-11-21 18:37:05,170 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4521187.jpg
+2025-11-21 18:37:05,231 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4521187.jpg
+2025-11-21 18:37:05,253 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/383901.jpg
+2025-11-21 18:37:05,343 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/383901.jpg
+2025-11-21 18:37:05,383 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/395626.jpg
+2025-11-21 18:37:05,456 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/395626.jpg
+2025-11-21 18:37:05,466 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4112237.jpg
+2025-11-21 18:37:05,537 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4112237.jpg
+2025-11-21 18:37:05,552 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/4/3184.png
+2025-11-21 18:37:05,658 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/3184.png
+2025-11-21 18:37:07,553 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6225494.jpg
+2025-11-21 18:37:07,625 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6225494.jpg
+2025-11-21 18:37:07,633 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4288959.jpg
+2025-11-21 18:37:07,717 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4288959.jpg
+2025-11-21 18:37:08,587 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6210269.jpg
+2025-11-21 18:37:08,676 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6210269.jpg
+2025-11-21 18:37:09,429 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6196548.jpg
+2025-11-21 18:37:09,523 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6196548.jpg
+2025-11-21 18:37:09,682 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4535738.jpg
+2025-11-21 18:37:09,815 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4535738.jpg
+2025-11-21 18:37:09,983 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6054852.jpg
+2025-11-21 18:37:10,084 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6054852.jpg
+2025-11-21 18:37:10,099 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/0/60470a.png
+2025-11-21 18:37:10,270 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/60470a.png
+2025-11-21 18:37:11,781 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6326078.jpg
+2025-11-21 18:37:11,845 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6326078.jpg
+2025-11-21 18:37:11,853 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4210828.jpg
+2025-11-21 18:37:11,921 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4210828.jpg
+2025-11-21 18:37:11,948 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6132157.jpg
+2025-11-21 18:37:12,053 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6132157.jpg
+2025-11-21 18:37:12,059 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4114127.jpg
+2025-11-21 18:37:12,123 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4114127.jpg
+2025-11-21 18:37:13,815 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6248078.jpg
+2025-11-21 18:37:13,916 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6248078.jpg
+2025-11-21 18:37:14,000 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6123814.jpg
+2025-11-21 18:37:14,106 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6123814.jpg
+2025-11-21 18:37:14,208 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4667166.jpg
+2025-11-21 18:37:14,301 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4667166.jpg
+2025-11-21 18:37:14,366 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6099483.jpg
+2025-11-21 18:37:14,457 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6099483.jpg
+2025-11-21 18:37:14,475 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6063611.jpg
+2025-11-21 18:37:14,571 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6063611.jpg
+2025-11-21 18:37:14,641 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6039482.jpg
+2025-11-21 18:37:14,735 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6039482.jpg
+2025-11-21 18:37:15,102 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6125569.jpg
+2025-11-21 18:37:15,216 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6125569.jpg
+2025-11-21 18:37:15,254 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4217562.jpg
+2025-11-21 18:37:15,350 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4217562.jpg
+2025-11-21 18:37:15,358 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6039479.jpg
+2025-11-21 18:37:15,463 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6039479.jpg
+2025-11-21 18:37:15,494 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/460026.jpg
+2025-11-21 18:37:15,586 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/460026.jpg
+2025-11-21 18:37:15,604 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4217725.jpg
+2025-11-21 18:37:15,696 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4217725.jpg
+2025-11-21 18:37:15,722 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/448802.jpg
+2025-11-21 18:37:15,820 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/448802.jpg
+2025-11-21 18:37:15,838 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6009518.jpg
+2025-11-21 18:37:15,960 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6009518.jpg
+2025-11-21 18:37:35,686 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3183a.png
+2025-11-21 18:37:37,618 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6401210.jpg
+2025-11-21 18:37:37,624 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4654577.jpg
+2025-11-21 18:37:37,637 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4500878.jpg
+2025-11-21 18:37:37,644 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211748.jpg
+2025-11-21 18:37:37,654 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4261605.jpg
+2025-11-21 18:37:37,716 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6157554.jpg
+2025-11-21 18:37:37,731 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6043656.jpg
+2025-11-21 18:37:37,737 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/250826.jpg
+2025-11-21 18:37:37,757 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6089147.jpg
+2025-11-21 18:37:37,763 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/459626.jpg
+2025-11-21 18:37:37,771 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/373021.jpg
+2025-11-21 18:37:37,779 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211498.jpg
+2025-11-21 18:37:37,817 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6047218.jpg
+2025-11-21 18:37:38,914 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6199908.jpg
+2025-11-21 18:37:38,935 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4604304.jpg
+2025-11-21 18:37:38,940 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6019987.jpg
+2025-11-21 18:37:38,945 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4273590.jpg
+2025-11-21 18:37:38,957 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3003301.jpg
+2025-11-21 18:37:38,963 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/292602.jpg
+2025-11-21 18:37:38,972 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6028812.jpg
+2025-11-21 18:37:38,977 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4623.png
+2025-11-21 18:37:38,984 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4530469.jpg
+2025-11-21 18:37:38,992 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4113128.jpg
+2025-11-21 18:37:39,008 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6046381.jpg
+2025-11-21 18:37:39,017 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6043639.jpg
+2025-11-21 18:37:39,026 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4100530.jpg
+2025-11-21 18:37:39,034 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/408526.jpg
+2025-11-21 18:37:39,040 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/601926.jpg
+2025-11-21 18:37:39,046 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4521187.jpg
+2025-11-21 18:37:39,053 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/383901.jpg
+2025-11-21 18:37:39,059 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/395626.jpg
+2025-11-21 18:37:39,065 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4112237.jpg
+2025-11-21 18:37:39,075 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3184.png
+2025-11-21 18:37:40,227 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6225494.jpg
+2025-11-21 18:37:40,238 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4288959.jpg
+2025-11-21 18:37:41,615 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6210269.jpg
+2025-11-21 18:37:45,458 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6196548.jpg
+2025-11-21 18:37:45,475 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4535738.jpg
+2025-11-21 18:37:45,584 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6054852.jpg
+2025-11-21 18:37:45,604 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/60470a.png
+2025-11-21 18:37:50,394 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6326078.jpg
+2025-11-21 18:37:50,403 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4210828.jpg
+2025-11-21 18:37:50,436 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6132157.jpg
+2025-11-21 18:37:50,443 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4114127.jpg
+2025-11-21 18:37:53,678 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6248078.jpg
+2025-11-21 18:37:53,747 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6123814.jpg
+2025-11-21 18:37:54,036 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4667166.jpg
+2025-11-21 18:37:54,074 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6099483.jpg
+2025-11-21 18:37:54,085 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6063611.jpg
+2025-11-21 18:37:54,236 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6039482.jpg
+2025-11-21 18:37:54,422 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6125569.jpg
+2025-11-21 18:37:54,442 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4217562.jpg
+2025-11-21 18:37:54,482 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6039479.jpg
+2025-11-21 18:37:54,493 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/460026.jpg
+2025-11-21 18:37:54,511 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4217725.jpg
+2025-11-21 18:37:54,530 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/448802.jpg
+2025-11-21 18:37:54,550 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6009518.jpg
+2025-11-21 18:37:54,744 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3183a.png
+2025-11-21 18:37:55,199 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6420433.jpg
+2025-11-21 18:37:55,341 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6420433.jpg
+2025-11-21 18:37:55,525 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4119525.jpg
+2025-11-21 18:37:55,609 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4119525.jpg
+2025-11-21 18:37:55,636 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4640844.jpg
+2025-11-21 18:37:55,682 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4640844.jpg
+2025-11-21 18:37:55,712 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/14/2583.png
+2025-11-21 18:37:55,778 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2583.png
+2025-11-21 18:37:55,786 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/408321.jpg
+2025-11-21 18:37:55,851 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/408321.jpg
+2025-11-21 18:37:56,047 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6139234.jpg
+2025-11-21 18:37:56,118 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6139234.jpg
+2025-11-21 18:37:56,162 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4521681.jpg
+2025-11-21 18:37:56,209 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4521681.jpg
+2025-11-21 18:37:56,245 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4497943.jpg
+2025-11-21 18:37:56,298 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4497943.jpg
+2025-11-21 18:37:56,320 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/0/73587p05.png
+2025-11-21 18:37:56,383 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/73587p05.png
+2025-11-21 18:37:56,394 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/0/4873.png
+2025-11-21 18:37:56,471 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4873.png
+2025-11-21 18:37:56,511 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/7/4207a.png
+2025-11-21 18:37:56,620 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4207a.png
+2025-11-21 18:37:56,654 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4210676.jpg
+2025-11-21 18:37:56,714 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4210676.jpg
+2025-11-21 18:37:56,740 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4141580.jpg
+2025-11-21 18:37:56,802 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4141580.jpg
+2025-11-21 18:37:56,814 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6093529.jpg
+2025-11-21 18:37:56,865 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6093529.jpg
+2025-11-21 18:37:56,912 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4158791.jpg
+2025-11-21 18:37:57,041 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4158791.jpg
+2025-11-21 18:37:57,325 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4153414.jpg
+2025-11-21 18:37:57,426 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4153414.jpg
+2025-11-21 18:37:57,827 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6097234.jpg
+2025-11-21 18:37:58,018 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6097234.jpg
+2025-11-21 18:37:58,063 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4106536.jpg
+2025-11-21 18:37:58,152 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4106536.jpg
+2025-11-21 18:37:58,177 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/363326.jpg
+2025-11-21 18:37:58,282 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/363326.jpg
+2025-11-21 18:37:58,515 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6147016.jpg
+2025-11-21 18:37:58,587 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6147016.jpg
+2025-11-21 18:37:58,607 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/658302.jpg
+2025-11-21 18:37:58,651 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/658302.jpg
+2025-11-21 18:37:58,684 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6066114.jpg
+2025-11-21 18:37:58,709 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6401210.jpg
+2025-11-21 18:37:58,718 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4654577.jpg
+2025-11-21 18:37:58,728 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4500878.jpg
+2025-11-21 18:37:58,730 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211748.jpg
+2025-11-21 18:37:58,735 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4261605.jpg
+2025-11-21 18:37:58,737 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6066114.jpg
+2025-11-21 18:37:58,747 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4185652.jpg
+2025-11-21 18:37:58,798 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4185652.jpg
+2025-11-21 18:37:58,812 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/4/2422.png
+2025-11-21 18:37:58,823 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6157554.jpg
+2025-11-21 18:37:58,837 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6043656.jpg
+2025-11-21 18:37:58,847 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/250826.jpg
+2025-11-21 18:37:58,866 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6089147.jpg
+2025-11-21 18:37:58,872 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/459626.jpg
+2025-11-21 18:37:58,880 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/373021.jpg
+2025-11-21 18:37:58,886 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211498.jpg
+2025-11-21 18:37:58,923 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6047218.jpg
+2025-11-21 18:37:58,968 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2422.png
+2025-11-21 18:37:58,985 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4141607.jpg
+2025-11-21 18:37:59,085 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4141607.jpg
+2025-11-21 18:37:59,234 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/8/40942.png
+2025-11-21 18:37:59,407 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/40942.png
+2025-11-21 18:37:59,522 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/409501.jpg
+2025-11-21 18:37:59,597 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/409501.jpg
+2025-11-21 18:37:59,618 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4106809.jpg
+2025-11-21 18:37:59,684 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4106809.jpg
+2025-11-21 18:37:59,719 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4234920.jpg
+2025-11-21 18:37:59,836 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4234920.jpg
+2025-11-21 18:37:59,855 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/0/3186.png
+2025-11-21 18:37:59,970 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/3186.png
+2025-11-21 18:37:59,985 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4119500.jpg
+2025-11-21 18:38:00,053 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4119500.jpg
+2025-11-21 18:38:00,308 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/4/3187.png
+2025-11-21 18:38:00,433 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/3187.png
+2025-11-21 18:38:00,453 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4565433.jpg
+2025-11-21 18:38:00,501 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4565433.jpg
+2025-11-21 18:38:00,542 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4538720.jpg
+2025-11-21 18:38:00,607 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6199908.jpg
+2025-11-21 18:38:00,639 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4538720.jpg
+2025-11-21 18:38:00,730 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4604304.jpg
+2025-11-21 18:38:00,744 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6019987.jpg
+2025-11-21 18:38:00,758 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4273590.jpg
+2025-11-21 18:38:00,769 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3003301.jpg
+2025-11-21 18:38:00,784 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/292602.jpg
+2025-11-21 18:38:00,811 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6028812.jpg
+2025-11-21 18:38:00,838 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4623.png
+2025-11-21 18:38:00,861 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4530469.jpg
+2025-11-21 18:38:00,872 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4113128.jpg
+2025-11-21 18:38:01,012 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6046381.jpg
+2025-11-21 18:38:01,023 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6043639.jpg
+2025-11-21 18:38:01,033 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4100530.jpg
+2025-11-21 18:38:01,055 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/408526.jpg
+2025-11-21 18:38:01,084 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/601926.jpg
+2025-11-21 18:38:01,114 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4521187.jpg
+2025-11-21 18:38:01,124 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/14/850.png
+2025-11-21 18:38:01,125 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/383901.jpg
+2025-11-21 18:38:01,133 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/395626.jpg
+2025-11-21 18:38:01,141 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4112237.jpg
+2025-11-21 18:38:01,177 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3184.png
+2025-11-21 18:38:01,227 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/850.png
+2025-11-21 18:38:01,362 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6152107.jpg
+2025-11-21 18:38:01,425 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6152107.jpg
+2025-11-21 18:38:01,453 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6015891.jpg
+2025-11-21 18:38:01,513 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6015891.jpg
+2025-11-21 18:38:03,087 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6225494.jpg
+2025-11-21 18:38:03,101 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4288959.jpg
+2025-11-21 18:38:03,767 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6285587.jpg
+2025-11-21 18:38:03,833 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6285587.jpg
+2025-11-21 18:38:05,140 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6210269.jpg
+2025-11-21 18:38:06,231 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6196548.jpg
+2025-11-21 18:38:06,246 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4535738.jpg
+2025-11-21 18:38:06,317 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6054852.jpg
+2025-11-21 18:38:06,333 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/60470a.png
+2025-11-21 18:38:06,373 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6350724.jpg
+2025-11-21 18:38:06,466 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6350724.jpg
+2025-11-21 18:38:06,489 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/0/73590a.png
+2025-11-21 18:38:06,562 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/73590a.png
+2025-11-21 18:38:06,577 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/248621.jpg
+2025-11-21 18:38:06,665 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/248621.jpg
+2025-11-21 18:38:06,722 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4184955.jpg
+2025-11-21 18:38:06,797 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4184955.jpg
+2025-11-21 18:38:06,865 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4590657.jpg
+2025-11-21 18:38:06,927 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4590657.jpg
+2025-11-21 18:38:06,946 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/256926.jpg
+2025-11-21 18:38:07,001 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/256926.jpg
+2025-11-21 18:38:07,018 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4120251.jpg
+2025-11-21 18:38:07,063 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4120251.jpg
+2025-11-21 18:38:08,431 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6326078.jpg
+2025-11-21 18:38:08,444 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4210828.jpg
+2025-11-21 18:38:08,500 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6132157.jpg
+2025-11-21 18:38:08,509 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4114127.jpg
+2025-11-21 18:38:18,499 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6248078.jpg
+2025-11-21 18:38:18,532 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6123814.jpg
+2025-11-21 18:38:18,681 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4667166.jpg
+2025-11-21 18:38:18,711 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6099483.jpg
+2025-11-21 18:38:18,716 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6063611.jpg
+2025-11-21 18:38:18,748 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6039482.jpg
+2025-11-21 18:38:18,784 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6125569.jpg
+2025-11-21 18:38:18,789 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4217562.jpg
+2025-11-21 18:38:18,795 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6039479.jpg
+2025-11-21 18:38:18,808 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/460026.jpg
+2025-11-21 18:38:18,815 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4217725.jpg
+2025-11-21 18:38:18,826 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/448802.jpg
+2025-11-21 18:38:18,832 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6009518.jpg
+2025-11-21 18:38:18,986 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3183a.png
+2025-11-21 18:38:27,594 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6401210.jpg
+2025-11-21 18:38:27,716 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4654577.jpg
+2025-11-21 18:38:27,752 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4500878.jpg
+2025-11-21 18:38:27,765 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211748.jpg
+2025-11-21 18:38:27,780 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4261605.jpg
+2025-11-21 18:38:28,660 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6157554.jpg
+2025-11-21 18:38:28,845 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6043656.jpg
+2025-11-21 18:38:28,901 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/250826.jpg
+2025-11-21 18:38:29,216 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6089147.jpg
+2025-11-21 18:38:29,349 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/459626.jpg
+2025-11-21 18:38:29,404 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/373021.jpg
+2025-11-21 18:38:29,527 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211498.jpg
+2025-11-21 18:38:30,557 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6047218.jpg
+2025-11-21 18:38:35,065 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6199908.jpg
+2025-11-21 18:38:35,093 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4604304.jpg
+2025-11-21 18:38:35,099 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6019987.jpg
+2025-11-21 18:38:35,151 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4273590.jpg
+2025-11-21 18:38:35,158 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3003301.jpg
+2025-11-21 18:38:35,175 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/292602.jpg
+2025-11-21 18:38:35,190 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6028812.jpg
+2025-11-21 18:38:35,199 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4623.png
+2025-11-21 18:38:35,206 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4530469.jpg
+2025-11-21 18:38:35,213 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4113128.jpg
+2025-11-21 18:38:35,234 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6046381.jpg
+2025-11-21 18:38:35,241 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6043639.jpg
+2025-11-21 18:38:35,249 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4100530.jpg
+2025-11-21 18:38:35,260 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/408526.jpg
+2025-11-21 18:38:35,268 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/601926.jpg
+2025-11-21 18:38:35,315 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4521187.jpg
+2025-11-21 18:38:35,349 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/383901.jpg
+2025-11-21 18:38:35,377 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/395626.jpg
+2025-11-21 18:38:35,395 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4112237.jpg
+2025-11-21 18:38:35,402 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/3184.png
+2025-11-21 18:38:36,388 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6225494.jpg
+2025-11-21 18:38:36,394 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4288959.jpg
+2025-11-21 18:38:37,794 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6210269.jpg
+2025-11-21 18:38:39,095 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6196548.jpg
+2025-11-21 18:38:39,125 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4535738.jpg
+2025-11-21 18:38:39,295 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6054852.jpg
+2025-11-21 18:38:39,312 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/60470a.png
+2025-11-21 18:38:40,507 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6326078.jpg
+2025-11-21 18:38:40,516 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4210828.jpg
+2025-11-21 18:38:40,549 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6132157.jpg
+2025-11-21 18:38:40,558 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4114127.jpg
+2025-11-21 18:38:41,222 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4567993.jpg
+2025-11-21 18:38:41,377 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4567993.jpg
+2025-11-21 18:38:41,428 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4551541.jpg
+2025-11-21 18:38:41,510 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4551541.jpg
+2025-11-21 18:38:41,519 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/382340.jpg
+2025-11-21 18:38:41,588 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/382340.jpg
+2025-11-21 18:38:42,029 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6248078.jpg
+2025-11-21 18:38:42,091 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6123814.jpg
+2025-11-21 18:38:42,198 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4667166.jpg
+2025-11-21 18:38:42,224 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6099483.jpg
+2025-11-21 18:38:42,235 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6063611.jpg
+2025-11-21 18:38:42,270 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6039482.jpg
+2025-11-21 18:38:42,309 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6125569.jpg
+2025-11-21 18:38:42,316 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4217562.jpg
+2025-11-21 18:38:42,323 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6039479.jpg
+2025-11-21 18:38:42,350 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/460026.jpg
+2025-11-21 18:38:42,357 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/4217725.jpg
+2025-11-21 18:38:42,363 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/448802.jpg
+2025-11-21 18:38:42,373 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6009518.jpg
+2025-11-21 18:38:42,698 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6245195.jpg
+2025-11-21 18:38:42,772 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6245195.jpg
+2025-11-21 18:38:42,846 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4116743.jpg
+2025-11-21 18:38:42,908 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4116743.jpg
+2025-11-21 18:38:42,924 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/42/2418a.png
+2025-11-21 18:38:43,016 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2418a.png
+2025-11-21 18:38:43,064 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4114163.jpg
+2025-11-21 18:38:43,164 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4114163.jpg
+2025-11-21 18:38:43,303 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4288958.jpg
+2025-11-21 18:38:43,399 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4288958.jpg
+2025-11-21 18:38:43,426 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4195864.jpg
+2025-11-21 18:38:43,527 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4195864.jpg
+2025-11-21 18:38:44,465 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6246853.jpg
+2025-11-21 18:38:44,581 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6246853.jpg
+2025-11-21 18:38:44,695 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/42/2337.png
+2025-11-21 18:38:44,813 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2337.png
+2025-11-21 18:38:44,883 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4560932.jpg
+2025-11-21 18:38:44,963 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4560932.jpg
+2025-11-21 18:38:48,060 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4621178.jpg
+2025-11-21 18:38:48,118 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4621178.jpg
+2025-11-21 18:38:48,163 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4653512.jpg
+2025-11-21 18:38:48,217 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4653512.jpg
+2025-11-21 18:38:48,243 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6129592.jpg
+2025-11-21 18:38:48,326 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6129592.jpg
+2025-11-21 18:38:49,140 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6177918.jpg
+2025-11-21 18:38:49,241 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6177918.jpg
+2025-11-21 18:38:49,279 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4208222.jpg
+2025-11-21 18:38:49,338 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4208222.jpg
+2025-11-21 18:38:49,356 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4546689.jpg
+2025-11-21 18:38:49,402 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4546689.jpg
+2025-11-21 18:38:49,461 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4567492.jpg
+2025-11-21 18:38:49,520 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4567492.jpg
+2025-11-21 18:38:49,680 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6056370.jpg
+2025-11-21 18:38:49,849 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6056370.jpg
+2025-11-21 18:38:50,011 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4153948.jpg
+2025-11-21 18:38:50,201 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4153948.jpg
+2025-11-21 18:38:50,226 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6023972.jpg
+2025-11-21 18:38:50,288 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6023972.jpg
+2025-11-21 18:38:50,354 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6102582.jpg
+2025-11-21 18:38:50,398 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6102582.jpg
+2025-11-21 18:38:50,436 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4613756.jpg
+2025-11-21 18:38:50,482 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4613756.jpg
+2025-11-21 18:38:50,578 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/46/4474.png
+2025-11-21 18:38:50,669 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4474.png
+2025-11-21 18:38:50,685 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/459440.jpg
+2025-11-21 18:38:50,736 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/459440.jpg
+2025-11-21 18:38:51,136 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4597712.jpg
+2025-11-21 18:38:51,209 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4597712.jpg
+2025-11-21 18:38:51,280 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4183652.jpg
+2025-11-21 18:38:51,345 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4183652.jpg
+2025-11-21 18:38:54,543 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6266304.jpg
+2025-11-21 18:38:54,607 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6266304.jpg
+2025-11-21 18:38:56,012 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6166852.jpg
+2025-11-21 18:38:56,065 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6166852.jpg
+2025-11-21 18:38:56,210 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4650183.jpg
+2025-11-21 18:38:56,352 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4650183.jpg
+2025-11-21 18:38:56,447 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4543458.jpg
+2025-11-21 18:38:56,499 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4543458.jpg
+2025-11-21 18:38:57,235 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6171892.jpg
+2025-11-21 18:38:57,323 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6171892.jpg
+2025-11-21 18:38:57,378 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4129574.jpg
+2025-11-21 18:38:57,437 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4129574.jpg
+2025-11-21 18:38:57,623 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/36/2507.png
+2025-11-21 18:38:57,716 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2507.png
+2025-11-21 18:38:58,267 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6145616.jpg
+2025-11-21 18:38:58,323 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6145616.jpg
+2025-11-21 18:39:00,189 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6314982.jpg
+2025-11-21 18:39:00,295 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6314982.jpg
+2025-11-21 18:39:00,326 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/47/21.png
+2025-11-21 18:39:00,447 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/21.png
+2025-11-21 18:39:00,667 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6157482.jpg
+2025-11-21 18:39:00,781 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6157482.jpg
+2025-11-21 18:39:00,853 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4599456.jpg
+2025-11-21 18:39:00,906 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4599456.jpg
+2025-11-21 18:39:01,320 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/photos/1/2352a-1-114d7194-3a06-407a-b2f5-3ac626ad4e2c.jpg
+2025-11-21 18:39:01,461 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2352a-1-114d7194-3a06-407a-b2f5-3ac626ad4e2c.jpg
+2025-11-21 18:39:01,497 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4500929.jpg
+2025-11-21 18:39:01,572 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4500929.jpg
+2025-11-21 18:39:01,673 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/47/4483.png
+2025-11-21 18:39:01,737 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4483.png
+2025-11-21 18:39:01,783 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4549263.jpg
+2025-11-21 18:39:01,851 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4549263.jpg
+2025-11-21 18:39:02,073 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6106160.jpg
+2025-11-21 18:39:02,156 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6106160.jpg
+2025-11-21 18:39:02,364 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6030851.jpg
+2025-11-21 18:39:02,441 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6030851.jpg
+2025-11-21 18:39:02,476 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4505858.jpg
+2025-11-21 18:39:02,556 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4505858.jpg
+2025-11-21 18:39:02,595 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/34/2620.png
+2025-11-21 18:39:02,695 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2620.png
+2025-11-21 18:39:02,718 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4194217.jpg
+2025-11-21 18:39:02,768 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4194217.jpg
+2025-11-21 18:39:02,786 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/47/30161.png
+2025-11-21 18:39:02,851 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/30161.png
+2025-11-21 18:39:03,206 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4496442.jpg
+2025-11-21 18:39:03,255 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4496442.jpg
+2025-11-21 18:39:03,267 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4597715.jpg
+2025-11-21 18:39:03,339 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4597715.jpg
+2025-11-21 18:39:03,364 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4124103.jpg
+2025-11-21 18:39:03,474 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4124103.jpg
+2025-11-21 18:39:03,559 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4114165.jpg
+2025-11-21 18:39:03,642 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4114165.jpg
+2025-11-21 18:39:03,799 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4249859.jpg
+2025-11-21 18:39:03,929 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4249859.jpg
+2025-11-21 18:39:04,144 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4195541.jpg
+2025-11-21 18:39:04,210 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4195541.jpg
+2025-11-21 18:39:04,228 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6056654.jpg
+2025-11-21 18:39:04,314 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6056654.jpg
+2025-11-21 18:39:04,521 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/7/2916.png
+2025-11-21 18:39:04,670 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/2916.png
+2025-11-21 18:39:04,688 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/6031896.jpg
+2025-11-21 18:39:04,733 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/6031896.jpg
+2025-11-21 18:44:48,289 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:44:49,637 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-21 18:46:02,191 - app - DEBUG - Minifigure part enriched: 2446, name: Helmet, Standard, img_url: https://cdn.rebrickable.com/media/parts/elements/4106303.jpg
+2025-11-21 18:46:02,202 - app - DEBUG - Minifigure part enriched: 2447, name: Headwear Accessory Visor For Standard Helmet, img_url: https://cdn.rebrickable.com/media/parts/elements/4163306.jpg
+2025-11-21 18:46:02,216 - app - DEBUG - Minifigure part enriched: 3626cpr1147, name: Minifig Head Bluecoat Soldier / Driver / Garbage Man Dan, Eyebrows and Lopsided Grin Print, img_url: https://cdn.rebrickable.com/media/parts/elements/6021844.jpg
+2025-11-21 18:46:02,233 - app - DEBUG - Minifigure part enriched: 970c11pr0066, name: Hips and Dark Tan Legs with Cargo Pockets Front Print, img_url: https://cdn.rebrickable.com/media/parts/elements/6209990.jpg
+2025-11-21 18:46:02,249 - app - DEBUG - Minifigure part enriched: 973c05h01pr4024, name: Torso Police Uniform With Gold Badge Silver Radio Print, Dark Blue Arms, Yellow Hands, img_url: https://cdn.rebrickable.com/media/parts/elements/6209966.jpg
+2025-11-21 18:46:02,274 - app - DEBUG - Minifigure part enriched: 30170, name: Headwear Accessory Glasses / Goggles, img_url: https://cdn.rebrickable.com/media/parts/elements/4210645.jpg
+2025-11-21 18:46:02,314 - app - DEBUG - Minifigure part enriched: 30171, name: Hat / Helmet, Aviator Cap, img_url: https://cdn.rebrickable.com/media/parts/elements/4211187.jpg
+2025-11-21 18:46:02,342 - app - DEBUG - Minifigure part enriched: 3626cpr1623, name: Minifig Head The Giant, Dark Orange Eyebrows and Sideburns, Broken Tooth, Determined Grin, Pupils Print, img_url: https://cdn.rebrickable.com/media/parts/elements/6103921.jpg
+2025-11-21 18:46:02,376 - app - DEBUG - Minifigure part enriched: 92590, name: Minifig Neckwear Backpack [Open], img_url: https://cdn.rebrickable.com/media/parts/elements/4598955.jpg
+2025-11-21 18:46:02,386 - app - DEBUG - Minifigure part enriched: 970c12, name: Hips and Dark Bluish Gray Legs, img_url: https://cdn.rebrickable.com/media/parts/elements/4222693.jpg
+2025-11-21 18:46:02,393 - app - DEBUG - Minifigure part enriched: 973c27h01pr2502, name: Torso Prison Shirt, '86753', Dual Sided Dark Bluish Gray Stripes over Dark Tan Undershirt Print, White Arms, Yellow Hands, img_url: https://cdn.rebrickable.com/media/parts/elements/6056258.jpg

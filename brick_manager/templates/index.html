@@ -1,0 +1,708 @@
+<!DOCTYPE html><!DOCTYPE html><!DOCTYPE html>
+
+<html lang="en">
+
+<head><html lang="en"><html lang="en">
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><head>
+
+    <title>Brick Manager - Home</title>
+
+        <meta charset="UTF-8"><head>
+
+    <!-- Favicon -->
+
+    {% include "favicon_links.html" %}    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <meta charset="UTF-8">
+
+    
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    <title>Brick Manager - Home</title>    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">        <title>Brick Manager</title>
+
+    
+
+    <style>    <!-- Favicon -->    
+
+        .hero-section {
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);    {% include "favicon_links.html" %}    
+
+            color: white;
+
+            padding: 100px 0;        
+
+            text-align: center;
+
+        }    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    <!-- Favicon -->
+
+        
+
+        .feature-card {    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">    {% include "favicon_links.html" %}
+
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+            height: 100%;    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">    <!-- Favicon -->
+
+            cursor: pointer;
+
+        }        {% include "favicon_links.html" %}
+
+        
+
+        .feature-card:hover {    <style>    
+
+            transform: translateY(-5px);
+
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);        .hero-section {    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        }
+
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+        .feature-icon {
+
+            font-size: 3rem;            color: white;    <style>
+
+            margin-bottom: 1rem;
+
+            color: #667eea;            padding: 100px 0;        .camera-container {
+
+        }
+
+    </style>            text-align: center;            text-align: center;
+
+</head>
+
+<body>        }            padding: 20px;
+
+    <!-- Include the navigation bar -->
+
+    {% include 'navbar.html' %}                }
+
+    
+
+    <!-- Hero Section -->        .feature-card {        .quick-scan-btn {
+
+    <section class="hero-section">
+
+        <div class="container">            transition: transform 0.3s ease, box-shadow 0.3s ease;            width: 100%;
+
+            <h1 class="display-3 fw-bold mb-4">Welcome to Brick Manager</h1>
+
+            <p class="lead mb-5">Your complete LEGO inventory management system</p>            height: 100%;            max-width: 400px;
+
+            <a href="{{ url_for('main.ai_detection') }}" class="btn btn-light btn-lg me-3">
+
+                <i class="bi bi-camera-fill"></i> Start Scanning            cursor: pointer;            height: 80px;
+
+            </a>
+
+            <a href="{{ url_for('set_maintain.maintain') }}" class="btn btn-outline-light btn-lg">        }            font-size: 1.5rem;
+
+                <i class="bi bi-box-seam"></i> Manage Sets
+
+            </a>                    margin: 20px auto;
+
+        </div>
+
+    </section>        .feature-card:hover {            display: block;
+
+    
+
+    <!-- Features Section -->            transform: translateY(-5px);        }
+
+    <section class="py-5">
+
+        <div class="container">            box-shadow: 0 10px 25px rgba(0,0,0,0.2);        .results-panel {
+
+            <h2 class="text-center mb-5">Features</h2>
+
+            <div class="row g-4">        }            margin-top: 20px;
+
+                <!-- AI Detection -->
+
+                <div class="col-md-4">                    display: none;
+
+                    <a href="{{ url_for('main.ai_detection') }}" class="text-decoration-none">
+
+                        <div class="card feature-card">        .feature-icon {        }
+
+                            <div class="card-body text-center">
+
+                                <i class="bi bi-camera-fill feature-icon"></i>            font-size: 3rem;        .results-panel.show {
+
+                                <h3 class="card-title">AI Part Detection</h3>
+
+                                <p class="card-text">Instantly identify LEGO parts using your camera with advanced AI recognition</p>            margin-bottom: 1rem;            display: block;
+
+                            </div>
+
+                        </div>            color: #667eea;        }
+
+                    </a>
+
+                </div>        }        .loading-spinner {
+
+                
+
+                <!-- Set Management -->    </style>            display: none;
+
+                <div class="col-md-4">
+
+                    <a href="{{ url_for('set_maintain.maintain') }}" class="text-decoration-none"></head>            text-align: center;
+
+                        <div class="card feature-card">
+
+                            <div class="card-body text-center"><body>            padding: 20px;
+
+                                <i class="bi bi-box-seam feature-icon"></i>
+
+                                <h3 class="card-title">Set Management</h3>    <!-- Include the navigation bar -->        }
+
+                                <p class="card-text">Track your LEGO sets, parts inventory, and completion status</p>
+
+                            </div>    {% include 'navbar.html' %}        .loading-spinner.show {
+
+                        </div>
+
+                    </a>                display: block;
+
+                </div>
+
+                    <!-- Hero Section -->        }
+
+                <!-- Storage Organization -->
+
+                <div class="col-md-4">    <section class="hero-section">        @media (min-width: 768px) {
+
+                    <a href="{{ url_for('storage.storage') }}" class="text-decoration-none">
+
+                        <div class="card feature-card">        <div class="container">            .split-view {
+
+                            <div class="card-body text-center">
+
+                                <i class="bi bi-archive-fill feature-icon"></i>            <h1 class="display-3 fw-bold mb-4">Welcome to Brick Manager</h1>                display: grid;
+
+                                <h3 class="card-title">Storage System</h3>
+
+                                <p class="card-text">Organize parts with location tracking and label generation</p>            <p class="lead mb-5">Your complete LEGO inventory management system</p>                grid-template-columns: 1fr 1fr;
+
+                            </div>
+
+                        </div>            <a href="{{ url_for('main.ai_detection') }}" class="btn btn-light btn-lg me-3">                gap: 20px;
+
+                    </a>
+
+                </div>                <i class="bi bi-camera-fill"></i> Start Scanning            }
+
+                
+
+                <!-- Part Lookup -->            </a>        }
+
+                <div class="col-md-4">
+
+                    <a href="{{ url_for('part_lookup.lookup') }}" class="text-decoration-none">            <a href="{{ url_for('set_maintain.maintain') }}" class="btn btn-outline-light btn-lg">        .hidden-file-input {
+
+                        <div class="card feature-card">
+
+                            <div class="card-body text-center">                <i class="bi bi-box-seam"></i> Manage Sets            display: none;
+
+                                <i class="bi bi-search feature-icon"></i>
+
+                                <h3 class="card-title">Part Lookup</h3>            </a>        }
+
+                                <p class="card-text">Find parts quickly with detailed information and location</p>
+
+                            </div>        </div>        .result-card {
+
+                        </div>
+
+                    </a>    </section>            margin-bottom: 15px;
+
+                </div>
+
+                            }
+
+                <!-- Set Search -->
+
+                <div class="col-md-4">    <!-- Features Section -->    </style>
+
+                    <a href="{{ url_for('set_search.search') }}" class="text-decoration-none">
+
+                        <div class="card feature-card">    <section class="py-5"></head>
+
+                            <div class="card-body text-center">
+
+                                <i class="bi bi-list-ul feature-icon"></i>        <div class="container">
+
+                                <h3 class="card-title">Set Search</h3>
+
+                                <p class="card-text">Browse and search the Rebrickable database for LEGO sets</p>            <h2 class="text-center mb-5">Features</h2><body>
+
+                            </div>
+
+                        </div>            <div class="row g-4">    <!-- Include the navigation bar -->
+
+                    </a>
+
+                </div>                <!-- AI Detection -->    {% include 'navbar.html' %}
+
+                
+
+                <!-- Data Sync -->                <div class="col-md-4">    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+                <div class="col-md-4">
+
+                    <a href="{{ url_for('rebrickable_sync.sync_data') }}" class="text-decoration-none">                    <a href="{{ url_for('main.ai_detection') }}" class="text-decoration-none">
+
+                        <div class="card feature-card">
+
+                            <div class="card-body text-center">                        <div class="card feature-card">    <div class="container">
+
+                                <i class="bi bi-arrow-repeat feature-icon"></i>
+
+                                <h3 class="card-title">Data Sync</h3>                            <div class="card-body text-center">        <h1>Brick Manager</h1>
+
+                                <p class="card-text">Keep your database updated with latest Rebrickable data</p>
+
+                            </div>                                <i class="bi bi-camera-fill feature-icon"></i>
+
+                        </div>
+
+                    </a>                                <h3 class="card-title">AI Part Detection</h3>        <div class="camera-container">
+
+                </div>
+
+            </div>                                <p class="card-text">Instantly identify LEGO parts using your camera with advanced AI recognition</p>            <!-- Quick Camera Button for Mobile -->
+
+        </div>
+
+    </section>                            </div>            <button type="button" class="btn btn-primary btn-lg quick-scan-btn" id="quickScanBtn">
+
+    
+
+    <!-- Quick Actions -->                        </div>                📷 Quick Scan
+
+    <section class="bg-light py-5">
+
+        <div class="container">                    </a>            </button>
+
+            <h2 class="text-center mb-5">Quick Actions</h2>
+
+            <div class="row justify-content-center">                </div>            
+
+                <div class="col-md-8">
+
+                    <div class="list-group">                            <!-- Hidden file input with camera attribute -->
+
+                        <a href="{{ url_for('manual_entry.manual') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+
+                            <div>                <!-- Set Management -->            <input type="file" 
+
+                                <i class="bi bi-plus-circle text-success me-2"></i>
+
+                                <strong>Add Set Manually</strong>                <div class="col-md-4">                   id="cameraInput" 
+
+                                <p class="mb-0 text-muted">Add a new LEGO set to your collection</p>
+
+                            </div>                    <a href="{{ url_for('set_maintain.maintain') }}" class="text-decoration-none">                   name="file" 
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>                        <div class="card feature-card">                   accept="image/*" 
+
+                        <a href="{{ url_for('main.ai_detection') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+
+                            <div>                            <div class="card-body text-center">                   capture="environment" 
+
+                                <i class="bi bi-camera text-primary me-2"></i>
+
+                                <strong>Quick Scan</strong>                                <i class="bi bi-box-seam feature-icon"></i>                   class="hidden-file-input">
+
+                                <p class="mb-0 text-muted">Scan parts with your camera instantly</p>
+
+                            </div>                                <h3 class="card-title">Set Management</h3>            
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>                                <p class="card-text">Track your LEGO sets, parts inventory, and completion status</p>            <!-- Traditional Upload (fallback) -->
+
+                        <a href="{{ url_for('missing_parts.missing') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+
+                            <div>                            </div>            <div class="mt-3">
+
+                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+
+                                <strong>Missing Parts</strong>                        </div>                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('fileInput').click()">
+
+                                <p class="mb-0 text-muted">View all parts needed to complete your sets</p>
+
+                            </div>                    </a>                    📁 Choose from Gallery
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>                </div>                </button>
+
+                        <a href="{{ url_for('box_maintenance.box_maintenance') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+
+                            <div>                                <input type="file" 
+
+                                <i class="bi bi-printer text-info me-2"></i>
+
+                                <strong>Generate Labels</strong>                <!-- Storage Organization -->                       id="fileInput" 
+
+                                <p class="mb-0 text-muted">Create labels for your storage boxes</p>
+
+                            </div>                <div class="col-md-4">                       name="file" 
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </a>                    <a href="{{ url_for('storage.storage') }}" class="text-decoration-none">                       accept="image/*" 
+
+                    </div>
+
+                </div>                        <div class="card feature-card">                       class="hidden-file-input">
+
+            </div>
+
+        </div>                            <div class="card-body text-center">            </div>
+
+    </section>
+
+                                    <i class="bi bi-archive-fill feature-icon"></i>        </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>                                <h3 class="card-title">Storage System</h3>
+
+</html>
+
+                                <p class="card-text">Organize parts with location tracking and label generation</p>        <!-- Loading Spinner -->
+
+                            </div>        <div class="loading-spinner" id="loadingSpinner">
+
+                        </div>            <div class="spinner-border text-primary" role="status">
+
+                    </a>                <span class="visually-hidden">Loading...</span>
+
+                </div>            </div>
+
+                            <p class="mt-2">Analyzing image...</p>
+
+                <!-- Part Lookup -->        </div>
+
+                <div class="col-md-4">
+
+                    <a href="{{ url_for('part_lookup.lookup') }}" class="text-decoration-none">        <!-- Results Panel -->
+
+                        <div class="card feature-card">        <div class="results-panel" id="resultsPanel">
+
+                            <div class="card-body text-center">            <h3>Scan Results</h3>
+
+                                <i class="bi bi-search feature-icon"></i>            <div id="resultsContent"></div>
+
+                                <h3 class="card-title">Part Lookup</h3>            <button type="button" class="btn btn-success mt-3" id="scanAgainBtn">
+
+                                <p class="card-text">Find parts quickly with detailed information and location</p>                📷 Scan Another Part
+
+                            </div>            </button>
+
+                        </div>        </div>
+
+                    </a>    </div>
+
+                </div></body>
+
+                
+
+                <!-- Set Search --><script>
+
+                <div class="col-md-4">    // Add dark mode JavaScript here
+
+                    <a href="{{ url_for('set_search.search') }}" class="text-decoration-none">    document.addEventListener('DOMContentLoaded', function () {
+
+                        <div class="card feature-card">        const toggleSwitch = document.getElementById('darkModeToggle');
+
+                            <div class="card-body text-center">
+
+                                <i class="bi bi-list-ul feature-icon"></i>        // Only set up dark mode if toggle exists
+
+                                <h3 class="card-title">Set Search</h3>        if (toggleSwitch) {
+
+                                <p class="card-text">Browse and search the Rebrickable database for LEGO sets</p>            if (localStorage.getItem('darkMode') === 'true') {
+
+                            </div>                document.body.classList.add('dark-mode');
+
+                        </div>                toggleSwitch.checked = true;
+
+                    </a>            }
+
+                </div>
+
+                            toggleSwitch.addEventListener('change', function () {
+
+                <!-- Data Sync -->                if (this.checked) {
+
+                <div class="col-md-4">                    document.body.classList.add('dark-mode');
+
+                    <a href="{{ url_for('rebrickable_sync.sync_data') }}" class="text-decoration-none">                    localStorage.setItem('darkMode', 'true');
+
+                        <div class="card feature-card">                } else {
+
+                            <div class="card-body text-center">                    document.body.classList.remove('dark-mode');
+
+                                <i class="bi bi-arrow-repeat feature-icon"></i>                    localStorage.setItem('darkMode', 'false');
+
+                                <h3 class="card-title">Data Sync</h3>                }
+
+                                <p class="card-text">Keep your database updated with latest Rebrickable data</p>            });
+
+                            </div>        }
+
+                        </div>
+
+                    </a>        // Quick Scan functionality
+
+                </div>        const quickScanBtn = document.getElementById('quickScanBtn');
+
+            </div>        const cameraInput = document.getElementById('cameraInput');
+
+        </div>        const fileInput = document.getElementById('fileInput');
+
+    </section>        const loadingSpinner = document.getElementById('loadingSpinner');
+
+            const resultsPanel = document.getElementById('resultsPanel');
+
+    <!-- Quick Actions -->        const resultsContent = document.getElementById('resultsContent');
+
+    <section class="bg-light py-5">        const scanAgainBtn = document.getElementById('scanAgainBtn');
+
+        <div class="container">
+
+            <h2 class="text-center mb-5">Quick Actions</h2>        console.log('Quick Scan initialized', {
+
+            <div class="row justify-content-center">            quickScanBtn: !!quickScanBtn,
+
+                <div class="col-md-8">            cameraInput: !!cameraInput,
+
+                    <div class="list-group">            fileInput: !!fileInput
+
+                        <a href="{{ url_for('manual_entry.manual') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">        });
+
+                            <div>
+
+                                <i class="bi bi-plus-circle text-success me-2"></i>        // Open camera when Quick Scan button is clicked
+
+                                <strong>Add Set Manually</strong>        if (quickScanBtn && cameraInput) {
+
+                                <p class="mb-0 text-muted">Add a new LEGO set to your collection</p>            quickScanBtn.addEventListener('click', function() {
+
+                            </div>                console.log('Quick Scan button clicked');
+
+                            <i class="bi bi-chevron-right"></i>                cameraInput.click();
+
+                        </a>            });
+
+                        <a href="{{ url_for('main.ai_detection') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">        }
+
+                            <div>
+
+                                <i class="bi bi-camera text-primary me-2"></i>        // Auto-upload when camera captures image
+
+                                <strong>Quick Scan</strong>        if (cameraInput) {
+
+                                <p class="mb-0 text-muted">Scan parts with your camera instantly</p>            cameraInput.addEventListener('change', function(e) {
+
+                            </div>                console.log('Camera input changed', e.target.files);
+
+                            <i class="bi bi-chevron-right"></i>                if (e.target.files && e.target.files[0]) {
+
+                        </a>                    console.log('File selected from camera:', e.target.files[0].name);
+
+                        <a href="{{ url_for('missing_parts.missing') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">                    uploadAndScan(e.target.files[0]);
+
+                            <div>                }
+
+                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>            });
+
+                                <strong>Missing Parts</strong>        }
+
+                                <p class="mb-0 text-muted">View all parts needed to complete your sets</p>
+
+                            </div>        // Auto-upload when file is selected from gallery
+
+                            <i class="bi bi-chevron-right"></i>        if (fileInput) {
+
+                        </a>            fileInput.addEventListener('change', function(e) {
+
+                        <a href="{{ url_for('box_maintenance.box_maintenance') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">                console.log('File input changed', e.target.files);
+
+                            <div>                if (e.target.files && e.target.files[0]) {
+
+                                <i class="bi bi-printer text-info me-2"></i>                    console.log('File selected from gallery:', e.target.files[0].name);
+
+                                <strong>Generate Labels</strong>                    uploadAndScan(e.target.files[0]);
+
+                                <p class="mb-0 text-muted">Create labels for your storage boxes</p>                }
+
+                            </div>            });
+
+                            <i class="bi bi-chevron-right"></i>        }
+
+                        </a>
+
+                    </div>        // Scan again button
+
+                </div>        scanAgainBtn.addEventListener('click', function() {
+
+            </div>            resultsPanel.classList.remove('show');
+
+        </div>            resultsContent.innerHTML = '';
+
+    </section>            quickScanBtn.style.display = 'block';
+
+                cameraInput.value = '';
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>            fileInput.value = '';
+
+</body>        });
+
+</html>
+
+        function uploadAndScan(file) {
+            // Hide scan button and show loading
+            quickScanBtn.style.display = 'none';
+            loadingSpinner.classList.add('show');
+            resultsPanel.classList.remove('show');
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Upload and get results
+            fetch('{{ url_for("upload.upload") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    // If redirected to results page, fetch that page
+                    return fetch(response.url).then(r => r.text());
+                }
+                return response.text();
+            })
+            .then(html => {
+                // Hide loading
+                loadingSpinner.classList.remove('show');
+                
+                // Parse the response
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Extract results from the response
+                const resultCards = doc.querySelectorAll('.card');
+                
+                if (resultCards.length > 0) {
+                    resultsContent.innerHTML = '';
+                    resultCards.forEach(card => {
+                        resultsContent.appendChild(card.cloneNode(true));
+                    });
+                    
+                    // Apply color styling to dynamically loaded color cells
+                    applyColorStyling();
+                    
+                    // Set up increment buttons for dynamically loaded content
+                    setupIncrementButtons();
+                    resultsPanel.classList.add('show');
+                } else {
+                    resultsContent.innerHTML = '<div class="alert alert-warning">No results found. Please try again.</div>';
+                    resultsPanel.classList.add('show');
+                    quickScanBtn.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                loadingSpinner.classList.remove('show');
+                resultsContent.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+                resultsPanel.classList.add('show');
+                quickScanBtn.style.display = 'block';
+                console.error('Error:', error);
+            });
+        }
+
+        // Function to apply color styling to color cells
+        function applyColorStyling() {
+            const colorCells = document.querySelectorAll('.color-cell');
+            console.log('Applying color styling to', colorCells.length, 'cells');
+            
+            colorCells.forEach(cell => {
+                const colorRgb = cell.dataset.colorHex || 'FFFFFF';
+                console.log('Color:', colorRgb, 'for', cell.textContent.trim());
+                const brightness = parseInt(colorRgb, 16);
+                const textColor = brightness > 0x888888 ? 'black' : 'white';
+                cell.style.backgroundColor = '#' + colorRgb;
+                cell.style.color = textColor;
+            });
+        }
+
+        // Function to setup quantity input handlers
+        function setupIncrementButtons() {
+            const haveInputs = document.querySelectorAll('.have-quantity-input');
+            console.log('Setting up', haveInputs.length, 'quantity inputs');
+            
+            haveInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const partId = this.dataset.partId;
+                    const needed = parseInt(this.dataset.needed);
+                    const newHave = parseInt(this.value);
+                    const row = this.closest('tr');
+                    const missingCell = row.querySelector('.missing-quantity');
+                    
+                    // Calculate new missing value
+                    const newMissing = needed - newHave;
+                    
+                    // Update backend
+                    fetch(`/upload/update_part_quantity/${partId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ have_quantity: newHave })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update missing display
+                            missingCell.innerHTML = `<strong>${newMissing}</strong>`;
+                            
+                            // Change styling based on completion
+                            if (newMissing === 0) {
+                                row.style.backgroundColor = '#d4edda';
+                                missingCell.classList.remove('text-danger');
+                                missingCell.classList.add('text-success');
+                            } else {
+                                row.style.backgroundColor = '';
+                                missingCell.classList.remove('text-success');
+                                missingCell.classList.add('text-danger');
+                            }
+                        } else {
+                            alert('Error updating part: ' + data.error);
+                            // Revert input value
+                            this.value = data.old_have || 0;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to update part quantity');
+                    });
+                });
+            });
+        }
+    });
+</script>
+
+</html>
