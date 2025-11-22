@@ -8356,3 +8356,14 @@ NameError: name '_result' is not defined. Did you mean: 'result'?
 2025-11-22 15:03:08,522 - app - DEBUG - Master lookup data loaded successfully.
 2025-11-22 15:05:31,966 - app - DEBUG - Master lookup data loaded successfully.
 2025-11-22 15:05:47,464 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-22 15:09:31,286 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-22 16:48:58,632 - app - DEBUG - Set search initiated for: 10340
+2025-11-22 16:48:58,632 - app - DEBUG - Set number corrected to: 10340-1
+2025-11-22 16:48:58,638 - app - DEBUG - Set info fetched: {'set_num': '10340-1', 'name': 'Wreath', 'year': 2024, 'theme_id': 227, 'num_parts': 1194, 'set_img_url': 'https://cdn.rebrickable.com/media/sets/10340-1.jpg'}
+2025-11-22 16:48:59,250 - app - DEBUG - Fetched 91 parts for set 10340-1 from local database
+2025-11-22 16:48:59,250 - app - DEBUG - Parts info fetched: 91 parts found.
+2025-11-22 16:48:59,265 - app - DEBUG - Fetched 0 minifigs for set 10340-1 from local database
+2025-11-22 16:48:59,266 - app - DEBUG - Minifigs info fetched: 0 minifigs found.
+2025-11-22 16:49:01,969 - app - DEBUG - Adding set 10340-1 to the database with status complete.
+2025-11-22 16:49:01,984 - app - DEBUG - Fetched 91 parts for set 10340-1 from local database
+2025-11-22 16:49:02,051 - app - DEBUG - Fetched 0 minifigs for set 10340-1 from local database
