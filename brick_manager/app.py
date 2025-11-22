@@ -53,6 +53,7 @@ except ImportError:
 
 from routes.admin_sync import admin_sync_bp
 from routes.box_maintenance import box_maintenance_bp
+from routes.building_instructions import building_instructions_bp
 from routes.dashboard import dashboard_bp
 from routes.import_rebrickable_data import import_rebrickable_data_bp
 from routes.main import main_bp
@@ -328,6 +329,7 @@ app.register_blueprint(box_maintenance_bp)
 app.register_blueprint(token_management_bp)
 app.register_blueprint(rebrickable_sync_bp)
 app.register_blueprint(admin_sync_bp)
+app.register_blueprint(building_instructions_bp)
 
 # Set up the scheduler for database backup and sync tasks
 scheduler = BackgroundScheduler()

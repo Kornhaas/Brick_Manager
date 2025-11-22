@@ -156,70 +156,92 @@
         {% endif %}
 
         {% if categories %}
+        <!-- Spare Parts Toggle - Always Visible -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="mb-1">Spare Parts Filter</h6>
+                        <small class="text-muted">Toggle to include or exclude spare parts from all views</small>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="global-toggle-spare-parts" {% if include_spare %}checked{% endif %}>
+                        <label class="form-check-label" for="global-toggle-spare-parts">
+                            <span id="global-spare-parts-label">{% if include_spare %}Include Spare Parts{% else %}Exclude Spare Parts{% endif %}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Set Filter - Always Visible -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="mb-3">Internal ID Filter</h6>
+                <small class="text-muted d-block mb-3">Filter missing parts by specific internal IDs (the number in the Internal ID column). Leave empty to show all sets.</small>
+                
+                <form method="GET" id="set-filter-form">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" name="set_filter" id="set_filter_input" 
+                                   value="{{ set_filter }}" placeholder="e.g. 229 or 200-220 or 200;204;205">
+                            <input type="hidden" name="include_spare" value="{% if include_spare %}true{% else %}false{% endif %}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="clearSetFilter()">Clear</button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <strong>Supported formats:</strong><br>
+                        • Single internal ID: <code>229</code><br>
+                        • Range: <code>200-220</code><br>
+                        • List: <code>200;204;205</code> or <code>200,204,205</code><br>
+                        • Mixed: <code>200-210;229;250-260</code>
+                    </small>
+                </div>
+                
+                {% if set_filter %}
+                <div class="mt-3">
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-filter"></i> Currently filtering by internal IDs: <strong>{{ set_filter }}</strong>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="mb-1">View Mode</h6>
+                        <small class="text-muted">Switch between grouped category view and complete list view</small>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="viewMode" id="categoryViewBtn" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary" for="categoryViewBtn">
+                            <i class="fas fa-th"></i> Category View
+                        </label>
+                        <input type="radio" class="btn-check" name="viewMode" id="listViewBtn" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="listViewBtn">
+                            <i class="fas fa-list"></i> List View
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Category Overview Section -->
         <div id="category-overview">
             <h3>Categories with Missing Parts</h3>
             <p class="text-muted">Click on a category to view the missing parts in that category.</p>
-            
-            <!-- Spare Parts Toggle for Overview -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="mb-1">Spare Parts Filter</h6>
-                            <small class="text-muted">Toggle to include or exclude spare parts from category counts and results</small>
-                        </div>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="overview-toggle-spare-parts" {% if include_spare %}checked{% endif %}>
-                            <label class="form-check-label" for="overview-toggle-spare-parts">
-                                <span id="overview-spare-parts-label">{% if include_spare %}Include Spare Parts{% else %}Exclude Spare Parts{% endif %}</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Set Filter -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h6 class="mb-3">Internal ID Filter</h6>
-                    <small class="text-muted d-block mb-3">Filter missing parts by specific internal IDs (the number in the Internal ID column). Leave empty to show all sets.</small>
-                    
-                    <form method="GET" id="set-filter-form">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" name="set_filter" id="set_filter_input" 
-                                       value="{{ set_filter }}" placeholder="e.g. 229 or 200-220 or 200;204;205">
-                                <input type="hidden" name="include_spare" value="{% if include_spare %}true{% else %}false{% endif %}">
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-outline-secondary w-100" onclick="clearSetFilter()">Clear</button>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <div class="mt-2">
-                        <small class="text-muted">
-                            <strong>Supported formats:</strong><br>
-                            • Single internal ID: <code>229</code><br>
-                            • Range: <code>200-220</code><br>
-                            • List: <code>200;204;205</code> or <code>200,204,205</code><br>
-                            • Mixed: <code>200-210;229;250-260</code>
-                        </small>
-                    </div>
-                    
-                    {% if set_filter %}
-                    <div class="mt-3">
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-filter"></i> Currently filtering by internal IDs: <strong>{{ set_filter }}</strong>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
             
             <div class="row" id="category-grid">
                 {% for category in categories %}
@@ -236,6 +258,46 @@
                 </div>
                 {% endfor %}
             </div>
+            </div>
+        </div>
+
+        <!-- All Parts List View Section -->
+        <div id="all-parts-list-section" class="parts-section mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>All Missing Parts - Complete List</h3>
+            </div>
+
+            <!-- Loading Spinner for List View -->
+            <div id="list-loading-spinner" class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading all missing parts...</p>
+            </div>
+
+            <!-- All Parts Table -->
+            <div id="all-parts-table-container" style="display: none;">
+                <table id="all-missing-parts-table" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th class="sortable" data-column="type" style="cursor: pointer;">Type <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="set_id" style="cursor: pointer;">Set ID <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="internal_id" style="cursor: pointer;">Internal ID <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="item_id" style="cursor: pointer;">Part Number <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="name" style="cursor: pointer;">Name <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="category" style="cursor: pointer;">Category <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="color" style="cursor: pointer;">Color <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="total_quantity" style="cursor: pointer;">Needed <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="have_quantity" style="cursor: pointer;">Have Quantity <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="location" style="cursor: pointer;">Location <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-column="is_spare" style="cursor: pointer;">Spare Part <i class="fas fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-parts-table-body">
+                        <!-- All parts will be loaded here -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -401,12 +463,30 @@
     <script>
         let currentCategoryParts = [];
         let currentCategoryName = null;
+        let allPartsList = [];
+        
+        // Helper function to determine text color based on background color
+        function getContrastColor(hexColor) {
+            // Remove # if present
+            const hex = hexColor.replace('#', '');
+            
+            // Convert to RGB
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            
+            // Calculate luminance
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            
+            // Return black for light colors, white for dark colors
+            return luminance > 0.5 ? '#000000' : '#FFFFFF';
+        }
         
         document.addEventListener('DOMContentLoaded', function () {
             const toggleSpareParts = document.getElementById('toggle-spare-parts');
-            const overviewToggleSpareParts = document.getElementById('overview-toggle-spare-parts');
+            const globalToggleSpareParts = document.getElementById('global-toggle-spare-parts');
 
-            // Set initial state from server for both toggles
+            // Set initial state from server
             {% if include_spare is defined %}
             const initialSpareState = {{ 'true' if include_spare else 'false' }};
             if (toggleSpareParts) {
@@ -416,20 +496,20 @@
                     label.textContent = toggleSpareParts.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
                 }
             }
-            if (overviewToggleSpareParts) {
-                overviewToggleSpareParts.checked = initialSpareState;
-                const overviewLabel = document.getElementById('overview-spare-parts-label');
-                if (overviewLabel) {
-                    overviewLabel.textContent = overviewToggleSpareParts.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+            if (globalToggleSpareParts) {
+                globalToggleSpareParts.checked = initialSpareState;
+                const globalLabel = document.getElementById('global-spare-parts-label');
+                if (globalLabel) {
+                    globalLabel.textContent = globalToggleSpareParts.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
                 }
             }
             {% endif %}
 
-            // Overview Spare Parts Toggle - reload category overview
-            if (overviewToggleSpareParts) {
-                overviewToggleSpareParts.addEventListener('change', function () {
+            // Global Spare Parts Toggle - affects all views
+            if (globalToggleSpareParts) {
+                globalToggleSpareParts.addEventListener('change', function () {
                     // Update the label text based on toggle state
-                    const label = document.getElementById('overview-spare-parts-label');
+                    const label = document.getElementById('global-spare-parts-label');
                     label.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
                     
                     // Sync with details toggle
@@ -441,8 +521,18 @@
                         }
                     }
                     
-                    // Reload the category overview
-                    reloadCategoryOverview();
+                    // Check which view is active and reload accordingly
+                    const listViewBtn = document.getElementById('listViewBtn');
+                    if (listViewBtn && listViewBtn.checked) {
+                        // List view is active - reload list
+                        loadAllPartsList();
+                    } else if (currentCategoryName) {
+                        // Category details view is active - reload category
+                        loadCategoryParts(currentCategoryName);
+                    } else {
+                        // Category overview is active - reload overview
+                        reloadCategoryOverview();
+                    }
                 });
             }
 
@@ -455,12 +545,12 @@
                         label.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
                     }
                     
-                    // Sync with overview toggle
-                    if (overviewToggleSpareParts) {
-                        overviewToggleSpareParts.checked = this.checked;
-                        const overviewLabel = document.getElementById('overview-spare-parts-label');
-                        if (overviewLabel) {
-                            overviewLabel.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
+                    // Sync with global toggle
+                    if (globalToggleSpareParts) {
+                        globalToggleSpareParts.checked = this.checked;
+                        const globalLabel = document.getElementById('global-spare-parts-label');
+                        if (globalLabel) {
+                            globalLabel.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
                         }
                     }
                     
@@ -470,6 +560,26 @@
                     } else {
                         // If we're in overview mode, reload the category overview
                         reloadCategoryOverview();
+                    }
+                });
+            }
+
+            // Setup view mode toggle
+            const categoryViewBtn = document.getElementById('categoryViewBtn');
+            const listViewBtn = document.getElementById('listViewBtn');
+            
+            if (categoryViewBtn) {
+                categoryViewBtn.addEventListener('change', function() {
+                    if (this.checked) {
+                        showCategoryView();
+                    }
+                });
+            }
+
+            if (listViewBtn) {
+                listViewBtn.addEventListener('change', function() {
+                    if (this.checked) {
+                        showListView();
                     }
                 });
             }
@@ -495,10 +605,10 @@
             `;
 
             // Make AJAX request to get parts for this category
-            // Get state from details toggle if available, otherwise from overview toggle
+            // Get state from global toggle
+            const globalToggle = document.getElementById('global-toggle-spare-parts');
             const detailsToggle = document.getElementById('toggle-spare-parts');
-            const overviewToggle = document.getElementById('overview-toggle-spare-parts');
-            const includeSpare = detailsToggle ? detailsToggle.checked : (overviewToggle ? overviewToggle.checked : true);
+            const includeSpare = globalToggle ? globalToggle.checked : (detailsToggle ? detailsToggle.checked : true);
             
             // Get current set filter value
             const setFilterInput = document.getElementById('set_filter_input');
@@ -558,11 +668,239 @@
             document.getElementById('category-overview').style.display = 'block';
         }
 
+        function showCategoryView() {
+            document.getElementById('all-parts-list-section').style.display = 'none';
+            document.getElementById('parts-section').style.display = 'none';
+            document.getElementById('category-overview').style.display = 'block';
+        }
+
+        function showListView() {
+            document.getElementById('category-overview').style.display = 'none';
+            document.getElementById('parts-section').style.display = 'none';
+            document.getElementById('all-parts-list-section').style.display = 'block';
+            
+            // Load all parts if not already loaded
+            if (allPartsList.length === 0) {
+                loadAllPartsList();
+            }
+        }
+
+        function loadAllPartsList() {
+            // Show loading spinner
+            document.getElementById('list-loading-spinner').style.display = 'block';
+            document.getElementById('all-parts-table-container').style.display = 'none';
+
+            // Get spare parts filter state from global toggle
+            const globalSpareToggle = document.getElementById('global-toggle-spare-parts');
+            const includeSpare = globalSpareToggle ? globalSpareToggle.checked : true;
+            
+            // Get current set filter value
+            const setFilterInput = document.getElementById('set_filter_input');
+            const setFilter = setFilterInput ? setFilterInput.value.trim() : '';
+            
+            // Build URL
+            let url = `/missing_parts_all?include_spare=${includeSpare}`;
+            if (setFilter) {
+                url += `&set_filter=${encodeURIComponent(setFilter)}`;
+            }
+            
+            console.log('Loading all parts list, URL:', url);
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received all parts:', data.length, 'items');
+                    allPartsList = data;
+                    
+                    // Hide spinner, show table
+                    document.getElementById('list-loading-spinner').style.display = 'none';
+                    document.getElementById('all-parts-table-container').style.display = 'block';
+                    
+                    renderAllPartsTable(data);
+                })
+                .catch(error => {
+                    console.error('Error loading all parts:', error);
+                    document.getElementById('list-loading-spinner').innerHTML = 
+                        `<div class="alert alert-danger">
+                            <h5>Error loading parts list</h5>
+                            <p>${error.message}</p>
+                            <button class="btn btn-primary btn-sm" onclick="loadAllPartsList()">Try Again</button>
+                        </div>`;
+                });
+        }
+
+        function renderAllPartsTable(parts) {
+            const tbody = document.getElementById('all-parts-table-body');
+            tbody.innerHTML = '';
+
+            if (!parts || parts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="12" class="text-center">No missing parts found</td></tr>';
+                return;
+            }
+
+            console.log('Rendering table with', parts.length, 'parts');
+            console.log('First part structure:', parts[0]);
+
+            parts.forEach((part, index) => {
+                const row = document.createElement('tr');
+                
+                // Color cell background using color_rgb (format: RRGGBB)
+                const colorHex = part.color_rgb ? `#${part.color_rgb}` : '';
+                const colorStyle = colorHex ? `background-color: ${colorHex}; color: ${getContrastColor(colorHex)};` : '';
+                
+                // Safely access all properties with fallbacks
+                const imgUrl = part.img_url || '/static/default_image.png';
+                const name = part.name || 'Unknown';
+                const type = part.type || 'N/A';
+                const setId = part.set_id || 'N/A';
+                const internalId = part.internal_id || 'N/A';
+                const itemId = part.item_id || 'N/A';
+                const category = part.category || 'Unknown';
+                const color = part.color || 'N/A';
+                const totalQty = part.total_quantity || 0;
+                const haveQty = part.have_quantity || 0;
+                const location = part.location || 'Not stored';
+                const isSpare = part.is_spare || false;
+                const colorId = part.color_id || '';
+                
+                row.innerHTML = `
+                    <td><img src="${imgUrl}" alt="${name}" style="max-width: 50px; cursor: pointer;" class="part-image-thumbnail" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-url="${imgUrl}" data-part-name="${name}"></td>
+                    <td>${type}</td>
+                    <td>${setId}</td>
+                    <td>${internalId}</td>
+                    <td>${itemId}</td>
+                    <td>${name}</td>
+                    <td>${category}</td>
+                    <td style="${colorStyle}">${color}</td>
+                    <td>${totalQty}</td>
+                    <td>
+                        <input type="number" 
+                               class="form-control form-control-sm have-quantity-input" 
+                               value="${haveQty}"
+                               min="0"
+                               max="${totalQty}"
+                               data-part-id="${itemId}"
+                               data-set-id="${internalId}"
+                               data-part-type="${type}"
+                               data-is-spare="${isSpare}"
+                               data-color-id="${colorId}"
+                               data-index="${index}"
+                               style="width: 80px;">
+                    </td>
+                    <td>${location}</td>
+                    <td>${isSpare ? '<span class="badge bg-warning">Yes</span>' : '<span class="badge bg-secondary">No</span>'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Add event listeners to all input fields
+            document.querySelectorAll('.have-quantity-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    updatePartQuantityInList(this);
+                });
+            });
+
+            // Add event listeners to all images for modal display
+            document.querySelectorAll('.part-image-thumbnail').forEach(img => {
+                img.addEventListener('click', function() {
+                    const modalImage = document.getElementById('modalImage');
+                    const modalImageName = document.getElementById('modalImageName');
+                    modalImage.src = this.dataset.imgUrl;
+                    modalImage.alt = this.dataset.partName;
+                    modalImageName.textContent = this.dataset.partName;
+                });
+            });
+        }
+
+        function updatePartQuantityInList(inputElement) {
+            const partId = inputElement.dataset.partId;
+            const setId = inputElement.dataset.setId;
+            const partType = inputElement.dataset.partType;
+            const isSpare = inputElement.dataset.isSpare === 'true';
+            const colorId = inputElement.dataset.colorId;
+            const newQuantity = parseInt(inputElement.value);
+            const index = parseInt(inputElement.dataset.index);
+
+            // Update the part in our cached array
+            if (allPartsList[index]) {
+                const oldQuantity = allPartsList[index].have_quantity;
+                const totalQuantity = allPartsList[index].total_quantity;
+                allPartsList[index].have_quantity = newQuantity;
+
+                // Send update to server
+                fetch('/update_part_quantity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        part_id: partId,
+                        set_id: parseInt(setId),
+                        part_type: partType,
+                        is_spare: isSpare,
+                        color_id: parseInt(colorId),
+                        have_quantity: newQuantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Quantity updated successfully');
+                        // If quantity now matches or exceeds total, remove this part from the list
+                        if (newQuantity >= totalQuantity) {
+                            // Remove from cached array
+                            allPartsList.splice(index, 1);
+                            // Remove the row from the table without reloading
+                            const row = inputElement.closest('tr');
+                            if (row) {
+                                row.style.transition = 'opacity 0.3s';
+                                row.style.opacity = '0';
+                                setTimeout(() => {
+                                    row.remove();
+                                    // Update remaining rows' indices
+                                    updateRowIndices();
+                                    // Show message if list is now empty
+                                    if (allPartsList.length === 0) {
+                                        const tbody = document.getElementById('all-parts-table-body');
+                                        tbody.innerHTML = '<tr><td colspan="12" class="text-center">No missing parts found</td></tr>';
+                                    }
+                                }, 300);
+                            }
+                        }
+                    } else {
+                        console.error('Error updating quantity:', data.message);
+                        alert('Error updating quantity: ' + (data.message || 'Unknown error'));
+                        // Revert the value
+                        inputElement.value = oldQuantity;
+                        allPartsList[index].have_quantity = oldQuantity;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating part quantity:', error);
+                    alert('Error updating quantity. Please try again.');
+                    // Revert the value
+                    inputElement.value = oldQuantity;
+                    allPartsList[index].have_quantity = oldQuantity;
+                });
+            }
+        }
+
+        function updateRowIndices() {
+            // Update data-index attributes for all remaining rows
+            document.querySelectorAll('.have-quantity-input').forEach((input, newIndex) => {
+                input.dataset.index = newIndex;
+            });
+        }
+
         function reloadCategoryOverview() {
-            // Get state from overview toggle if available, otherwise from details toggle
-            const overviewToggle = document.getElementById('overview-toggle-spare-parts');
-            const detailsToggle = document.getElementById('toggle-spare-parts');
-            const includeSpare = overviewToggle ? overviewToggle.checked : (detailsToggle ? detailsToggle.checked : true);
+            // Get state from global toggle
+            const globalToggle = document.getElementById('global-toggle-spare-parts');
+            const includeSpare = globalToggle ? globalToggle.checked : true;
             
             // Get current set filter value
             const setFilterInput = document.getElementById('set_filter_input');
@@ -999,7 +1337,76 @@
                     }
                 });
             });
+
+            // Add sorting functionality to table headers
+            const sortableHeaders = document.querySelectorAll('#all-missing-parts-table .sortable');
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.dataset.column;
+                    sortTableByColumn(column, this);
+                });
+            });
         });
+
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc';
+
+        function sortTableByColumn(column, headerElement) {
+            // Toggle sort direction if clicking the same column
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+
+            // Update all header icons
+            document.querySelectorAll('#all-missing-parts-table .sortable i').forEach(icon => {
+                icon.className = 'fas fa-sort';
+            });
+
+            // Update clicked header icon
+            const icon = headerElement.querySelector('i');
+            if (icon) {
+                icon.className = currentSortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+            }
+
+            // Sort the allPartsList array
+            allPartsList.sort((a, b) => {
+                let valA = a[column];
+                let valB = b[column];
+
+                // Handle null/undefined values
+                if (valA === null || valA === undefined) valA = '';
+                if (valB === null || valB === undefined) valB = '';
+
+                // Handle boolean values (is_spare)
+                if (typeof valA === 'boolean') {
+                    valA = valA ? 1 : 0;
+                    valB = valB ? 1 : 0;
+                }
+
+                // Handle numeric values
+                if (typeof valA === 'number' && typeof valB === 'number') {
+                    return currentSortDirection === 'asc' ? valA - valB : valB - valA;
+                }
+
+                // Handle string values (case insensitive)
+                const strA = String(valA).toLowerCase();
+                const strB = String(valB).toLowerCase();
+
+                if (strA < strB) {
+                    return currentSortDirection === 'asc' ? -1 : 1;
+                }
+                if (strA > strB) {
+                    return currentSortDirection === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+
+            // Re-render the table
+            renderAllPartsTable(allPartsList);
+        }
 
     </script>
 </body>

@@ -829,6 +829,83 @@ def missing_parts_categories_api():
         )
 
 
+@missing_parts_bp.route("/missing_parts_all", methods=["GET"])
+def missing_parts_all():
+    """Get all missing parts across all categories as a simple list"""
+    start_time = time.time()
+    
+    missing_items = []
+    include_spare = request.args.get("include_spare", "true").lower() == "true"
+    set_filter = request.args.get("set_filter", "").strip()
+    
+    # Parse internal ID filter
+    allowed_internal_ids = parse_internal_id_filter(set_filter)
+    if allowed_internal_ids:
+        current_app.logger.info(
+            f"Filtering all parts by {len(allowed_internal_ids)} internal IDs"
+        )
+    
+    try:
+        # Step 1: Collect all parts that need checking
+        parts_to_check = []
+        
+        # Collect regular parts
+        user_sets = User_Set.query.all()
+        for user_set in user_sets:
+            # Apply internal ID filter
+            if not should_include_set(user_set, allowed_internal_ids):
+                continue
+            
+            if not hasattr(user_set, "parts_in_set") or user_set.parts_in_set is None:
+                continue
+            for part in user_set.parts_in_set:
+                if part.quantity > part.have_quantity:
+                    if not include_spare and part.is_spare:
+                        continue
+                    parts_to_check.append(
+                        (part, user_set, "Regular Part")
+                    )
+        
+        # Collect minifigure parts
+        user_minifigure_parts = UserMinifigurePart.query.all()
+        for minifig_part in user_minifigure_parts:
+            # Apply internal ID filter for minifigure parts
+            if hasattr(minifig_part, "user_set") and minifig_part.user_set:
+                if not should_include_set(minifig_part.user_set, allowed_internal_ids):
+                    continue
+            
+            if minifig_part.quantity > minifig_part.have_quantity:
+                if not include_spare and minifig_part.is_spare:
+                    continue
+                parts_to_check.append(
+                    (minifig_part, minifig_part.user_set, "Minifigure Part")
+                )
+        
+        # Step 2: Bulk enrich all parts
+        if parts_to_check:
+            master_lookup = load_part_lookup()
+            missing_items = bulk_enrich_missing_parts(parts_to_check, master_lookup)
+        
+        # Sort by Category, Color, Part Name
+        missing_items.sort(key=lambda x: (
+            x.get("category_name", "Unknown"),
+            x.get("color_name", ""),
+            x.get("item_name", "")
+        ))
+        
+        total_time = time.time() - start_time
+        current_app.logger.info(
+            f"Retrieved {len(missing_items)} total missing parts in {total_time:.2f} seconds"
+        )
+        
+        return jsonify(missing_items)
+    
+    except Exception as e:
+        current_app.logger.error(f"Error in missing_parts_all route: {str(e)}")
+        current_app.logger.exception("Full traceback:")
+        return jsonify([])
+
+
 @missing_parts_bp.route("/update_part_quantity", methods=["POST"])
 def update_part_quantity():
     """Update the have_quantity for a specific part"""

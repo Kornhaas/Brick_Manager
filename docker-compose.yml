@@ -16,6 +16,7 @@ services:
       - ./data/output:/app/data/output           # Generated outputs (labels, etc.)
       - ./data/cache:/app/data/cache             # Application cache
       - ./data/logs:/app/data/logs               # Application logs
+      - ./data/instructions:/app/data/instructions  # Building instructions (PDFs/images)
     environment:
       - FLASK_APP=brick_manager/app.py
       - FLASK_ENV=production
