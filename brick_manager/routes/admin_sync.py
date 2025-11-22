@@ -333,7 +333,7 @@ def sync_user_sets():
             summary = result["summary"]
             # Add rate limiting info from the add operation if available
             if "sets_to_add_result" in summary:
-                addresult = summary["sets_to_add_result"]
+                add_result = summary["sets_to_add_result"]
                 if "rate_limited_count" in add_result:
                     summary["rate_limited_count"] = add_result["rate_limited_count"]
                 if "added_count" in add_result:

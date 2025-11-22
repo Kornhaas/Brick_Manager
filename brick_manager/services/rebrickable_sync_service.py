@@ -189,19 +189,19 @@ def make_rate_limited_request(
     for attempt in range(max_retries + 1):
         try:
             if method.upper() == "GET":
-                _response = requests.get(
+                response = requests.get(
                     url, headers=headers, params=params, timeout=timeout
                 )
             elif method.upper() == "DELETE":
-                _response = requests.delete(
+                response = requests.delete(
                     url, headers=headers, params=params, timeout=timeout
                 )
             elif method.upper() == "POST":
-                _response = requests.post(
+                response = requests.post(
                     url, headers=headers, params=params, timeout=timeout
                 )
             elif method.upper() == "PUT":
-                _response = requests.put(
+                response = requests.put(
                     url, headers=headers, params=params, timeout=timeout
                 )
             else:
@@ -232,6 +232,9 @@ def make_rate_limited_request(
             logger.debug(f"Request failed on attempt {attempt + 1}: {e}")
             if attempt < max_retries:
                 time.sleep(2**attempt)
+    
+    # If we exhausted all retries due to exceptions, return None
+    return None
 
 
 def get_local_missing_parts(include_spare=False, include_minifig=True):
@@ -364,7 +367,7 @@ def get_rebrickable_lost_parts():
         page = 1
 
         while True:
-            _response = requests.get(
+            response = requests.get(
                 url, headers=headers, params={"page": page}, timeout=30
             )
 
@@ -457,7 +460,7 @@ def add_lost_parts_to_rebrickable(parts_to_add):
             )
 
             try:
-                _response = requests.post(
+                response = requests.post(
                     url, headers=headers, json=batch, timeout=60
                 )  # Longer timeout for batches
 
@@ -549,7 +552,7 @@ def add_lost_parts_individually(parts_data, headers, user_token):
 
         for i, part_data in enumerate(parts_data):
             try:
-                _response = requests.post(
+                response = requests.post(
                     url, headers=headers, json=[part_data], timeout=20
                 )
 
@@ -617,7 +620,7 @@ def remove_lost_parts_from_rebrickable(parts_to_remove):
                 continue
 
             url = f"https://rebrickable.com/api/v3/users/{user_token}/lost_parts/{lost_part_id}/"
-            _response = requests.delete(url, headers=headers, timeout=30)
+            response = requests.delete(url, headers=headers, timeout=30)
 
             if response.status_code == 204:
                 removed_count += 1
@@ -664,7 +667,7 @@ def get_user_part_lists():
 
         while True:
             params = {"page": page, "page_size": 100}
-            _response = make_rate_limited_request(url, headers, params, timeout=20)
+            response = make_rate_limited_request(url, headers, params, timeout=20)
 
             if not response or response.status_code != 200:
                 logger.error(
@@ -724,7 +727,7 @@ def find_or_create_missing_parts_list(list_name="Brick_Manager-Missing_Parts"):
 
         data = {"name": list_name, "is_buildable": False, "num_parts": 0}
 
-        _response = requests.post(url, headers=headers, data=data, timeout=30)
+        response = requests.post(url, headers=headers, data=data, timeout=30)
 
         if response.status_code == 201:
             created_list = response.json()
@@ -853,7 +856,7 @@ def add_parts_to_part_list(list_id, parts_to_add):
             )
 
             try:
-                _response = requests.post(url, headers=headers, json=batch, timeout=60)
+                response = requests.post(url, headers=headers, json=batch, timeout=60)
 
                 if response.status_code == 201:
                     added_parts = response.json()
@@ -960,7 +963,7 @@ def add_parts_individually_to_list(list_id, parts_data, headers, user_token):
             headers_form = headers.copy()
             headers_form["Content-Type"] = "application/x-www-form-urlencoded"
 
-            _response = requests.post(url, headers=headers_form, data=data, timeout=30)
+            response = requests.post(url, headers=headers_form, data=data, timeout=30)
 
             if response.status_code == 201:
                 added_count += 1
