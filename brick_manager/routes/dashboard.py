@@ -5,7 +5,7 @@ This module provides routes for the dashboard,
 including viewing summaries, details, and updating quantities.
 """
 from flask import Blueprint, current_app, jsonify, render_template, request, url_for
-from models import RebrickableParts, User_Parts, User_Set, UserMinifigurePart, db
+from models import RebrickableParts, RebrickableInventoryParts, User_Parts, User_Set, UserMinifigurePart, db
 from services.cache_service import cache_image
 from services.part_lookup_service import load_part_lookup
 
@@ -34,14 +34,10 @@ def enrich_part(item, master_lookup):
         part_info.category.name if part_info and part_info.category else "No Category"
     )
 
-    # Get image URL - only cache if it's a valid external URL
-    if part_info and part_info.part_img_url and part_info.part_img_url.startswith('http'):
-        img_url = cache_image(part_info.part_img_url)
-        current_app.logger.debug(f"Part {item.part_num}: Cached image from {part_info.part_img_url} -> {img_url}")
-    else:
-        # Use fallback image directly without caching
-        img_url = url_for("static", filename="default_image.png")
-        current_app.logger.debug(f"Part {item.part_num}: Using fallback (part_info={part_info is not None}, has_url={part_info.part_img_url if part_info else 'N/A'})")
+    # Return API endpoint for lazy loading images (don't cache during initial load)
+    # Include color_id to get the correct colored part image
+    color_id = item.color_id if hasattr(item, 'color_id') else None
+    img_url = url_for("dashboard.cache_part_image_api", part_num=item.part_num, color_id=color_id or 0)
 
     location_data = (
         f"Location: {part_data.get('location', 'Unknown')}, "
@@ -56,8 +52,11 @@ def enrich_part(item, master_lookup):
         "set_id": item.user_set.template_set.set_num if item.user_set else None,
         "internal_id": item.user_set.id if item.user_set else None,
         "part_num": item.part_num,
+        "color_id": color_id,
         "name": part_info.name if part_info else "Unknown",
         "color": item.rebrickable_color.name if item.rebrickable_color else "Unknown",
+        "color_rgb": item.rebrickable_color.rgb if item.rebrickable_color else None,
+        "color_is_trans": item.rebrickable_color.is_trans if item.rebrickable_color else False,
         "total_quantity": item.quantity,
         "have_quantity": item.have_quantity,
         "category": category,
@@ -275,3 +274,41 @@ def api_missing_minifigure_parts():
         enrich_part(item, master_lookup) for item in missing_minifigure_parts
     ]
     return jsonify(enriched_data)
+
+
+@dashboard_bp.route("/api/cache_part_image/<part_num>/<int:color_id>", methods=["GET"])
+def cache_part_image_api(part_num, color_id):
+    """API endpoint to cache and return a single part image URL for specific part and color combination."""
+    try:
+        # Get image URL from inventory_parts table using both part_num and color_id
+        inventory_part = RebrickableInventoryParts.query.filter_by(
+            part_num=part_num, 
+            color_id=color_id
+        ).first()
+        
+        if inventory_part and inventory_part.img_url and inventory_part.img_url.startswith('http'):
+            cached_url = cache_image(inventory_part.img_url)
+            current_app.logger.debug(f"Part {part_num} color {color_id}: Found in inventory_parts -> {cached_url}")
+            return jsonify({"success": True, "url": cached_url})
+        
+        # Try without color_id as fallback
+        inventory_part_any = RebrickableInventoryParts.query.filter_by(part_num=part_num).first()
+        if inventory_part_any and inventory_part_any.img_url and inventory_part_any.img_url.startswith('http'):
+            cached_url = cache_image(inventory_part_any.img_url)
+            current_app.logger.debug(f"Part {part_num}: Found in inventory_parts (any color) -> {cached_url}")
+            return jsonify({"success": True, "url": cached_url})
+        
+        # Fallback to parts table
+        part_info = RebrickableParts.query.filter_by(part_num=part_num).first()
+        if part_info and part_info.part_img_url and part_info.part_img_url.startswith('http'):
+            cached_url = cache_image(part_info.part_img_url)
+            current_app.logger.debug(f"Part {part_num}: Found in parts table -> {cached_url}")
+            return jsonify({"success": True, "url": cached_url})
+        
+        # No image found
+        current_app.logger.debug(f"Part {part_num} color {color_id}: No image found, using default")
+        return jsonify({"success": False, "url": url_for("static", filename="default_image.png")})
+    
+    except Exception as e:
+        current_app.logger.error(f"Error caching image for part {part_num} color {color_id}: {e}")
+        return jsonify({"success": False, "url": url_for("static", filename="default_image.png")})
