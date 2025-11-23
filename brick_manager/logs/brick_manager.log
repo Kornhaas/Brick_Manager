@@ -27719,3 +27719,32 @@ NameError: name '_result' is not defined. Did you mean: 'result'?
 2025-11-23 19:12:23,371 - app - DEBUG - Part 3044a color 1: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/3044a.png
 2025-11-23 19:12:23,505 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/300425.jpg
 2025-11-23 19:12:23,525 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/0/3298p57.png
+2025-11-23 19:12:23,552 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/300425.jpg
+2025-11-23 19:12:23,553 - app - DEBUG - Part 3004 color 6: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/300425.jpg
+2025-11-23 19:12:23,592 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/3298p57.png
+2025-11-23 19:12:23,593 - app - DEBUG - Part 3298pr0028 color 0: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/3298p57.png
+2025-11-23 19:12:23,721 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/304501.jpg
+2025-11-23 19:12:23,800 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/304501.jpg
+2025-11-23 19:12:23,803 - app - DEBUG - Part 3045 color 15: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/304501.jpg
+2025-11-23 19:12:23,939 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4187061.jpg
+2025-11-23 19:12:24,000 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4187061.jpg
+2025-11-23 19:12:24,001 - app - DEBUG - Part 30165 color 14: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/4187061.jpg
+2025-11-23 19:12:24,110 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4511896.jpg
+2025-11-23 19:12:24,158 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4511896.jpg
+2025-11-23 19:12:24,158 - app - DEBUG - Part 3626c color 25: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/4511896.jpg
+2025-11-23 19:12:24,298 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/300428.jpg
+2025-11-23 19:12:24,371 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/300428.jpg
+2025-11-23 19:12:24,372 - app - DEBUG - Part 3004 color 2: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/300428.jpg
+2025-11-23 19:12:24,533 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4107050.jpg
+2025-11-23 19:12:24,609 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4107050.jpg
+2025-11-23 19:12:24,612 - app - DEBUG - Part 33051 color 10: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/4107050.jpg
+2025-11-23 19:12:25,075 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/4211679.jpg
+2025-11-23 19:12:25,136 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/4211679.jpg
+2025-11-23 19:12:25,137 - app - DEBUG - Part 30552 color 71: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/4211679.jpg
+2025-11-23 19:12:25,245 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6143944.jpg
+2025-11-23 19:12:25,246 - app - DEBUG - Part 3626cpr1898 color 25: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/6143944.jpg
+2025-11-23 19:12:25,466 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/6104030.jpg
+2025-11-23 19:12:25,466 - app - DEBUG - Part 18896 color 0: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/6104030.jpg
+2025-11-23 19:12:25,664 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/elements/302302.jpg
+2025-11-23 19:12:25,720 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/302302.jpg
+2025-11-23 19:12:25,721 - app - DEBUG - Part 3023 color 7: Found in inventory_parts -> http://127.0.0.1:5001/cache/images/302302.jpg
