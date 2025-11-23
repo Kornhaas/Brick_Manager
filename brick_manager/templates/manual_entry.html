@@ -457,9 +457,9 @@
             saveSpinner.classList.remove('d-none');
             submitBtnText.textContent = 'Saving...';
             
-            // Disable all form inputs to prevent changes during save
-            const inputs = form.querySelectorAll('input, button');
-            inputs.forEach(input => input.disabled = true);
+            // Make form inputs readonly instead of disabled (disabled fields don't get submitted)
+            const inputs = form.querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
+            inputs.forEach(input => input.readOnly = true);
             
             // Show overlay to prevent user interaction
             document.body.style.cursor = 'wait';

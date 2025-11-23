@@ -15824,3 +15824,39 @@ NameError: name '_result' is not defined. Did you mean: 'result'?
 2025-11-23 14:17:54,797 - app - DEBUG - Master lookup data loaded successfully.
 2025-11-23 14:26:24,747 - app - DEBUG - Master lookup data loaded successfully.
 2025-11-23 14:26:24,747 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-23 15:24:45,353 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/14/572.png
+2025-11-23 15:24:45,353 - app - INFO - Downloading image: https://cdn.rebrickable.com/media/parts/ldraw/14/572.png
+2025-11-23 15:24:45,725 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/572.png
+2025-11-23 15:24:45,725 - app - INFO - Image successfully cached: /workspaces/Brick_Manager/brick_manager/static/cache/images/572.png
+2025-11-23 15:35:12,462 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/572.png
+2025-11-23 15:35:12,462 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/572.png
+2025-11-23 15:35:28,238 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/572.png
+2025-11-23 15:35:28,238 - app - DEBUG - Using cached image: /workspaces/Brick_Manager/brick_manager/static/cache/images/572.png
+2025-11-23 15:35:42,126 - app - INFO - Starting missing parts category analysis
+2025-11-23 15:35:42,126 - app - INFO - Starting missing parts category analysis
+2025-11-23 15:35:42,127 - app - INFO - Starting category summary analysis
+2025-11-23 15:35:42,127 - app - INFO - Starting category summary analysis
+2025-11-23 15:35:42,159 - app - INFO - Queried 275 user sets in 0.03 seconds
+2025-11-23 15:35:42,159 - app - INFO - Queried 275 user sets in 0.03 seconds
+2025-11-23 15:35:42,192 - app - DEBUG - Processed set 1 (set_num: 6010-1) - 22 total parts, 2 missing parts
+2025-11-23 15:35:42,192 - app - DEBUG - Processed set 1 (set_num: 6010-1) - 22 total parts, 2 missing parts
+2025-11-23 15:35:42,197 - app - DEBUG - Processed set 2 (set_num: 6601-1) - 15 total parts, 0 missing parts
+2025-11-23 15:35:42,197 - app - DEBUG - Processed set 2 (set_num: 6601-1) - 15 total parts, 0 missing parts
+2025-11-23 15:35:42,201 - app - DEBUG - Processed set 3 (set_num: 688-1) - 23 total parts, 0 missing parts
+2025-11-23 15:35:42,201 - app - DEBUG - Processed set 3 (set_num: 688-1) - 23 total parts, 0 missing parts
+2025-11-23 15:35:42,214 - app - DEBUG - Processed set 4 (set_num: 4005-1) - 40 total parts, 3 missing parts
+2025-11-23 15:35:42,214 - app - DEBUG - Processed set 4 (set_num: 4005-1) - 40 total parts, 3 missing parts
+2025-11-23 15:35:42,217 - app - DEBUG - Processed set 5 (set_num: 6505-1) - 16 total parts, 0 missing parts
+2025-11-23 15:35:42,217 - app - DEBUG - Processed set 5 (set_num: 6505-1) - 16 total parts, 0 missing parts
+2025-11-23 15:35:55,160 - app - INFO - Checked 275 user sets, 275 matched filter
+2025-11-23 15:35:55,160 - app - INFO - Checked 275 user sets, 275 matched filter
+2025-11-23 15:35:55,160 - app - INFO - Processed regular parts in 13.00 seconds
+2025-11-23 15:35:55,160 - app - INFO - Processed regular parts in 13.00 seconds
+2025-11-23 15:35:57,307 - app - INFO - Processed minifigure parts in 2.15 seconds
+2025-11-23 15:35:57,307 - app - INFO - Processed minifigure parts in 2.15 seconds
+2025-11-23 15:35:57,308 - app - INFO - Category summary complete in 15.18 seconds. Found 69 categories
+2025-11-23 15:35:57,308 - app - INFO - Category summary complete in 15.18 seconds. Found 69 categories
+2025-11-23 15:35:57,308 - app - INFO - Missing parts statistics - Total: 7332, Regular: 6319, Spare: 1013
+2025-11-23 15:35:57,308 - app - INFO - Missing parts statistics - Total: 7332, Regular: 6319, Spare: 1013
+2025-11-23 15:35:57,330 - app - INFO - Missing parts category analysis complete in 15.20 seconds
+2025-11-23 15:35:57,330 - app - INFO - Missing parts category analysis complete in 15.20 seconds
