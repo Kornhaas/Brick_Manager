@@ -10,3 +10,7 @@ coverage.xml
 coverage.xml
 .env
 data/*
+brick_manager/logs/brick_manager.log
+brick_manager/coverage.xml
+brick_manager/lego_scanner.log
+brick_manager/logs/brick_manager.log
