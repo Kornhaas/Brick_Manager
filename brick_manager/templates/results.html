@@ -21,93 +21,180 @@
     {% include 'navbar.html' %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <h1 class="text-center">Scan Results</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="text-center flex-grow-1 mb-0">Scan Results</h1>
+      <a href="{{ url_for('main.ai_detection') }}" class="btn btn-primary">
+        <i class="bi bi-camera"></i> Scan Another Part
+      </a>
+    </div>
+
     {% if result and 'items' in result %} {% for item in result['items'] %}
-    <div class="card mb-4">
+    <div class="card mb-4 shadow-sm">
       <div class="card-body">
-        <h5 class="card-title">{{ item['name'] }}</h5>
-        <img
-          src="{{ item['img_url'] }}"
-          alt="{{ item['name'] }}"
-          class="img-fluid"
-        />
+        <div class="row">
+          <!-- Left Side: Part Information -->
+          <div class="col-md-6">
+            <h5 class="card-title text-primary mb-3">
+              <i class="bi bi-box-seam"></i> {{ item['name'] }}
+            </h5>
+            <div class="text-center mb-3">
+              <img
+                src="{{ item['img_url'] }}"
+                alt="{{ item['name'] }}"
+                class="img-fluid rounded shadow-sm"
+                style="max-height: 300px;"
+              />
+            </div>
+            <div class="part-details">
+              <p class="mb-2">
+                <strong><i class="bi bi-hash"></i> Part ID:</strong> 
+                <span class="badge bg-secondary">{{ item['id'] }}</span>
+              </p>
+              <p class="mb-2">
+                <strong><i class="bi bi-tag"></i> Category:</strong> 
+                {{ item['category_name'] | default('Unknown Category') }}
+              </p>
+              <p class="mb-2">
+                <strong><i class="bi bi-graph-up"></i> Match Score:</strong> 
+                <span class="badge bg-info">{{ "%.2f" % (item['score'] * 100) }}%</span>
+              </p>
+            </div>
+          </div>
 
-        <!-- Display Part Details -->
-        <p class="card-text"><strong>ID:</strong> {{ item['id'] }}</p>
-        <p class="card-text">
-          <strong>Category Name:</strong> {{ item['category_name'] |
-          default('Unknown Category') }}
-        </p>
-        <p class="card-text">
-          <strong>Score:</strong> {{ "%.6f" % item['score'] }}
-        </p>
-
-        <!-- Display Lookup Information if available -->
-        {% if item['lookup_info'] %}
-        <p class="card-text">
-          <strong>Schrank:</strong> {{ item['lookup_info']['location'] }}
-        </p>
-        <p class="card-text">
-          <strong>Fach:</strong> {{ item['lookup_info']['level'] }}
-        </p>
-        <p class="card-text">
-          <strong>Box:</strong> {{ item['lookup_info']['box'] }}
-        </p>
-        {% endif %}
-
-        <!-- Missing Sets Table -->
-        {% if item['missing_sets'] and item['missing_sets']|length > 0 %}
-        <div class="mt-3">
-          <h6 class="text-danger">⚠️ This part is missing in {{ item['missing_sets']|length }} set(s):</h6>
-          <div class="table-responsive">
-            <table class="table table-bordered" id="missing-sets-table">
-              <thead>
-                <tr>
-                  <th>Set ID</th>
-                  <th>Set Name</th>
-                  <th>Color</th>
-                  <th>Needed</th>
-                  <th>Have</th>
-                  <th>Missing</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for set_info in item['missing_sets'] %}
-                <tr data-part-id="{{ set_info['part_id'] }}">
-                  <td><strong>{{ set_info['user_set_id'] }}</strong></td>
-                  <td>{{ set_info['set_name'] }}</td>
-                  <td class="color-cell" data-color-hex="{{ set_info['color_hex'] }}">
-                    {{ set_info['color_name'] }}
-                  </td>
-                  <td>{{ set_info['needed'] }}</td>
-                  <td>
-                    <input type="number" 
-                           class="form-control have-quantity-input" 
-                           value="{{ set_info['have'] }}" 
-                           min="0" 
-                           max="{{ set_info['needed'] }}"
-                           data-part-id="{{ set_info['part_id'] }}"
-                           data-needed="{{ set_info['needed'] }}">
-                  </td>
-                  <td class="missing-quantity"><strong>{{ set_info['missing'] }}</strong></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+          <!-- Right Side: Storage Location -->
+          <div class="col-md-6">
+            <h5 class="card-title text-success mb-3">
+              <i class="bi bi-geo-alt-fill"></i> Storage Location
+              {% if item['lookup_info'] %}
+              <button class="btn btn-sm btn-outline-primary float-end" onclick="toggleEditMode('{{ item['id'] }}')">
+                <i class="bi bi-pencil"></i> Edit
+              </button>
+              {% endif %}
+            </h5>
+            
+            <!-- Display Mode -->
+            <div id="storage-display-{{ item['id'] }}" class="alert alert-success" role="alert" style="{% if not item['lookup_info'] %}display: none;{% endif %}">
+              <div class="storage-info">
+                <div class="row mb-3">
+                  <div class="col-4 text-end"><strong>Schrank:</strong></div>
+                  <div class="col-8">
+                    <span class="badge bg-success fs-6" id="display-location-{{ item['id'] }}">{{ item['lookup_info']['location'] if item['lookup_info'] else '' }}</span>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-4 text-end"><strong>Fach:</strong></div>
+                  <div class="col-8">
+                    <span class="badge bg-success fs-6" id="display-level-{{ item['id'] }}">{{ item['lookup_info']['level'] if item['lookup_info'] else '' }}</span>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-4 text-end"><strong>Box:</strong></div>
+                  <div class="col-8">
+                    <span class="badge bg-success fs-6" id="display-box-{{ item['id'] }}">{{ item['lookup_info']['box'] if item['lookup_info'] else '' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Edit/Add Mode -->
+            <div id="storage-edit-{{ item['id'] }}" class="alert alert-info" role="alert" style="{% if item['lookup_info'] %}display: none;{% endif %}"
+              <h6><i class="bi bi-pencil-square"></i> {% if item['lookup_info'] %}Edit{% else %}Add{% endif %} Storage Location</h6>
+              <form id="storage-form-{{ item['id'] }}" onsubmit="saveStorage(event, '{{ item['id'] }}')">
+                <div class="row g-2">
+                  <div class="col-4">
+                    <label class="form-label"><strong>Schrank:</strong></label>
+                    <input type="number" class="form-control" id="input-location-{{ item['id'] }}" 
+                           value="{{ item['lookup_info']['location'] if item['lookup_info'] else '' }}" 
+                           min="1" required autocomplete="off">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label"><strong>Fach:</strong></label>
+                    <input type="number" class="form-control" id="input-level-{{ item['id'] }}" 
+                           value="{{ item['lookup_info']['level'] if item['lookup_info'] else '' }}" 
+                           min="1" required autocomplete="off">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label"><strong>Box:</strong></label>
+                    <input type="number" class="form-control" id="input-box-{{ item['id'] }}" 
+                           value="{{ item['lookup_info']['box'] if item['lookup_info'] else '' }}" 
+                           min="1" required autocomplete="off">
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <button type="submit" class="btn btn-success btn-sm">
+                    <i class="bi bi-save"></i> Save Location
+                  </button>
+                  {% if item['lookup_info'] %}
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEditMode('{{ item['id'] }}')">
+                    <i class="bi bi-x"></i> Cancel
+                  </button>
+                  {% endif %}
+                </div>
+              </form>
+            </div>
+          </div>
           </div>
         </div>
-        {% else %}
-        <div class="mt-3">
-          <p class="text-success">✓ This part is not missing in any of your sets.</p>
-        </div>
-        {% endif %}
 
-        <!-- Action Buttons -->
-        <a
-          href="{{ url_for('storage.add_to_storage', part_id=item['id']) }}"
-          class="btn btn-success"
-          >Add to Storage</a
-        >
+        <!-- Missing Sets Section - Full Width at Bottom -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <hr class="my-4">
+            <h5 class="card-title mb-3">
+              <i class="bi bi-clipboard-check"></i> Internal Sets Status
+            </h5>
+            {% if item['missing_sets'] and item['missing_sets']|length > 0 %}
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-circle"></i> 
+              <strong>Missing in {{ item['missing_sets']|length }} set(s)</strong>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover table-bordered" id="missing-sets-table">
+                <thead class="table-dark">
+                  <tr>
+                    <th><i class="bi bi-hash"></i> Set ID</th>
+                    <th><i class="bi bi-box"></i> Set Name</th>
+                    <th><i class="bi bi-palette"></i> Color</th>
+                    <th><i class="bi bi-arrow-up-circle"></i> Needed</th>
+                    <th><i class="bi bi-check-circle"></i> Have</th>
+                    <th><i class="bi bi-exclamation-circle"></i> Missing</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for set_info in item['missing_sets'] %}
+                  <tr data-part-id="{{ set_info['part_id'] }}">
+                    <td><strong>{{ set_info['user_set_id'] }}</strong></td>
+                    <td>{{ set_info['set_name'] }}</td>
+                    <td class="color-cell" data-color-hex="{{ set_info['color_hex'] }}">
+                      {{ set_info['color_name'] }}
+                    </td>
+                    <td><span class="badge bg-primary">{{ set_info['needed'] }}</span></td>
+                    <td>
+                      <input type="number" 
+                             class="form-control form-control-sm have-quantity-input" 
+                             value="{{ set_info['have'] }}" 
+                             min="0" 
+                             max="{{ set_info['needed'] }}"
+                             data-part-id="{{ set_info['part_id'] }}"
+                             data-needed="{{ set_info['needed'] }}"
+                             style="max-width: 80px;">
+                    </td>
+                    <td class="missing-quantity">
+                      <span class="badge bg-danger">{{ set_info['missing'] }}</span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="alert alert-success" role="alert">
+              <i class="bi bi-check-circle-fill"></i> 
+              <strong>Complete!</strong> This part is not missing in any of your sets.
+            </div>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
     {% endfor %} {% else %}
@@ -115,6 +202,80 @@
     {% endif %}
 
     <script>
+      // Toggle between display and edit mode
+      function toggleEditMode(partId) {
+        console.log('Toggle edit mode for part:', partId);
+        const displayDiv = document.getElementById(`storage-display-${partId}`);
+        const editDiv = document.getElementById(`storage-edit-${partId}`);
+        
+        console.log('Display div:', displayDiv);
+        console.log('Edit div:', editDiv);
+        
+        if (!displayDiv || !editDiv) {
+          console.error('Could not find storage divs for part:', partId);
+          return;
+        }
+        
+        if (displayDiv.style.display === 'none') {
+          displayDiv.style.display = 'block';
+          editDiv.style.display = 'none';
+        } else {
+          displayDiv.style.display = 'none';
+          editDiv.style.display = 'block';
+        }
+      }
+      
+      // Save storage location
+      function saveStorage(event, partId) {
+        event.preventDefault();
+        
+        const location = document.getElementById(`input-location-${partId}`).value;
+        const level = document.getElementById(`input-level-${partId}`).value;
+        const box = document.getElementById(`input-box-${partId}`).value;
+        const saveButton = event.target.querySelector('button[type="submit"]') || event.target;
+        
+        // Show spinner and disable button
+        const originalButtonHTML = saveButton.innerHTML;
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving...';
+        
+        // Save to backend
+        fetch('/upload/save_storage_location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            part_num: partId,
+            location: location,
+            level: level,
+            box: box
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Update display
+            document.getElementById(`display-location-${partId}`).textContent = location;
+            document.getElementById(`display-level-${partId}`).textContent = level;
+            document.getElementById(`display-box-${partId}`).textContent = box;
+            
+            // Switch to display mode
+            document.getElementById(`storage-display-${partId}`).style.display = 'block';
+            document.getElementById(`storage-edit-${partId}`).style.display = 'none';
+          } else {
+            // Restore button and show error
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalButtonHTML;
+            alert('Error saving storage location: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          saveButton.disabled = false;
+          saveButton.innerHTML = originalButtonHTML;
+          alert('Failed to save storage location');
+        });
+      }
+      
       function generateLabel(location, level, box) {
         if (!location || !level || !box) {
           alert("Please provide valid location, level, and box.");
@@ -154,16 +315,15 @@
       document.addEventListener('DOMContentLoaded', function() {
         // Apply color styling to color cells (matching set_maintenance.js)
         const colorCells = document.querySelectorAll('.color-cell');
-        console.log('Found color cells:', colorCells.length);
         
         colorCells.forEach(cell => {
           const colorRgb = cell.dataset.colorHex || 'FFFFFF';
-          console.log('Applying color:', colorRgb, 'to cell:', cell.textContent.trim());
           const brightness = parseInt(colorRgb, 16);
           const textColor = brightness > 0x888888 ? 'black' : 'white';
           cell.style.backgroundColor = '#' + colorRgb;
           cell.style.color = textColor;
-          console.log('Applied backgroundColor:', cell.style.backgroundColor);
+          cell.style.fontWeight = 'bold';
+          cell.style.padding = '8px';
         });
 
         // Handle input field changes
@@ -191,18 +351,13 @@
             .then(response => response.json())
             .then(data => {
               if (data.success) {
-                // Update missing display
-                missingCell.innerHTML = `<strong>${newMissing}</strong>`;
-                
-                // Change styling based on completion
+                // Update missing display with badge styling
                 if (newMissing === 0) {
+                  missingCell.innerHTML = `<span class="badge bg-success">${newMissing}</span>`;
                   row.style.backgroundColor = '#d4edda';
-                  missingCell.classList.remove('text-danger');
-                  missingCell.classList.add('text-success');
                 } else {
+                  missingCell.innerHTML = `<span class="badge bg-danger">${newMissing}</span>`;
                   row.style.backgroundColor = '';
-                  missingCell.classList.remove('text-success');
-                  missingCell.classList.add('text-danger');
                 }
               } else {
                 alert('Error updating part: ' + data.error);

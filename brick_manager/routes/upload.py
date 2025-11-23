@@ -17,9 +17,9 @@ from config import Config
 
 # Third-party imports
 from flask import Blueprint, flash, redirect, render_template, request, url_for, jsonify
-from models import User_Parts
+from models import User_Parts, PartStorage
 from services.brickognize_service import get_predictions
-from services.part_lookup_service import load_part_lookup
+from services.part_lookup_service import load_part_lookup, save_part_lookup
 from services.sqlite_service import get_category_name_from_db
 from werkzeug.utils import secure_filename
 
@@ -98,8 +98,19 @@ def upload():
         if result:
             for item in result.get("items", []):
                 item_id = item.get("id")
+                
+                # Try to get storage location from master_lookup first (cached)
                 if item_id in master_lookup:
                     item["lookup_info"] = master_lookup[item_id]
+                else:
+                    # If not in cache, query database directly
+                    part_storage = PartStorage.query.filter_by(part_num=item_id).first()
+                    if part_storage:
+                        item["lookup_info"] = {
+                            "location": part_storage.location,
+                            "level": part_storage.level,
+                            "box": part_storage.box
+                        }
 
                 # Add category information from the database
                 # Ensure your prediction result includes 'category_id'
@@ -182,4 +193,55 @@ def update_part_quantity(part_id):
             "new_missing": user_part.quantity - user_part.have_quantity
         })
     except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+
+@upload_bp.route("/upload/save_storage_location", methods=["POST"])
+def save_storage_location():
+    """Save or update storage location for a part."""
+    from app import db
+    
+    try:
+        data = request.get_json()
+        part_num = data.get('part_num')
+        location = data.get('location')
+        level = data.get('level')
+        box = data.get('box')
+        
+        # Validate inputs
+        if not all([part_num, location, level, box]):
+            return jsonify({"success": False, "error": "All fields are required"}), 400
+        
+        # Get or create PartStorage entry
+        part_storage = PartStorage.query.filter_by(part_num=part_num).first()
+        
+        if part_storage:
+            # Update existing entry
+            part_storage.location = str(location)
+            part_storage.level = str(level)
+            part_storage.box = str(box)
+        else:
+            # Create new entry
+            part_storage = PartStorage(
+                part_num=part_num,
+                location=str(location),
+                level=str(level),
+                box=str(box)
+            )
+            db.session.add(part_storage)
+        
+        db.session.commit()
+        
+        # Also update the master lookup cache
+        master_lookup = load_part_lookup()
+        master_lookup[part_num] = {
+            "location": str(location),
+            "level": str(level),
+            "box": str(box)
+        }
+        save_part_lookup(master_lookup)
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 400

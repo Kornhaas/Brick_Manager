@@ -82,9 +82,12 @@
                    class="hidden-file-input">
             
             <!-- Traditional Upload (fallback) -->
-            <div class="mt-3">
+            <div class="mt-3 d-flex gap-2 justify-content-center flex-wrap">
                 <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('fileInput').click()">
                     📁 Choose from Gallery
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="window.location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i> Scan Another Part
                 </button>
                 <input type="file" 
                        id="fileInput" 
@@ -319,6 +322,96 @@
             });
         }
     });
+
+    // Storage location edit functionality
+    function toggleEditMode(partId) {
+        console.log('toggleEditMode called for partId:', partId);
+        const displayDiv = document.getElementById(`storage-display-${partId}`);
+        const editDiv = document.getElementById(`storage-edit-${partId}`);
+        
+        console.log('Display div:', displayDiv);
+        console.log('Edit div:', editDiv);
+        
+        if (displayDiv && editDiv) {
+            const isHidden = displayDiv.style.display === 'none';
+            displayDiv.style.display = isHidden ? 'block' : 'none';
+            editDiv.style.display = isHidden ? 'none' : 'block';
+            console.log('Toggled - Display:', displayDiv.style.display, 'Edit:', editDiv.style.display);
+        } else {
+            console.error('Could not find display or edit div for partId:', partId);
+        }
+    }
+
+    function saveStorage(event, partId) {
+        event.preventDefault();
+        
+        const location = document.getElementById(`input-location-${partId}`).value;
+        const level = document.getElementById(`input-level-${partId}`).value;
+        const box = document.getElementById(`input-box-${partId}`).value;
+        const saveButton = event.target.querySelector('button[type="submit"]') || event.target;
+        
+        // Validate required fields
+        if (!location || !level || !box) {
+            alert('Please fill in all fields (Location, Level, and Box)');
+            return;
+        }
+
+        // Show spinner and disable button
+        const originalButtonHTML = saveButton.innerHTML;
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving...';
+
+        const data = {
+            part_num: partId,
+            location: location,
+            level: level,
+            box: box
+        };
+
+        fetch('/upload/save_storage_location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update display with new values
+                const displayDiv = document.getElementById(`storage-display-${partId}`);
+                const editDiv = document.getElementById(`storage-edit-${partId}`);
+                
+                displayDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div><strong>Schrank:</strong> ${location}</div>
+                            <div><strong>Fach:</strong> ${level}</div>
+                            <div><strong>Box:</strong> ${box}</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="toggleEditMode('${partId}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Toggle back to display mode
+                displayDiv.style.display = 'block';
+                editDiv.style.display = 'none';
+            } else {
+                // Restore button and show error
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalButtonHTML;
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalButtonHTML;
+            alert('Failed to save storage location');
+        });
+    }
 </script>
 
 </html>

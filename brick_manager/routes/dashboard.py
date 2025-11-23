@@ -4,7 +4,7 @@ This module provides routes for the dashboard,
 
 including viewing summaries, details, and updating quantities.
 """
-from flask import Blueprint, current_app, jsonify, render_template, request
+from flask import Blueprint, current_app, jsonify, render_template, request, url_for
 from models import RebrickableParts, User_Parts, User_Set, UserMinifigurePart, db
 from services.cache_service import cache_image
 from services.part_lookup_service import load_part_lookup
@@ -34,9 +34,14 @@ def enrich_part(item, master_lookup):
         part_info.category.name if part_info and part_info.category else "No Category"
     )
 
-    img_url = cache_image(
-        part_info.part_img_url if part_info else "/static/default_image.png"
-    )
+    # Get image URL - only cache if it's a valid external URL
+    if part_info and part_info.part_img_url and part_info.part_img_url.startswith('http'):
+        img_url = cache_image(part_info.part_img_url)
+        current_app.logger.debug(f"Part {item.part_num}: Cached image from {part_info.part_img_url} -> {img_url}")
+    else:
+        # Use fallback image directly without caching
+        img_url = url_for("static", filename="default_image.png")
+        current_app.logger.debug(f"Part {item.part_num}: Using fallback (part_info={part_info is not None}, has_url={part_info.part_img_url if part_info else 'N/A'})")
 
     location_data = (
         f"Location: {part_data.get('location', 'Unknown')}, "

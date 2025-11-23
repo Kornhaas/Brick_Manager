@@ -1,0 +1,45 @@
+The currently activated Python version 3.9.2 is not supported by the project (^3.11).
+Trying to find and use a compatible version. 
+Using python3.12 (3.12.11)
+2025-11-23 08:25:55,309 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-23 08:25:55,322 - tzlocal - DEBUG - /etc/timezone found, contents:
+ Etc/UTC
+
+2025-11-23 08:25:55,326 - tzlocal - DEBUG - /etc/localtime found
+2025-11-23 08:25:55,330 - tzlocal - DEBUG - 2 found:
+ {'/etc/timezone': 'Etc/UTC', '/etc/localtime is a symlink to': 'Etc/UTC'}
+2025-11-23 08:25:55,331 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-11-23 08:25:55,331 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-11-23 08:25:55,331 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-11-23 08:25:55,331 - apscheduler.scheduler - INFO - Added job "backup_database" to job store "default"
+2025-11-23 08:25:55,331 - apscheduler.scheduler - INFO - Added job "scheduled_sync_missing_parts" to job store "default"
+2025-11-23 08:25:55,331 - apscheduler.scheduler - INFO - Added job "scheduled_sync_user_sets" to job store "default"
+2025-11-23 08:25:55,331 - apscheduler.scheduler - INFO - Scheduler started
+2025-11-23 08:25:55,332 - apscheduler.scheduler - DEBUG - Looking for jobs to run
+2025-11-23 08:25:55,332 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2025-11-23 14:25:55.331241+00:00 (in 21599.999154 seconds)
+ * Serving Flask app 'app'
+ * Debug mode: on
+2025-11-23 08:25:55,344 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://172.17.0.2:5001
+2025-11-23 08:25:55,344 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-23 08:25:55,346 - werkzeug - INFO -  * Restarting with stat
+2025-11-23 08:25:56,734 - app - DEBUG - Master lookup data loaded successfully.
+2025-11-23 08:25:56,746 - tzlocal - DEBUG - /etc/timezone found, contents:
+ Etc/UTC
+
+2025-11-23 08:25:56,746 - tzlocal - DEBUG - /etc/localtime found
+2025-11-23 08:25:56,747 - tzlocal - DEBUG - 2 found:
+ {'/etc/timezone': 'Etc/UTC', '/etc/localtime is a symlink to': 'Etc/UTC'}
+2025-11-23 08:25:56,747 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-11-23 08:25:56,747 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-11-23 08:25:56,747 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-11-23 08:25:56,748 - apscheduler.scheduler - INFO - Added job "backup_database" to job store "default"
+2025-11-23 08:25:56,748 - apscheduler.scheduler - INFO - Added job "scheduled_sync_missing_parts" to job store "default"
+2025-11-23 08:25:56,748 - apscheduler.scheduler - INFO - Added job "scheduled_sync_user_sets" to job store "default"
+2025-11-23 08:25:56,748 - apscheduler.scheduler - INFO - Scheduler started
+2025-11-23 08:25:56,748 - apscheduler.scheduler - DEBUG - Looking for jobs to run
+2025-11-23 08:25:56,748 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2025-11-23 14:25:56.747751+00:00 (in 21599.999202 seconds)
+2025-11-23 08:25:56,753 - werkzeug - WARNING -  * Debugger is active!
+2025-11-23 08:25:56,756 - werkzeug - INFO -  * Debugger PIN: 112-970-860
