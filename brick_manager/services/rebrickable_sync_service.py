@@ -232,7 +232,7 @@ def make_rate_limited_request(
             logger.debug(f"Request failed on attempt {attempt + 1}: {e}")
             if attempt < max_retries:
                 time.sleep(2**attempt)
-    
+
     # If we exhausted all retries due to exceptions, return None
     return None
 

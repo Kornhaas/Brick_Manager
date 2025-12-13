@@ -98,7 +98,7 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 # Configure logging
-log_path = os.path.join(app.config['LOG_FOLDER'], "brick_manager.log")
+log_path = os.path.join(app.config["LOG_FOLDER"], "brick_manager.log")
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
@@ -124,10 +124,10 @@ def backup_database():
         # sqlite:///relative/path -> relative/path (3 slashes)
         if db_uri.startswith("sqlite:////"):
             # Absolute path: sqlite:////app/... -> /app/...
-            db_source_path = db_uri[len("sqlite:///"):]  # Keep one slash
+            db_source_path = db_uri[len("sqlite:///") :]  # Keep one slash
         elif db_uri.startswith("sqlite:///"):
             # Relative path: sqlite:///path -> path
-            db_source_path = db_uri[len("sqlite:///"):]
+            db_source_path = db_uri[len("sqlite:///") :]
         else:
             # Non-SQLite or already a path
             db_source_path = db_uri

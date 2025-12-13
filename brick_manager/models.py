@@ -139,24 +139,38 @@ class UserMinifigurePart(db.Model):
 
 
 class PartStorage(db.Model):
-    """Represents the storage information for parts."""
+    """Represents the storage information for parts with support for multiple locations per part."""
 
     __tablename__ = "part_storage"
 
+    __table_args__ = (
+        # Allow same part_num with different colors or notes in different locations
+        db.Index("idx_part_location", "part_num", "location", "level", "box"),
+    )
+
     id = db.Column(Integer, primary_key=True)
     part_num = db.Column(Text, ForeignKey("rebrickable_parts.part_num"), nullable=False)
+    color_id = db.Column(
+        Integer, ForeignKey("rebrickable_colors.id"), nullable=True
+    )  # Optional: track color
     location = db.Column(Text)
     level = db.Column(Text)
     box = db.Column(Text)
+    notes = db.Column(Text, nullable=True)  # e.g., "spare parts", "red version", etc.
     label_printed = db.Column(Boolean, default=False, nullable=False)
 
     # Relationships
     rebrickable_part = db.relationship(
         "RebrickableParts", backref="part_storage", lazy="joined"
     )
+    rebrickable_color = db.relationship(
+        "RebrickableColors", backref="part_storage_colors", lazy="joined"
+    )
 
     def __repr__(self):
-        return f"<PartStorage {self.part_num} - Location: {self.location}, Level: {self.level}, Box: {self.box}>"
+        color_info = f" Color: {self.color_id}," if self.color_id else ""
+        notes_info = f" ({self.notes})" if self.notes else ""
+        return f"<PartStorage {self.part_num} -{color_info} Location: {self.location}, Level: {self.level}, Box: {self.box}{notes_info}>"
 
 
 class RebrickablePartCategories(db.Model):

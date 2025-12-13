@@ -45,7 +45,9 @@ class Config:  # pylint: disable=R0903
         CACHE_FOLDER = os.path.join(BASE_DIR, "static", "cache")
         INSTANCE_FOLDER = os.path.join(BASE_DIR, "instance")
         LOG_FOLDER = os.path.join(BASE_DIR, "logs")
-        INSTRUCTIONS_FOLDER = os.path.join(os.path.dirname(BASE_DIR), "data", "instructions")
+        INSTRUCTIONS_FOLDER = os.path.join(
+            os.path.dirname(BASE_DIR), "data", "instructions"
+        )
         SQLALCHEMY_DATABASE_URI = os.getenv(
             "SQLALCHEMY_DATABASE_URI", f"sqlite:///{INSTANCE_FOLDER}/brick_manager.db"
         )

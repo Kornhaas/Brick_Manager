@@ -75,6 +75,7 @@
                         <th>Level</th>
                         <th>Box</th>
                         <th>Print Of</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,6 +106,18 @@
                                    data-part-num="{{ part.part_num }}">
                         </td>
                         <td>{{ part.print_of if part.print_of else 'None' }}</td>
+                        <td>
+                            {% if part.location or part.level or part.box %}
+                            <button type="button" class="btn btn-sm btn-danger delete-location-btn" 
+                                    data-part-num="{{ part.part_num }}"
+                                    data-part-name="{{ part.name }}"
+                                    title="Delete storage location">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                            {% else %}
+                            <span class="text-muted">No location</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -214,6 +227,52 @@
                     modalPartImg.alt = img.dataset.partName;
                     modalTitle.textContent = img.dataset.partName;
                     partImageModal.show();
+                });
+            });
+
+            // Delete location logic
+            document.querySelectorAll('.delete-location-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const partNum = this.dataset.partNum;
+                    const partName = this.dataset.partName;
+                    
+                    if (confirm(`Are you sure you want to delete the storage location for:\n\nPart: ${partNum}\nName: ${partName}\n\nThis action cannot be undone.`)) {
+                        // Disable button and show loading state
+                        this.disabled = true;
+                        this.innerHTML = '<i class="bi bi-hourglass-split"></i> Deleting...';
+                        
+                        fetch('/delete_location', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ part_num: partNum })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message) {
+                                // Clear the input fields
+                                const row = this.closest('tr');
+                                row.querySelectorAll('.location-input').forEach(input => {
+                                    input.value = '';
+                                });
+                                
+                                // Update button state
+                                this.closest('td').innerHTML = '<span class="text-muted">No location</span>';
+                                
+                                // Show success notification
+                                showNotification();
+                            } else if (data.error) {
+                                alert('Error: ' + data.error);
+                                this.disabled = false;
+                                this.innerHTML = '<i class="bi bi-trash"></i> Delete';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error deleting location:', error);
+                            alert('An error occurred while deleting the location.');
+                            this.disabled = false;
+                            this.innerHTML = '<i class="bi bi-trash"></i> Delete';
+                        });
+                    }
                 });
             });
         });

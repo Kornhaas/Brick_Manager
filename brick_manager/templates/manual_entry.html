@@ -93,6 +93,68 @@
             font-weight: 600;
             margin: 5px;
         }
+        
+        .parts-list-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .part-list-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.2s;
+        }
+        
+        .part-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .part-list-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .part-list-item.invalid {
+            background: #ffe6e6;
+            opacity: 0.7;
+        }
+        
+        .part-list-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-right: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 5px;
+            background: white;
+        }
+        
+        .part-list-info {
+            flex: 1;
+        }
+        
+        .part-list-info h6 {
+            margin: 0 0 5px 0;
+            font-size: 0.95rem;
+            color: #495057;
+        }
+        
+        .part-list-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .part-list-badge {
+            padding: 3px 8px;
+            font-size: 0.75rem;
+            border-radius: 3px;
+        }
     </style>
 </head>
 
@@ -134,17 +196,17 @@
                     </div>
                     <div class="card-body">
                         <form method="post" id="manual-entry-form">
-                            <!-- Part Number -->
+                            <!-- Part Number(s) -->
                             <div class="mb-4 form-control-with-validation">
                                 <label for="part_num" class="form-label">
-                                    <i class="bi bi-hash"></i> Part Number <span class="text-danger">*</span>
+                                    <i class="bi bi-hash"></i> Part Number(s) <span class="text-danger">*</span>
                                 </label>
                                 <div class="position-relative">
                                     <input type="text" 
                                            id="part_num" 
                                            name="part_num" 
                                            class="form-control form-control-lg" 
-                                           placeholder="e.g., 3001"
+                                           placeholder="e.g., 3001 or 3001,3002,3003"
                                            value="{{ part_num }}"
                                            required 
                                            autofocus>
@@ -156,7 +218,7 @@
                                     <i class="validation-icon text-success bi bi-check-circle-fill" id="validIcon"></i>
                                     <i class="validation-icon text-danger bi bi-x-circle-fill" id="invalidIcon"></i>
                                 </div>
-                                <small class="form-text text-muted">Enter the part number to validate</small>
+                                <small class="form-text text-muted">Enter one or multiple part numbers separated by commas</small>
                             </div>
 
                             <hr>
@@ -208,6 +270,34 @@
                                 </div>
                             </div>
 
+                            <!-- Optional: Color ID (for tracking specific color variants) -->
+                            <div class="mb-3">
+                                <label for="color_id" class="form-label">
+                                    <i class="bi bi-palette"></i> Color ID <small class="text-muted">(Optional)</small>
+                                </label>
+                                <input type="number" 
+                                       id="color_id" 
+                                       name="color_id" 
+                                       class="form-control" 
+                                       placeholder="e.g., 1 for White, 5 for Red"
+                                       min="0">
+                                <small class="form-text text-muted">Leave empty if color doesn't matter</small>
+                            </div>
+
+                            <!-- Optional: Notes -->
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">
+                                    <i class="bi bi-sticky"></i> Notes <small class="text-muted">(Optional)</small>
+                                </label>
+                                <input type="text" 
+                                       id="notes" 
+                                       name="notes" 
+                                       class="form-control" 
+                                       placeholder="e.g., spare parts, red variant, extra stock"
+                                       maxlength="200">
+                                <small class="form-text text-muted">Helps distinguish multiple storage locations for same part</small>
+                            </div>
+
                             <!-- Hidden confirmation field -->
                             <input type="hidden" id="confirmed" name="confirmed" value="">
                             
@@ -231,36 +321,47 @@
                 <div class="part-preview-card" id="partPreview">
                     <h5 class="text-center mb-4"><i class="bi bi-eye"></i> Part Preview</h5>
                     
-                    <!-- Part Image -->
-                    <div class="part-image-container mb-4">
-                        <img id="partImage" src="" alt="Part Image" style="display: none;">
-                        <div id="noImagePlaceholder">
-                            <i class="bi bi-image" style="font-size: 4rem; color: #ccc;"></i>
-                            <p class="text-muted mt-2">No image available</p>
+                    <!-- Single Part View -->
+                    <div id="singlePartView">
+                        <!-- Part Image -->
+                        <div class="part-image-container mb-4">
+                            <img id="partImage" src="" alt="Part Image" style="display: none;">
+                            <div id="noImagePlaceholder">
+                                <i class="bi bi-image" style="font-size: 4rem; color: #ccc;"></i>
+                                <p class="text-muted mt-2">No image available</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Part Details -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="bi bi-info-circle"></i> Part Details</h6>
+                                <hr>
+                                <p class="mb-2"><strong>Name:</strong> <span id="partName">-</span></p>
+                                <p class="mb-2"><strong>Category:</strong> <span id="partCategory">-</span></p>
+                                <p class="mb-0"><strong>Part Number:</strong> <span id="partNumber">-</span></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Storage Warning -->
+                        <div class="alert storage-exists-warning mt-3" id="storageWarning" style="display: none;">
+                            <h6><i class="bi bi-exclamation-triangle"></i> <span id="storageWarningTitle">Existing Storage Location(s)</span></h6>
+                            <p class="mb-2" id="storageWarningText">This part is already stored at:</p>
+                            <div id="existingStorageList">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                            <p class="mb-0 mt-3"><small class="text-info"><i class="bi bi-info-circle"></i> You can add this part to a different location. Use Color ID or Notes to distinguish variants.</small></p>
                         </div>
                     </div>
                     
-                    <!-- Part Details -->
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title"><i class="bi bi-info-circle"></i> Part Details</h6>
-                            <hr>
-                            <p class="mb-2"><strong>Name:</strong> <span id="partName">-</span></p>
-                            <p class="mb-2"><strong>Category:</strong> <span id="partCategory">-</span></p>
-                            <p class="mb-0"><strong>Part Number:</strong> <span id="partNumber">-</span></p>
+                    <!-- Multiple Parts List View -->
+                    <div id="multiplePartsView" style="display: none;">
+                        <div class="alert alert-info mb-3">
+                            <i class="bi bi-info-circle"></i> <strong><span id="validPartsCount">0</span> parts</strong> will be added to the same location
                         </div>
-                    </div>
-                    
-                    <!-- Storage Warning -->
-                    <div class="alert storage-exists-warning mt-3" id="storageWarning" style="display: none;">
-                        <h6><i class="bi bi-exclamation-triangle"></i> Storage Location Already Exists</h6>
-                        <p class="mb-2">This part already has a storage location:</p>
-                        <div>
-                            <span class="info-badge">Schrank: <span id="existingSchrank">-</span></span>
-                            <span class="info-badge">Fach: <span id="existingFach">-</span></span>
-                            <span class="info-badge">Box: <span id="existingBox">-</span></span>
+                        <div id="partsListContainer" class="parts-list-scroll">
+                            <!-- Parts will be dynamically added here -->
                         </div>
-                        <p class="mb-0 mt-3"><small>Submitting the form will overwrite the existing location.</small></p>
                     </div>
                 </div>
                 
@@ -270,13 +371,16 @@
                         <h5 class="card-title"><i class="bi bi-lightbulb"></i> How to Use</h5>
                         <hr>
                         <ol>
-                            <li class="mb-2">Enter the <strong>Part Number</strong> (e.g., 3001)</li>
-                            <li class="mb-2">Wait for automatic validation - the part image will appear</li>
+                            <li class="mb-2">Enter <strong>one or multiple Part Numbers</strong> (e.g., 3001 or 3001,3002,3003)</li>
+                            <li class="mb-2">Wait for automatic validation - part info will appear</li>
                             <li class="mb-2">Enter the <strong>Storage Location</strong> (Schrank, Fach, Box)</li>
-                            <li class="mb-2">Click <strong>Add to Storage</strong> to save</li>
+                            <li class="mb-2">Click <strong>Add to Storage</strong> to save all parts</li>
                         </ol>
                         <div class="alert alert-info mt-3">
-                            <i class="bi bi-info-circle"></i> <strong>Tip:</strong> After saving, the box number will automatically increment for the next entry!
+                            <i class="bi bi-info-circle"></i> <strong>Tip:</strong> You can add multiple parts to the same location by separating part numbers with commas!
+                        </div>
+                        <div class="alert alert-success mt-2">
+                            <i class="bi bi-check-circle"></i> After saving, the box number will automatically increment for the next entry.
                         </div>
                     </div>
                 </div>
@@ -297,9 +401,11 @@
         const invalidIcon = document.getElementById('invalidIcon');
         const confirmedInput = document.getElementById('confirmed');
         
-        // Auto-validate part number on input
+        let validatedParts = [];
+        
+        // Auto-validate part number(s) on input
         partNumInput.addEventListener('input', function() {
-            const partNum = this.value.trim();
+            const input = this.value.trim();
             
             // Reset validation state
             partValidated = false;
@@ -308,8 +414,9 @@
             invalidIcon.style.display = 'none';
             partPreview.classList.remove('show');
             instructionsCard.style.display = 'block';
+            validatedParts = [];
             
-            if (partNum.length < 2) {
+            if (input.length < 2) {
                 validationSpinner.style.display = 'none';
                 return;
             }
@@ -324,17 +431,23 @@
             
             // Debounce validation request - wait 1.5 seconds after user stops typing
             validationTimeout = setTimeout(() => {
-                validatePart(partNum);
+                // Check if comma-separated
+                const partNumbers = input.split(',').map(p => p.trim()).filter(p => p.length > 0);
+                
+                if (partNumbers.length === 1) {
+                    // Single part
+                    validateSinglePart(partNumbers[0]);
+                } else if (partNumbers.length > 1) {
+                    // Multiple parts
+                    validateMultipleParts(partNumbers);
+                }
             }, 1500);
         });
         
-        function validatePart(partNum) {
-            console.log('Validating part:', partNum);
+        function validateSinglePart(partNum) {
+            console.log('Validating single part:', partNum);
             fetch(`/manual_entry/validate_part/${partNum}`)
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     console.log('Validation response:', data);
                     validationSpinner.style.display = 'none';
@@ -344,8 +457,12 @@
                         validIcon.style.display = 'block';
                         partValidated = true;
                         submitBtn.disabled = false;
+                        validatedParts = [{ partNum, data }];
                         
-                        // Show preview
+                        // Show single part view
+                        document.getElementById('singlePartView').style.display = 'block';
+                        document.getElementById('multiplePartsView').style.display = 'none';
+                        
                         instructionsCard.style.display = 'none';
                         partPreview.classList.add('show');
                         
@@ -363,11 +480,9 @@
                             partImage.style.display = 'block';
                             noImagePlaceholder.style.display = 'none';
                             
-                            // Handle image loading errors
                             partImage.onerror = function() {
                                 this.style.display = 'none';
                                 noImagePlaceholder.style.display = 'block';
-                                console.log('Image failed to load:', data.part_info.image_url);
                             };
                         } else {
                             partImage.style.display = 'none';
@@ -376,16 +491,47 @@
                         
                         // Show storage warning if exists
                         const storageWarning = document.getElementById('storageWarning');
-                        if (data.has_storage && data.storage_info) {
+                        if (data.has_storage && data.storage_list && data.storage_list.length > 0) {
                             storageWarning.style.display = 'block';
-                            document.getElementById('existingSchrank').textContent = data.storage_info.location;
-                            document.getElementById('existingFach').textContent = data.storage_info.level;
-                            document.getElementById('existingBox').textContent = data.storage_info.box;
+                            
+                            // Update title based on count
+                            const count = data.storage_count || 1;
+                            document.getElementById('storageWarningTitle').textContent = 
+                                count > 1 ? `${count} Existing Storage Locations` : 'Existing Storage Location';
+                            document.getElementById('storageWarningText').textContent = 
+                                count > 1 ? 'This part is already stored at:' : 'This part is already stored at:';
+                            
+                            // Build list of existing storage locations
+                            const listContainer = document.getElementById('existingStorageList');
+                            listContainer.innerHTML = '';
+                            
+                            data.storage_list.forEach((storage, index) => {
+                                const div = document.createElement('div');
+                                div.className = 'mb-2 p-2 border rounded bg-light d-flex justify-content-between align-items-center';
+                                
+                                let colorInfo = storage.color ? `<span class="badge bg-info">${storage.color}</span> ` : '';
+                                let notesInfo = storage.notes ? `<span class="badge bg-secondary">${storage.notes}</span>` : '';
+                                
+                                div.innerHTML = `
+                                    <div>
+                                        <strong>Location ${index + 1}:</strong> ${colorInfo}${notesInfo}<br>
+                                        <span class="info-badge">Schrank: ${storage.location}</span>
+                                        <span class="info-badge">Fach: ${storage.level}</span>
+                                        <span class="info-badge">Box: ${storage.box}</span>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger delete-storage-btn" 
+                                            data-storage-id="${storage.id}"
+                                            data-part-num="${partNum}"
+                                            title="Delete this storage location">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                `;
+                                listContainer.appendChild(div);
+                            });
                         } else {
                             storageWarning.style.display = 'none';
                         }
                     } else {
-                        // Part doesn't exist
                         invalidIcon.style.display = 'block';
                         alert('Part not found in Rebrickable database. Please check the part number.');
                     }
@@ -395,6 +541,89 @@
                     invalidIcon.style.display = 'block';
                     console.error('Validation error:', error);
                 });
+        }
+        
+        function validateMultipleParts(partNumbers) {
+            console.log('Validating multiple parts:', partNumbers);
+            
+            const promises = partNumbers.map(partNum => 
+                fetch(`/manual_entry/validate_part/${partNum}`)
+                    .then(response => response.json())
+                    .then(data => ({ partNum, data, valid: data.exists }))
+                    .catch(error => {
+                        console.error(`Error validating ${partNum}:`, error);
+                        return { partNum, data: null, valid: false };
+                    })
+            );
+            
+            Promise.all(promises).then(results => {
+                validationSpinner.style.display = 'none';
+                validatedParts = results.filter(r => r.valid);
+                
+                if (validatedParts.length > 0) {
+                    validIcon.style.display = 'block';
+                    partValidated = true;
+                    submitBtn.disabled = false;
+                    
+                    // Show multiple parts view
+                    document.getElementById('singlePartView').style.display = 'none';
+                    document.getElementById('multiplePartsView').style.display = 'block';
+                    
+                    instructionsCard.style.display = 'none';
+                    partPreview.classList.add('show');
+                    
+                    // Update count
+                    document.getElementById('validPartsCount').textContent = validatedParts.length;
+                    
+                    // Build parts list
+                    const container = document.getElementById('partsListContainer');
+                    container.innerHTML = '';
+                    
+                    results.forEach(result => {
+                        const div = document.createElement('div');
+                        div.className = `part-list-item ${result.valid ? '' : 'invalid'}`;
+                        
+                        if (result.valid) {
+                            div.innerHTML = `
+                                <img src="${result.data.part_info.image_url || '/static/default_image.png'}" 
+                                     alt="${result.partNum}" 
+                                     class="part-list-img"
+                                     onerror="this.src='/static/default_image.png'">
+                                <div class="part-list-info">
+                                    <h6><strong>${result.partNum}</strong> - ${result.data.part_info.name}</h6>
+                                    <p><span class="badge bg-secondary part-list-badge">${result.data.part_info.category}</span></p>
+                                    ${result.data.has_storage ? 
+                                        `<p class="text-warning"><small><i class="bi bi-exclamation-triangle"></i> Has existing storage location</small></p>` : 
+                                        ''}
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">Valid</span>
+                                </div>
+                            `;
+                        } else {
+                            div.innerHTML = `
+                                <div class="part-list-info">
+                                    <h6><strong>${result.partNum}</strong></h6>
+                                    <p class="text-danger"><i class="bi bi-x-circle"></i> Not found in database</p>
+                                </div>
+                                <div>
+                                    <span class="badge bg-danger">Invalid</span>
+                                </div>
+                            `;
+                        }
+                        
+                        container.appendChild(div);
+                    });
+                    
+                    if (validatedParts.length !== results.length) {
+                        const invalidCount = results.length - validatedParts.length;
+                        alert(`${invalidCount} part number(s) not found and will be skipped.`);
+                    }
+                } else {
+                    invalidIcon.style.display = 'block';
+                    alert('None of the part numbers were found in the database.');
+                }
+            });
         }
         
         // Form submission with confirmation
@@ -425,27 +654,7 @@
                 return false;
             }
             
-            // Check if storage exists and needs confirmation
-            const storageWarning = document.getElementById('storageWarning');
-            if (storageWarning.style.display === 'block' && confirmedInput.value !== 'yes') {
-                e.preventDefault();
-                
-                const existingSchrank = document.getElementById('existingSchrank').textContent;
-                const existingFach = document.getElementById('existingFach').textContent;
-                const existingBox = document.getElementById('existingBox').textContent;
-                
-                if (confirm(`This part already exists in storage:\nSchrank: ${existingSchrank}, Fach: ${existingFach}, Box: ${existingBox}\n\nDo you want to overwrite it?`)) {
-                    confirmedInput.value = 'yes';
-                    skipValidation = true;
-                    showSavingState();
-                    form.submit();
-                } else {
-                    confirmedInput.value = '';
-                }
-                return false;
-            }
-            
-            // Show saving state
+            // Show saving state (no confirmation needed - multiple storage locations are now supported)
             showSavingState();
             return true;
         });
@@ -469,6 +678,52 @@
         window.onload = function() {
             partNumInput.focus();
         };
+
+        // Delete storage location handler (using event delegation)
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-storage-btn')) {
+                const btn = e.target.closest('.delete-storage-btn');
+                const storageId = btn.dataset.storageId;
+                const partNum = btn.dataset.partNum;
+                
+                if (confirm(`Are you sure you want to delete this storage location?\n\nThis action cannot be undone.`)) {
+                    // Disable button and show loading state
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+                    
+                    fetch(`/manual_entry/delete_storage/${storageId}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            // Remove the storage location div
+                            btn.closest('.mb-2').remove();
+                            
+                            // Re-validate the part to update the storage list
+                            const partNumField = document.getElementById('part_num');
+                            if (partNumField.value === partNum) {
+                                validateSinglePart(partNum);
+                            }
+                            
+                            // Show success message
+                            alert('Storage location deleted successfully!');
+                        } else if (data.error) {
+                            alert('Error: ' + data.error);
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="bi bi-trash"></i>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting storage:', error);
+                        alert('An error occurred while deleting the storage location.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-trash"></i>';
+                    });
+                }
+            }
+        });
     </script>
 </body>
 </html>

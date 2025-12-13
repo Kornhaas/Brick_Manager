@@ -11,13 +11,13 @@ It includes:
 """
 
 import os  # Standard library import
-from typing import List, Dict
+from typing import Dict, List
 
 from config import Config
 
 # Third-party imports
-from flask import Blueprint, flash, redirect, render_template, request, url_for, jsonify
-from models import User_Parts, PartStorage
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from models import PartStorage, User_Parts
 from services.brickognize_service import get_predictions
 from services.part_lookup_service import load_part_lookup, save_part_lookup
 from services.sqlite_service import get_category_name_from_db
@@ -29,38 +29,46 @@ upload_bp = Blueprint("upload", __name__)
 def get_missing_sets_for_part(part_num: str) -> List[Dict]:
     """Get list of user sets where this part is missing."""
     try:
-        user_parts = User_Parts.query.filter_by(part_num=part_num).filter(
-            User_Parts.have_quantity < User_Parts.quantity
-        ).all()
-        
+        user_parts = (
+            User_Parts.query.filter_by(part_num=part_num)
+            .filter(User_Parts.have_quantity < User_Parts.quantity)
+            .all()
+        )
+
         sets_missing = []
         for user_part in user_parts:
             if user_part.user_set:
                 missing_qty = user_part.quantity - user_part.have_quantity
-                
+
                 # Debug: Check if rebrickable_color is loaded
-                color_hex = 'CCCCCC'
-                color_name = 'Unknown'
+                color_hex = "CCCCCC"
+                color_name = "Unknown"
                 if user_part.rebrickable_color:
                     color_hex = user_part.rebrickable_color.rgb
                     color_name = user_part.rebrickable_color.name
                     print(f"Color for part {part_num}: {color_name} = #{color_hex}")
                 else:
-                    print(f"Warning: No rebrickable_color for part {part_num}, color_id={user_part.color_id}")
-                
-                sets_missing.append({
-                    'user_set_id': user_part.user_set.id,
-                    'set_num': user_part.user_set.set_num,
-                    'set_name': user_part.user_set.template_set.name if user_part.user_set.template_set else 'Unknown Set',
-                    'needed': user_part.quantity,
-                    'have': user_part.have_quantity,
-                    'missing': missing_qty,
-                    'color_id': user_part.color_id,
-                    'color_name': color_name,
-                    'color_hex': color_hex,
-                    'part_id': user_part.id
-                })
-        
+                    print(
+                        f"Warning: No rebrickable_color for part {part_num}, color_id={user_part.color_id}"
+                    )
+
+                sets_missing.append(
+                    {
+                        "user_set_id": user_part.user_set.id,
+                        "set_num": user_part.user_set.set_num,
+                        "set_name": user_part.user_set.template_set.name
+                        if user_part.user_set.template_set
+                        else "Unknown Set",
+                        "needed": user_part.quantity,
+                        "have": user_part.have_quantity,
+                        "missing": missing_qty,
+                        "color_id": user_part.color_id,
+                        "color_name": color_name,
+                        "color_hex": color_hex,
+                        "part_id": user_part.id,
+                    }
+                )
+
         return sets_missing
     except Exception as e:
         print(f"Error getting missing sets for part {part_num}: {e}")
@@ -98,7 +106,7 @@ def upload():
         if result:
             for item in result.get("items", []):
                 item_id = item.get("id")
-                
+
                 # Try to get storage location from master_lookup first (cached)
                 if item_id in master_lookup:
                     item["lookup_info"] = master_lookup[item_id]
@@ -109,7 +117,7 @@ def upload():
                         item["lookup_info"] = {
                             "location": part_storage.location,
                             "level": part_storage.level,
-                            "box": part_storage.box
+                            "box": part_storage.box,
                         }
 
                 # Add category information from the database
@@ -117,7 +125,7 @@ def upload():
                 part_cat_id = item.get("category_id")
                 if part_cat_id:
                     item["category_name"] = get_category_name_from_db(part_cat_id)
-                
+
                 # Add missing sets information
                 missing_sets = get_missing_sets_for_part(item_id)
                 item["missing_sets"] = missing_sets
@@ -153,15 +161,16 @@ def allowed_file(filename):
 def increment_part(part_id):
     """Increment the have_quantity for a User_Part by 1."""
     from app import db
+
     try:
         user_part = User_Parts.query.get_or_404(part_id)
         user_part.have_quantity += 1
         db.session.commit()
-        
+
         return {
             "success": True,
             "new_have": user_part.have_quantity,
-            "new_missing": user_part.quantity - user_part.have_quantity
+            "new_missing": user_part.quantity - user_part.have_quantity,
         }
     except Exception as e:
         return {"success": False, "error": str(e)}, 400
@@ -171,27 +180,38 @@ def increment_part(part_id):
 def update_part_quantity(part_id):
     """Update the have_quantity for a User_Part to a specific value."""
     from app import db
+
     try:
         user_part = User_Parts.query.get_or_404(part_id)
         data = request.get_json()
-        new_have = int(data.get('have_quantity', 0))
-        
+        new_have = int(data.get("have_quantity", 0))
+
         # Validate the new quantity
         if new_have < 0:
-            return jsonify({"success": False, "error": "Quantity cannot be negative"}), 400
+            return (
+                jsonify({"success": False, "error": "Quantity cannot be negative"}),
+                400,
+            )
         if new_have > user_part.quantity:
-            return jsonify({"success": False, "error": "Quantity cannot exceed needed amount"}), 400
-        
+            return (
+                jsonify(
+                    {"success": False, "error": "Quantity cannot exceed needed amount"}
+                ),
+                400,
+            )
+
         old_have = user_part.have_quantity
         user_part.have_quantity = new_have
         db.session.commit()
-        
-        return jsonify({
-            "success": True,
-            "old_have": old_have,
-            "new_have": user_part.have_quantity,
-            "new_missing": user_part.quantity - user_part.have_quantity
-        })
+
+        return jsonify(
+            {
+                "success": True,
+                "old_have": old_have,
+                "new_have": user_part.have_quantity,
+                "new_missing": user_part.quantity - user_part.have_quantity,
+            }
+        )
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 
@@ -200,21 +220,21 @@ def update_part_quantity(part_id):
 def save_storage_location():
     """Save or update storage location for a part."""
     from app import db
-    
+
     try:
         data = request.get_json()
-        part_num = data.get('part_num')
-        location = data.get('location')
-        level = data.get('level')
-        box = data.get('box')
-        
+        part_num = data.get("part_num")
+        location = data.get("location")
+        level = data.get("level")
+        box = data.get("box")
+
         # Validate inputs
         if not all([part_num, location, level, box]):
             return jsonify({"success": False, "error": "All fields are required"}), 400
-        
+
         # Get or create PartStorage entry
         part_storage = PartStorage.query.filter_by(part_num=part_num).first()
-        
+
         if part_storage:
             # Update existing entry
             part_storage.location = str(location)
@@ -226,21 +246,21 @@ def save_storage_location():
                 part_num=part_num,
                 location=str(location),
                 level=str(level),
-                box=str(box)
+                box=str(box),
             )
             db.session.add(part_storage)
-        
+
         db.session.commit()
-        
+
         # Also update the master lookup cache
         master_lookup = load_part_lookup()
         master_lookup[part_num] = {
             "location": str(location),
             "level": str(level),
-            "box": str(box)
+            "box": str(box),
         }
         save_part_lookup(master_lookup)
-        
+
         return jsonify({"success": True})
     except Exception as e:
         db.session.rollback()

@@ -7,7 +7,7 @@ The data is either added to or updated in the master lookup.
 """
 
 from flask import Blueprint, flash, render_template, request, jsonify, url_for
-from models import PartStorage, RebrickableParts, RebrickableInventoryParts
+from models import PartStorage, RebrickableParts, RebrickableInventoryParts, db
 from services.part_lookup_service import load_part_lookup, save_part_lookup
 from services.cache_service import cache_image
 
@@ -31,52 +31,97 @@ def manual_entry():
         return render_template("manual_entry.html", existing_entry=None)
 
     if request.method == "POST":
-        part_num = request.form.get("part_num")
+        part_num_input = request.form.get("part_num")
         schrank = request.form.get("schrank")
         fach = request.form.get("fach")
         box = request.form.get("box")
+        color_id = request.form.get("color_id")  # Optional color ID
+        notes = request.form.get("notes")  # Optional notes
         confirmed = request.form.get("confirmed")  # Track confirmation
 
+        # Convert color_id to int or None
+        color_id = int(color_id) if color_id and color_id.strip() and color_id.isdigit() else None
+        notes = notes.strip() if notes else None
+
         # Validate inputs
-        if not part_num or not part_num.strip():
+        if not part_num_input or not part_num_input.strip():
             flash("Part ID cannot be empty.", "danger")
         elif not all(val.isdigit() for val in [schrank, fach, box]):
             flash("Location, Level, and Box must be numeric.", "danger")
         else:
-            # Check if part ID exists in storage with non-empty fields
-            part_storage = PartStorage.query.filter_by(part_num=part_num).first()
-            existing_entry = None
+            # Handle comma-separated part numbers
+            part_numbers = [p.strip() for p in part_num_input.split(',') if p.strip()]
             
-            # Only consider it as existing if all storage fields have values
-            if part_storage and part_storage.location and part_storage.level and part_storage.box:
-                existing_entry = {
-                    "location": part_storage.location,
-                    "level": part_storage.level,
-                    "box": part_storage.box
-                }
+            # Validate all parts exist in Rebrickable database
+            valid_parts = []
+            invalid_parts = []
             
-            if existing_entry and not confirmed:
-                flash(
-                    f"Part Number {part_num} already exists. Confirm overwrite.",
-                    "warning",
-                )
-                return render_template(
-                    "manual_entry.html",
+            for part_num in part_numbers:
+                part_info = RebrickableInventoryParts.query.filter_by(part_num=part_num).first()
+                if not part_info:
+                    part_info = RebrickableParts.query.filter_by(part_num=part_num).first()
+                
+                if part_info:
+                    valid_parts.append(part_num)
+                else:
+                    invalid_parts.append(part_num)
+            
+            if invalid_parts:
+                flash(f"Invalid part numbers skipped: {', '.join(invalid_parts)}", "warning")
+            
+            if not valid_parts:
+                flash("No valid part numbers to add.", "danger")
+                return render_template("manual_entry.html", existing_entry=None)
+            
+            # Process all valid parts
+            added_count = 0
+            updated_count = 0
+            
+            for part_num in valid_parts:
+                # Check if exact match exists (same location, level, box, color, notes)
+                existing_storage = PartStorage.query.filter_by(
                     part_num=part_num,
-                    schrank=schrank,
-                    fach=fach,
+                    location=schrank,
+                    level=fach,
                     box=box,
-                    existing_entry=existing_entry,
-                )
-
-            # Add or update entry in the master lookup
-            master_lookup[part_num] = {"location": schrank, "level": fach, "box": box}
-            action = "updated" if existing_entry else "added"
-            flash(f"Part Number {part_num} successfully {action}.", "success")
-
+                    color_id=color_id,
+                    notes=notes
+                ).first()
+                
+                if existing_storage:
+                    # Exact match exists - no need to add
+                    updated_count += 1
+                else:
+                    # Create new storage entry (allows multiple locations per part)
+                    new_storage = PartStorage(
+                        part_num=part_num,
+                        location=schrank,
+                        level=fach,
+                        box=box,
+                        color_id=color_id,
+                        notes=notes
+                    )
+                    db.session.add(new_storage)
+                    added_count += 1
+                
+                # Also maintain master_lookup for backward compatibility (use first/primary location)
+                if part_num not in master_lookup:
+                    master_lookup[part_num] = {"location": schrank, "level": fach, "box": box}
+            
             # Save changes
             try:
+                db.session.commit()
                 save_part_lookup(master_lookup)
+                
+                # Build success message
+                messages = []
+                if added_count > 0:
+                    messages.append(f"{added_count} part(s) added")
+                if updated_count > 0:
+                    messages.append(f"{updated_count} part(s) updated")
+                
+                flash(f"Successfully saved: {', '.join(messages)}.", "success")
+                
             except Exception as save_error:
                 flash(f"Error saving master lookup: {save_error}", "danger")
                 return render_template("manual_entry.html", existing_entry=None)
@@ -108,19 +153,33 @@ def validate_part(part_num):
                 "message": "Part not found in Rebrickable database"
             }), 404
         
-        # Check if part has storage location
-        part_storage = PartStorage.query.filter_by(part_num=part_num).first()
+        # Check if part has storage locations (can be multiple)
+        existing_storages = PartStorage.query.filter_by(part_num=part_num).filter(
+            PartStorage.location.isnot(None),
+            PartStorage.level.isnot(None),
+            PartStorage.box.isnot(None)
+        ).all()
         
-        has_storage = False
+        has_storage = len(existing_storages) > 0
         storage_info = None
+        storage_list = []
         
-        if part_storage and part_storage.location and part_storage.level and part_storage.box:
-            has_storage = True
-            storage_info = {
-                "location": part_storage.location,
-                "level": part_storage.level,
-                "box": part_storage.box
-            }
+        if has_storage:
+            # Return list of all storage locations
+            for storage in existing_storages:
+                storage_entry = {
+                    "id": storage.id,  # Include ID for deletion
+                    "location": storage.location,
+                    "level": storage.level,
+                    "box": storage.box,
+                    "color": storage.rebrickable_color.name if storage.rebrickable_color else None,
+                    "color_id": storage.color_id,
+                    "notes": storage.notes
+                }
+                storage_list.append(storage_entry)
+            
+            # For backward compatibility, keep first one as primary
+            storage_info = storage_list[0] if storage_list else None
         
         # Get cached image URL from rebrickable_inventory_parts (take first available)
         inventory_part = RebrickableInventoryParts.query.filter_by(
@@ -141,6 +200,8 @@ def validate_part(part_num):
             "exists": True,
             "has_storage": has_storage,
             "storage_info": storage_info,
+            "storage_list": storage_list,  # All storage locations
+            "storage_count": len(storage_list),
             "part_info": {
                 "name": rebrickable_part.name,
                 "category": rebrickable_part.category.name if rebrickable_part.category else "Unknown",
@@ -153,3 +214,20 @@ def validate_part(part_num):
             "exists": False,
             "message": f"Error validating part: {str(e)}"
         }), 500
+
+
+@manual_entry_bp.route("/manual_entry/delete_storage/<int:storage_id>", methods=["DELETE"])
+def delete_storage(storage_id):
+    """Delete a specific storage location entry."""
+    try:
+        storage = PartStorage.query.get(storage_id)
+        if not storage:
+            return jsonify({"error": "Storage location not found"}), 404
+        
+        db.session.delete(storage)
+        db.session.commit()
+        
+        return jsonify({"message": "Storage location deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Error deleting storage: {str(e)}"}), 500

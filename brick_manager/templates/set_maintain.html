@@ -208,7 +208,7 @@
                                 <img
                                     src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
                                     alt="{{ entry.set_num }}"
-                                    width="60"
+                                    width="150"
                                     class="img-thumbnail set-image-clickable"
                                     style="cursor: pointer;"
                                     data-image-src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"

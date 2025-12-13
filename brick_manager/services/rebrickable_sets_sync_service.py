@@ -77,10 +77,7 @@ def create_brick_manager_list():
         list_data = {"name": "Brick_Manager", "is_buildable": True}
 
         url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/"
-        response = requests.post(url,
-            json=list_data,
-            headers=headers,
-            timeout=20)
+        response = requests.post(url, json=list_data, headers=headers, timeout=20)
 
         if response.status_code == 201:
             created_list = response.json()
@@ -174,10 +171,7 @@ def get_list_sets(list_id):
             url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
             params = {"page": page, "page_size": 100}
 
-            response = requests.get(url,
-                headers=headers,
-                params=params,
-                timeout=20)
+            response = requests.get(url, headers=headers, params=params, timeout=20)
 
             if response.status_code == 200:
                 data = response.json()
@@ -255,15 +249,11 @@ def add_sets_to_list(list_id, set_data):
 
         try:
             # Try bulk addition
-            response = requests.post(url,
-                json=bulk_data,
-                headers=headers,
-                timeout=60)
+            response = requests.post(url, json=bulk_data, headers=headers, timeout=60)
 
             if response.status_code == 201:
                 added_sets = response.json()
-                added_count = len(added_sets) if isinstance(added_sets,
-                    list) else 1
+                added_count = len(added_sets) if isinstance(added_sets, list) else 1
                 logger.info(
                     f"Successfully added {added_count} sets to list via bulk operation"
                 )
@@ -327,10 +317,7 @@ def add_sets_individually(list_id, sets_to_process, headers, user_token):
             url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
             data = {"set_num": set_num, "quantity": quantity}
 
-            response = requests.post(url,
-                json=data,
-                headers=headers,
-                timeout=20)
+            response = requests.post(url, json=data, headers=headers, timeout=20)
 
             if response.status_code == 201:
                 added_count += 1
@@ -394,9 +381,7 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
 
         # First, remove the set from the list
         delete_url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/{set_num}/"
-        deleteresponse = requests.delete(delete_url,
-            headers=headers,
-            timeout=20)
+        deleteresponse = requests.delete(delete_url, headers=headers, timeout=20)
 
         if delete_response.status_code not in [
             204,
@@ -413,9 +398,7 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
         # Then add it back with the new quantity
         add_url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
         add_data = {"set_num": set_num, "quantity": new_quantity}
-        addresponse = requests.post(
-            add_url, json=add_data, headers=headers, timeout=20
-        )
+        addresponse = requests.post(add_url, json=add_data, headers=headers, timeout=20)
 
         if add_response.status_code == 201:
             logger.debug(f"Updated set {set_num} quantity to {new_quantity}")
@@ -612,9 +595,7 @@ def sync_user_sets_with_rebrickable():
         update_rate_limited_count = 0
         if sets_to_update:
             for set_num, local_qty, rebrickable_qty in sets_to_update:
-                update_result = update_set_quantity_in_list(list_id,
-                    set_num,
-                    local_qty)
+                update_result = update_set_quantity_in_list(list_id, set_num, local_qty)
                 if update_result.get("success"):
                     updated_count += 1
                     logger.debug(
@@ -642,8 +623,7 @@ def sync_user_sets_with_rebrickable():
 
         # Step 7: Remove old sets
         if sets_to_remove:
-            remove_result = remove_sets_from_list(list_id,
-                list(sets_to_remove))
+            remove_result = remove_sets_from_list(list_id, list(sets_to_remove))
             results["operations"].append(
                 {"operation": "remove_sets", "result": remove_result}
             )

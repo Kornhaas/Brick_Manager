@@ -105,7 +105,11 @@ def get_box_contents_get():
             if inventory_part and inventory_part.img_url:
                 img_url = inventory_part.img_url
             else:
-                img_url = part.part_img_url if part.part_img_url else "/static/default_image.png"
+                img_url = (
+                    part.part_img_url
+                    if part.part_img_url
+                    else "/static/default_image.png"
+                )
 
             result.append(
                 {
@@ -418,7 +422,9 @@ def update_part_location():
         return jsonify({"error": "An unexpected error occurred."}), 500
 
 
-@box_maintenance_bp.route("/box_maintenance/delete_part/<int:storage_id>", methods=["DELETE"])
+@box_maintenance_bp.route(
+    "/box_maintenance/delete_part/<int:storage_id>", methods=["DELETE"]
+)
 def delete_part_storage(storage_id):
     """Deletes a part from storage."""
     try:
@@ -430,7 +436,10 @@ def delete_part_storage(storage_id):
         db.session.delete(storage)
         db.session.commit()
 
-        return jsonify({"message": f"Part {part_num} removed from storage successfully."}), 200
+        return (
+            jsonify({"message": f"Part {part_num} removed from storage successfully."}),
+            200,
+        )
     except NotFound as e:
         current_app.logger.error("NotFound in delete_part_storage: %s", e)
         return jsonify({"error": str(e)}), 404
@@ -439,7 +448,9 @@ def delete_part_storage(storage_id):
         return jsonify({"error": "An unexpected error occurred."}), 500
 
 
-@box_maintenance_bp.route("/box_maintenance/location_overview/<location>", methods=["GET"])
+@box_maintenance_bp.route(
+    "/box_maintenance/location_overview/<location>", methods=["GET"]
+)
 def get_location_overview(location):
     """Gets an overview of all boxes in a specific location."""
     try:
@@ -449,7 +460,7 @@ def get_location_overview(location):
                 PartStorage.level,
                 PartStorage.box,
                 db.func.min(PartStorage.part_num).label("first_part_num"),
-                db.func.count(PartStorage.id).label("part_count")
+                db.func.count(PartStorage.id).label("part_count"),
             )
             .filter(PartStorage.location == location)
             .group_by(PartStorage.level, PartStorage.box)
@@ -463,9 +474,11 @@ def get_location_overview(location):
                 subquery.c.box,
                 subquery.c.part_count,
                 RebrickableParts.part_num,
-                RebrickableParts.part_img_url
+                RebrickableParts.part_img_url,
             )
-            .join(RebrickableParts, RebrickableParts.part_num == subquery.c.first_part_num)
+            .join(
+                RebrickableParts, RebrickableParts.part_num == subquery.c.first_part_num
+            )
             .order_by(subquery.c.level, subquery.c.box)
             .all()
         )
@@ -482,18 +495,24 @@ def get_location_overview(location):
 
             if inventory_part and inventory_part.img_url:
                 img_url = cache_image(inventory_part.img_url)
-            elif part_img_url and part_img_url.strip() and part_img_url.strip().lower() != "none":
+            elif (
+                part_img_url
+                and part_img_url.strip()
+                and part_img_url.strip().lower() != "none"
+            ):
                 img_url = cache_image(part_img_url)
             else:
                 img_url = "/static/default_image.png"
 
-            result.append({
-                "location": location,
-                "level": level,
-                "box": box,
-                "part_count": part_count,
-                "img_url": img_url
-            })
+            result.append(
+                {
+                    "location": location,
+                    "level": level,
+                    "box": box,
+                    "part_count": part_count,
+                    "img_url": img_url,
+                }
+            )
 
         return jsonify(result)
     except Exception as e:
@@ -501,7 +520,9 @@ def get_location_overview(location):
         return jsonify({"error": "An unexpected error occurred."}), 500
 
 
-@box_maintenance_bp.route("/box_maintenance/level_overview/<location>/<level>", methods=["GET"])
+@box_maintenance_bp.route(
+    "/box_maintenance/level_overview/<location>/<level>", methods=["GET"]
+)
 def get_level_overview(location, level):
     """Gets an overview of all boxes in a specific location and level."""
     try:
@@ -510,7 +531,7 @@ def get_level_overview(location, level):
             db.session.query(
                 PartStorage.box,
                 db.func.min(PartStorage.part_num).label("first_part_num"),
-                db.func.count(PartStorage.id).label("part_count")
+                db.func.count(PartStorage.id).label("part_count"),
             )
             .filter(PartStorage.location == location, PartStorage.level == level)
             .group_by(PartStorage.box)
@@ -523,9 +544,11 @@ def get_level_overview(location, level):
                 subquery.c.box,
                 subquery.c.part_count,
                 RebrickableParts.part_num,
-                RebrickableParts.part_img_url
+                RebrickableParts.part_img_url,
             )
-            .join(RebrickableParts, RebrickableParts.part_num == subquery.c.first_part_num)
+            .join(
+                RebrickableParts, RebrickableParts.part_num == subquery.c.first_part_num
+            )
             .order_by(subquery.c.box)
             .all()
         )
@@ -542,18 +565,24 @@ def get_level_overview(location, level):
 
             if inventory_part and inventory_part.img_url:
                 img_url = cache_image(inventory_part.img_url)
-            elif part_img_url and part_img_url.strip() and part_img_url.strip().lower() != "none":
+            elif (
+                part_img_url
+                and part_img_url.strip()
+                and part_img_url.strip().lower() != "none"
+            ):
                 img_url = cache_image(part_img_url)
             else:
                 img_url = "/static/default_image.png"
 
-            result.append({
-                "location": location,
-                "level": level,
-                "box": box,
-                "part_count": part_count,
-                "img_url": img_url
-            })
+            result.append(
+                {
+                    "location": location,
+                    "level": level,
+                    "box": box,
+                    "part_count": part_count,
+                    "img_url": img_url,
+                }
+            )
 
         return jsonify(result)
     except Exception as e:
