@@ -47,7 +47,7 @@ def is_valid_url(url):
         return False
 
 
-def cache_image(image_url, cache_dir=None):
+def cache_image(image_url, cache_dir=None):  # noqa: C901
     """
     Download and cache an image locally if not already cached.
 

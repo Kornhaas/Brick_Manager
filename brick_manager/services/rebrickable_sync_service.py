@@ -27,7 +27,7 @@ _rate_limit_tracker = {
 def update_rate_limit_tracker(was_rate_limited):
     """Update the global rate limiting tracker."""
 
-    global _rate_limit_tracker
+    global _rate_limit_tracker  # noqa: F824
 
     if was_rate_limited:
         _rate_limit_tracker["consecutive_hits"] += 1
@@ -43,7 +43,7 @@ def update_rate_limit_tracker(was_rate_limited):
 def should_skip_api_calls():
     """Check if we should skip API calls due to rate limiting."""
 
-    global _rate_limit_tracker
+    global _rate_limit_tracker  # noqa: F824
 
     if _rate_limit_tracker["should_throttle"]:
         # Reset throttling after 30 seconds
@@ -107,8 +107,11 @@ def find_inventory_part_id_from_user_sets(part_num, color_id, user_set_num=None)
                 )
                 update_rate_limit_tracker(True)  # Rate limited
                 # Continue with just the user_set_num if we have it
-        except Exception:
-            pass  # If backup lookup fails, continue with what we have
+        except (
+            Exception
+        ) as e:  # nosec B110 - Intentional: backup lookup failure should not stop processing
+            logger.debug(f"Backup lookup failed for {part_num}/{color_id}: {e}")
+            # If backup lookup fails, continue with what we have
 
         # Try each set until we find the part
         for set_num in sets_to_check:
@@ -213,16 +216,14 @@ def make_rate_limited_request(
                     # Exponential backoff: 2^attempt seconds
                     wait_time = 2**attempt
                     logger.debug(
-                        f"Rate limited (attempt {attempt + \
-                            1}/{max_retries + \
-                            1}), waiting {wait_time}s before retry"
+                        f"Rate limited (attempt {attempt + 1}/{max_retries + 1}), "
+                        f"waiting {wait_time}s before retry"
                     )
                     time.sleep(wait_time)
                     continue
                 else:
                     logger.debug(
-                        f"Rate limited after {max_retries + \
-                            1} attempts, giving up"
+                        f"Rate limited after {max_retries + 1} attempts, giving up"
                     )
                     return response  # Return the 429 response
             else:
@@ -772,7 +773,7 @@ def get_part_list_parts(list_id):
 
         while True:
             params = {"page": page, "page_size": 100}
-            _response = make_rate_limited_request(url, headers, params, timeout=20)
+            response = make_rate_limited_request(url, headers, params, timeout=20)
 
             if not response or response.status_code != 200:
                 logger.error(
@@ -1099,10 +1100,8 @@ def clear_part_list(list_id):
 
                     # Progress feedback for every 50 parts
                     if (i + 1) % 50 == 0:
-                        logger.info(
-                            f"Removed {i + \
-                            1}/{len(current_parts)} parts"
-                        )
+                        count = i + 1
+                        logger.info(f"Removed {count}/{len(current_parts)} parts")
 
                 elif response and response.status_code == 429:
                     logger.warning(

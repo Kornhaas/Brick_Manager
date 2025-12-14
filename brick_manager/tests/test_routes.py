@@ -15,7 +15,7 @@ class TestSetSearchRoutes:
     def test_set_search_get(self, client):
         """Test GET request to set search page."""
 
-        _response = client.get("/set_search")
+        response = client.get("/set_search")
         assert response.status_code == 200
 
     def test_search_set_valid_input(self, client):
@@ -27,13 +27,13 @@ class TestSetSearchRoutes:
             mock_set.year = 2023
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            _response = client.post("/search_set", data={"set_number": "10001-1"})
+            response = client.post("/search_set", data={"set_number": "10001-1"})
             assert response.status_code == 200
 
     def test_search_set_invalid_input(self, client):
         """Test searching with invalid input."""
 
-        _response = client.post("/search_set", data={"set_number": ""})
+        response = client.post("/search_set", data={"set_number": ""})
         # Should handle gracefully
         assert response.status_code in [200, 400]
 
@@ -42,7 +42,7 @@ class TestSetSearchRoutes:
         with patch("routes.set_search.RebrickableSets") as mock_sets:
             mock_sets.query.filter_by.return_value.first.return_value = None
 
-            _response = client.post("/search_set", data={"set_number": "99999-1"})
+            response = client.post("/search_set", data={"set_number": "99999-1"})
             assert response.status_code == 200
 
     @patch("routes.set_search.db.session")
@@ -53,7 +53,7 @@ class TestSetSearchRoutes:
             mock_set.id = 1
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            _response = client.post(
+            response = client.post(
                 "/add_set", data={"set_num": "10001-1", "status": "complete"}
             )
             assert response.status_code in [200, 302]  # Success or redirect
@@ -66,7 +66,7 @@ class TestSetSearchRoutes:
             mock_set.id = 1
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            _response = client.post(
+            response = client.post(
                 "/add_set", data={"set_num": "10001-1", "status": "assembled"}
             )
             assert response.status_code in [200, 302]
@@ -79,7 +79,7 @@ class TestSetSearchRoutes:
             mock_set.id = 1
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            _response = client.post(
+            response = client.post(
                 "/add_set", data={"set_num": "10001-1", "status": "unknown"}
             )
             assert response.status_code in [200, 302]
@@ -89,7 +89,7 @@ class TestSetSearchRoutes:
         with patch("routes.set_search.RebrickableSets") as mock_sets:
             mock_sets.query.filter_by.return_value.first.return_value = None
 
-            _response = client.post(
+            response = client.post(
                 "/add_set", data={"set_num": "99999-1", "status": "complete"}
             )
             # Should handle gracefully
@@ -98,13 +98,13 @@ class TestSetSearchRoutes:
     def test_search_set_method_not_allowed(self, client):
         """Test that only POST is allowed for search_set."""
 
-        _response = client.get("/search_set")
+        response = client.get("/search_set")
         assert response.status_code == 405
 
     def test_add_set_method_not_allowed(self, client):
         """Test that only POST is allowed for add_set."""
 
-        _response = client.get("/add_set")
+        response = client.get("/add_set")
         assert response.status_code == 405
 
     def test_search_set_with_special_characters(self, client):
@@ -112,7 +112,7 @@ class TestSetSearchRoutes:
         with patch("routes.set_search.RebrickableSets") as mock_sets:
             mock_sets.query.filter_by.return_value.first.return_value = None
 
-            _response = client.post("/search_set", data={"set_number": '10001-1"&<>'})
+            response = client.post("/search_set", data={"set_number": '10001-1"&<>'})
             # Should handle special characters safely
             assert response.status_code in [200, 400]
 
@@ -126,7 +126,7 @@ class TestSetSearchRoutes:
             mock_set.id = 1
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            _response = client.post(
+            response = client.post(
                 "/add_set", data={"set_num": "10001-1", "status": "complete"}
             )
 
@@ -137,7 +137,7 @@ class TestSetSearchRoutes:
         """Test CSRF protection on forms."""
 
         # This test depends on whether CSRF is implemented
-        _response = client.post("/search_set", data={"set_number": "10001-1"})
+        response = client.post("/search_set", data={"set_number": "10001-1"})
         # Should either work or return appropriate error
         assert response.status_code in [200, 400, 403]
 
@@ -148,7 +148,7 @@ class TestSetMaintenanceRoutes:
     def test_set_maintain_get(self, client):
         """Test GET request to set maintenance page."""
 
-        _response = client.get("/set_maintain")
+        response = client.get("/set_maintain")
         assert response.status_code == 200
 
     @patch("routes.set_maintain.User_Set")
@@ -163,14 +163,14 @@ class TestSetMaintenanceRoutes:
             mock_set
         ]
 
-        _response = client.get("/set_maintain")
+        response = client.get("/set_maintain")
         assert response.status_code == 200
 
     @patch("routes.set_maintain.db.session")
     def test_update_user_set(self, mock_session, client):
         """Test updating user set quantities."""
 
-        _response = client.post(
+        response = client.post(
             "/update_user_set",
             data={
                 "user_set_id": "1",
@@ -183,7 +183,7 @@ class TestSetMaintenanceRoutes:
     def test_set_maintain_method_not_allowed(self, client):
         """Test that set maintenance only allows GET."""
 
-        _response = client.post("/set_maintain")
+        response = client.post("/set_maintain")
         assert response.status_code == 405
 
 
@@ -193,26 +193,26 @@ class TestMissingPartsRoutes:
     def test_missing_parts_get(self, client):
         """Test GET request to missing parts page."""
 
-        _response = client.get("/missing_parts")
+        response = client.get("/missing_parts")
         assert response.status_code == 200
 
     def test_missing_parts_category(self, client):
         """Test missing parts by category."""
 
-        _response = client.get("/missing_parts_category/Brick")
+        response = client.get("/missing_parts_category/Brick")
         # Should return data or handle gracefully
         assert response.status_code in [200, 404]
 
     def test_missing_parts_invalid_category(self, client):
         """Test missing parts with invalid category."""
 
-        _response = client.get("/missing_parts_category/InvalidCategory")
+        response = client.get("/missing_parts_category/InvalidCategory")
         assert response.status_code in [200, 404]
 
     def test_missing_parts_with_special_chars(self, client):
         """Test missing parts category with special characters."""
 
-        _response = client.get("/missing_parts_category/Minifig%20Heads")
+        response = client.get("/missing_parts_category/Minifig%20Heads")
         assert response.status_code in [200, 404]
 
 
@@ -222,7 +222,7 @@ class TestPartLookupRoutes:
     def test_part_lookup_get(self, client):
         """Test GET request to part lookup page."""
 
-        _response = client.get("/lookup_part")
+        response = client.get("/lookup_part")
         assert response.status_code == 200
 
     @patch("routes.part_lookup.RebrickableParts")
@@ -234,7 +234,7 @@ class TestPartLookupRoutes:
         mock_part.name = "Brick 2 x 4"
         mock_parts.query.filter_by.return_value.first.return_value = mock_part
 
-        _response = client.post("/lookup_part", data={"part_number": "3001"})
+        response = client.post("/lookup_part", data={"part_number": "3001"})
         assert response.status_code == 200
 
     def test_part_lookup_invalid_part(self, client):
@@ -242,7 +242,7 @@ class TestPartLookupRoutes:
         with patch("routes.part_lookup.RebrickableParts") as mock_parts:
             mock_parts.query.filter_by.return_value.first.return_value = None
 
-            _response = client.post("/lookup_part", data={"part_number": "99999"})
+            response = client.post("/lookup_part", data={"part_number": "99999"})
             assert response.status_code == 200
 
 
@@ -252,7 +252,7 @@ class TestDashboardRoutes:
     def test_dashboard_get(self, client):
         """Test GET request to dashboard page."""
 
-        _response = client.get("/dashboard")
+        response = client.get("/dashboard")
         assert response.status_code == 200
 
     @patch("routes.dashboard.User_Set")
@@ -263,5 +263,5 @@ class TestDashboardRoutes:
         mock_set.id = 1
         mock_user_set.query.all.return_value = [mock_set]
 
-        _response = client.get("/dashboard")
+        response = client.get("/dashboard")
         assert response.status_code == 200

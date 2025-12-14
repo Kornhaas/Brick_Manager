@@ -36,7 +36,7 @@ class TestPartLookupService:
         mock_part_storage.query.all.return_value = [mock_entry1, mock_entry2]
 
         # Execute
-        _result = load_part_lookup()
+        result = load_part_lookup()
 
         # Verify
         expected = {
@@ -53,7 +53,7 @@ class TestPartLookupService:
         mock_part_storage.query.all.return_value = []
 
         # Execute
-        _result = load_part_lookup()
+        result = load_part_lookup()
 
         # Verify
         assert result == {}

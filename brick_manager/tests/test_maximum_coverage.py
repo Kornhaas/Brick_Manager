@@ -88,7 +88,7 @@ class TestMaxCoverageBoost:
             assert callable(scheduled_sync_missing_parts)
             assert callable(scheduled_sync_user_sets)
 
-    def test_all_service_imports_and_basic_functions(self):
+    def test_all_service_imports_and_basic_functions(self):  # noqa: C901
         """Test importing all services and basic function calls."""
 
         # Rebrickable Service
@@ -272,7 +272,7 @@ class TestMaxCoverageBoost:
             )
 
             # Test all functions with mock data
-            _result = make_request("http://test.com/api", {"page": 1})
+            result = make_request("http://test.com/api", {"page": 1})
             assert result is not None
 
             sets_result = get_user_sets("test_token", "test_key")
@@ -306,10 +306,10 @@ class TestMaxCoverageBoost:
             )
 
             # Test when file exists
-            _result = cache_image("http://test.com/image.jpg")
+            result = cache_image("http://test.com/image.jpg")
 
             # Test get cached path
-            _path_result = get_cached_image_path("http://test.com/image.jpg")
+            _pathresult = get_cached_image_path("http://test.com/image.jpg")
 
             # Test file doesn't exist scenario
             mock_exists.return_value = False
@@ -318,7 +318,7 @@ class TestMaxCoverageBoost:
             mock_response.content = b"fake_image_data"
             mock_get.return_value = mock_response
 
-            _result = cache_image("http://test.com/image2.jpg")
+            result = cache_image("http://test.com/image2.jpg")
 
         except ImportError:
             pass
@@ -428,11 +428,11 @@ class TestMaxCoverageBoost:
         # Test app error handlers
         with app.test_client() as client:
             # Test 404 error
-            _response = client.get("/definitely-does-not-exist")
+            response = client.get("/definitely-does-not-exist")
             assert response.status_code == 404
 
             # Test method not allowed
-            _response = client.post("/definitely-does-not-exist")
+            response = client.post("/definitely-does-not-exist")
             assert response.status_code in [404, 405]
 
     def test_database_models_comprehensive(self):

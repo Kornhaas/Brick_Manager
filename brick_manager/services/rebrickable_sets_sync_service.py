@@ -326,7 +326,7 @@ def add_sets_individually(list_id, sets_to_process, headers, user_token):
                 # Rate limited - this is expected for large sync operations
                 rate_limited_count += 1
                 logger.info(
-                    f"Rate limited on set {set_num} (attempt {i+1}/{len(sets_to_process)})"
+                    f"Rate limited on set {set_num} (attempt {i + 1}/{len(sets_to_process)})"
                 )
                 # Don't treat this as an error - just note it for summary
             else:
@@ -381,7 +381,7 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
 
         # First, remove the set from the list
         delete_url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/{set_num}/"
-        deleteresponse = requests.delete(delete_url, headers=headers, timeout=20)
+        delete_response = requests.delete(delete_url, headers=headers, timeout=20)
 
         if delete_response.status_code not in [
             204,
@@ -398,7 +398,9 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
         # Then add it back with the new quantity
         add_url = f"https://rebrickable.com/api/v3/users/{user_token}/setlists/{list_id}/sets/"
         add_data = {"set_num": set_num, "quantity": new_quantity}
-        addresponse = requests.post(add_url, json=add_data, headers=headers, timeout=20)
+        add_response = requests.post(
+            add_url, json=add_data, headers=headers, timeout=20
+        )
 
         if add_response.status_code == 201:
             logger.debug(f"Updated set {set_num} quantity to {new_quantity}")
@@ -484,7 +486,7 @@ def remove_sets_from_list(list_id, set_nums):
         return {"success": False, "message": f"Error removing sets: {str(e)}"}
 
 
-def sync_user_sets_with_rebrickable():
+def sync_user_sets_with_rebrickable():  # noqa: C901
     """
 
     Synchronize local user sets with the Rebrickable "Brick_Manager" list.

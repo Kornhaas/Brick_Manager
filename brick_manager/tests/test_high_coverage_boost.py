@@ -158,7 +158,7 @@ class TestServicesCoverage:
             make_request,
         )
 
-        _result = make_request("test_url", {})
+        result = make_request("test_url", {})
         assert result is not None
 
         sets_result = get_user_sets("test_token", "test_key")
@@ -178,7 +178,7 @@ class TestServicesCoverage:
 
         from brick_manager.services.cache_service import cache_image
 
-        _result = cache_image("http://test.com/image.jpg")
+        result = cache_image("http://test.com/image.jpg")
         # Just test that function runs without error
         assert result is not None or result is None
 
@@ -221,7 +221,7 @@ class TestRoutesCoverage:
         """Test dashboard route functions."""
         with app_module.app.test_client() as client:
             # Test main dashboard endpoint
-            _response = client.get("/")
+            response = client.get("/")
             assert response.status_code in [
                 200,
                 302,
@@ -233,14 +233,14 @@ class TestRoutesCoverage:
         """Test main route functions."""
         with app_module.app.test_client() as client:
             # Test main routes
-            _response = client.get("/main")
+            response = client.get("/main")
             assert response.status_code in [200, 302, 404, 500]
 
     def test_storage_routes(self):
         """Test storage route functions."""
         with app_module.app.test_client() as client:
             # Test storage routes
-            _response = client.get("/storage")
+            response = client.get("/storage")
             assert response.status_code in [200, 302, 404, 500]
 
 

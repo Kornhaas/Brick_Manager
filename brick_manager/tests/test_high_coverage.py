@@ -108,7 +108,7 @@ class TestPartLookupServiceReal:
         mock_query.all.return_value = []
         mock_part_storage.query = mock_query
 
-        _result = load_part_lookup()
+        result = load_part_lookup()
 
         assert isinstance(result, dict)
         mock_query.all.assert_called_once()
@@ -122,7 +122,7 @@ class TestPartLookupServiceReal:
         from services.part_lookup_service import save_part_lookup
 
         # Test with empty data (function returns None, not True)
-        _result = save_part_lookup({})
+        result = save_part_lookup({})
         assert result is None
 
         # Test with actual data
@@ -133,7 +133,7 @@ class TestPartLookupServiceReal:
         mock_part_storage.return_value = mock_storage_instance
         mock_part_storage.query.filter_by.return_value.first.return_value = None
 
-        _result = save_part_lookup(test_data)
+        result = save_part_lookup(test_data)
 
         # Should attempt to save
         assert result is True
@@ -166,7 +166,7 @@ class TestCacheServiceReal:
         ]
 
         for url, expected in test_cases:
-            _result = is_valid_url(url)
+            result = is_valid_url(url)
             assert result == expected, f"URL '{url}' should be {expected}"
 
     @pytest.mark.unit
@@ -179,7 +179,7 @@ class TestCacheServiceReal:
 
         mock_url_for.return_value = "/static/default_image.png"
 
-        _result = cache_image(None)
+        result = cache_image(None)
 
         assert result == "/static/default_image.png"
         mock_url_for.assert_called_once()
@@ -194,7 +194,7 @@ class TestCacheServiceReal:
 
         mock_url_for.return_value = "/static/default_image.png"
 
-        _result = cache_image("invalid-url")
+        result = cache_image("invalid-url")
 
         # Should return the fallback image when invalid
         assert result == "/static/default_image.png"
@@ -244,7 +244,7 @@ class TestBrickognizeServiceIntegration:
             "services.brickognize_service.get_category_name_from_part_num",
             return_value="Brick",
         ):
-            _result = get_predictions(mock_file, "test.jpg")
+            result = get_predictions(mock_file, "test.jpg")
 
             assert result is not None
             assert "items" in result
@@ -281,7 +281,7 @@ class TestLabelServiceIntegration:
         # Mock canvas to raise an exception
         mock_canvas.Canvas.side_effect = Exception("PDF generation failed")
 
-        _result = save_image_as_pdf("test.jpg", "output.pd")
+        result = save_image_as_pdf("test.jpg", "output.pd")
 
         # Should handle error gracefully
         assert result is not None or result is None  # Depending on implementation

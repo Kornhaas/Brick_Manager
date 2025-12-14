@@ -1,16 +1,16 @@
-"""Pytest configuration and fixtures for the Bricks Manager test suite."""
-
 import os
 import sys
 import tempfile
 
 import pytest
 from flask import Flask
+from models import db
+
+"""Pytest configuration and fixtures for the Bricks Manager test suite."""
+
 
 # Add the parent directory to the path so we can import from brick_manager
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-from models import db
 
 
 def create_test_app():
@@ -43,6 +43,7 @@ def create_test_app():
     try:
         from routes.admin_sync import admin_sync_bp
         from routes.box_maintenance import box_maintenance_bp
+        from routes.building_instructions import building_instructions_bp
         from routes.dashboard import dashboard_bp
         from routes.import_rebrickable_data import import_rebrickable_data_bp
         from routes.main import main_bp
@@ -72,6 +73,7 @@ def create_test_app():
         app.register_blueprint(token_management_bp)
         app.register_blueprint(rebrickable_sync_bp)
         app.register_blueprint(admin_sync_bp)
+        app.register_blueprint(building_instructions_bp)
     except ImportError:
         # If blueprints can't be imported, continue without them
         pass

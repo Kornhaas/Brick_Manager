@@ -36,6 +36,45 @@ FILES = [
     "inventory_minifigs.csv.gz",
 ]
 
+# Lazy import to avoid circular dependency issues
+MODEL_MAP = None
+
+
+def _get_model_map():
+    """Get MODEL_MAP with lazy import to avoid circular dependencies."""
+    global MODEL_MAP  # pylint: disable=global-statement
+    if MODEL_MAP is None:
+        from models import (  # pylint: disable=import-outside-toplevel
+            RebrickableColors,
+            RebrickableElements,
+            RebrickableInventories,
+            RebrickableInventoryMinifigs,
+            RebrickableInventoryParts,
+            RebrickableInventorySets,
+            RebrickableMinifigs,
+            RebrickablePartCategories,
+            RebrickablePartRelationships,
+            RebrickableParts,
+            RebrickableSets,
+            RebrickableThemes,
+        )
+
+        MODEL_MAP = {
+            "part_categories.csv.gz": RebrickablePartCategories,
+            "colors.csv.gz": RebrickableColors,
+            "parts.csv.gz": RebrickableParts,
+            "part_relationships.csv.gz": RebrickablePartRelationships,
+            "elements.csv.gz": RebrickableElements,
+            "themes.csv.gz": RebrickableThemes,
+            "sets.csv.gz": RebrickableSets,
+            "minifigs.csv.gz": RebrickableMinifigs,
+            "inventories.csv.gz": RebrickableInventories,
+            "inventory_parts.csv.gz": RebrickableInventoryParts,
+            "inventory_sets.csv.gz": RebrickableInventorySets,
+            "inventory_minifigs.csv.gz": RebrickableInventoryMinifigs,
+        }
+    return MODEL_MAP
+
 
 def download_and_extract_csv(file_name):
     """
@@ -55,7 +94,7 @@ def download_and_extract_csv(file_name):
     csv_path = os.path.join(IMPORT_DIR, file_name.replace(".gz", ""))
     url = f"{BASE_URL}/{file_name}"
     logging.info(f"Downloading {url} ...")
-    with requests.get(url, stream=True) as r:
+    with requests.get(url, stream=True, timeout=30) as r:
         r.raise_for_status()
         with open(gz_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
@@ -137,38 +176,10 @@ def import_data():
             # First ensure all tables have proper structure
             ensure_table_structure()
 
-            from models import (
-                RebrickableColors,
-                RebrickableElements,
-                RebrickableInventories,
-                RebrickableInventoryMinifigs,
-                RebrickableInventoryParts,
-                RebrickableInventorySets,
-                RebrickableMinifigs,
-                RebrickablePartCategories,
-                RebrickablePartRelationships,
-                RebrickableParts,
-                RebrickableSets,
-                RebrickableThemes,
-            )
-
-            MODEL_MAP = {
-                "part_categories.csv.gz": RebrickablePartCategories,
-                "colors.csv.gz": RebrickableColors,
-                "parts.csv.gz": RebrickableParts,
-                "part_relationships.csv.gz": RebrickablePartRelationships,
-                "elements.csv.gz": RebrickableElements,
-                "themes.csv.gz": RebrickableThemes,
-                "sets.csv.gz": RebrickableSets,
-                "minifigs.csv.gz": RebrickableMinifigs,
-                "inventories.csv.gz": RebrickableInventories,
-                "inventory_parts.csv.gz": RebrickableInventoryParts,
-                "inventory_sets.csv.gz": RebrickableInventorySets,
-                "inventory_minifigs.csv.gz": RebrickableInventoryMinifigs,
-            }
+            model_map = _get_model_map()
             for file in FILES:
                 csv_path = download_and_extract_csv(file)
-                import_csv_to_sqlite(csv_path, MODEL_MAP[file])
+                import_csv_to_sqlite(csv_path, model_map[file])
             return (
                 jsonify(
                     {"status": "success", "message": "CSV data imported into SQLite!"}
@@ -199,9 +210,10 @@ def main():
     """
     logging.basicConfig(level=logging.INFO)
 
+    model_map = _get_model_map()
     for file in FILES:
         csv_path = download_and_extract_csv(file)
-        import_csv_to_sqlite(csv_path, MODEL_MAP[file])
+        import_csv_to_sqlite(csv_path, model_map[file])
     logging.info("All CSV files imported successfully.")
 
 

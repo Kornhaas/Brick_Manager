@@ -41,7 +41,7 @@ class TestBrickognizeService(unittest.TestCase):
         # Call the function
         file_path = "test_image.jpg"
         filename = "image.jpg"
-        _result = get_predictions(file_path, filename)
+        result = get_predictions(file_path, filename)
 
         # Assert the API was called
         mock_post.assert_called_once_with(
@@ -72,7 +72,7 @@ class TestBrickognizeService(unittest.TestCase):
         # Call the function
         file_path = "test_image.jpg"
         filename = "image.jpg"
-        _result = get_predictions(file_path, filename)
+        result = get_predictions(file_path, filename)
 
         # Assert the API was called
         mock_post.assert_called_once()
@@ -92,7 +92,7 @@ class TestBrickognizeService(unittest.TestCase):
         # Call the function
         file_path = "test_image.jpg"
         filename = "image.jpg"
-        _result = get_predictions(file_path, filename)
+        result = get_predictions(file_path, filename)
 
         # Assert the API was called
         mock_post.assert_called_once()
@@ -118,7 +118,7 @@ class TestBrickognizeService(unittest.TestCase):
         # Call the function
         file_path = "test_image.jpg"
         filename = "image.jpg"
-        _result = get_predictions(file_path, filename)
+        result = get_predictions(file_path, filename)
 
         # Assert the API was called
         mock_post.assert_called_once()

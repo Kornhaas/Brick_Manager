@@ -4,7 +4,9 @@ This module provides services for interacting with the SQLite database.
 
 """
 import logging
+import sqlite3
 
+from flask import current_app
 from models import RebrickablePartCategories, RebrickableParts
 
 
@@ -110,10 +112,7 @@ def get_category_name_from_part_num(part_num):
         return "Unknown Category"
 
 
-# Add missing functions and imports for test compatibility
-import sqlite3
-
-from flask import current_app
+# Add missing functions for test compatibility
 
 
 def get_connection():
@@ -142,7 +141,7 @@ def execute_query(query, params=None):
             cursor.execute(query)
 
         if query.strip().upper().startswith("SELECT"):
-            _result = cursor.fetchall()
+            result = cursor.fetchall()
         else:
             conn.commit()
             result = cursor.rowcount

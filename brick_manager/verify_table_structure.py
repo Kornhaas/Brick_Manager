@@ -37,7 +37,7 @@ def check_table_structure():
         cursor.execute(
             'SELECT sql FROM sqlite_master WHERE type="table" AND name="rebrickable_parts";'
         )
-        _result = cursor.fetchone()
+        result = cursor.fetchone()
 
         if result:
             create_sql = result[0]

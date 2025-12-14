@@ -30,7 +30,7 @@ class TestRebrickableSyncServiceLarge:
             sync_missing_parts_with_rebrickable,
         )
 
-        _result = sync_missing_parts_with_rebrickable()
+        result = sync_missing_parts_with_rebrickable()
         assert result is not None
         assert "success" in result
         assert result["success"] is False
@@ -47,7 +47,7 @@ class TestRebrickableSyncServiceLarge:
             sync_missing_minifigure_parts_with_rebrickable,
         )
 
-        _result = sync_missing_minifigure_parts_with_rebrickable()
+        result = sync_missing_minifigure_parts_with_rebrickable()
         assert result is not None
         assert "success" in result
         assert result["success"] is False
@@ -62,7 +62,7 @@ class TestRebrickableSyncServiceLarge:
             sync_part_colors_with_rebrickable,
         )
 
-        _result = sync_part_colors_with_rebrickable()
+        result = sync_part_colors_with_rebrickable()
         assert result is not None
         assert "success" in result
         assert result["success"] is False
@@ -77,7 +77,7 @@ class TestRebrickableSyncServiceLarge:
             sync_categories_with_rebrickable,
         )
 
-        _result = sync_categories_with_rebrickable()
+        result = sync_categories_with_rebrickable()
         assert result is not None
         assert "success" in result
         assert result["success"] is False
@@ -92,7 +92,7 @@ class TestRebrickableSyncServiceLarge:
             sync_themes_with_rebrickable,
         )
 
-        _result = sync_themes_with_rebrickable()
+        result = sync_themes_with_rebrickable()
         assert result is not None
         assert "success" in result
         assert result["success"] is False
@@ -126,7 +126,7 @@ class TestRebrickableSetsServiceLarge:
             sync_user_sets_with_rebrickable,
         )
 
-        _result = sync_user_sets_with_rebrickable()
+        result = sync_user_sets_with_rebrickable()
         assert result is not None
         assert "success" in result
         assert result["success"] is False
@@ -269,7 +269,7 @@ class TestBrickognizeServiceCoverageBoost:
         from brick_manager.services.brickognize_service import get_brickognize_api_key
 
         # Should return environment variable or None
-        _result = get_brickognize_api_key()
+        result = get_brickognize_api_key()
         assert result is None or isinstance(result, str)
 
     @patch("brick_manager.services.brickognize_service.get_brickognize_api_key")

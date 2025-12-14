@@ -84,7 +84,7 @@ class TestApplicationIntegration:
             mock_set.name = "Test Set"
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            _response = client.post("/search_set", data={"set_number": "10001-1"})
+            response = client.post("/search_set", data={"set_number": "10001-1"})
             assert response.status_code == 200
 
         # Step 2: Add the set
@@ -94,13 +94,13 @@ class TestApplicationIntegration:
             mock_set.id = 1
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 
-            _response = client.post(
+            response = client.post(
                 "/add_set", data={"set_num": "10001-1", "status": "complete"}
             )
             assert response.status_code in [200, 302]
 
         # Step 3: View set maintenance
-        _response = client.get("/set_maintain")
+        response = client.get("/set_maintain")
         assert response.status_code == 200
 
     def test_part_lookup_workflow(self, client):
@@ -113,18 +113,18 @@ class TestApplicationIntegration:
             mock_part.name = "Brick 2 x 4"
             mock_parts.query.filter_by.return_value.first.return_value = mock_part
 
-            _response = client.post("/lookup_part", data={"part_number": "3001"})
+            response = client.post("/lookup_part", data={"part_number": "3001"})
             assert response.status_code == 200
 
     def test_missing_parts_workflow(self, client):
         """Test the missing parts workflow."""
 
         # View missing parts main page
-        _response = client.get("/missing_parts")
+        response = client.get("/missing_parts")
         assert response.status_code == 200
 
         # View missing parts by category
-        _response = client.get("/missing_parts_category/Brick")
+        response = client.get("/missing_parts_category/Brick")
         assert response.status_code in [200, 404]
 
     def test_navigation_between_pages(self, client):
@@ -140,7 +140,7 @@ class TestApplicationIntegration:
         ]
 
         for page in pages:
-            _response = client.get(page)
+            response = client.get(page)
             assert response.status_code == 200
 
     @patch("services.cache_service.requests.get")
@@ -157,7 +157,7 @@ class TestApplicationIntegration:
         mock_get.return_value = mock_response
 
         # Test caching
-        _result = cache_image("http://example.com/test.jpg")
+        result = cache_image("http://example.com/test.jpg")
         assert result.startswith("/static/cache/images/")
 
     def test_part_lookup_service_integration(self, app):
@@ -190,17 +190,17 @@ class TestApplicationIntegration:
         """Test error handling across the application."""
 
         # Test 404 handling
-        _response = client.get("/non-existent-page")
+        response = client.get("/non-existent-page")
         assert response.status_code == 404
 
         # Test method not allowed
-        _response = client.post("/set_maintain")
+        response = client.post("/set_maintain")
         assert response.status_code == 405
 
-    def test_security_headers_integration(self, client):
+    def testsecurity_headers_integration(self, client):
         """Test that security measures are in place."""
 
-        _response = client.get("/")
+        response = client.get("/")
         assert response.status_code == 200
 
         # Check for potential security headers
@@ -215,7 +215,7 @@ class TestApplicationIntegration:
         """Test that static files are served correctly."""
 
         # Test that static files route works
-        _response = client.get("/static/default_image.png")
+        response = client.get("/static/default_image.png")
         assert response.status_code in [200, 404]  # File may or may not exist
 
     def test_database_transaction_rollback(self, app):
@@ -239,7 +239,7 @@ class TestApplicationIntegration:
                 pass
 
             # Verify rollback occurred
-            _result = RebrickableSets.query.filter_by(set_num="test-1").first()
+            result = RebrickableSets.query.filter_by(set_num="test-1").first()
             assert result is None
 
     def test_concurrent_database_access(self, app):
@@ -300,7 +300,7 @@ class TestAPIIntegration:
 
         # This would require the actual service functions to be implemented
         # from services.rebrickable_service import get_rebrickable_sets
-        # _result = get_rebrickable_sets(api_key='test')
+        # result = get_rebrickable_sets(api_key='test')
         # assert len(result) == 1
 
     @patch("services.brickognize_service.requests.post")
@@ -323,7 +323,7 @@ class TestAPIIntegration:
                 b"fake_image"
             )
 
-            _result = get_predictions("test_image.jpg", "test.jpg")
+            result = get_predictions("test_image.jpg", "test.jpg")
             assert result is not None
 
 
@@ -341,7 +341,7 @@ class TestPerformanceIntegration:
 
         for page in pages:
             start_time = time.time()
-            _response = client.get(page)
+            response = client.get(page)
             end_time = time.time()
 
             assert response.status_code == 200

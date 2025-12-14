@@ -62,7 +62,7 @@ class TestFixedWorkingCoverage:
 
         for test_url, expected in test_cases:
             if test_url is not None:
-                _result = is_valid_url(test_url)
+                result = is_valid_url(test_url)
                 assert (
                     result == expected
                 ), f"URL '{test_url}' should be {expected}, got {result}"
@@ -103,7 +103,7 @@ class TestFixedWorkingCoverage:
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
 
-        _result = RebrickableService._make_request("test/")
+        result = RebrickableService._make_request("test/")
 
         assert result == {"success": True}
         mock_get.assert_called_once()
@@ -125,7 +125,7 @@ class TestFixedWorkingCoverage:
                 mock_storage.query.all.return_value = []
 
                 # Test load function
-                _result = load_part_lookup()
+                result = load_part_lookup()
                 assert isinstance(result, dict)
 
                 # Test save function with empty data
@@ -229,7 +229,7 @@ class TestFixedWorkingCoverage:
 
         mock_url_for.return_value = "/static/default_image.png"
 
-        _result = cache_image(None)
+        result = cache_image(None)
 
         assert result == "/static/default_image.png"
         mock_url_for.assert_called_once()
@@ -276,7 +276,7 @@ class TestFixedWorkingCoverage:
 
             try:
                 # Test with correct parameters
-                _result = get_predictions(mock_file, "test.jpg")
+                result = get_predictions(mock_file, "test.jpg")
                 assert result is not None
             except Exception:
                 # Expected - function may have database dependencies

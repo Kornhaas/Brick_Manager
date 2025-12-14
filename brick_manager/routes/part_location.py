@@ -127,15 +127,15 @@ def delete_location():
         part_num = request.json.get("part_num")
         if not part_num:
             return jsonify({"error": "Part number is required"}), 400
-        
+
         master_lookup = load_part_lookup()
-        
+
         if part_num in master_lookup:
             del master_lookup[part_num]
             save_part_lookup(master_lookup)
             return jsonify({"message": "Location deleted successfully!"}), 200
-        else:
-            return jsonify({"error": "Part not found in storage"}), 404
+
+        return jsonify({"error": "Part not found in storage"}), 404
     except Exception as error:
         logging.error("Error deleting location: %s", error, exc_info=True)
         return jsonify({"error": "An error occurred while deleting location."}), 500

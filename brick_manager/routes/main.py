@@ -12,8 +12,9 @@ It includes:
 import os
 
 from flask import Blueprint, abort, current_app, jsonify, render_template, send_file
-from models import db
 from sqlalchemy import text
+
+from models import db
 
 main_bp = Blueprint("main", __name__)
 

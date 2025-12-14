@@ -95,7 +95,7 @@ def set_maintain():
 
 
 @set_maintain_bp.route("/set_maintain/<int:user_set_id>", methods=["GET"])
-def get_user_set_details(user_set_id):
+def get_user_set_details(user_set_id):  # noqa: C901
     """
 
     Returns the details of a specific User_Set, including its parts, minifigures, and user minifigure parts.

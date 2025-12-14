@@ -115,7 +115,7 @@ def sync_missing_parts():
             summary = result["summary"]
             # Add rate limiting info from the add operation if available
             if "missing_parts_add_result" in summary:
-                addresult = summary["missing_parts_add_result"]
+                add_result = summary["missing_parts_add_result"]
                 if "rate_limited_count" in add_result:
                     summary["rate_limited_count"] = add_result["rate_limited_count"]
 
@@ -173,7 +173,7 @@ def sync_missing_minifigure_parts():
             summary = result["summary"]
             # Add rate limiting info from the add operation if available
             if "missing_parts_add_result" in summary:
-                addresult = summary["missing_parts_add_result"]
+                add_result = summary["missing_parts_add_result"]
                 if "rate_limited_count" in add_result:
                     summary["rate_limited_count"] = add_result["rate_limited_count"]
 
@@ -224,13 +224,13 @@ def sync_all_missing_parts():
         batch_size = data.get("batch_size")
 
         # Perform both synchronizations
-        regularresult = sync_missing_parts_with_rebrickable(batch_size=batch_size)
-        minifigresult = sync_missing_minifigure_parts_with_rebrickable(
+        regular_result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
+        minifig_result = sync_missing_minifigure_parts_with_rebrickable(
             batch_size=batch_size
         )
 
         # Combine results
-        combinedresult = {
+        combined_result = {
             "success": regular_result["success"] and minifig_result["success"],
             "regular_parts": regular_result,
             "minifigure_parts": minifig_result,

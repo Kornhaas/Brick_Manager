@@ -123,7 +123,7 @@ class TestCoverageBoosters:
 
         for url in invalid_urls:
             try:
-                _result = is_valid_url(url)
+                result = is_valid_url(url)
                 assert result is False
             except Exception:
                 # Some invalid inputs might raise exceptions, which is also valid
@@ -168,7 +168,7 @@ class TestCoverageBoosters:
                 mock_query_result.all.return_value = []
                 mock_db.session.query.return_value = mock_query_result
 
-                _result = load_part_lookup()
+                result = load_part_lookup()
                 assert isinstance(result, dict)
 
         except ImportError:

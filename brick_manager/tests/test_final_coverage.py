@@ -313,7 +313,7 @@ class TestFinalCoveragePush:
         ]
 
         for url, expected in edge_cases:
-            _result = is_valid_url(url.strip() if url else url)
+            result = is_valid_url(url.strip() if url else url)
             assert result == expected, f"URL '{url}' should be {expected}"
 
     @pytest.mark.unit

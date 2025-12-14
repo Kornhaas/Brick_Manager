@@ -35,13 +35,13 @@ class TestServicesComprehensive:
             mock_post.return_value = mock_response
 
             # Test identify_lego_part
-            _result = identify_lego_part("test_image.jpg")
+            result = identify_lego_part("test_image.jpg")
             assert isinstance(result, dict)
             assert "items" in result
 
             # Test with different response
             mock_response.json.return_value = {"error": "No parts found"}
-            _result = identify_lego_part("test_image.jpg")
+            result = identify_lego_part("test_image.jpg")
             assert isinstance(result, dict)
 
             # Test get_part_details if it exists
@@ -75,7 +75,7 @@ class TestServicesComprehensive:
             mock_file.return_value.read.return_value = (
                 '{"test_key": {"data": "test", "timestamp": 1234567890}}'
             )
-            _result = cache.get("test_key")
+            result = cache.get("test_key")
             assert result is not None
 
             # Test cache expiry
@@ -142,7 +142,7 @@ class TestServicesComprehensive:
 
                 for label in test_labels:
                     try:
-                        _result = service.extract_coordinates(label)
+                        result = service.extract_coordinates(label)
                         assert result is not None or result is None  # Either is valid
                     except Exception:
                         pass  # Expected for invalid formats
@@ -156,7 +156,7 @@ class TestServicesComprehensive:
                     tmp_path = tmp.name
 
                 try:
-                    _result = service.process_image(tmp_path)
+                    result = service.process_image(tmp_path)
                     assert result is not None or result is None
                 finally:
                     if os.path.exists(tmp_path):
@@ -192,15 +192,15 @@ class TestServicesComprehensive:
 
             # Test part lookup methods
             if hasattr(service, "lookup_part"):
-                _result = service.lookup_part("3001")
+                result = service.lookup_part("3001")
                 assert result is not None
 
             if hasattr(service, "lookup_by_color"):
-                _result = service.lookup_by_color("3001", "Red")
+                result = service.lookup_by_color("3001", "Red")
                 assert result is not None
 
             if hasattr(service, "get_part_info"):
-                _result = service.get_part_info("3001")
+                result = service.get_part_info("3001")
                 assert result is not None
 
             # Test error handling
@@ -208,7 +208,7 @@ class TestServicesComprehensive:
             mock_response.json.side_effect = Exception("Not found")
 
             if hasattr(service, "lookup_part"):
-                _result = service.lookup_part("invalid_part")
+                result = service.lookup_part("invalid_part")
                 # Should handle errors gracefully
 
         except ImportError:
@@ -243,15 +243,15 @@ class TestServicesComprehensive:
 
             # Test set lookup methods
             if hasattr(service, "get_set_info"):
-                _result = service.get_set_info("10030-1")
+                result = service.get_set_info("10030-1")
                 assert result is not None
 
             if hasattr(service, "get_set_parts"):
-                _result = service.get_set_parts("10030-1")
+                result = service.get_set_parts("10030-1")
                 assert result is not None
 
             if hasattr(service, "get_set_minifigs"):
-                _result = service.get_set_minifigs("10030-1")
+                result = service.get_set_minifigs("10030-1")
                 assert result is not None
 
             # Test different API endpoints
@@ -265,7 +265,7 @@ class TestServicesComprehensive:
             for endpoint in endpoints_to_test:
                 if hasattr(service, "make_request"):
                     try:
-                        _result = service.make_request(endpoint)
+                        result = service.make_request(endpoint)
                         assert result is not None or result is None
                     except Exception:
                         pass
@@ -275,7 +275,7 @@ class TestServicesComprehensive:
             mock_response.json.side_effect = Exception("Server error")
 
             if hasattr(service, "get_set_info"):
-                _result = service.get_set_info("invalid-set")
+                result = service.get_set_info("invalid-set")
                 # Should handle errors gracefully
 
         except ImportError:
@@ -302,7 +302,7 @@ class TestServicesComprehensive:
             if hasattr(service, "execute_query"):
                 # Test SELECT query
                 mock_cursor.fetchall.return_value = [("result1",), ("result2",)]
-                _result = service.execute_query("SELECT * FROM test_table")
+                result = service.execute_query("SELECT * FROM test_table")
                 assert result is not None
 
                 # Test INSERT query
@@ -315,14 +315,14 @@ class TestServicesComprehensive:
 
             if hasattr(service, "fetch_one"):
                 mock_cursor.fetchone.return_value = ("single_result",)
-                _result = service.fetch_one(
+                result = service.fetch_one(
                     "SELECT * FROM test_table WHERE id = ?", (1,)
                 )
                 assert result is not None
 
             if hasattr(service, "fetch_all"):
                 mock_cursor.fetchall.return_value = [("result1",), ("result2",)]
-                _result = service.fetch_all("SELECT * FROM test_table")
+                result = service.fetch_all("SELECT * FROM test_table")
                 assert result is not None
 
             # Test transaction methods

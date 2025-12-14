@@ -19,7 +19,7 @@ class TestRebrickableServiceCoverage:
 
         from brick_manager.services.rebrickable_service import make_request
 
-        _result = make_request("http://test.com/api", {"page": 1})
+        result = make_request("http://test.com/api", {"page": 1})
         assert result is not None
         assert "results" in result
 
@@ -37,7 +37,7 @@ class TestRebrickableServiceCoverage:
 
         from brick_manager.services.rebrickable_service import get_user_sets
 
-        _result = get_user_sets("test_token", "test_key")
+        result = get_user_sets("test_token", "test_key")
         assert result is not None
 
     @patch("brick_manager.services.rebrickable_service.requests.get")
@@ -52,7 +52,7 @@ class TestRebrickableServiceCoverage:
 
         from brick_manager.services.rebrickable_service import get_set_parts
 
-        _result = get_set_parts("123-1", "test_key")
+        result = get_set_parts("123-1", "test_key")
         assert result is not None
 
     @patch("brick_manager.services.rebrickable_service.requests.get")
@@ -67,7 +67,7 @@ class TestRebrickableServiceCoverage:
 
         from brick_manager.services.rebrickable_service import get_missing_parts
 
-        _result = get_missing_parts("test_token", "test_key")
+        result = get_missing_parts("test_token", "test_key")
         assert result is not None
 
     @patch("brick_manager.services.rebrickable_service.requests.get")
@@ -82,7 +82,7 @@ class TestRebrickableServiceCoverage:
 
         from brick_manager.services.rebrickable_service import get_part_image_url
 
-        _result = get_part_image_url("123", "4", "test_key")
+        result = get_part_image_url("123", "4", "test_key")
         assert result is not None
 
 
@@ -104,7 +104,7 @@ class TestCacheServiceCoverage:
 
         from brick_manager.services.cache_service import cache_image
 
-        _result = cache_image("http://test.com/image.jpg")
+        result = cache_image("http://test.com/image.jpg")
         assert mock_makedirs.called
         assert mock_file.called
 
@@ -116,7 +116,7 @@ class TestCacheServiceCoverage:
 
         from brick_manager.services.cache_service import cache_image
 
-        _result = cache_image("http://test.com/image.jpg")
+        result = cache_image("http://test.com/image.jpg")
         # Should return early if file exists
 
     @patch("brick_manager.services.cache_service.requests.get")
@@ -127,7 +127,7 @@ class TestCacheServiceCoverage:
 
         from brick_manager.services.cache_service import cache_image
 
-        _result = cache_image("http://test.com/image.jpg")
+        result = cache_image("http://test.com/image.jpg")
         # Should handle error gracefully
 
     @patch("brick_manager.services.cache_service.os.path.exists")
@@ -138,7 +138,7 @@ class TestCacheServiceCoverage:
 
         from brick_manager.services.cache_service import get_cached_image_path
 
-        _result = get_cached_image_path("http://test.com/image.jpg")
+        result = get_cached_image_path("http://test.com/image.jpg")
         assert result is not None
 
 
@@ -150,7 +150,7 @@ class TestLabelServiceCoverage:
 
         from brick_manager.services.label_service import generate_qr_code
 
-        _result = generate_qr_code("test_data")
+        result = generate_qr_code("test_data")
         assert result is not None
 
     @patch("brick_manager.services.label_service.Image.open")
@@ -217,7 +217,7 @@ class TestPartLookupServiceCoverage:
 
         from brick_manager.services.part_lookup_service import load_part_lookup
 
-        _result = load_part_lookup()
+        result = load_part_lookup()
         assert result is not None
 
     @patch("builtins.open", side_effect=FileNotFoundError())
@@ -235,7 +235,7 @@ class TestPartLookupServiceCoverage:
         from brick_manager.services.part_lookup_service import search_parts
 
         # Test with empty query
-        _result = search_parts("test", 10)
+        result = search_parts("test", 10)
         assert isinstance(result, list)
 
 
@@ -252,7 +252,7 @@ class TestTokenServiceCoverage:
 
         from brick_manager.services.token_service import get_rebrickable_user_token
 
-        _result = get_rebrickable_user_token()
+        result = get_rebrickable_user_token()
         assert result == "test_token"
 
     @patch("brick_manager.services.token_service.UserTokens.query")
@@ -263,7 +263,7 @@ class TestTokenServiceCoverage:
 
         from brick_manager.services.token_service import get_rebrickable_user_token
 
-        _result = get_rebrickable_user_token()
+        result = get_rebrickable_user_token()
         assert result is None
 
     def test_get_rebrickable_api_key(self):
@@ -292,7 +292,7 @@ class TestBrickognizeServiceCoverage:
 
         from brick_manager.services.brickognize_service import predict_part
 
-        _result = predict_part(b"fake_image_data")
+        result = predict_part(b"fake_image_data")
         assert result is not None
 
     @patch("brick_manager.services.brickognize_service.requests.post")
@@ -319,7 +319,7 @@ class TestSqliteServiceCoverage:
 
         from brick_manager.services.sqlite_service import get_connection
 
-        _result = get_connection()
+        result = get_connection()
         assert result is not None
 
     @patch("brick_manager.services.sqlite_service.get_connection")
@@ -334,7 +334,7 @@ class TestSqliteServiceCoverage:
 
         from brick_manager.services.sqlite_service import execute_query
 
-        _result = execute_query("SELECT * FROM test")
+        result = execute_query("SELECT * FROM test")
         assert result is not None
 
     @patch("brick_manager.services.sqlite_service.get_connection")

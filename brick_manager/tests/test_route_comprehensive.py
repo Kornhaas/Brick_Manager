@@ -343,7 +343,7 @@ class TestServiceComprehensive:
                     with patch("services.cache_service.url_for") as mock_url_for:
                         mock_url_for.return_value = "/cached/image.jpg"
 
-                        _result = cache_image("https://example.com/image.jpg")
+                        result = cache_image("https://example.com/image.jpg")
 
                         # Should return cached URL
                         assert result is not None
@@ -438,7 +438,7 @@ class TestServiceComprehensive:
             from services.label_service import download_image
 
             # Test with None URL
-            _result = download_image(None)
+            result = download_image(None)
             assert result is None
 
             # Test with successful download
@@ -451,7 +451,7 @@ class TestServiceComprehensive:
                 mock_image.open.return_value = MagicMock()
                 mock_get.return_value = mock_response
 
-                _result = download_image("https://example.com/image.jpg")
+                result = download_image("https://example.com/image.jpg")
                 # Should attempt to download
                 mock_get.assert_called_once()
 
@@ -485,7 +485,7 @@ class TestServiceComprehensive:
                     mock_storage.query.all.return_value = mock_parts
 
                     # Test load function with data
-                    _result = load_part_lookup()
+                    result = load_part_lookup()
                     assert isinstance(result, dict)
 
                     # Test save function with data

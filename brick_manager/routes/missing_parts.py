@@ -2,13 +2,11 @@
 This module handles the display of all missing parts and missing minifigure parts across all sets.
 """
 
-import os
 import re
 import time
 import urllib.parse
-from urllib.parse import urlparse
 
-from flask import Blueprint, current_app, jsonify, render_template, request, url_for
+from flask import Blueprint, current_app, jsonify, render_template, request
 from models import (
     PartStorage,
     RebrickableColors,
@@ -21,7 +19,6 @@ from models import (
     UserMinifigurePart,
     db,
 )
-from services.cache_service import cache_image
 from services.part_lookup_service import load_part_lookup
 
 # pylint: disable=C0301

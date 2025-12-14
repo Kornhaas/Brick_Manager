@@ -148,7 +148,7 @@ class TestRouteEndpointsCoverage:
 
         with app.test_client() as client:
             try:
-                _response = client.get("/")
+                response = client.get("/")
                 # Accept any response (200, 302, 404, 500) - just test execution
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
@@ -162,7 +162,7 @@ class TestRouteEndpointsCoverage:
 
         with app.test_client() as client:
             try:
-                _response = client.get("/dashboard")
+                response = client.get("/dashboard")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
@@ -174,7 +174,7 @@ class TestRouteEndpointsCoverage:
 
         with app.test_client() as client:
             try:
-                _response = client.get("/storage")
+                response = client.get("/storage")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
@@ -186,7 +186,7 @@ class TestRouteEndpointsCoverage:
 
         with app.test_client() as client:
             try:
-                _response = client.get("/missing-parts")
+                response = client.get("/missing-parts")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
@@ -198,7 +198,7 @@ class TestRouteEndpointsCoverage:
 
         with app.test_client() as client:
             try:
-                _response = client.get("/set-search")
+                response = client.get("/set-search")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
@@ -210,7 +210,7 @@ class TestRouteEndpointsCoverage:
 
         with app.test_client() as client:
             try:
-                _response = client.get("/part-lookup")
+                response = client.get("/part-lookup")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
@@ -222,7 +222,7 @@ class TestRouteEndpointsCoverage:
 
         with app.test_client() as client:
             try:
-                _response = client.get("/upload")
+                response = client.get("/upload")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
@@ -234,7 +234,7 @@ class TestRouteEndpointsCoverage:
 
         with app.test_client() as client:
             try:
-                _response = client.get("/manual-entry")
+                response = client.get("/manual-entry")
                 assert response.status_code in [200, 302, 404, 500]
             except Exception:
                 pass
@@ -256,7 +256,7 @@ class TestServiceFunctionsCoverage:
         from brick_manager.services.rebrickable_service import make_request
 
         # Test basic request functionality
-        _result = make_request("http://test.com/api", {"key": "test"})
+        result = make_request("http://test.com/api", {"key": "test"})
         assert result is not None
 
     @patch("brick_manager.services.cache_service.requests.get")
@@ -268,7 +268,7 @@ class TestServiceFunctionsCoverage:
 
         from brick_manager.services.cache_service import get_cached_image_path
 
-        _result = get_cached_image_path("http://test.com/image.jpg")
+        result = get_cached_image_path("http://test.com/image.jpg")
         # Should execute without error
 
     def test_label_service_through_routes(self):
@@ -276,7 +276,7 @@ class TestServiceFunctionsCoverage:
 
         from brick_manager.services.label_service import generate_qr_code
 
-        _result = generate_qr_code("test_data")
+        result = generate_qr_code("test_data")
         assert result is not None
 
     @patch("brick_manager.services.part_lookup_service.open")
@@ -368,7 +368,7 @@ class TestErrorHandlingPaths:
 
         with app.test_client() as client:
             # Test non-existent route
-            _response = client.get("/non-existent-route")
+            response = client.get("/non-existent-route")
             assert response.status_code == 404
 
     @patch("brick_manager.services.rebrickable_service.requests.get")
@@ -380,7 +380,7 @@ class TestErrorHandlingPaths:
         from brick_manager.services.rebrickable_service import make_request
 
         try:
-            _result = make_request("http://test.com/api", {})
+            result = make_request("http://test.com/api", {})
             # Should handle error gracefully
         except Exception:
             # Expected behavior for error handling

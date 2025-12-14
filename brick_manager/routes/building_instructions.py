@@ -5,7 +5,7 @@ import logging
 import os
 
 from flask import Blueprint, abort, current_app, render_template, send_file
-from models import User_Set, db
+from models import User_Set
 
 # Create blueprint
 building_instructions_bp = Blueprint("building_instructions", __name__)

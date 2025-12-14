@@ -68,7 +68,7 @@ class TestCacheServiceCoverage:
         test_url = "https://example.com/test.jpg"
         with patch("services.cache_service.current_app") as mock_app:
             mock_app.static_folder = "/static"
-            _result = cache_image(test_url)
+            result = cache_image(test_url)
 
             # Verify calls were made
             mock_get.assert_called_once()
@@ -90,9 +90,9 @@ class TestCacheServiceCoverage:
                 "services.cache_service.url_for",
                 return_value="/static/default_image.png",
             ):
-                _result = cache_image(test_url)
+                result = cache_image(test_url)
                 assert (
-                    _result == "/static/default_image.png"
+                    result == "/static/default_image.png"
                 )  # Should return fallback on error
 
     @pytest.mark.unit
@@ -112,7 +112,7 @@ class TestCacheServiceCoverage:
                 "services.cache_service.url_for",
                 return_value="/static/default_image.png",
             ):
-                _result = cache_image(test_url)
+                result = cache_image(test_url)
                 assert result == "/static/default_image.png"
 
     @pytest.mark.unit
@@ -123,7 +123,7 @@ class TestCacheServiceCoverage:
                 "services.cache_service.url_for",
                 return_value="/static/default_image.png",
             ):
-                _result = cache_image("not-a-valid-url")
+                result = cache_image("not-a-valid-url")
                 assert result == "/static/default_image.png"
 
     @pytest.mark.unit
@@ -133,7 +133,7 @@ class TestCacheServiceCoverage:
             # Mock url_for to avoid Flask context issues
             with patch("services.cache_service.url_for") as mock_url_for:
                 mock_url_for.return_value = "/static/default_image.png"
-                _result = cache_image(None)
+                result = cache_image(None)
                 assert result == "/static/default_image.png"
                 mock_url_for.assert_called_once()
 
@@ -184,7 +184,7 @@ class TestRebrickableServiceCoverage:
             mock_response_success,
         ]
 
-        _result = RebrickableService._make_request("test/")
+        result = RebrickableService._make_request("test/")
 
         assert result == {"success": True}
         assert mock_get.call_count == 3
@@ -200,7 +200,7 @@ class TestRebrickableServiceCoverage:
         mock_response.raise_for_status.side_effect = Exception("500 Error")
         mock_get.return_value = mock_response
 
-        _result = RebrickableService._make_request("test/")
+        result = RebrickableService._make_request("test/")
 
         assert result is None
         assert mock_get.call_count == RebrickableService.MAX_RETRIES
@@ -214,7 +214,7 @@ class TestRebrickableServiceCoverage:
 
         mock_get.side_effect = requests.Timeout("Request timeout")
 
-        _result = RebrickableService._make_request("test/")
+        result = RebrickableService._make_request("test/")
 
         assert result is None
 
@@ -227,7 +227,7 @@ class TestRebrickableServiceCoverage:
 
         mock_get.side_effect = requests.ConnectionError("Connection failed")
 
-        _result = RebrickableService._make_request("test/")
+        result = RebrickableService._make_request("test/")
 
         assert result is None
 
@@ -243,7 +243,7 @@ class TestRebrickableServiceCoverage:
                 ]
             }
 
-            _result = RebrickableService.get_all_category_ids()
+            result = RebrickableService.get_all_category_ids()
 
             assert isinstance(result, list)
             assert len(result) == 3
@@ -257,7 +257,7 @@ class TestRebrickableServiceCoverage:
         with patch.object(RebrickableService, "_make_request") as mock_request:
             mock_request.return_value = {"results": []}
 
-            _result = RebrickableService.get_all_category_ids()
+            result = RebrickableService.get_all_category_ids()
 
             assert isinstance(result, list)
             assert len(result) == 0
@@ -268,7 +268,7 @@ class TestRebrickableServiceCoverage:
         with patch.object(RebrickableService, "_make_request") as mock_request:
             mock_request.return_value = None
 
-            _result = RebrickableService.get_all_category_ids()
+            result = RebrickableService.get_all_category_ids()
 
             assert result == []
 
@@ -283,7 +283,7 @@ class TestRebrickableServiceCoverage:
                 "part_material": "Plastic",
             }
 
-            _result = RebrickableService.get_part_details("3001")
+            result = RebrickableService.get_part_details("3001")
 
             assert result["part_num"] == "3001"
             assert result["name"] == "Brick 2 x 4"
@@ -296,7 +296,7 @@ class TestRebrickableServiceCoverage:
         with patch.object(RebrickableService, "_make_request") as mock_request:
             mock_request.return_value = None
 
-            _result = RebrickableService.get_part_details("invalid")
+            result = RebrickableService.get_part_details("invalid")
 
             assert result is None
 
@@ -308,7 +308,7 @@ class TestRebrickableServiceCoverage:
                 "part_img_url": "https://cdn.rebrickable.com/media/parts/elements/3001.jpg"
             }
 
-            _result = RebrickableService.get_part_image_url("3001")
+            result = RebrickableService.get_part_image_url("3001")
 
             assert result == "https://cdn.rebrickable.com/media/parts/elements/3001.jpg"
 
@@ -318,7 +318,7 @@ class TestRebrickableServiceCoverage:
         with patch.object(RebrickableService, "_make_request") as mock_request:
             mock_request.return_value = {"part_img_url": None}
 
-            _result = RebrickableService.get_part_image_url("3001")
+            result = RebrickableService.get_part_image_url("3001")
 
             assert result is None
 
@@ -328,7 +328,7 @@ class TestRebrickableServiceCoverage:
         with patch.object(RebrickableService, "_make_request") as mock_request:
             mock_request.return_value = None
 
-            _result = RebrickableService.get_part_image_url("invalid")
+            result = RebrickableService.get_part_image_url("invalid")
 
             assert result is None
 
@@ -346,7 +346,7 @@ class TestRebrickableServiceCoverage:
                 "previous": None,
             }
 
-            _result = RebrickableService.get_parts_by_category(1)
+            result = RebrickableService.get_parts_by_category(1)
 
             assert result["count"] == 2
             assert len(result["results"]) == 2
@@ -361,7 +361,7 @@ class TestRebrickableServiceCoverage:
                 "count": 1,
             }
 
-            _result = RebrickableService.get_parts_by_category(1, page_size=10, page=2)
+            result = RebrickableService.get_parts_by_category(1, page_size=10, page=2)
 
             assert result is not None
             # Verify correct URL construction with parameters
@@ -376,7 +376,7 @@ class TestRebrickableServiceCoverage:
             }
 
             filters = {"part_cat_id": 1}
-            _result = RebrickableService.get_parts(filters=filters)
+            result = RebrickableService.get_parts(filters=filters)
 
             assert result["count"] == 1
             assert len(result["results"]) == 1
@@ -393,7 +393,7 @@ class TestRebrickableServiceCoverage:
                 "count": 2,
             }
 
-            _result = RebrickableService.get_colors()
+            result = RebrickableService.get_colors()
 
             assert result["count"] == 2
             assert len(result["results"]) == 2
@@ -410,7 +410,7 @@ class TestRebrickableServiceCoverage:
             ]
 
             part_nums = ["3001", "3002", "3003"]
-            _result = RebrickableService.get_part_images_bulk(part_nums)
+            result = RebrickableService.get_part_images_bulk(part_nums)
 
             assert len(result) == 3
             assert (
@@ -427,7 +427,7 @@ class TestRebrickableServiceCoverage:
     def test_get_part_images_bulk_empty_list(self):
         """Test bulk image retrieval with empty list."""
 
-        _result = RebrickableService.get_part_images_bulk([])
+        result = RebrickableService.get_part_images_bulk([])
 
         assert result == {}
 
@@ -474,5 +474,5 @@ class TestServiceIntegration:
                             "services.cache_service.os.path.exists", return_value=True
                         ):
                             with patch("builtins.open", mock_open()):
-                                _result = cache_image(test_url)
+                                result = cache_image(test_url)
                                 assert result is not None
