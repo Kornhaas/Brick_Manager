@@ -24,6 +24,7 @@ from models import (
     PartStorage,
     RebrickablePartCategories,
     RebrickableParts,
+    User_Parts,
     User_Set,
     UserMinifigurePart,
     db,
@@ -32,6 +33,63 @@ from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
 
 set_maintain_bp = Blueprint("set_maintain", __name__)
+
+
+@set_maintain_bp.route("/update_part_location", methods=["POST"])
+def update_part_location():
+    """
+    Updates or creates the location for a specific part.
+    Expects JSON: {part_num, location, level, box}
+    """
+    try:
+        data = request.get_json()
+        part_num = data.get("part_num")
+        location = data.get("location", "").strip()
+        level = data.get("level", "").strip()
+        box = data.get("box", "").strip()
+
+        if not part_num:
+            return jsonify({"success": False, "error": "Part number is required"}), 400
+
+        # Find or create part storage entry
+        part_storage = PartStorage.query.filter_by(part_num=part_num).first()
+
+        if part_storage:
+            # Update existing entry
+            part_storage.location = location if location else None
+            part_storage.level = level if level else None
+            part_storage.box = box if box else None
+        else:
+            # Create new entry
+            part_storage = PartStorage(
+                part_num=part_num,
+                location=location if location else None,
+                level=level if level else None,
+                box=box if box else None,
+            )
+            db.session.add(part_storage)
+
+        db.session.commit()
+
+        # Format the location string for display
+        location_str = (
+            f"Location: {location or 'Unknown'}, "
+            f"Level: {level or 'Unknown'}, "
+            f"Box: {box or 'Unknown'}"
+        )
+
+        return jsonify(
+            {
+                "success": True,
+                "location": location_str,
+                "message": "Location updated successfully",
+            }
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error updating part location: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @set_maintain_bp.route("/set_maintain", methods=["GET"])
@@ -320,6 +378,56 @@ def get_user_set_details(user_set_id):  # noqa: C901
             "completeness_percentage": round(completeness_percentage, 2),
         }
     )
+
+
+@set_maintain_bp.route("/set_maintain/update_part_quantity", methods=["POST"])
+def update_part_quantity():
+    """Update the have_quantity for a specific part in real-time"""
+    try:
+        data = request.get_json()
+        part_id = int(data.get("part_id"))
+        part_type = data.get("part_type", "regular")  # 'regular' or 'minifig'
+        new_quantity = int(data.get("have_quantity"))
+
+        current_app.logger.info(
+            f"Auto-updating {part_type} quantity: part_id={part_id}, quantity={new_quantity}"
+        )
+
+        if part_type == "minifig":
+            # Update minifigure part
+            part = UserMinifigurePart.query.get(part_id)
+            if not part:
+                current_app.logger.error(f"Minifigure part not found: id={part_id}")
+                return jsonify({"success": False, "message": "Minifigure part not found"}), 404
+        else:
+            # Update regular part
+            part = User_Parts.query.get(part_id)
+            if not part:
+                current_app.logger.error(f"Regular part not found: id={part_id}")
+                return jsonify({"success": False, "message": "Part not found"}), 404
+
+        # Clamp the value between 0 and the required quantity
+        part.have_quantity = max(0, min(part.quantity, new_quantity))
+        db.session.commit()
+
+        current_app.logger.info(
+            f"Successfully updated {part_type} quantity for part_id={part_id}"
+        )
+
+        return jsonify({
+            "success": True,
+            "message": "Quantity updated successfully",
+            "have_quantity": part.have_quantity,
+            "total_quantity": part.quantity
+        })
+
+    except ValueError as e:
+        current_app.logger.error(f"Invalid value in request: {e}")
+        return jsonify({"success": False, "message": "Invalid input value"}), 400
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error updating part quantity: {e}")
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
 @set_maintain_bp.route("/set_maintain/update", methods=["POST"])

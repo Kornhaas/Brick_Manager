@@ -424,7 +424,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td>
                             <input type="number" name="part_id_${part.id
               }" value="${part.have_quantity}" min="0" max="${part.quantity
-              }" class="form-control">
+              }" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="regular">
                         </td>
                         <td>${part.location || "Not Specified"}</td>
                     </tr>`;
@@ -468,7 +468,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td style="background-color: #${colorRgb}; color: ${textColor};">${part.color || "Not Specified"}</td>
                         <td>${part.quantity}</td>
                         <td>
-                            <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control">
+                            <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="minifig">
                         </td>
                         <td>${part.location || "Not Specified"}</td>
                     </tr>`;
@@ -500,6 +500,9 @@ document.addEventListener("DOMContentLoaded", function () {
           });
 
           document.getElementById("status").value = data.status;
+          
+          // Attach auto-save listeners to all quantity inputs after all tables are populated
+          attachAutoSaveListeners();
         })
         .catch((error) =>
           console.error("Error fetching User_Set details:", error)
@@ -622,3 +625,200 @@ document.addEventListener('click', function(event) {
     showImageModal(imageSrc, imageName);
   }
 });
+
+// Location editing functionality
+document.addEventListener('DOMContentLoaded', function() {
+  // Add click handlers to location cells
+  function addLocationClickHandlers() {
+    // Target location cells in non-spare parts, spare parts, and minifig parts tables
+    const locationCells = document.querySelectorAll(
+      '#non-spare-parts-table-body tr td:nth-child(8), ' +
+      '#spare-parts-table-body tr td:nth-child(8), ' +
+      '#minifigs-table-body table tbody tr td:nth-child(7)'
+    );
+    
+    locationCells.forEach(cell => {
+      cell.style.cursor = 'pointer';
+      cell.title = 'Click to edit location';
+      
+      cell.addEventListener('click', function() {
+        const row = this.closest('tr');
+        const partNumCell = row.querySelector('td:nth-child(2)');
+        const partNameCell = row.querySelector('td:nth-child(3)');
+        
+        if (!partNumCell || !partNameCell) return;
+        
+        const partNum = partNumCell.textContent.trim();
+        const partName = partNameCell.textContent.trim();
+        const currentLocation = this.textContent.trim();
+        
+        // Parse current location (format: "Location Level-Box" or "Not Specified")
+        let location = '', level = '', box = '';
+        if (currentLocation !== 'Not Specified') {
+          const parts = currentLocation.split(' ');
+          if (parts.length >= 1) location = parts[0];
+          if (parts.length >= 2) {
+            const levelBox = parts[1].split('-');
+            level = levelBox[0] || '';
+            box = levelBox[1] || '';
+          }
+        }
+        
+        // Populate modal
+        document.getElementById('modalPartNum').textContent = partNum;
+        document.getElementById('modalPartName').textContent = partName;
+        document.getElementById('modalLocation').value = location;
+        document.getElementById('modalLevel').value = level;
+        document.getElementById('modalBox').value = box;
+        
+        // Store reference to the cell for updating later
+        const modal = document.getElementById('locationModal');
+        modal.setAttribute('data-current-cell', '');
+        modal.currentCell = this;
+        modal.currentPartNum = partNum;
+        
+        // Show modal
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+      });
+    });
+  }
+  
+  // Save location button handler
+  const saveLocationBtn = document.getElementById('saveLocationBtn');
+  if (saveLocationBtn) {
+    saveLocationBtn.addEventListener('click', function() {
+      const modal = document.getElementById('locationModal');
+      const partNum = modal.currentPartNum;
+      const location = document.getElementById('modalLocation').value.trim();
+      const level = document.getElementById('modalLevel').value.trim();
+      const box = document.getElementById('modalBox').value.trim();
+      const statusDiv = document.getElementById('locationUpdateStatus');
+      
+      // Clear previous status
+      statusDiv.style.display = 'none';
+      statusDiv.className = 'alert';
+      
+      // Send update request
+      fetch('/update_part_location', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          part_num: partNum,
+          location: location,
+          level: level,
+          box: box
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update the cell text
+          if (modal.currentCell) {
+            modal.currentCell.textContent = data.location || 'Not Specified';
+          }
+          
+          // Show success message
+          statusDiv.className = 'alert alert-success';
+          statusDiv.textContent = data.message;
+          statusDiv.style.display = 'block';
+          
+          // Close modal after short delay
+          setTimeout(() => {
+            bootstrap.Modal.getInstance(modal).hide();
+            statusDiv.style.display = 'none';
+          }, 1500);
+        } else {
+          // Show error message
+          statusDiv.className = 'alert alert-danger';
+          statusDiv.textContent = data.message || 'Failed to update location';
+          statusDiv.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('Error updating location:', error);
+        statusDiv.className = 'alert alert-danger';
+        statusDiv.textContent = 'Network error. Please try again.';
+        statusDiv.style.display = 'block';
+      });
+    });
+  }
+  
+  // Initialize handlers when viewing set details
+  const originalViewDetails = document.querySelectorAll('.view-details');
+  originalViewDetails.forEach(button => {
+    button.addEventListener('click', function() {
+      // Wait for the parts tables to be populated
+      setTimeout(addLocationClickHandlers, 500);
+    });
+  });
+});
+
+// Auto-save function for quantity inputs
+function attachAutoSaveListeners() {
+  document.querySelectorAll('.auto-save-quantity').forEach(input => {
+    // Remove any existing listeners to prevent duplicates
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+    
+    newInput.addEventListener('change', function() {
+      const partId = this.getAttribute('data-part-id');
+      const partType = this.getAttribute('data-part-type');
+      const newQuantity = parseInt(this.value);
+      const row = this.closest('tr');
+      
+      // Visual feedback - add a subtle border color while saving
+      this.style.borderColor = '#ffc107';
+      
+      fetch('/set_maintain/update_part_quantity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          part_id: partId,
+          part_type: partType,
+          have_quantity: newQuantity
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update the input with the clamped value from server
+          this.value = data.have_quantity;
+          
+          // Update row color based on completion status
+          if (data.have_quantity >= data.total_quantity) {
+            row.className = 'table-success';
+          } else {
+            row.className = 'table-danger';
+          }
+          
+          // Visual feedback - green border for success
+          this.style.borderColor = '#28a745';
+          setTimeout(() => {
+            this.style.borderColor = '';
+          }, 1000);
+          
+          console.log('Quantity auto-saved successfully');
+        } else {
+          // Visual feedback - red border for error
+          this.style.borderColor = '#dc3545';
+          setTimeout(() => {
+            this.style.borderColor = '';
+          }, 2000);
+          console.error('Failed to save quantity:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error auto-saving quantity:', error);
+        this.style.borderColor = '#dc3545';
+        setTimeout(() => {
+          this.style.borderColor = '';
+        }, 2000);
+      });
+    });
+  });
+}
