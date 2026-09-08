@@ -1,0 +1,29 @@
+{
+  "features": {
+    "ghcr.io/devcontainers-extra/features/isort:2": {
+      "version": "2.0.18",
+      "resolved": "ghcr.io/devcontainers-extra/features/isort@sha256:61054644446a26f4d6badffad9fbda36f5d801bc390543728fe591059209c728",
+      "integrity": "sha256:61054644446a26f4d6badffad9fbda36f5d801bc390543728fe591059209c728"
+    },
+    "ghcr.io/devcontainers-extra/features/poetry:2": {
+      "version": "2.0.18",
+      "resolved": "ghcr.io/devcontainers-extra/features/poetry@sha256:7b5f2c66d25d8b3cc5d601af6b81b720c77dd315f24d5e6f84b342cccc3c9228",
+      "integrity": "sha256:7b5f2c66d25d8b3cc5d601af6b81b720c77dd315f24d5e6f84b342cccc3c9228"
+    },
+    "ghcr.io/devcontainers-extra/features/pylint:2": {
+      "version": "2.0.18",
+      "resolved": "ghcr.io/devcontainers-extra/features/pylint@sha256:c5aa6c40c6f98d86b8faa06900755243d31fb5bb173fd24ba2b07c2139b361c4",
+      "integrity": "sha256:c5aa6c40c6f98d86b8faa06900755243d31fb5bb173fd24ba2b07c2139b361c4"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "1.8.0",
+      "resolved": "ghcr.io/devcontainers/features/python@sha256:fbcad6955caeecc5ad3f7886baf652e25cba5225a6c4c2287c536de2e5607511",
+      "integrity": "sha256:fbcad6955caeecc5ad3f7886baf652e25cba5225a6c4c2287c536de2e5607511"
+    },
+    "ghcr.io/hspaans/devcontainer-features/pymarkdownlnt:2": {
+      "version": "2.0.0",
+      "resolved": "ghcr.io/hspaans/devcontainer-features/pymarkdownlnt@sha256:8d2b78037f078ba842ea09b855ba986e6291cb9d6318510676412c96bedda08c",
+      "integrity": "sha256:8d2b78037f078ba842ea09b855ba986e6291cb9d6318510676412c96bedda08c"
+    }
+  }
+}
