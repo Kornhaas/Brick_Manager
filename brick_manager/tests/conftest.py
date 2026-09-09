@@ -90,7 +90,9 @@ def app():
     with test_app.app_context():
         db.create_all()
         yield test_app
+        db.session.remove()
         db.drop_all()
+        db.engine.dispose()
 
     # Clean up the temporary database file
     os.close(db_fd)
