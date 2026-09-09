@@ -1090,7 +1090,7 @@ def clear_part_list(list_id):
 
                 url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/{part_num}/{color_id}/"
 
-                _response = make_rate_limited_request(
+                response = make_rate_limited_request(
                     url, headers, method="DELETE", timeout=20
                 )
 
@@ -1291,7 +1291,7 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
 
                 url = f"https://rebrickable.com/api/v3/users/{user_token}/partlists/{list_id}/parts/{part_num}/{color_id}/"
 
-                _response = make_rate_limited_request(
+                response = make_rate_limited_request(
                     url, headers, method="DELETE", timeout=20
                 )
 
@@ -1301,10 +1301,7 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
 
                     # Progress feedback for every 25 parts
                     if (i + 1) % 25 == 0:
-                        logger.info(
-                            f"Removed {i + \
-                            1}/{len(parts_to_remove)} parts"
-                        )
+                        logger.info("Removed %d/%d parts", i + 1, len(parts_to_remove))
 
                 elif response and response.status_code == 429:
                     logger.warning(

@@ -245,8 +245,9 @@ def validate_part(part_num):
         )
 
     except Exception as e:
+        current_app.logger.exception("Error validating part")
         return (
-            jsonify({"exists": False, "message": f"Error validating part: {str(e)}"}),
+            jsonify({"exists": False, "message": "Unable to validate part."}),
             500,
         )
 
@@ -267,4 +268,5 @@ def delete_storage(storage_id):
         return jsonify({"message": "Storage location deleted successfully"}), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": f"Error deleting storage: {str(e)}"}), 500
+        current_app.logger.exception("Error deleting storage")
+        return jsonify({"error": "Unable to delete storage location."}), 500

@@ -1,3 +1,7 @@
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+}[character]));
+
 document.addEventListener("DOMContentLoaded", function () {
   const setsTable = document.getElementById("sets-table");
   const setDetails = document.getElementById("set-details");
@@ -414,19 +418,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const partRow = `
                     <tr class="${statusClass}">
-                        <td><img src="${part.part_img_url}" alt="${part.name
-              }" class="img-thumbnail" width="50" style="cursor: pointer;" onclick="showImageModal('${part.part_img_url}', '${part.name} (${part.part_num})')" /></td>
-                        <td>${part.part_num}</td>
-                        <td>${part.name}</td>
-                        <td>${part.category || "Unknown Category"}</td>
-                        <td style="background-color: #${colorRgb}; color: ${textColor};">${part.color || "Not Specified"}</td>
-                        <td>${part.quantity}</td>
+                        <td><img src="${escapeHtml(part.part_img_url)}" alt="${escapeHtml(part.name)
+              }" data-image-src="${escapeHtml(part.part_img_url)}" data-image-name="${escapeHtml(`${part.name} (${part.part_num})`)}" class="img-thumbnail set-image-clickable" width="50" style="cursor: pointer;" /></td>
+                        <td>${escapeHtml(part.part_num)}</td>
+                        <td>${escapeHtml(part.name)}</td>
+                        <td>${escapeHtml(part.category || "Unknown Category")}</td>
+                        <td style="background-color: #${colorRgb}; color: ${textColor};">${escapeHtml(part.color || "Not Specified")}</td>
+                        <td>${escapeHtml(part.quantity)}</td>
                         <td>
                             <input type="number" name="part_id_${part.id
               }" value="${part.have_quantity}" min="0" max="${part.quantity
               }" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="regular">
                         </td>
-                        <td>${part.location || "Not Specified"}</td>
+                        <td>${escapeHtml(part.location || "Not Specified")}</td>
                     </tr>`;
 
             if (part.is_spare) {
@@ -445,7 +449,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Main minifigure row
             minifigsTableBody.innerHTML += `
                                 <tr>
-                                    <td><img src="${minifig.img_url}" alt="${minifig.name}" class="img-thumbnail" width="50" style="cursor: pointer;" onclick="showImageModal('${minifig.img_url}', '${minifig.name} (${minifig.fig_num})')" /></td>
+                                    <td><img src="${escapeHtml(minifig.img_url)}" alt="${escapeHtml(minifig.name)}" data-image-src="${escapeHtml(minifig.img_url)}" data-image-name="${escapeHtml(`${minifig.name} (${minifig.fig_num})`)}" class="img-thumbnail set-image-clickable" width="50" style="cursor: pointer;" /></td>
                                     <td>${minifig.fig_num}</td>
                                     <td>${minifig.name}</td>
                                     <td>${minifig.quantity}</td>
@@ -462,7 +466,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 return `
                     <tr class="${statusClass}">
-                        <td><img src="${part.part_img_url}" alt="${part.name}" class="img-thumbnail" width="30" style="cursor: pointer;" onclick="showImageModal('${part.part_img_url}', '${part.name} (${part.part_num})')" /></td>
+                        <td><img src="${escapeHtml(part.part_img_url)}" alt="${escapeHtml(part.name)}" data-image-src="${escapeHtml(part.part_img_url)}" data-image-name="${escapeHtml(`${part.name} (${part.part_num})`)}" class="img-thumbnail set-image-clickable" width="30" style="cursor: pointer;" /></td>
                         <td>${part.part_num}</td>
                         <td>${part.name}</td>
                         <td style="background-color: #${colorRgb}; color: ${textColor};">${part.color || "Not Specified"}</td>
@@ -566,7 +570,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Function to show image in modal
 function showImageModal(imageSrc, imageName) {
-  document.getElementById('modalImage').src = imageSrc;
+  let safeImageSrc = '/static/default_image.png';
+  try {
+    const parsedUrl = new URL(imageSrc, window.location.origin);
+    if (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') {
+      safeImageSrc = parsedUrl.href;
+    }
+  } catch (error) {
+    console.warn('Rejected invalid image URL', error);
+  }
+  document.getElementById('modalImage').src = safeImageSrc;
   document.getElementById('modalImageName').textContent = imageName;
   document.getElementById('imageModalLabel').textContent = imageName + ' - Image';
   var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));

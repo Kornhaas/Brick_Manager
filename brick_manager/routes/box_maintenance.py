@@ -6,7 +6,8 @@ and generating labels for boxes.
 """
 import os
 
-from flask import Blueprint, current_app, jsonify, render_template, request, send_file
+from config import Config
+from flask import Blueprint, current_app, jsonify, render_template, request, send_from_directory
 from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
 from services.label_service import create_box_label_jpg
@@ -366,8 +367,9 @@ def generate_box_label():
         if not os.path.exists(label_path):
             raise FileNotFoundError("Label file could not be generated.")
 
-        return send_file(
-            label_path,
+        return send_from_directory(
+            Config.UPLOAD_FOLDER,
+            os.path.basename(label_path),
             as_attachment=True,
             download_name=f"box_label_{box}.jpg",
             mimetype="image/jpeg",

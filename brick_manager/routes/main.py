@@ -11,8 +11,9 @@ It includes:
 
 import os
 
-from flask import Blueprint, abort, current_app, jsonify, render_template, send_file
+from flask import Blueprint, abort, current_app, jsonify, render_template, send_from_directory
 from sqlalchemy import text
+from werkzeug.utils import safe_join
 
 from models import db
 
@@ -109,11 +110,11 @@ def serve_cached_image(filename):
             abort(404)
 
         # Construct full file path
-        file_path = os.path.join(cache_dir, filename)
+        file_path = safe_join(cache_dir, filename)
 
         # Check if file exists and serve it
-        if os.path.exists(file_path) and os.path.isfile(file_path):
-            return send_file(file_path)
+        if file_path and os.path.isfile(file_path):
+            return send_from_directory(cache_dir, filename)
         else:
             abort(404)
 

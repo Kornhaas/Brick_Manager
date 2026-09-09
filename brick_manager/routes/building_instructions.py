@@ -3,9 +3,11 @@ Building Instructions route for displaying and accessing instruction files
 """
 import logging
 import os
+from pathlib import Path
 
 from flask import Blueprint, abort, current_app, render_template, send_file
 from models import User_Set
+from werkzeug.exceptions import HTTPException
 
 # Create blueprint
 building_instructions_bp = Blueprint("building_instructions", __name__)
@@ -166,29 +168,33 @@ def building_instructions():
 def download_instruction_file(file_path):
     """Download or view an instruction file"""
     try:
-        instructions_folder = get_instructions_folder()
-        full_path = os.path.join(instructions_folder, file_path)
+        instructions_folder = Path(get_instructions_folder()).resolve()
+        full_path = (instructions_folder / file_path).resolve(strict=True)
 
-        # Security check: ensure the file is within the instructions folder
-        if not os.path.abspath(full_path).startswith(
-            os.path.abspath(instructions_folder)
-        ):
+        try:
+            full_path.relative_to(instructions_folder)
+        except ValueError:
             logger.warning(
                 f"Attempted access to file outside instructions folder: {file_path}"
             )
             abort(403)
 
         # Check if file exists
-        if not os.path.exists(full_path):
+        allowed_extensions = {".pdf", ".jpg", ".jpeg", ".png"}
+        if not full_path.is_file() or full_path.suffix.lower() not in allowed_extensions:
             logger.warning(f"Instruction file not found: {full_path}")
             abort(404)
 
         # Determine if we should display inline (PDF, images) or force download
-        ext = os.path.splitext(file_path)[1].lower()
+        ext = full_path.suffix.lower()
         as_attachment = ext not in [".pdf", ".jpg", ".jpeg", ".png"]
 
         return send_file(full_path, as_attachment=as_attachment)
 
+    except (FileNotFoundError, OSError):
+        abort(404)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error serving instruction file {file_path}: {e}")
         abort(500)

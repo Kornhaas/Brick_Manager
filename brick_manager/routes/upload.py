@@ -173,7 +173,8 @@ def increment_part(part_id):
             "new_missing": user_part.quantity - user_part.have_quantity,
         }
     except Exception as e:
-        return {"success": False, "error": str(e)}, 400
+        current_app.logger.exception("Error incrementing part quantity")
+        return {"success": False, "error": "Unable to update quantity."}, 400
 
 
 @upload_bp.route("/upload/update_part_quantity/<int:part_id>", methods=["POST"])
@@ -213,7 +214,8 @@ def update_part_quantity(part_id):
             }
         )
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 400
+        current_app.logger.exception("Error updating part quantity")
+        return jsonify({"success": False, "error": "Unable to update quantity."}), 400
 
 
 @upload_bp.route("/upload/save_storage_location", methods=["POST"])
@@ -264,4 +266,5 @@ def save_storage_location():
         return jsonify({"success": True})
     except Exception as e:
         db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 400
+        current_app.logger.exception("Error saving storage location")
+        return jsonify({"success": False, "error": "Unable to save storage location."}), 400

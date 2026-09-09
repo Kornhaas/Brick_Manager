@@ -223,65 +223,69 @@ function setupLevelOverview() {
 function displaySingleBoxContents(contents, location, level, box) {
     const container = document.getElementById('singleBoxContents');
     if (contents.length === 0) {
-        container.innerHTML = '<div class="alert alert-info">No parts found in this box.</div>';
+        const message = document.createElement('div');
+        message.className = 'alert alert-info';
+        message.textContent = 'No parts found in this box.';
+        container.replaceChildren(message);
         return;
     }
-
-    let html = `
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Box Contents: ${location} - ${level} - ${box}</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Part Number</th>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-    `;
-
-    contents.forEach(part => {
-        html += `
-            <tr>
-                <td><img src="${part.img_url}" alt="${part.name}" style="max-width: 60px; height: auto;"></td>
-                <td>${part.part_num}</td>
-                <td>${part.name}</td>
-                <td>${part.category}</td>
-                <td>
-                    <button class="btn btn-sm btn-warning edit-btn" 
-                            data-id="${part.storage_id}" 
-                            data-part="${part.part_num}"
-                            data-location="${location}"
-                            data-level="${level}"
-                            data-box="${box}">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="btn btn-sm btn-danger delete-btn" 
-                            data-id="${part.storage_id}"
-                            data-part="${part.part_num}">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </td>
-            </tr>
-        `;
+    const card = document.createElement('div');
+    card.className = 'card shadow-sm';
+    const header = document.createElement('div');
+    header.className = 'card-header bg-primary text-white';
+    const heading = document.createElement('h5');
+    heading.className = 'mb-0';
+    heading.textContent = `Box Contents: ${location} - ${level} - ${box}`;
+    header.appendChild(heading);
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    const responsive = document.createElement('div');
+    responsive.className = 'table-responsive';
+    const table = document.createElement('table');
+    table.className = 'table table-hover';
+    const tableHead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    ['Image', 'Part Number', 'Name', 'Category', 'Actions'].forEach(label => {
+        const cell = document.createElement('th');
+        cell.textContent = label;
+        headerRow.appendChild(cell);
     });
-
-    html += `
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
-
-    container.innerHTML = html;
+    tableHead.appendChild(headerRow);
+    const tableBody = document.createElement('tbody');
+    contents.forEach(part => {
+        const row = document.createElement('tr');
+        const imageCell = document.createElement('td');
+        const image = document.createElement('img');
+        image.src = part.img_url;
+        image.alt = part.name;
+        image.style.cssText = 'max-width: 60px; height: auto;';
+        imageCell.appendChild(image);
+        row.append(imageCell);
+        [part.part_num, part.name, part.category].forEach(value => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+        const actions = document.createElement('td');
+        [['btn-warning edit-btn', 'fas fa-edit', 'Edit'], ['btn-danger delete-btn', 'fas fa-trash', 'Delete']].forEach(([classes, iconClass, label]) => {
+            const button = document.createElement('button');
+            button.className = `btn btn-sm ${classes}`;
+            button.dataset.id = part.storage_id;
+            button.dataset.part = part.part_num;
+            if (label === 'Edit') Object.assign(button.dataset, { location, level, box });
+            const icon = document.createElement('i');
+            icon.className = iconClass;
+            button.append(icon, document.createTextNode(` ${label}`));
+            actions.appendChild(button);
+        });
+        row.appendChild(actions);
+        tableBody.appendChild(row);
+    });
+    table.append(tableHead, tableBody);
+    responsive.appendChild(table);
+    body.appendChild(responsive);
+    card.append(header, body);
+    container.replaceChildren(card);
 
     // Attach event listeners to edit/delete buttons
     attachActionButtons();

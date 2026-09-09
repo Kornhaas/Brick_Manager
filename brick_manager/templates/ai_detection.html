@@ -382,18 +382,26 @@
                 const displayDiv = document.getElementById(`storage-display-${partId}`);
                 const editDiv = document.getElementById(`storage-edit-${partId}`);
                 
-                displayDiv.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div><strong>Schrank:</strong> ${location}</div>
-                            <div><strong>Fach:</strong> ${level}</div>
-                            <div><strong>Box:</strong> ${box}</div>
-                        </div>
-                        <button class="btn btn-sm btn-outline-primary" onclick="toggleEditMode('${partId}')">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                    </div>
-                `;
+                displayDiv.replaceChildren();
+                const row = document.createElement('div');
+                row.className = 'd-flex justify-content-between align-items-center';
+                const values = document.createElement('div');
+                [['Schrank', location], ['Fach', level], ['Box', box]].forEach(([label, value]) => {
+                    const valueRow = document.createElement('div');
+                    const labelElement = document.createElement('strong');
+                    labelElement.textContent = `${label}: `;
+                    valueRow.append(labelElement, document.createTextNode(value));
+                    values.appendChild(valueRow);
+                });
+                const editButton = document.createElement('button');
+                editButton.type = 'button';
+                editButton.className = 'btn btn-sm btn-outline-primary';
+                editButton.addEventListener('click', () => toggleEditMode(partId));
+                const icon = document.createElement('i');
+                icon.className = 'bi bi-pencil';
+                editButton.appendChild(icon);
+                row.append(values, editButton);
+                displayDiv.appendChild(row);
                 
                 // Toggle back to display mode
                 displayDiv.style.display = 'block';

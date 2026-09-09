@@ -509,23 +509,37 @@
                                 const div = document.createElement('div');
                                 div.className = 'mb-2 p-2 border rounded bg-light d-flex justify-content-between align-items-center';
                                 
-                                let colorInfo = storage.color ? `<span class="badge bg-info">${storage.color}</span> ` : '';
-                                let notesInfo = storage.notes ? `<span class="badge bg-secondary">${storage.notes}</span>` : '';
-                                
-                                div.innerHTML = `
-                                    <div>
-                                        <strong>Location ${index + 1}:</strong> ${colorInfo}${notesInfo}<br>
-                                        <span class="info-badge">Schrank: ${storage.location}</span>
-                                        <span class="info-badge">Fach: ${storage.level}</span>
-                                        <span class="info-badge">Box: ${storage.box}</span>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-danger delete-storage-btn" 
-                                            data-storage-id="${storage.id}"
-                                            data-part-num="${partNum}"
-                                            title="Delete this storage location">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                `;
+                                const details = document.createElement('div');
+                                const title = document.createElement('strong');
+                                title.textContent = `Location ${index + 1}: `;
+                                details.appendChild(title);
+                                [['bg-info', storage.color], ['bg-secondary', storage.notes]].forEach(([style, value]) => {
+                                    if (value) {
+                                        const badge = document.createElement('span');
+                                        badge.className = `badge ${style}`;
+                                        badge.textContent = value;
+                                        details.appendChild(badge);
+                                        details.appendChild(document.createTextNode(' '));
+                                    }
+                                });
+                                details.appendChild(document.createElement('br'));
+                                [['Schrank', storage.location], ['Fach', storage.level], ['Box', storage.box]].forEach(([label, value]) => {
+                                    const badge = document.createElement('span');
+                                    badge.className = 'info-badge';
+                                    badge.textContent = `${label}: ${value}`;
+                                    details.appendChild(badge);
+                                    details.appendChild(document.createTextNode(' '));
+                                });
+                                const button = document.createElement('button');
+                                button.type = 'button';
+                                button.className = 'btn btn-sm btn-danger delete-storage-btn';
+                                button.dataset.storageId = storage.id;
+                                button.dataset.partNum = partNum;
+                                button.title = 'Delete this storage location';
+                                const icon = document.createElement('i');
+                                icon.className = 'bi bi-trash';
+                                button.appendChild(icon);
+                                div.append(details, button);
                                 listContainer.appendChild(div);
                             });
                         } else {

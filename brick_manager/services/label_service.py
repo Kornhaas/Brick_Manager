@@ -12,15 +12,32 @@ It includes functionalities to:
 
 import logging
 import os
+from pathlib import Path
 
 import requests
+from config import Config
 from PIL import Image, ImageDraw, ImageFont
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from services.cache_service import cache_image  # Import the cache_image function
+from werkzeug.utils import secure_filename
 
 # pylint: disable=W0718,R0914
 CM = 28.35  # 1 cm in points
+
+
+def _label_output_path(box_info, extension):
+    """Build a label path contained within the configured upload directory."""
+    upload_dir = Path(Config.UPLOAD_FOLDER).resolve()
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    components = [
+        secure_filename(str(box_info.get(field, "unknown"))) or "unknown"
+        for field in ("location", "level", "box")
+    ]
+    output_path = (upload_dir / f"{'_'.join(components)}_label.{extension}").resolve()
+    if output_path.parent != upload_dir:
+        raise ValueError("Invalid label output path")
+    return str(output_path)
 
 
 def download_image(img_url):
@@ -312,11 +329,7 @@ def create_box_label_image(box_info):
             fill="red",
             anchor="mm",
         )
-        temp_image_path = os.path.join(
-            "uploads",
-            f'{box_info.get("location", "unknown")}_{box_info.get("level", "unknown")}_'
-            f'{box_info.get("box", "unknown")}_label.jpg',
-        )
+        temp_image_path = _label_output_path(box_info, "jpg")
         image.save(temp_image_path, dpi=(300, 300))
         return temp_image_path
 
@@ -392,14 +405,7 @@ def create_box_label_image(box_info):
             fill="red",
         )
 
-    # Construct the filename dynamically
-    location = box_info.get("location", "unknown").replace(" ", "_")
-    level = box_info.get("level", "unknown").replace(" ", "_")
-    box = box_info.get("box", "unknown").replace(" ", "_")
-    filename = f"{location}_{level}_{box}_label.png"
-
-    # Define the full path for saving the image
-    temp_image_path = os.path.join("uploads", filename)
+    temp_image_path = _label_output_path(box_info, "png")
 
     # Save the final composite label as an image
     image.save(temp_image_path, dpi=(300, 300))

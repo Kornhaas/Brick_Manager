@@ -8,6 +8,7 @@ and generating labels for sets and their parts.
 
 
 import os
+from pathlib import Path
 
 from flask import (
     Blueprint,
@@ -89,7 +90,7 @@ def update_part_location():
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error updating part location: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": "Unable to update part location."}), 500
 
 
 @set_maintain_bp.route("/set_maintain", methods=["GET"])
@@ -427,7 +428,7 @@ def update_part_quantity():
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error updating part quantity: {e}")
-        return jsonify({"success": False, "message": str(e)}), 500
+        return jsonify({"success": False, "message": "Unable to update quantity."}), 500
 
 
 @set_maintain_bp.route("/set_maintain/update", methods=["POST"])
@@ -546,9 +547,9 @@ def generate_label():
 
     Generate a DrawIO file for a Brick set label and provide it for download.
     """
-    set_id = request.json.get("set_id")
-
-    box_size = request.json.get("box_size")
+    data = request.get_json(silent=True) or {}
+    set_id = data.get("set_id")
+    box_size = data.get("box_size")
     current_app.logger.info(
         "Generating label for set %s with box size %s", set_id, box_size
     )
@@ -568,9 +569,10 @@ def generate_label():
             "BOX_ID": str(user_set.id),
         }
 
-        safe_box_size = secure_filename(box_size)
-        drawio_template = os.path.join("templates", f"{safe_box_size}.drawio")
-        if not os.path.exists(drawio_template):
+        safe_box_size = secure_filename(str(box_size or ""))
+        template_dir = Path(current_app.template_folder).resolve()
+        drawio_template = (template_dir / f"{safe_box_size}.drawio").resolve()
+        if not safe_box_size or drawio_template.parent != template_dir or not drawio_template.is_file():
             return jsonify({"error": f"DrawIO template {box_size} not found"}), 400
 
         with open(drawio_template, "r", encoding="utf-8") as template_file:
@@ -578,8 +580,9 @@ def generate_label():
             for key, value in label_data.items():
                 content = content.replace(key, value)
 
-        output_file = f"output/{set_id}_{box_size}.drawio"
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        output_dir = Path(current_app.config["OUTPUT_FOLDER"]).resolve()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_file = output_dir / f"{user_set.id}_{safe_box_size}.drawio"
         with open(output_file, "w", encoding="utf-8") as output:
             output.write(content)
 
