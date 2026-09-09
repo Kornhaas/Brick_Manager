@@ -23,15 +23,16 @@ jobs:
     name: 🔍 Lint Python Code
     
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       
     - name: 🐍 Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
         
@@ -72,9 +73,10 @@ jobs:
         fi
         
     - name: 📤 Upload Pylint report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: always()
       with:
         name: pylint-report-py${{ matrix.python-version }}
         path: pylint_output.txt
+        if-no-files-found: warn
         retention-days: 30
