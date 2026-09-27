@@ -45,8 +45,8 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-# Patch known pip vulnerabilities shipped with the base image
-RUN pip install --no-cache-dir --upgrade pip
+# Patch known vulnerabilities in packages shipped via the base image / build stage
+RUN pip install --no-cache-dir --upgrade pip setuptools msgpack
 
 # Copy application code
 COPY brick_manager/ ./brick_manager/
