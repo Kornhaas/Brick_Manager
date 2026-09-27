@@ -57,6 +57,7 @@ class Config:  # pylint: disable=R0903
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REBRICKABLE_TOKEN = os.getenv("REBRICKABLE_TOKEN", "test-token")
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+    BRICK_MANAGER_CLIENT_API_KEY = os.getenv("BRICK_MANAGER_CLIENT_API_KEY", "")
 
     # Flask settings
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size

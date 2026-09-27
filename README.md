@@ -118,6 +118,7 @@ A comprehensive Flask-based web application for managing brick collections, sets
    
    # Start application
    poetry run flask run
+   # For a trusted private LAN only: poetry run flask run --host 0.0.0.0 --port 5000
    ```
 
 ## 📁 Project Structure
@@ -205,7 +206,31 @@ SQLALCHEMY_DATABASE_URI=sqlite:///data/instance/brick_manager.db
 
 # Optional
 LOG_LEVEL=INFO
+
+# Desktop client API: set a strong random key; enter the same value in the client .env
+BRICK_MANAGER_CLIENT_API_KEY=your-random-client-api-key
 ```
+
+### Desktop Client API
+
+The desktop client uses the authenticated versioned API at `/api/v1` for part
+master data, sets, missing quantities and storage locations. It also writes
+owned quantities and part locations back through this API; the Flask server
+remains the only source of truth.
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/parts/{part_num}` | Part master record |
+| `GET` | `/api/v1/parts/{part_num}/sets` | User sets and part quantities |
+| `GET` | `/api/v1/parts/{part_num}/storage` | Storage coordinates |
+| `PUT` | `/api/v1/user-parts/{id}/quantity` | Update owned quantity |
+| `PUT` | `/api/v1/parts/{part_num}/storage` | Create/update storage coordinates |
+
+All routes require `Authorization: Bearer <BRICK_MANAGER_CLIENT_API_KEY>`.
+The API fails closed with HTTP 503 when the server key is unset. Bind Flask to a
+trusted private interface and firewall it from the public Internet. HTTPS is
+recommended; the desktop client requires an explicit insecure-HTTP opt-in for
+non-local addresses.
 
 ### Rebrickable API Setup
 
