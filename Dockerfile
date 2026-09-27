@@ -46,8 +46,12 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-# Patch known vulnerabilities in packages shipped with the base image
-RUN pip install --no-cache-dir --upgrade pip setuptools
+# Patch base image packages, then drop pip: it is not needed at runtime and its
+# vendored dependency manifest keeps getting flagged by image scanners
+RUN pip install --no-cache-dir --upgrade pip setuptools \
+    && rm -rf /usr/local/lib/python3.12/site-packages/pip \
+    /usr/local/lib/python3.12/site-packages/pip-*.dist-info \
+    /usr/local/bin/pip /usr/local/bin/pip3 /usr/local/bin/pip3.12
 
 # Copy application code
 COPY brick_manager/ ./brick_manager/
