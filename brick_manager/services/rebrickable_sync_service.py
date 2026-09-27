@@ -509,8 +509,8 @@ def add_lost_parts_to_rebrickable(parts_to_add):
                     total_errors.append(error_msg)
 
             except Exception as e:
-                error_msg = f"Error in batch {batch_num}: {str(e)}"
-                logger.error(error_msg)
+                error_msg = f"Error in batch {batch_num}"
+                logger.error(f"{error_msg}: {e}", exc_info=True)
                 total_errors.append(error_msg)
                 continue
 
@@ -901,8 +901,8 @@ def add_parts_to_part_list(list_id, parts_to_add):
                     total_errors.append(error_msg)
 
             except Exception as e:
-                error_msg = f"Error in batch {batch_num}: {str(e)}"
-                logger.error(error_msg)
+                error_msg = f"Error in batch {batch_num}"
+                logger.error(f"{error_msg}: {e}", exc_info=True)
                 total_errors.append(error_msg)
                 continue
 
@@ -1113,9 +1113,9 @@ def clear_part_list(list_id):
                     logger.debug(error_msg)
 
             except Exception as e:
-                error_msg = f"Error removing part: {e}"
+                error_msg = "Error removing part"
                 errors.append(error_msg)
-                logger.debug(error_msg)
+                logger.debug(f"{error_msg}: {e}")
                 continue
 
         success = removed_count > 0 or len(current_parts) == 0
@@ -1313,9 +1313,9 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
                     logger.debug(error_msg)
 
             except Exception as e:
-                error_msg = f"Error removing part: {e}"
+                error_msg = "Error removing part"
                 errors.append(error_msg)
-                logger.debug(error_msg)
+                logger.debug(f"{error_msg}: {e}")
                 continue
 
         success = removed_count > 0 or len(parts_to_remove) == 0
