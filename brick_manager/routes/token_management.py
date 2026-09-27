@@ -80,8 +80,8 @@ def token_management_page():
             "token_management.html", token_exists=token_exists, username=username
         )
     except Exception as e:
-        logger.error(f"Error loading token management page: {e}")
-        flash(f"Error loading token management page: {e}", "error")
+        logger.error(f"Error loading token management page: {e}", exc_info=True)
+        flash("Error loading token management page", "error")
         return redirect(url_for("main.index"))
 
 
@@ -206,11 +206,13 @@ def generate_token():
         )
     except requests.exceptions.RequestException as e:
         logger.error(f"Network error connecting to Rebrickable API: {e}")
-        return jsonify({"success": False, "message": f"Network error: {e}"})
+        return jsonify(
+            {"success": False, "message": "Network error connecting to Rebrickable API"}
+        )
     except Exception as e:
-        logger.error(f"Error generating token: {e}")
+        logger.error(f"Error generating token: {e}", exc_info=True)
         db.session.rollback()
-        return jsonify({"success": False, "message": f"Error generating token: {e}"})
+        return jsonify({"success": False, "message": "Error generating token"})
 
 
 @token_management_bp.route("/delete_token", methods=["POST"])
@@ -230,9 +232,9 @@ def delete_token():
             return jsonify({"success": False, "message": "No token found to delete"})
 
     except Exception as e:
-        logger.error(f"Error deleting token: {e}")
+        logger.error(f"Error deleting token: {e}", exc_info=True)
         db.session.rollback()
-        return jsonify({"success": False, "message": f"Error deleting token: {e}"})
+        return jsonify({"success": False, "message": "Error deleting token"})
 
 
 @token_management_bp.route("/test_token", methods=["POST"])
@@ -285,5 +287,5 @@ def test_token():
             )
 
     except Exception as e:
-        logger.error(f"Error testing token: {e}")
-        return jsonify({"success": False, "message": f"Error testing token: {e}"})
+        logger.error(f"Error testing token: {e}", exc_info=True)
+        return jsonify({"success": False, "message": "Error testing token"})

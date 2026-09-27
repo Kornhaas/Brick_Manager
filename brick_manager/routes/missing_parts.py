@@ -990,4 +990,7 @@ def update_part_quantity():
         current_app.logger.error(f"Error updating part quantity: {str(e)}")
         current_app.logger.exception("Full traceback:")
         db.session.rollback()
-        return jsonify({"success": False, "message": str(e)}), 500
+        return (
+            jsonify({"success": False, "message": "An internal error occurred."}),
+            500,
+        )

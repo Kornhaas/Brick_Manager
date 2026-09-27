@@ -21,7 +21,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     name: 🔍 Lint Python Code
-    
+
+    permissions:
+      contents: read
+
     strategy:
       fail-fast: false
       matrix:

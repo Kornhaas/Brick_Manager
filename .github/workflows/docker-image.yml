@@ -16,7 +16,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: 🧪 Run Tests
-    
+
+    permissions:
+      contents: read
+
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v5
@@ -168,7 +171,10 @@ jobs:
     name: 🚀 Deploy
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
-    
+
+    permissions:
+      contents: read
+
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v5

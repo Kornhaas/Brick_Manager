@@ -3,11 +3,12 @@ Building Instructions route for displaying and accessing instruction files
 """
 import logging
 import os
-from pathlib import Path
+from pathlib import PurePosixPath
 
 from flask import Blueprint, abort, current_app, render_template, send_file
 from models import User_Set
 from werkzeug.exceptions import HTTPException
+from werkzeug.utils import secure_filename
 
 # Create blueprint
 building_instructions_bp = Blueprint("building_instructions", __name__)
@@ -160,7 +161,7 @@ def building_instructions():
             sets=[],
             total_sets=0,
             sets_with_instructions=0,
-            error=str(e),
+            error="An internal error occurred while loading building instructions.",
         )
 
 
@@ -168,28 +169,30 @@ def building_instructions():
 def download_instruction_file(file_path):
     """Download or view an instruction file"""
     try:
-        instructions_folder = Path(get_instructions_folder()).resolve()
-        full_path = (instructions_folder / file_path).resolve(strict=True)
+        instructions_folder = os.path.realpath(get_instructions_folder())
 
-        try:
-            full_path.relative_to(instructions_folder)
-        except ValueError:
-            logger.warning(
-                f"Attempted access to file outside instructions folder: {file_path}"
-            )
-            abort(403)
-
-        # Check if file exists
-        allowed_extensions = {".pdf", ".jpg", ".jpeg", ".png"}
-        if not full_path.is_file() or full_path.suffix.lower() not in allowed_extensions:
-            logger.warning(f"Instruction file not found: {full_path}")
+        # Rebuild the path from sanitized components so that no user-supplied
+        # segment can traverse outside the instructions folder.
+        parts = [
+            secure_filename(part)
+            for part in PurePosixPath(file_path).parts
+            if part not in ("", ".", "..")
+        ]
+        if not parts or any(not part for part in parts):
             abort(404)
 
-        # Determine if we should display inline (PDF, images) or force download
-        ext = full_path.suffix.lower()
-        as_attachment = ext not in [".pdf", ".jpg", ".jpeg", ".png"]
+        full_path = os.path.realpath(os.path.join(instructions_folder, *parts))
+        if not full_path.startswith(instructions_folder + os.sep):
+            logger.warning("Attempted access to file outside instructions folder")
+            abort(403)
 
-        return send_file(full_path, as_attachment=as_attachment)
+        allowed_extensions = {".pdf", ".jpg", ".jpeg", ".png"}
+        ext = os.path.splitext(full_path)[1].lower()
+        if not os.path.isfile(full_path) or ext not in allowed_extensions:
+            logger.warning("Instruction file not found")
+            abort(404)
+
+        return send_file(full_path, as_attachment=False)
 
     except (FileNotFoundError, OSError):
         abort(404)

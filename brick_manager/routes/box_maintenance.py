@@ -125,7 +125,7 @@ def get_box_contents_get():
         return jsonify(result)
     except BadRequest as e:
         current_app.logger.error("BadRequest in get_box_contents_get: %s", e)
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": "Invalid request."}), 400
     except Exception as e:
         current_app.logger.error("Error in get_box_contents_get: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500
@@ -415,10 +415,10 @@ def update_part_location():
         return jsonify({"message": "Location updated successfully."}), 200
     except BadRequest as e:
         current_app.logger.error("BadRequest in update_part_location: %s", e)
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": "Invalid request."}), 400
     except NotFound as e:
         current_app.logger.error("NotFound in update_part_location: %s", e)
-        return jsonify({"error": str(e)}), 404
+        return jsonify({"error": "Part storage entry not found."}), 404
     except Exception as e:
         current_app.logger.error("Error in update_part_location: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500
@@ -444,7 +444,7 @@ def delete_part_storage(storage_id):
         )
     except NotFound as e:
         current_app.logger.error("NotFound in delete_part_storage: %s", e)
-        return jsonify({"error": str(e)}), 404
+        return jsonify({"error": "Part storage entry not found."}), 404
     except Exception as e:
         current_app.logger.error("Error in delete_part_storage: %s", e)
         return jsonify({"error": "An unexpected error occurred."}), 500

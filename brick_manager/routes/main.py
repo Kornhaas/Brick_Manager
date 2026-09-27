@@ -72,11 +72,12 @@ def health_check():
             200,
         )
     except Exception as e:
+        current_app.logger.error(f"Health check failed: {e}", exc_info=True)
         return (
             jsonify(
                 {
                     "status": "unhealthy",
-                    "message": f"Health check failed: {str(e)}",
+                    "message": "Health check failed",
                     "database": "disconnected",
                 }
             ),
@@ -159,7 +160,8 @@ def debug_cache():
             cached_url = cache_image(test_url)
             test_result = f"Success: {cached_url}"
         except Exception as e:
-            test_result = f"Failed: {str(e)}"
+            current_app.logger.error(f"Cache test failed: {e}", exc_info=True)
+            test_result = "Failed"
 
         # Re-check cached files after test
         cached_files_after_test = []
@@ -190,7 +192,13 @@ def debug_cache():
         )
 
     except Exception as e:
+        current_app.logger.error(f"Error in debug_cache: {e}", exc_info=True)
         return (
-            jsonify({"error": str(e), "cache_directory": "Error getting directory"}),
+            jsonify(
+                {
+                    "error": "An internal error occurred.",
+                    "cache_directory": "Error getting directory",
+                }
+            ),
             500,
         )

@@ -74,8 +74,8 @@ def sync_missing_parts():
             return jsonify(result), 500
 
     except Exception as e:
-        logger.error(f"Error during sync: {e}")
+        logger.error(f"Error during sync: {e}", exc_info=True)
         return (
-            jsonify({"success": False, "message": f"Synchronization failed: {str(e)}"}),
+            jsonify({"success": False, "message": "Synchronization failed"}),
             500,
         )

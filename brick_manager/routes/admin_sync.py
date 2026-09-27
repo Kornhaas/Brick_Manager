@@ -38,9 +38,11 @@ def admin_sync_page():
         )
 
     except Exception as e:
-        logger.error(f"Error loading admin sync page: {e}")
+        logger.error(f"Error loading admin sync page: {e}", exc_info=True)
         return render_template(
-            "admin_sync.html", tokens_configured=False, error_message=str(e)
+            "admin_sync.html",
+            tokens_configured=False,
+            error_message="An internal error occurred while loading this page.",
         )
 
 
@@ -67,12 +69,12 @@ def check_sync_availability():
             )
 
     except Exception as e:
-        logger.error(f"Error checking sync availability: {e}")
+        logger.error(f"Error checking sync availability: {e}", exc_info=True)
         return (
             jsonify(
                 {
                     "available": False,
-                    "message": f"Error checking availability: {str(e)}",
+                    "message": "Error checking availability.",
                 }
             ),
             500,
@@ -125,12 +127,12 @@ def sync_missing_parts():
             return jsonify(result), 500
 
     except Exception as e:
-        logger.error(f"Error during missing parts sync: {e}")
+        logger.error(f"Error during missing parts sync: {e}", exc_info=True)
         return (
             jsonify(
                 {
                     "success": False,
-                    "message": f"Missing parts synchronization failed: {str(e)}",
+                    "message": "Missing parts synchronization failed.",
                 }
             ),
             500,
@@ -183,12 +185,12 @@ def sync_missing_minifigure_parts():
             return jsonify(result), 500
 
     except Exception as e:
-        logger.error(f"Error during missing minifigure parts sync: {e}")
+        logger.error(f"Error during missing minifigure parts sync: {e}", exc_info=True)
         return (
             jsonify(
                 {
                     "success": False,
-                    "message": f"Missing minifigure parts synchronization failed: {str(e)}",
+                    "message": "Missing minifigure parts synchronization failed.",
                 }
             ),
             500,
@@ -284,12 +286,12 @@ def sync_all_missing_parts():
             return jsonify(combined_result), 500
 
     except Exception as e:
-        logger.error(f"Error during combined missing parts sync: {e}")
+        logger.error(f"Error during combined missing parts sync: {e}", exc_info=True)
         return (
             jsonify(
                 {
                     "success": False,
-                    "message": f"Combined missing parts synchronization failed: {str(e)}",
+                    "message": "Combined missing parts synchronization failed.",
                 }
             ),
             500,
@@ -345,12 +347,12 @@ def sync_user_sets():
             return jsonify(result), 500
 
     except Exception as e:
-        logger.error(f"Error during user sets sync: {e}")
+        logger.error(f"Error during user sets sync: {e}", exc_info=True)
         return (
             jsonify(
                 {
                     "success": False,
-                    "message": f"User sets synchronization failed: {str(e)}",
+                    "message": "User sets synchronization failed.",
                 }
             ),
             500,
