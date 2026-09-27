@@ -11,16 +11,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
+# Install Poetry into an isolated venv so it is not part of the runtime site-packages
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir poetry
+    && python -m venv /opt/poetry \
+    && /opt/poetry/bin/pip install --no-cache-dir poetry poetry-plugin-export
 
 # Copy dependency files
 COPY pyproject.toml poetry.lock ./
 
-# Configure Poetry and install dependencies
-RUN poetry config virtualenvs.create false \
-    && poetry install --only main --no-root --no-interaction --no-ansi
+# Resolve dependencies from the lock file and install them into the system environment
+RUN /opt/poetry/bin/poetry export --only main --without-hashes --format requirements.txt --output requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt
 
 # Production stage
 FROM python:3.12-slim
@@ -45,8 +46,8 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-# Patch known vulnerabilities in packages shipped via the base image / build stage
-RUN pip install --no-cache-dir --upgrade pip setuptools msgpack
+# Patch known vulnerabilities in packages shipped with the base image
+RUN pip install --no-cache-dir --upgrade pip setuptools
 
 # Copy application code
 COPY brick_manager/ ./brick_manager/
