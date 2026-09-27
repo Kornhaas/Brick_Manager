@@ -116,8 +116,7 @@ def serve_cached_image(filename):
         # Check if file exists and serve it
         if file_path and os.path.isfile(file_path):
             return send_from_directory(cache_dir, filename)
-        else:
-            abort(404)
+        abort(404)
 
     except Exception as e:
         current_app.logger.error(f"Error serving cached image {filename}: {e}")

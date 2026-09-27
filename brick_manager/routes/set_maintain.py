@@ -7,7 +7,6 @@ and generating labels for sets and their parts.
 # pylint: disable=C0301,W0718
 
 
-import os
 from pathlib import Path
 
 from flask import (

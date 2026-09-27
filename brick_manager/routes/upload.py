@@ -16,7 +16,16 @@ from typing import Dict, List
 from config import Config
 
 # Third-party imports
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from models import PartStorage, User_Parts
 from services.brickognize_service import get_predictions
 from services.part_lookup_service import load_part_lookup, save_part_lookup
@@ -172,7 +181,7 @@ def increment_part(part_id):
             "new_have": user_part.have_quantity,
             "new_missing": user_part.quantity - user_part.have_quantity,
         }
-    except Exception as e:
+    except Exception:
         current_app.logger.exception("Error incrementing part quantity")
         return {"success": False, "error": "Unable to update quantity."}, 400
 
@@ -213,7 +222,7 @@ def update_part_quantity(part_id):
                 "new_missing": user_part.quantity - user_part.have_quantity,
             }
         )
-    except Exception as e:
+    except Exception:
         current_app.logger.exception("Error updating part quantity")
         return jsonify({"success": False, "error": "Unable to update quantity."}), 400
 
@@ -264,7 +273,7 @@ def save_storage_location():
         save_part_lookup(master_lookup)
 
         return jsonify({"success": True})
-    except Exception as e:
+    except Exception:
         db.session.rollback()
         current_app.logger.exception("Error saving storage location")
         return jsonify({"success": False, "error": "Unable to save storage location."}), 400

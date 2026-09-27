@@ -146,10 +146,10 @@ def get_cached_image_url(image_url):
         if cached_result:
             _image_url_cache[image_url] = cached_result
             return cached_result
-        else:
-            fallback = "/static/default_image.png"
-            _image_url_cache[image_url] = fallback
-            return fallback
+
+        fallback = "/static/default_image.png"
+        _image_url_cache[image_url] = fallback
+        return fallback
 
     except Exception as e:
         current_app.logger.warning(f"Error caching image {image_url}: {e}")

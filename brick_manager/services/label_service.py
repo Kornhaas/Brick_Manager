@@ -487,8 +487,6 @@ def generate_qr_code(data, size=100):
         return qr.make_image(fill_color="black", back_color="white")
     except ImportError:
         # Return a placeholder if qrcode is not available
-        from PIL import Image
-
         return Image.new("RGB", (size, size), color="white")
 
 

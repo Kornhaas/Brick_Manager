@@ -57,16 +57,16 @@ def check_sync_availability():
             return jsonify(
                 {"available": True, "message": "Sync available - tokens configured"}
             )
-        else:
-            missing = []
-            if not user_token:
-                missing.append("User Token")
-            if not api_key:
-                missing.append("API Key")
 
-            return jsonify(
-                {"available": False, "message": f'Missing: {", ".join(missing)}'}
-            )
+        missing = []
+        if not user_token:
+            missing.append("User Token")
+        if not api_key:
+            missing.append("API Key")
+
+        return jsonify(
+            {"available": False, "message": f'Missing: {", ".join(missing)}'}
+        )
 
     except Exception as e:
         logger.error(f"Error checking sync availability: {e}", exc_info=True)
@@ -123,8 +123,7 @@ def sync_missing_parts():
 
         if result["success"]:
             return jsonify(result)
-        else:
-            return jsonify(result), 500
+        return jsonify(result), 500
 
     except Exception as e:
         logger.error(f"Error during missing parts sync: {e}", exc_info=True)
@@ -181,8 +180,7 @@ def sync_missing_minifigure_parts():
 
         if result["success"]:
             return jsonify(result)
-        else:
-            return jsonify(result), 500
+        return jsonify(result), 500
 
     except Exception as e:
         logger.error(f"Error during missing minifigure parts sync: {e}", exc_info=True)
@@ -282,8 +280,7 @@ def sync_all_missing_parts():
 
         if combined_result["success"]:
             return jsonify(combined_result)
-        else:
-            return jsonify(combined_result), 500
+        return jsonify(combined_result), 500
 
     except Exception as e:
         logger.error(f"Error during combined missing parts sync: {e}", exc_info=True)
@@ -343,8 +340,7 @@ def sync_user_sets():
 
         if result["success"]:
             return jsonify(result)
-        else:
-            return jsonify(result), 500
+        return jsonify(result), 500
 
     except Exception as e:
         logger.error(f"Error during user sets sync: {e}", exc_info=True)

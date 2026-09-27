@@ -10,8 +10,8 @@ operations occur within the Flask application context.
 from models import PartStorage, db
 
 # Global cache for part lookup data to avoid reloading on every request
-_part_lookup_cache = None
-_cache_timestamp = None
+_part_lookup_cache = None  # pylint: disable=invalid-name
+_cache_timestamp = None  # pylint: disable=invalid-name
 
 
 def load_part_lookup():
@@ -105,8 +105,6 @@ def search_parts(query, limit=10):
     Returns:
         list: List of matching parts
     """
-    from models import PartStorage
-
     if not query:
         return []
 

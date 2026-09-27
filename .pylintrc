@@ -1,0 +1,41 @@
+[MAIN]
+init-hook = "import sys; sys.path.insert(0, 'brick_manager')"
+ignore = migrations,htmlcov,data,instance
+jobs = 0
+
+[FORMAT]
+# Black reformats code to 88 columns but leaves long strings/comments untouched
+max-line-length = 120
+
+[BASIC]
+good-names = e,i,j,k,f,db,id,_
+
+[MESSAGES CONTROL]
+disable =
+    # Deliberate project style / structure, changing these would require a
+    # larger refactoring rather than a lint fix:
+    import-outside-toplevel,
+    logging-fstring-interpolation,
+    broad-exception-caught,
+    duplicate-code,
+    unused-argument,
+    redefined-outer-name,
+    protected-access,
+    global-statement,
+    too-few-public-methods,
+    too-many-arguments,
+    too-many-positional-arguments,
+    too-many-branches,
+    too-many-instance-attributes,
+    too-many-lines,
+    too-many-locals,
+    too-many-nested-blocks,
+    too-many-public-methods,
+    too-many-return-statements,
+    too-many-statements,
+    # Obsolete check from old Pylint versions, conflicts with Black:
+    bad-continuation,
+    useless-option-value,
+    # Dynamic Flask/SQLAlchemy attributes produce false positives:
+    no-member,
+    no-name-in-module,

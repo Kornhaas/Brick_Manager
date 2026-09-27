@@ -157,10 +157,10 @@ class TestPartLookupService:
                 mock_query = MagicMock()
                 mock_query.first.return_value = mock_existing_entry
                 return mock_query
-            else:
-                mock_query = MagicMock()
-                mock_query.first.return_value = None
-                return mock_query
+
+            mock_query = MagicMock()
+            mock_query.first.return_value = None
+            return mock_query
 
         mock_part_storage.query.filter_by.side_effect = mock_filter_by
 

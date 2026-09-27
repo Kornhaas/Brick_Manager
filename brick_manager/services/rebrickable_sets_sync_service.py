@@ -41,11 +41,9 @@ def get_rebrickable_lists():
         if response.status_code == 200:
             data = response.json()
             return data.get("results", [])
-        else:
-            logger.error(
-                f"Failed to get lists: {response.status_code} - {response.text}"
-            )
-            return []
+
+        logger.error(f"Failed to get lists: {response.status_code} - {response.text}")
+        return []
 
     except Exception as e:
         logger.error(f"Error getting Rebrickable lists: {e}")
@@ -87,14 +85,14 @@ def create_brick_manager_list():
                 "list_id": created_list.get("id"),
                 "message": "Brick_Manager list created successfully",
             }
-        else:
-            logger.error(
-                f"Failed to create list: {response.status_code} - {response.text}"
-            )
-            return {
-                "success": False,
-                "message": f"Failed to create list: {response.text}",
-            }
+
+        logger.error(
+            f"Failed to create list: {response.status_code} - {response.text}"
+        )
+        return {
+            "success": False,
+            "message": f"Failed to create list: {response.text}",
+        }
 
     except Exception as e:
         logger.error(f"Error creating Brick_Manager list: {e}")
@@ -130,12 +128,12 @@ def get_brick_manager_list():
                 "message": "Found existing Brick_Manager list",
                 "created": False,
             }
-        else:
-            # Create the list
-            result = create_brick_manager_list()
-            if result["success"]:
-                result["created"] = True
-            return result
+
+        # Create the list
+        result = create_brick_manager_list()
+        if result["success"]:
+            result["created"] = True
+        return result
 
     except Exception as e:
         logger.error(f"Error getting Brick_Manager list: {e}")
@@ -265,7 +263,8 @@ def add_sets_to_list(list_id, set_data):
                     "errors": [],
                     "message": f"Added {added_count}/{len(sets_to_process)} sets to list via bulk operation",
                 }
-            elif response.status_code == 429:
+
+            if response.status_code == 429:
                 # Bulk operation rate limited - fall back to individual requests
                 logger.warning(
                     f"Bulk set addition rate limited, falling back to individual requests for {len(sets_to_process)} sets"
@@ -273,13 +272,13 @@ def add_sets_to_list(list_id, set_data):
                 return add_sets_individually(
                     list_id, sets_to_process, headers, user_token
                 )
-            else:
-                logger.warning(
-                    f"Bulk set addition failed ({response.status_code}), falling back to individual requests: {response.text}"
-                )
-                return add_sets_individually(
-                    list_id, sets_to_process, headers, user_token
-                )
+
+            logger.warning(
+                f"Bulk set addition failed ({response.status_code}), falling back to individual requests: {response.text}"
+            )
+            return add_sets_individually(
+                list_id, sets_to_process, headers, user_token
+            )
 
         except Exception as e:
             logger.warning(
@@ -408,20 +407,21 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
                 "updated_count": 1,
                 "message": f"Updated {set_num} quantity to {new_quantity}",
             }
-        elif add_response.status_code == 429:
+
+        if add_response.status_code == 429:
             return {
                 "success": False,
                 "rate_limited": True,
                 "message": f"Rate limited while updating {set_num}",
             }
-        else:
-            logger.error(
-                f"Failed to add set {set_num} with new quantity: {add_response.status_code} - {add_response.text}"
-            )
-            return {
-                "success": False,
-                "message": f"Failed to add set {set_num} with new quantity: {add_response.status_code}",
-            }
+
+        logger.error(
+            f"Failed to add set {set_num} with new quantity: {add_response.status_code} - {add_response.text}"
+        )
+        return {
+            "success": False,
+            "message": f"Failed to add set {set_num} with new quantity: {add_response.status_code}",
+        }
 
     except Exception as e:
         logger.error(f"Error updating set quantity: {e}")

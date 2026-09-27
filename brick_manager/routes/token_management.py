@@ -40,8 +40,7 @@ def get_encryption_key():
         db.session.add(key_config)
         db.session.commit()
         return key
-    else:
-        return base64.b64decode(key_config.value.encode())
+    return base64.b64decode(key_config.value.encode())
 
 
 def encrypt_token(token):
@@ -179,25 +178,25 @@ def generate_token():
                         "message": "Token generated and stored successfully!",
                     }
                 )
-            else:
-                logger.error("No user_token in Rebrickable response")
-                return jsonify(
-                    {
-                        "success": False,
-                        "message": "Invalid response from Rebrickable API",
-                    }
-                )
-        else:
-            # Error from Rebrickable
-            logger.error(
-                f"Rebrickable API error: {response.status_code} - {response.text}"
-            )
+
+            logger.error("No user_token in Rebrickable response")
             return jsonify(
                 {
                     "success": False,
-                    "message": f"Rebrickable API error: {response.status_code} - {response.text}",
+                    "message": "Invalid response from Rebrickable API",
                 }
             )
+
+        # Error from Rebrickable
+        logger.error(
+            f"Rebrickable API error: {response.status_code} - {response.text}"
+        )
+        return jsonify(
+            {
+                "success": False,
+                "message": f"Rebrickable API error: {response.status_code}",
+            }
+        )
 
     except requests.exceptions.Timeout:
         logger.error("Timeout connecting to Rebrickable API")
@@ -228,8 +227,7 @@ def delete_token():
             db.session.commit()
             logger.info("Rebrickable token deleted successfully")
             return jsonify({"success": True, "message": "Token deleted successfully!"})
-        else:
-            return jsonify({"success": False, "message": "No token found to delete"})
+        return jsonify({"success": False, "message": "No token found to delete"})
 
     except Exception as e:
         logger.error(f"Error deleting token: {e}", exc_info=True)
@@ -277,14 +275,14 @@ def test_token():
                     "message": f"Token is valid! Connected as user: {username}",
                 }
             )
-        else:
-            logger.error(f"Token test failed: {response.status_code} - {response.text}")
-            return jsonify(
-                {
-                    "success": False,
-                    "message": f"Token test failed: {response.status_code}",
-                }
-            )
+
+        logger.error(f"Token test failed: {response.status_code} - {response.text}")
+        return jsonify(
+            {
+                "success": False,
+                "message": f"Token test failed: {response.status_code}",
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error testing token: {e}", exc_info=True)

@@ -25,11 +25,11 @@ def get_cache_directory():
         images_cache_dir = os.path.join(cache_dir, "images")
         os.makedirs(images_cache_dir, exist_ok=True)
         return images_cache_dir
-    else:
-        # Fallback to static directory for local development
-        fallback_dir = "static/cache/images"
-        os.makedirs(fallback_dir, exist_ok=True)
-        return fallback_dir
+
+    # Fallback to static directory for local development
+    fallback_dir = "static/cache/images"
+    os.makedirs(fallback_dir, exist_ok=True)
+    return fallback_dir
 
 
 def is_valid_url(url):
@@ -149,16 +149,16 @@ def cache_image(image_url, cache_dir=None):  # noqa: C901
                 return url_for(
                     "main.serve_cached_image", filename=filename, _external=True
                 )
-            else:
-                # Local development - use static file serving
-                rel_cached_path = os.path.relpath(
-                    abs_cached_path, os.path.abspath("static")
-                )
-                return url_for(
-                    "static",
-                    filename=rel_cached_path.replace(os.sep, "/"),
-                    _external=True,
-                )
+
+            # Local development - use static file serving
+            rel_cached_path = os.path.relpath(
+                abs_cached_path, os.path.abspath("static")
+            )
+            return url_for(
+                "static",
+                filename=rel_cached_path.replace(os.sep, "/"),
+                _external=True,
+            )
         except RuntimeError:
             # Outside request context - return the file path directly
             current_app.logger.info(

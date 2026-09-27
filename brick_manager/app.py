@@ -19,6 +19,7 @@ from config import Config
 from models import db  # Import the db instance from models
 
 # Import service functions that tests expect to be available at module level
+# pylint: disable=unused-import,ungrouped-imports
 try:
     from services.rebrickable_sync_service import (
         sync_missing_minifigure_parts_with_rebrickable,

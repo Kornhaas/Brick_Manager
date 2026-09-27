@@ -194,7 +194,7 @@ def add_set():
         minifigs_info = fetch_minifigs_info(set_number)
         for minifig in minifigs_info:
             # Get or create rebrickable minifig
-            rebrickable_minifig, _ = get_or_create(
+            _rebrickable_minifig, _ = get_or_create(
                 db.session,
                 RebrickableMinifigs,
                 fig_num=minifig["fig_num"],
@@ -292,9 +292,9 @@ def fetch_set_info(set_number):
                 "num_parts": rebrickable_set.num_parts,
                 "set_img_url": rebrickable_set.img_url,
             }
-        else:
-            current_app.logger.warning("Set %s not found in local database", set_number)
-            return None
+
+        current_app.logger.warning("Set %s not found in local database", set_number)
+        return None
     except Exception as error:
         current_app.logger.error(
             "Error fetching set info from database for %s: %s", set_number, error

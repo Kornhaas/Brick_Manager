@@ -34,9 +34,9 @@ def get_category_name_from_db(part_cat_id):
                 part_cat_id,
             )
             return category.name
-        else:
-            logging.warning("No category found for part_cat_id: %s", part_cat_id)
-            return "Unknown Category"
+
+        logging.warning("No category found for part_cat_id: %s", part_cat_id)
+        return "Unknown Category"
 
     except Exception as e:
         logging.error(
@@ -97,13 +97,13 @@ def get_category_name_from_part_num(part_num):
                 part_info.part_cat_id,
             )
             return category.name
-        else:
-            logging.warning(
-                "No category found for part_cat_id: %s (part_num: %s)",
-                part_info.part_cat_id,
-                part_num,
-            )
-            return "Unknown Category"
+
+        logging.warning(
+            "No category found for part_cat_id: %s (part_num: %s)",
+            part_info.part_cat_id,
+            part_num,
+        )
+        return "Unknown Category"
 
     except Exception as e:
         logging.error(

@@ -6,7 +6,15 @@ Users can manually enter part details such as part ID, location (schrank), level
 The data is either added to or updated in the master lookup.
 """
 
-from flask import Blueprint, flash, jsonify, render_template, request, url_for
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    jsonify,
+    render_template,
+    request,
+    url_for,
+)
 from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
 from services.part_lookup_service import load_part_lookup, save_part_lookup
@@ -244,7 +252,7 @@ def validate_part(part_num):
             }
         )
 
-    except Exception as e:
+    except Exception:
         current_app.logger.exception("Error validating part")
         return (
             jsonify({"exists": False, "message": "Unable to validate part."}),
@@ -266,7 +274,7 @@ def delete_storage(storage_id):
         db.session.commit()
 
         return jsonify({"message": "Storage location deleted successfully"}), 200
-    except Exception as e:
+    except Exception:
         db.session.rollback()
         current_app.logger.exception("Error deleting storage")
         return jsonify({"error": "Unable to delete storage location."}), 500

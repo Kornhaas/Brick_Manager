@@ -27,8 +27,6 @@ _rate_limit_tracker = {
 def update_rate_limit_tracker(was_rate_limited):
     """Update the global rate limiting tracker."""
 
-    global _rate_limit_tracker  # noqa: F824
-
     if was_rate_limited:
         _rate_limit_tracker["consecutive_hits"] += 1
         _rate_limit_tracker["last_hit_time"] = time.time()
@@ -42,8 +40,6 @@ def update_rate_limit_tracker(was_rate_limited):
 
 def should_skip_api_calls():
     """Check if we should skip API calls due to rate limiting."""
-
-    global _rate_limit_tracker  # noqa: F824
 
     if _rate_limit_tracker["should_throttle"]:
         # Reset throttling after 30 seconds
@@ -187,8 +183,6 @@ def make_rate_limited_request(
     Returns:
         requests.Response or None if rate limited and retries exhausted
     """
-    import time
-
     for attempt in range(max_retries + 1):
         try:
             if method.upper() == "GET":
@@ -221,13 +215,13 @@ def make_rate_limited_request(
                     )
                     time.sleep(wait_time)
                     continue
-                else:
-                    logger.debug(
-                        f"Rate limited after {max_retries + 1} attempts, giving up"
-                    )
-                    return response  # Return the 429 response
-            else:
-                return response
+
+                logger.debug(
+                    f"Rate limited after {max_retries + 1} attempts, giving up"
+                )
+                return response  # Return the 429 response
+
+            return response
 
         except Exception as e:
             logger.debug(f"Request failed on attempt {attempt + 1}: {e}")
@@ -736,12 +730,12 @@ def find_or_create_missing_parts_list(list_name="Brick_Manager-Missing_Parts"):
             )
             update_rate_limit_tracker(False)
             return list_id
-        else:
-            logger.error(
-                f"Failed to create part list: {response.status_code} - {response.text}"
-            )
-            update_rate_limit_tracker(response.status_code == 429)
-            return None
+
+        logger.error(
+            f"Failed to create part list: {response.status_code} - {response.text}"
+        )
+        update_rate_limit_tracker(response.status_code == 429)
+        return None
 
     except Exception as e:
         logger.error(f"Error finding or creating missing parts list: {e}")
@@ -1053,10 +1047,10 @@ def clear_part_list(list_id):
                             "new_list_id": new_list_id,
                             "message": f"Successfully cleared {len(current_parts)} parts by recreating list",
                         }
-                    else:
-                        logger.warning(
-                            "Failed to recreate list after deletion, falling back to individual removal"
-                        )
+
+                    logger.warning(
+                        "Failed to recreate list after deletion, falling back to individual removal"
+                    )
                 else:
                     logger.info(
                         "List deletion not supported or failed, using individual part removal"

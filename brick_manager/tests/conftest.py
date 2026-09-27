@@ -73,8 +73,6 @@ def create_test_app():
     """Create and configure a new app instance for testing."""
 
     # Set template and static folders relative to the main app
-    import os
-
     basedir = os.path.abspath(os.path.dirname(__file__))
     template_folder = os.path.join(basedir, "..", "templates")
     static_folder = os.path.join(basedir, "..", "static")
