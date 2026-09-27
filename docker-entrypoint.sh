@@ -15,8 +15,8 @@ if [ "$(id -u)" = "0" ]; then
     chmod -R 777 /app/data 2>/dev/null || true
     
     echo "Permissions fixed. Switching to appuser..."
-    # Use gosu to switch to appuser and re-execute this script
-    exec gosu appuser "$0" "$@"
+    # Use su-exec to switch to appuser and re-execute this script
+    exec su-exec appuser "$0" "$@"
 fi
 
 echo "Running as appuser ($(id -u):$(id -g))"

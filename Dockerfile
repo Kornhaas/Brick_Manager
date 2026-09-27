@@ -1,15 +1,14 @@
 # Multi-stage build for optimal image size and security
-FROM python:3.12-slim AS builder
+FROM python:3.12-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    gcc \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+# Install build dependencies (only needed if a dependency has no musllinux wheel)
+RUN apk add --no-cache \
+    build-base \
+    libffi-dev \
+    openssl-dev
 
 # Install Poetry into an isolated venv so it is not part of the runtime site-packages
 RUN pip install --no-cache-dir --upgrade pip \
@@ -24,20 +23,16 @@ RUN /opt/poetry/bin/poetry export --only main --without-hashes --format requirem
     && pip install --no-cache-dir -r requirements.txt
 
 # Production stage
-FROM python:3.12-slim
+FROM python:3.12-alpine
 
 # Create app user for security
-RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /bin/bash appuser
+RUN addgroup -S appuser && adduser -S -G appuser -h /app -s /bin/sh appuser
 
-# Install runtime dependencies including gosu for user switching
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install runtime dependencies including su-exec for user switching
+RUN apk add --no-cache \
+    bash \
     curl \
-    gosu \
-    && rm -rf /var/lib/apt/lists/*
-
-# Ensure python3.12 is the default python
-RUN update-alternatives --install /usr/bin/python python /usr/local/bin/python3.12 1 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.12 1
+    su-exec
 
 # Set working directory
 WORKDIR /app
