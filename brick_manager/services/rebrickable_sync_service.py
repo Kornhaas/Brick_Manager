@@ -328,9 +328,11 @@ def get_local_missing_minifigure_parts(include_spare=False):
                         "part_num": minifig_part.part_num,
                         "color_id": minifig_part.color_id,
                         "missing_quantity": missing_quantity,
-                        "set_num": getattr(minifig_part.user_set, "set_num", None)
-                        if hasattr(minifig_part, "user_set")
-                        else None,
+                        "set_num": (
+                            getattr(minifig_part.user_set, "set_num", None)
+                            if hasattr(minifig_part, "user_set")
+                            else None
+                        ),
                         "minifigure_id": minifig_part.minifigure_id,
                         "is_spare": getattr(minifig_part, "is_spare", False),
                         "is_minifig": True,
@@ -919,9 +921,9 @@ def add_parts_to_part_list(list_id, parts_to_add):
                     "message"
                 ] += f" ({total_rate_limited} parts were rate limited and will be synced in next run)"
         else:
-            result[
-                "message"
-            ] = f"Failed to add parts to part list. Errors: {'; '.join(total_errors[:3])}"
+            result["message"] = (
+                f"Failed to add parts to part list. Errors: {'; '.join(total_errors[:3])}"
+            )
 
         return result
 
@@ -1123,15 +1125,15 @@ def clear_part_list(list_id):
         }
 
         if success:
-            result[
-                "message"
-            ] = f"Successfully removed {removed_count}/{len(current_parts)} parts from part list"
+            result["message"] = (
+                f"Successfully removed {removed_count}/{len(current_parts)} parts from part list"
+            )
             if len(errors) > 0:
                 result["message"] += f" ({len(errors)} parts had errors)"
         else:
-            result[
-                "message"
-            ] = f"Failed to remove parts from part list. Errors: {'; '.join(errors[:3])}"
+            result["message"] = (
+                f"Failed to remove parts from part list. Errors: {'; '.join(errors[:3])}"
+            )
 
         return result
 
@@ -1322,15 +1324,15 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
         }
 
         if success:
-            result[
-                "message"
-            ] = f"Successfully removed {removed_count}/{len(parts_to_remove)} parts from part list"
+            result["message"] = (
+                f"Successfully removed {removed_count}/{len(parts_to_remove)} parts from part list"
+            )
             if len(errors) > 0:
                 result["message"] += f" ({len(errors)} parts had errors)"
         else:
-            result[
-                "message"
-            ] = f"Failed to remove parts from part list. Errors: {'; '.join(errors[:3])}"
+            result["message"] = (
+                f"Failed to remove parts from part list. Errors: {'; '.join(errors[:3])}"
+            )
 
         return result
 
@@ -1401,9 +1403,9 @@ def update_part_quantities_in_list(list_id, parts_to_update):
         }
 
         if success:
-            result[
-                "message"
-            ] = f"Successfully updated quantities for {updated_count} parts"
+            result["message"] = (
+                f"Successfully updated quantities for {updated_count} parts"
+            )
             if updated_count < len(parts_to_update):
                 result["message"] += " (some updates may have been rate limited)"
         else:
@@ -1485,9 +1487,9 @@ def sync_missing_parts_with_rebrickable(batch_size=None):
                 duplicate_parts_count += 1
             else:
                 # First occurrence of this part
-                local_parts_dict[
-                    key
-                ] = part.copy()  # Make a copy to avoid modifying original
+                local_parts_dict[key] = (
+                    part.copy()
+                )  # Make a copy to avoid modifying original
                 if part.get("set_num"):
                     local_parts_dict[key]["source_sets"] = [part["set_num"]]
 
@@ -1718,9 +1720,9 @@ def sync_missing_minifigure_parts_with_rebrickable(batch_size=None):
                 duplicate_parts_count += 1
             else:
                 # First occurrence of this part
-                local_parts_dict[
-                    key
-                ] = part.copy()  # Make a copy to avoid modifying original
+                local_parts_dict[key] = (
+                    part.copy()
+                )  # Make a copy to avoid modifying original
                 if part.get("minifigure_id"):
                     local_parts_dict[key]["source_minifigures"] = [
                         part["minifigure_id"]

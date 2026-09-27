@@ -1,6 +1,5 @@
 """Comprehensive tests for app.py to achieve high coverage."""
 
-
 import os
 import sys
 from unittest.mock import patch

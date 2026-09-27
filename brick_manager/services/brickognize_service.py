@@ -8,12 +8,11 @@ It includes functions to:
 - Get part predictions from the Brickognize API based on an uploaded image.
 - Enrich the predictions with additional category information from the SQLite database.
 """
+
 import logging
 
 import requests
 from services.sqlite_service import get_category_name_from_part_num
-
-# pylint: disable=W0718
 
 
 def get_predictions(file_path, filename):

@@ -2,6 +2,7 @@
 
 This module handles the search, retrieval, and addition of Brick sets, parts, and minifigures.
 """
+
 import re
 
 from flask import (

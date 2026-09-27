@@ -4,10 +4,18 @@ This module provides routes for managing boxes, including filtering, fetching co
 
 and generating labels for boxes.
 """
+
 import os
 
 from config import Config
-from flask import Blueprint, current_app, jsonify, render_template, request, send_from_directory
+from flask import (
+    Blueprint,
+    current_app,
+    jsonify,
+    render_template,
+    request,
+    send_from_directory,
+)
 from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
 from services.label_service import create_box_label_jpg

@@ -1,6 +1,5 @@
 """Route function tests for maximum coverage boost."""
 
-
 from unittest.mock import Mock, patch
 
 import pytest

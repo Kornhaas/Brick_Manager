@@ -262,15 +262,21 @@ def bulk_enrich_missing_parts(parts_list, master_lookup):
 
             result = {
                 "type": part_type,
-                "set_id": user_set.template_set.set_num
-                if user_set.template_set
-                else "Unknown",
+                "set_id": (
+                    user_set.template_set.set_num
+                    if user_set.template_set
+                    else "Unknown"
+                ),
                 "internal_id": user_set.id,
                 "item_id": part_obj.part_num,
                 "name": part_info.name if part_info else "Unknown",
-                "category": part_info.category.name
-                if part_info and hasattr(part_info, "category") and part_info.category
-                else "Unknown Category",
+                "category": (
+                    part_info.category.name
+                    if part_info
+                    and hasattr(part_info, "category")
+                    and part_info.category
+                    else "Unknown Category"
+                ),
                 "color": color_info.name if color_info else "Unknown",
                 "color_rgb": color_info.rgb if color_info else "FFFFFF",
                 "color_id": part_obj.color_id,
@@ -374,15 +380,17 @@ def enrich_missing_part(part, user_set, part_type="Regular Part"):
 
         result = {
             "type": part_type,
-            "set_id": user_set.template_set.set_num
-            if user_set.template_set
-            else "Unknown",
+            "set_id": (
+                user_set.template_set.set_num if user_set.template_set else "Unknown"
+            ),
             "internal_id": user_set.id,
             "item_id": part.part_num,
             "name": part_info.name if part_info else "Unknown",
-            "category": part_info.category.name
-            if part_info and hasattr(part_info, "category") and part_info.category
-            else "Unknown Category",
+            "category": (
+                part_info.category.name
+                if part_info and hasattr(part_info, "category") and part_info.category
+                else "Unknown Category"
+            ),
             "color": color_info.name if color_info else "Unknown",
             "color_rgb": color_info.rgb if color_info else "FFFFFF",
             "color_id": part.color_id,
@@ -402,9 +410,11 @@ def enrich_missing_part(part, user_set, part_type="Regular Part"):
         # Return a basic result to prevent crashes
         return {
             "type": part_type,
-            "set_id": user_set.template_set.set_num
-            if hasattr(user_set, "template_set") and user_set.template_set
-            else "Unknown",
+            "set_id": (
+                user_set.template_set.set_num
+                if hasattr(user_set, "template_set") and user_set.template_set
+                else "Unknown"
+            ),
             "internal_id": user_set.id,
             "item_id": part.part_num,
             "name": "Unknown",

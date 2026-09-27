@@ -11,11 +11,17 @@ It includes:
 
 import os
 
-from flask import Blueprint, abort, current_app, jsonify, render_template, send_from_directory
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    jsonify,
+    render_template,
+    send_from_directory,
+)
+from models import db
 from sqlalchemy import text
 from werkzeug.utils import safe_join
-
-from models import db
 
 main_bp = Blueprint("main", __name__)
 

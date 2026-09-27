@@ -12,10 +12,9 @@ from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from config import Config
 from flask import Flask
 from flask_migrate import Migrate
-
-from config import Config
 from models import db  # Import the db instance from models
 
 # Import service functions that tests expect to be available at module level
@@ -51,6 +50,7 @@ except ImportError:
     def sync_user_sets_with_rebrickable(*args, **kwargs):
         """Sync user sets with Rebrickable (fallback implementation)."""
         return {"success": False, "message": "Service not available"}
+
 
 from routes.admin_sync import admin_sync_bp
 from routes.box_maintenance import box_maintenance_bp
@@ -99,7 +99,7 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 # Configure logging
-log_path = os.path.join(app.config['LOG_FOLDER'], "brick_manager.log")
+log_path = os.path.join(app.config["LOG_FOLDER"], "brick_manager.log")
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
@@ -125,10 +125,10 @@ def backup_database():
         # sqlite:///relative/path -> relative/path (3 slashes)
         if db_uri.startswith("sqlite:////"):
             # Absolute path: sqlite:////app/... -> /app/...
-            db_source_path = db_uri[len("sqlite:///"):]  # Keep one slash
+            db_source_path = db_uri[len("sqlite:///") :]  # Keep one slash
         elif db_uri.startswith("sqlite:///"):
             # Relative path: sqlite:///path -> path
-            db_source_path = db_uri[len("sqlite:///"):]
+            db_source_path = db_uri[len("sqlite:///") :]
         else:
             # Non-SQLite or already a path
             db_source_path = db_uri

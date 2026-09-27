@@ -1,6 +1,5 @@
 """Maximum coverage boost tests targeting remaining gaps."""
 
-
 from unittest.mock import Mock, mock_open, patch
 
 

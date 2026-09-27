@@ -9,8 +9,6 @@ import requests
 from flask import current_app, url_for
 from werkzeug.utils import secure_filename
 
-# pylint: disable=W0718
-
 
 def get_cache_directory():
     """

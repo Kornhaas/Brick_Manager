@@ -4,6 +4,7 @@ This module manages the maintenance of user sets, including adding, updating, de
 
 and generating labels for sets and their parts.
 """
+
 # pylint: disable=C0301,W0718
 
 
@@ -89,7 +90,10 @@ def update_part_location():
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error updating part location: {e}")
-        return jsonify({"success": False, "error": "Unable to update part location."}), 500
+        return (
+            jsonify({"success": False, "error": "Unable to update part location."}),
+            500,
+        )
 
 
 @set_maintain_bp.route("/set_maintain", methods=["GET"])
@@ -139,9 +143,11 @@ def set_maintain():
                 "completeness_percentage": round(completeness_percentage, 2),
                 "theme_name": theme_name,
                 "set_name": set_name,
-                "set_num": user_set.template_set.set_num
-                if user_set.template_set
-                else "Unknown",
+                "set_num": (
+                    user_set.template_set.set_num
+                    if user_set.template_set
+                    else "Unknown"
+                ),
                 "total_parts": total_quantity,
                 "parts_owned": total_have_quantity,
             }
@@ -353,13 +359,17 @@ def get_user_set_details(user_set_id):  # noqa: C901
         minifig_data = {
             "id": minifig.id,
             "fig_num": minifig.fig_num,
-            "name": minifig.rebrickable_minifig.name
-            if minifig.rebrickable_minifig
-            else "Unknown",
+            "name": (
+                minifig.rebrickable_minifig.name
+                if minifig.rebrickable_minifig
+                else "Unknown"
+            ),
             "quantity": minifig.quantity,
-            "img_url": minifig.rebrickable_minifig.img_url
-            if minifig.rebrickable_minifig
-            else "",
+            "img_url": (
+                minifig.rebrickable_minifig.img_url
+                if minifig.rebrickable_minifig
+                else ""
+            ),
             "location": "Not Specified",
             "status": "Not Available",
             "parts": enriched_parts,
@@ -368,9 +378,11 @@ def get_user_set_details(user_set_id):  # noqa: C901
 
     return jsonify(
         {
-            "set_img_url": user_set.template_set.img_url
-            if user_set.template_set and user_set.template_set.img_url
-            else "/static/default_image.png",
+            "set_img_url": (
+                user_set.template_set.img_url
+                if user_set.template_set and user_set.template_set.img_url
+                else "/static/default_image.png"
+            ),
             "parts": parts,
             # Now includes parts grouped with each minifig
             "minifigs": minifigures_with_parts,
@@ -398,7 +410,10 @@ def update_part_quantity():
             part = UserMinifigurePart.query.get(part_id)
             if not part:
                 current_app.logger.error(f"Minifigure part not found: id={part_id}")
-                return jsonify({"success": False, "message": "Minifigure part not found"}), 404
+                return (
+                    jsonify({"success": False, "message": "Minifigure part not found"}),
+                    404,
+                )
         else:
             # Update regular part
             part = User_Parts.query.get(part_id)
@@ -414,12 +429,14 @@ def update_part_quantity():
             f"Successfully updated {part_type} quantity for part_id={part_id}"
         )
 
-        return jsonify({
-            "success": True,
-            "message": "Quantity updated successfully",
-            "have_quantity": part.have_quantity,
-            "total_quantity": part.quantity
-        })
+        return jsonify(
+            {
+                "success": True,
+                "message": "Quantity updated successfully",
+                "have_quantity": part.have_quantity,
+                "total_quantity": part.quantity,
+            }
+        )
 
     except ValueError as e:
         current_app.logger.error(f"Invalid value in request: {e}")
@@ -571,7 +588,11 @@ def generate_label():
         safe_box_size = secure_filename(str(box_size or ""))
         template_dir = Path(current_app.template_folder).resolve()
         drawio_template = (template_dir / f"{safe_box_size}.drawio").resolve()
-        if not safe_box_size or drawio_template.parent != template_dir or not drawio_template.is_file():
+        if (
+            not safe_box_size
+            or drawio_template.parent != template_dir
+            or not drawio_template.is_file()
+        ):
             return jsonify({"error": f"DrawIO template {box_size} not found"}), 400
 
         with open(drawio_template, "r", encoding="utf-8") as template_file:

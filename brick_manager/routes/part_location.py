@@ -13,7 +13,7 @@ from services.label_service import create_label_image
 from services.part_lookup_service import load_part_lookup, save_part_lookup
 from services.rebrickable_service import RebrickableService
 
-# pylint: disable=C0301,W0718
+# pylint: disable=C0301
 part_location_bp = Blueprint("part_location", __name__)
 
 

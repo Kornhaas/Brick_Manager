@@ -203,9 +203,11 @@ def validate_part(part_num):
                     "location": storage.location,
                     "level": storage.level,
                     "box": storage.box,
-                    "color": storage.rebrickable_color.name
-                    if storage.rebrickable_color
-                    else None,
+                    "color": (
+                        storage.rebrickable_color.name
+                        if storage.rebrickable_color
+                        else None
+                    ),
                     "color_id": storage.color_id,
                     "notes": storage.notes,
                 }
@@ -244,9 +246,11 @@ def validate_part(part_num):
                 "storage_count": len(storage_list),
                 "part_info": {
                     "name": rebrickable_part.name,
-                    "category": rebrickable_part.category.name
-                    if rebrickable_part.category
-                    else "Unknown",
+                    "category": (
+                        rebrickable_part.category.name
+                        if rebrickable_part.category
+                        else "Unknown"
+                    ),
                     "image_url": image_url,
                 },
             }

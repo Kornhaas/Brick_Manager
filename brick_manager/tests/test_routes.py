@@ -119,8 +119,9 @@ class TestSetSearchRoutes:
     @patch("routes.set_search.flash")
     def test_add_set_success_message(self, mock_flash, client):
         """Test that success message is displayed when adding set."""
-        with patch("routes.set_search.RebrickableSets") as mock_sets, patch(
-            "routes.set_search.db.session"
+        with (
+            patch("routes.set_search.RebrickableSets") as mock_sets,
+            patch("routes.set_search.db.session"),
         ):
             mock_set = MagicMock()
             mock_set.id = 1

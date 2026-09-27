@@ -3,6 +3,7 @@
 This module provides services for interacting with the SQLite database.
 
 """
+
 import logging
 import sqlite3
 

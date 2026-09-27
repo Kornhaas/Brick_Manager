@@ -7,6 +7,7 @@ from the `PartStorage` table used in the Brick Manager application.
 It interacts with the database to query and update data, ensuring that the
 operations occur within the Flask application context.
 """
+
 from models import PartStorage, db
 
 # Global cache for part lookup data to avoid reloading on every request

@@ -12,25 +12,26 @@ from pathlib import Path
 # Database path
 DB_PATH = Path(__file__).parent / "data" / "instance" / "brick_manager.db"
 
+
 def migrate_database():
     """Add new columns to part_storage table."""
-    
+
     if not DB_PATH.exists():
         print(f"Error: Database not found at {DB_PATH}")
         sys.exit(1)
-    
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    
+
     try:
         # Check if columns already exist
         cursor.execute("PRAGMA table_info(part_storage)")
         columns = [row[1] for row in cursor.fetchall()]
-        
+
         changes_made = False
-        
+
         # Add color_id column if it doesn't exist
-        if 'color_id' not in columns:
+        if "color_id" not in columns:
             print("Adding color_id column to part_storage table...")
             cursor.execute("""
                 ALTER TABLE part_storage 
@@ -41,9 +42,9 @@ def migrate_database():
             print("✓ color_id column added")
         else:
             print("✓ color_id column already exists")
-        
+
         # Add notes column if it doesn't exist
-        if 'notes' not in columns:
+        if "notes" not in columns:
             print("Adding notes column to part_storage table...")
             cursor.execute("""
                 ALTER TABLE part_storage 
@@ -53,7 +54,7 @@ def migrate_database():
             print("✓ notes column added")
         else:
             print("✓ notes column already exists")
-        
+
         # Create index for faster lookups
         print("Creating index for part_storage lookups...")
         try:
@@ -64,9 +65,9 @@ def migrate_database():
             print("✓ Index created")
         except sqlite3.OperationalError as e:
             print(f"Note: Index creation - {e}")
-        
+
         conn.commit()
-        
+
         if changes_made:
             print("\n✅ Migration completed successfully!")
             print("\nYou can now:")
@@ -75,7 +76,7 @@ def migrate_database():
             print("  - Add notes (e.g., 'spare parts', 'red version')")
         else:
             print("\n✅ Database already up to date!")
-        
+
     except sqlite3.Error as e:
         print(f"\n❌ Migration failed: {e}")
         conn.rollback()
@@ -83,11 +84,12 @@ def migrate_database():
     finally:
         conn.close()
 
+
 if __name__ == "__main__":
     print("=" * 60)
     print("Part Storage Migration Script")
     print("Adding support for multiple storage locations per part")
     print("=" * 60)
     print()
-    
+
     migrate_database()

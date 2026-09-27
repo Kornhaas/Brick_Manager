@@ -65,9 +65,11 @@ def get_missing_sets_for_part(part_num: str) -> List[Dict]:
                     {
                         "user_set_id": user_part.user_set.id,
                         "set_num": user_part.user_set.set_num,
-                        "set_name": user_part.user_set.template_set.name
-                        if user_part.user_set.template_set
-                        else "Unknown Set",
+                        "set_name": (
+                            user_part.user_set.template_set.name
+                            if user_part.user_set.template_set
+                            else "Unknown Set"
+                        ),
                         "needed": user_part.quantity,
                         "have": user_part.have_quantity,
                         "missing": missing_qty,
@@ -276,4 +278,7 @@ def save_storage_location():
     except Exception:
         db.session.rollback()
         current_app.logger.exception("Error saving storage location")
-        return jsonify({"success": False, "error": "Unable to save storage location."}), 400
+        return (
+            jsonify({"success": False, "error": "Unable to save storage location."}),
+            400,
+        )

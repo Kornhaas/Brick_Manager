@@ -23,9 +23,11 @@ def check_sync_availability():
         return jsonify(
             {
                 "available": available,
-                "message": "Rebrickable sync is available"
-                if available
-                else "Missing Rebrickable credentials",
+                "message": (
+                    "Rebrickable sync is available"
+                    if available
+                    else "Missing Rebrickable credentials"
+                ),
             }
         )
 

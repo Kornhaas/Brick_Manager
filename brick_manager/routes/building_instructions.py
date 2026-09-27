@@ -1,6 +1,7 @@
 """
 Building Instructions route for displaying and accessing instruction files
 """
+
 import logging
 import os
 from pathlib import PurePosixPath

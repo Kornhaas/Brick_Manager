@@ -22,7 +22,6 @@ from reportlab.pdfgen import canvas
 from services.cache_service import cache_image  # Import the cache_image function
 from werkzeug.utils import secure_filename
 
-# pylint: disable=W0718,R0914
 CM = 28.35  # 1 cm in points
 
 

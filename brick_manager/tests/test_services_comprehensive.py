@@ -1,6 +1,5 @@
 """Comprehensive services tests for maximum coverage boost."""
 
-
 from unittest.mock import Mock, mock_open, patch
 
 

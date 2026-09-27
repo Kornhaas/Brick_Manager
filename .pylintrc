@@ -17,6 +17,7 @@ disable =
     import-outside-toplevel,
     logging-fstring-interpolation,
     broad-exception-caught,
+    broad-exception-raised,
     duplicate-code,
     unused-argument,
     redefined-outer-name,
@@ -33,7 +34,10 @@ disable =
     too-many-public-methods,
     too-many-return-statements,
     too-many-statements,
-    # Obsolete check from old Pylint versions, conflicts with Black:
+    # Only known to older Pylint releases (used by the Codacy analysis image):
+    W0703,
+    W0719,
+    R0201,
     bad-continuation,
     useless-option-value,
     # Dynamic Flask/SQLAlchemy attributes produce false positives:

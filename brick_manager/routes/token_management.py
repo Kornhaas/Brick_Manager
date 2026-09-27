@@ -188,9 +188,7 @@ def generate_token():
             )
 
         # Error from Rebrickable
-        logger.error(
-            f"Rebrickable API error: {response.status_code} - {response.text}"
-        )
+        logger.error(f"Rebrickable API error: {response.status_code} - {response.text}")
         return jsonify(
             {
                 "success": False,

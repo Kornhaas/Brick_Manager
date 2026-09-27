@@ -1,6 +1,5 @@
 """Large module coverage tests to reach 80% target."""
 
-
 from unittest.mock import Mock, patch
 
 import pytest

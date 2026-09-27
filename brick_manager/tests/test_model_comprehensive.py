@@ -5,7 +5,6 @@ Comprehensive model tests to significantly boost coverage.
 Focus on model methods, relationships, and database operations.
 """
 
-
 import pytest
 
 

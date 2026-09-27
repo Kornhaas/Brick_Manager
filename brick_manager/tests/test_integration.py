@@ -88,9 +88,10 @@ class TestApplicationIntegration:
             assert response.status_code == 200
 
         # Step 2: Add the set
-        with patch("routes.set_search.db.session"), patch(
-            "routes.set_search.RebrickableSets"
-        ) as mock_sets:
+        with (
+            patch("routes.set_search.db.session"),
+            patch("routes.set_search.RebrickableSets") as mock_sets,
+        ):
             mock_set.id = 1
             mock_sets.query.filter_by.return_value.first.return_value = mock_set
 

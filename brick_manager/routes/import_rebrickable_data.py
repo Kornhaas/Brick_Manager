@@ -15,7 +15,7 @@ import requests
 from flask import Blueprint, jsonify, render_template, request
 from models import db
 
-# pylint: disable=C0301,W0718
+# pylint: disable=C0301
 import_rebrickable_data_bp = Blueprint("import_rebrickable_data", __name__)
 
 BASE_URL = "https://cdn.rebrickable.com/media/downloads"

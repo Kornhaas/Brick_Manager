@@ -86,9 +86,7 @@ def create_brick_manager_list():
                 "message": "Brick_Manager list created successfully",
             }
 
-        logger.error(
-            f"Failed to create list: {response.status_code} - {response.text}"
-        )
+        logger.error(f"Failed to create list: {response.status_code} - {response.text}")
         return {
             "success": False,
             "message": f"Failed to create list: {response.text}",
@@ -276,9 +274,7 @@ def add_sets_to_list(list_id, set_data):
             logger.warning(
                 f"Bulk set addition failed ({response.status_code}), falling back to individual requests: {response.text}"
             )
-            return add_sets_individually(
-                list_id, sets_to_process, headers, user_token
-            )
+            return add_sets_individually(list_id, sets_to_process, headers, user_token)
 
         except Exception as e:
             logger.warning(
