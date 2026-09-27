@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-RUN pip install --no-cache-dir poetry
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir poetry
 
 # Copy dependency files
 COPY pyproject.toml poetry.lock ./
@@ -43,6 +44,9 @@ WORKDIR /app
 # Copy Python packages from builder
 COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
+
+# Patch known pip vulnerabilities shipped with the base image
+RUN pip install --no-cache-dir --upgrade pip
 
 # Copy application code
 COPY brick_manager/ ./brick_manager/
