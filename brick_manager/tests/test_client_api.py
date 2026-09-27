@@ -39,6 +39,7 @@ def part_records(app):
         year=2022,
         theme_id=theme.id,
         num_parts=1000,
+        img_url="https://example.test/10497.png",
     )
     db.session.add_all([part, template_set])
     db.session.flush()
@@ -63,7 +64,12 @@ def part_records(app):
     )
     db.session.add_all([user_part, storage])
     db.session.commit()
-    return {"part": part, "user_part": user_part, "storage": storage}
+    return {
+        "part": part,
+        "user_set": user_set,
+        "user_part": user_part,
+        "storage": storage,
+    }
 
 
 def test_client_api_requires_bearer_key(client):
@@ -101,8 +107,10 @@ def test_get_sets_returns_real_missing_quantities(client, part_records):
         {
             "part_id": part_records["user_part"].id,
             "user_set_id": part_records["user_part"].user_set_id,
+            "box_id": part_records["user_set"].id,
             "set_num": "10497-1",
             "set_name": "Galaxy Explorer",
+            "set_img_url": "https://example.test/10497.png",
             "needed": 12,
             "have": 8,
             "missing": 4,

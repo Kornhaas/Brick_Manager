@@ -75,8 +75,10 @@ def get_sets_for_part(part_num: str):
             {
                 "part_id": user_part.id,
                 "user_set_id": user_set.id,
+                "box_id": user_set.id,
                 "set_num": user_set.set_num,
                 "set_name": set_record.name if set_record else user_set.set_num,
+                "set_img_url": set_record.img_url if set_record else None,
                 "needed": user_part.quantity,
                 "have": have,
                 "missing": max(user_part.quantity - have, 0),
