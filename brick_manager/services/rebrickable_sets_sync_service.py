@@ -98,7 +98,7 @@ def create_brick_manager_list():
 
     except Exception as e:
         logger.error(f"Error creating Brick_Manager list: {e}")
-        return {"success": False, "message": f"Error creating list: {str(e)}"}
+        return {"success": False, "message": "Error creating list"}
 
 
 def get_brick_manager_list():
@@ -139,7 +139,7 @@ def get_brick_manager_list():
 
     except Exception as e:
         logger.error(f"Error getting Brick_Manager list: {e}")
-        return {"success": False, "message": f"Error getting list: {str(e)}"}
+        return {"success": False, "message": "Error getting list"}
 
 
 def get_list_sets(list_id):
@@ -289,7 +289,7 @@ def add_sets_to_list(list_id, set_data):
 
     except Exception as e:
         logger.error(f"Error adding sets to list: {e}")
-        return {"success": False, "message": f"Error adding sets: {str(e)}"}
+        return {"success": False, "message": "Error adding sets"}
 
 
 def add_sets_individually(list_id, sets_to_process, headers, user_token):
@@ -337,9 +337,8 @@ def add_sets_individually(list_id, sets_to_process, headers, user_token):
                 errors.append(error_msg)
 
         except Exception as e:
-            error_msg = f"Error adding {set_num}: {str(e)}"
-            logger.error(error_msg)
-            errors.append(error_msg)
+            logger.error(f"Error adding {set_num}: {e}", exc_info=True)
+            errors.append(f"Error adding {set_num}")
 
     return {
         "success": True,
@@ -426,7 +425,7 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
 
     except Exception as e:
         logger.error(f"Error updating set quantity: {e}")
-        return {"success": False, "message": f"Error updating set quantity: {str(e)}"}
+        return {"success": False, "message": "Error updating set quantity"}
 
 
 def remove_sets_from_list(list_id, set_nums):
@@ -469,9 +468,8 @@ def remove_sets_from_list(list_id, set_nums):
                     errors.append(error_msg)
 
             except Exception as e:
-                error_msg = f"Error removing {set_num}: {str(e)}"
-                logger.error(error_msg)
-                errors.append(error_msg)
+                logger.error(f"Error removing {set_num}: {e}", exc_info=True)
+                errors.append(f"Error removing {set_num}")
 
         return {
             "success": True,
@@ -483,7 +481,7 @@ def remove_sets_from_list(list_id, set_nums):
 
     except Exception as e:
         logger.error(f"Error removing sets from list: {e}")
-        return {"success": False, "message": f"Error removing sets: {str(e)}"}
+        return {"success": False, "message": "Error removing sets"}
 
 
 def sync_user_sets_with_rebrickable():  # noqa: C901
@@ -689,5 +687,5 @@ def sync_user_sets_with_rebrickable():  # noqa: C901
         logger.error(f"Error during user sets synchronization: {e}")
         return {
             "success": False,
-            "message": f"User sets synchronization failed: {str(e)}",
+            "message": "User sets synchronization failed",
         }

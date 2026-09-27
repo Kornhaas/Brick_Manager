@@ -528,7 +528,7 @@ def add_lost_parts_to_rebrickable(parts_to_add):
 
     except Exception as e:
         logger.error(f"Error adding lost parts to Rebrickable: {e}")
-        return {"success": False, "message": f"Error adding parts: {str(e)}"}
+        return {"success": False, "message": "Error adding parts"}
 
 
 def add_lost_parts_individually(parts_data, headers, user_token):
@@ -575,10 +575,8 @@ def add_lost_parts_individually(parts_data, headers, user_token):
                     errors.append(error_msg)
 
             except Exception as e:
-                error_msg = (
-                    f"Error adding part {part_data.get('inv_part_id')}: {str(e)}"
-                )
-                logger.error(error_msg)
+                error_msg = f"Error adding part {part_data.get('inv_part_id')}"
+                logger.error(f"{error_msg}: {e}", exc_info=True)
                 errors.append(error_msg)
 
         return {
@@ -594,7 +592,7 @@ def add_lost_parts_individually(parts_data, headers, user_token):
         logger.error(f"Error during individual parts addition: {e}")
         return {
             "success": False,
-            "message": f"Error adding parts individually: {str(e)}",
+            "message": "Error adding parts individually",
         }
 
 
@@ -642,7 +640,7 @@ def remove_lost_parts_from_rebrickable(parts_to_remove):
 
     except Exception as e:
         logger.error(f"Error removing lost parts from Rebrickable: {e}")
-        return {"success": False, "message": f"Error removing parts: {str(e)}"}
+        return {"success": False, "message": "Error removing parts"}
 
 
 def get_user_part_lists():
@@ -935,7 +933,7 @@ def add_parts_to_part_list(list_id, parts_to_add):
 
     except Exception as e:
         logger.error(f"Error adding parts to part list: {e}")
-        return {"success": False, "message": f"Error adding parts: {str(e)}"}
+        return {"success": False, "message": "Error adding parts"}
 
 
 def add_parts_individually_to_list(list_id, parts_data, headers, user_token):
@@ -1145,7 +1143,7 @@ def clear_part_list(list_id):
 
     except Exception as e:
         logger.error(f"Error clearing part list: {e}")
-        return {"success": False, "message": f"Error clearing part list: {str(e)}"}
+        return {"success": False, "message": "Error clearing part list"}
 
 
 def find_inventory_part_ids_bulk(missing_parts):
@@ -1201,7 +1199,7 @@ def find_inventory_part_ids_bulk(missing_parts):
                 url = f"https://rebrickable.com/api/v3/lego/sets/{set_num}/parts/"
                 params = {"page_size": 1000}  # Get all parts at once
 
-                _response = make_rate_limited_request(url, headers, params, timeout=30)
+                response = make_rate_limited_request(url, headers, params, timeout=30)
 
                 if response and response.status_code == 200:
                     set_inventory = response.json()
@@ -1344,7 +1342,7 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
 
     except Exception as e:
         logger.error(f"Error removing parts from part list: {e}")
-        return {"success": False, "message": f"Error removing parts: {str(e)}"}
+        return {"success": False, "message": "Error removing parts"}
 
 
 def update_part_quantities_in_list(list_id, parts_to_update):
@@ -1421,7 +1419,7 @@ def update_part_quantities_in_list(list_id, parts_to_update):
 
     except Exception as e:
         logger.error(f"Error updating part quantities: {e}")
-        return {"success": False, "message": f"Error updating quantities: {str(e)}"}
+        return {"success": False, "message": "Error updating quantities"}
 
 
 def sync_missing_parts_with_rebrickable(batch_size=None):
@@ -1652,7 +1650,7 @@ def sync_missing_parts_with_rebrickable(batch_size=None):
 
     except Exception as e:
         logger.error(f"Error during smart missing parts synchronization: {e}")
-        return {"success": False, "message": f"Smart synchronization failed: {str(e)}"}
+        return {"success": False, "message": "Smart synchronization failed"}
 
 
 def sync_missing_minifigure_parts_with_rebrickable(batch_size=None):
@@ -1897,5 +1895,5 @@ def sync_missing_minifigure_parts_with_rebrickable(batch_size=None):
         )
         return {
             "success": False,
-            "message": f"Smart minifigure synchronization failed: {str(e)}",
+            "message": "Smart minifigure synchronization failed",
         }
