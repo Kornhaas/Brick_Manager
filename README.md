@@ -25,6 +25,8 @@ A comprehensive Flask-based web application for managing brick collections, sets
 
 ### 📦 **Set Management**
 - **Enhanced Set Maintenance Interface** with sortable columns and advanced filtering
+- **Multiple Physical Copies** with duplicate warnings and explicit confirmation
+- **Sealed Set Tracking** for unopened original packaging
 - **Automatic Database Creation** for new deployments
 - **Progress Tracking** with visual completion indicators
 - **Automatic Label Printing** when generating box labels
@@ -112,13 +114,10 @@ A comprehensive Flask-based web application for managing brick collections, sets
    cp .env.example .env
    # Configure your .env file
    
-   # Initialize database
-   cd brick_manager
-   poetry run flask db upgrade
-   
    # Start application
-   poetry run flask run
-   # For a trusted private LAN only: poetry run flask run --host 0.0.0.0 --port 5000
+   poetry run flask --app brick_manager/app.py run
+   # For a trusted private LAN only:
+   poetry run flask --app brick_manager/app.py run --host 0.0.0.0 --port 5000
    ```
 
 ## 📁 Project Structure
@@ -129,12 +128,12 @@ Bricks_Manager/
 │   ├── Dockerfile                 # Multi-stage container build
 │   ├── docker-compose.yml         # Production deployment
 │   ├── docker-compose.dev.yml     # Development overrides
-│   ├── entrypoint.sh             # Container startup script
+│   ├── docker-entrypoint.sh      # Container startup script
 │   └── .dockerignore             # Build optimization
 ├── 
 ├── 🏠 Application Core
 │   └── brick_manager/
-│       ├── app.py                # Flask application factory
+│       ├── app.py                # Module-level Flask application and scheduler
 │       ├── config.py             # Configuration management
 │       ├── models.py             # Database models
 │       └── manage.py             # CLI management commands
@@ -174,7 +173,7 @@ Bricks_Manager/
 │       └── logs/                 # Application logs
 ├── 
 ├── 🧪 Testing & Quality
-│   ├── tests/                    # Unit and integration tests
+│   ├── brick_manager/tests/      # Unit and integration tests
 │   ├── pytest.ini               # Test configuration
 │   └── .pylintrc                # Code quality rules
 ├── 
@@ -250,11 +249,11 @@ non-local addresses.
 - **Bulk Operations**: Select multiple sets for batch operations
 
 **Workflow:**
-1. Navigate to "Set Maintenance"
-2. Use Quick Search or Advanced Filters to find sets
-3. Track completion with visual progress indicators
-4. Generate labels automatically when creating storage boxes
-5. Monitor printing status to avoid duplicates
+1. Search for a set under "Set Search" and save it with the appropriate status.
+2. When the same set number already exists, review the displayed copies and explicitly confirm another physical copy.
+3. Use "Set Maintenance" and its filters to find and update saved copies.
+4. Track completion with visual progress indicators.
+5. Generate labels and monitor their print status.
 
 ### 🔍 Part Lookup & Management
 
@@ -339,7 +338,7 @@ All user data is stored in mounted volumes:
 poetry run pytest
 
 # Docker environment
-docker compose exec bricks-manager pytest
+docker compose exec bricks-manager python -m pytest
 
 # With coverage
 poetry run pytest --cov=brick_manager
@@ -407,7 +406,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎯 Roadmap
 
-- [ ] **Web API**: REST API for mobile apps
+- [x] **Desktop Client API**: Authenticated `/api/v1` API for trusted clients
 - [ ] **Advanced Analytics**: Detailed collection insights
 - [ ] **Multi-user Support**: User authentication and permissions
 - [ ] **Cloud Storage**: Optional cloud backup integration

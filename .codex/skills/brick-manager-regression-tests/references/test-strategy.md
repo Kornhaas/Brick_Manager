@@ -5,7 +5,7 @@
 - Pytest configuration: `pytest.ini`; tests live in `brick_manager/tests/`.
 - `conftest.py` creates a temporary SQLite database, registers blueprints, exposes `app`, `client`, and `runner`, and recreates tables around tests.
 - `BRICK_MANAGER_CLIENT_API_KEY` is set to `test-client-api-key` in the test app.
-- Many historical generated classes are marked skipped through `LEGACY_TEST_CLASSES` because they target removed APIs. They are not evidence of current coverage.
+- Historical generated tests for removed APIs were deleted. The current suite should execute every collected test; narrowly justified platform or integration skips must remain explicit at the test itself.
 - The configured global coverage floor is 16%, which is a release floor, not an adequacy target for changed behavior.
 
 ## Useful commands
@@ -53,4 +53,4 @@ Frontend changes:
 
 ## Baseline interpretation
 
-The October 2026 diagnostic run collected 414 items, with 156 passed, 258 skipped, and 27.35% statement coverage. Sync and many write-heavy route modules were near 10–25%. Re-run before citing numbers; prioritize risk and changed behavior over gaming aggregate coverage.
+The verified 19 October 2026 run collected 169 items, with 169 passed, 0 skipped, and 30.05% statement coverage. Sync and many write-heavy route modules remain near 10–25%. Re-run before citing numbers; prioritize risk and changed behavior over gaming aggregate coverage.

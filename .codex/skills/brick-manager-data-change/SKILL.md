@@ -7,7 +7,7 @@ description: Plan, implement, or review Brick Manager model, SQLite schema, migr
 
 Protect existing user collection data and make schema and import changes repeatable.
 
-1. Establish the current truth from `brick_manager/models.py`, the queries that use the affected fields, and a real database schema when available. Treat `database_schema.md` as historical context only.
+1. Establish the current truth from `brick_manager/models.py`, versioned migrations, the queries that use the affected fields, and a real database schema when available. Keep `database_schema.md` synchronized, but do not use documentation alone to infer the live schema.
 2. Identify affected primary keys, foreign keys, nullability, defaults, indexes, relationships, cascade behavior, serializers, forms, and external identifiers before editing.
 3. Separate reference catalog data (`rebrickable_*`) from user-owned state (`user_sets`, quantities, missing parts, storage, labels, and configuration). A catalog refresh must not silently erase user-owned state.
 4. For an existing database, provide an explicit forward migration. Do not rely on `db.create_all()` to alter existing tables. Prefer Flask-Migrate/Alembic artifacts when the project begins tracking migrations; otherwise supply a narrowly scoped, restart-safe migration with validation and rollback guidance.

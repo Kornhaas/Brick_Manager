@@ -7,7 +7,7 @@ description: Add, repair, or review Brick Manager pytest coverage for bugs, rout
 
 Create tests that fail for the unwanted behavior and prove the intended observable contract.
 
-1. Read the implementation, its callers, and nearby current tests. Check `LEGACY_TEST_CLASSES` in `brick_manager/tests/conftest.py`; do not copy obsolete generated tests or silently add new skips.
+1. Read the implementation, its callers, and nearby current tests. Do not copy obsolete generated tests or hide failures behind broad collection-time skips.
 2. For a bugfix, reproduce the bug with a focused failing test before or alongside the fix. Assert response payloads, persisted state, generated artifact properties, or outbound request contracts rather than only status codes or lack of exceptions.
 3. Use the shared Flask app, client, and database fixtures when suitable. Keep database rows minimal and satisfy real foreign keys. Isolate filesystem output with temporary paths.
 4. Mock at the network/process boundary, not the business logic being tested. Configure realistic response objects and assert method, URL, payload, timeout, and meaningful side effects.

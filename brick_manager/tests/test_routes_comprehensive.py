@@ -10,131 +10,89 @@ class TestRoutesFunctionsCoverage:
 
     def test_dashboard_functions(self):
         """Test dashboard route functions."""
-        try:
-            from brick_manager.routes.dashboard import dashboard_bp
+        from brick_manager.routes.dashboard import dashboard_bp
 
-            assert dashboard_bp is not None
-        except ImportError:
-            pytest.skip("Dashboard module not available")
+        assert dashboard_bp is not None
 
     def test_missing_parts_functions(self):
         """Test missing parts route functions."""
-        try:
-            from brick_manager.routes.missing_parts import missing_parts_bp
+        from brick_manager.routes.missing_parts import missing_parts_bp
 
-            assert missing_parts_bp is not None
-        except ImportError:
-            pytest.skip("Missing parts module not available")
+        assert missing_parts_bp is not None
 
     def test_set_search_functions(self):
         """Test set search route functions."""
-        try:
-            from brick_manager.routes.set_search import set_search_bp
+        from brick_manager.routes.set_search import set_search_bp
 
-            assert set_search_bp is not None
-        except ImportError:
-            pytest.skip("Set search module not available")
+        assert set_search_bp is not None
 
     def test_set_maintain_functions(self):
         """Test set maintain route functions."""
-        try:
-            from brick_manager.routes.set_maintain import set_maintain_bp
+        from brick_manager.routes.set_maintain import set_maintain_bp
 
-            assert set_maintain_bp is not None
-        except ImportError:
-            pytest.skip("Set maintain module not available")
+        assert set_maintain_bp is not None
 
     def test_box_maintenance_functions(self):
         """Test box maintenance route functions."""
-        try:
-            from brick_manager.routes.box_maintenance import box_maintenance_bp
+        from brick_manager.routes.box_maintenance import box_maintenance_bp
 
-            assert box_maintenance_bp is not None
-        except ImportError:
-            pytest.skip("Box maintenance module not available")
+        assert box_maintenance_bp is not None
 
     def test_token_management_functions(self):
         """Test token management route functions."""
-        try:
-            from brick_manager.routes.token_management import token_management_bp
+        from brick_manager.routes.token_management import token_management_bp
 
-            assert token_management_bp is not None
-        except ImportError:
-            pytest.skip("Token management module not available")
+        assert token_management_bp is not None
 
     def test_admin_sync_functions(self):
         """Test admin sync route functions."""
-        try:
-            from brick_manager.routes.admin_sync import admin_sync_bp
+        from brick_manager.routes.admin_sync import admin_sync_bp
 
-            assert admin_sync_bp is not None
-        except ImportError:
-            pytest.skip("Admin sync module not available")
+        assert admin_sync_bp is not None
 
     def test_storage_functions(self):
         """Test storage route functions."""
-        try:
-            from brick_manager.routes.storage import storage_bp
+        from brick_manager.routes.storage import storage_bp
 
-            assert storage_bp is not None
-        except ImportError:
-            pytest.skip("Storage module not available")
+        assert storage_bp is not None
 
     def test_part_lookup_functions(self):
         """Test part lookup route functions."""
-        try:
-            from brick_manager.routes.part_lookup import part_lookup_bp
+        from brick_manager.routes.part_lookup import part_lookup_bp
 
-            assert part_lookup_bp is not None
-        except ImportError:
-            pytest.skip("Part lookup module not available")
+        assert part_lookup_bp is not None
 
     def test_manual_entry_functions(self):
         """Test manual entry route functions."""
-        try:
-            from brick_manager.routes.manual_entry import manual_entry_bp
+        from brick_manager.routes.manual_entry import manual_entry_bp
 
-            assert manual_entry_bp is not None
-        except ImportError:
-            pytest.skip("Manual entry module not available")
+        assert manual_entry_bp is not None
 
     def test_upload_functions(self):
         """Test upload route functions."""
-        try:
-            from brick_manager.routes.upload import upload_bp
+        from brick_manager.routes.upload import upload_bp
 
-            assert upload_bp is not None
-        except ImportError:
-            pytest.skip("Upload module not available")
+        assert upload_bp is not None
 
     def test_part_location_functions(self):
         """Test part location route functions."""
-        try:
-            from brick_manager.routes.part_location import part_location_bp
+        from brick_manager.routes.part_location import part_location_bp
 
-            assert part_location_bp is not None
-        except ImportError:
-            pytest.skip("Part location module not available")
+        assert part_location_bp is not None
 
     def test_import_rebrickable_data_functions(self):
         """Test import rebrickable data route functions."""
-        try:
-            from brick_manager.routes.import_rebrickable_data import (
-                import_rebrickable_data_bp,
-            )
+        from brick_manager.routes.import_rebrickable_data import (
+            import_rebrickable_data_bp,
+        )
 
-            assert import_rebrickable_data_bp is not None
-        except ImportError:
-            pytest.skip("Import rebrickable data module not available")
+        assert import_rebrickable_data_bp is not None
 
     def test_rebrickable_sync_functions(self):
         """Test rebrickable sync route functions."""
-        try:
-            from brick_manager.routes.rebrickable_sync import rebrickable_sync_bp
+        from brick_manager.routes.rebrickable_sync import rebrickable_sync_bp
 
-            assert rebrickable_sync_bp is not None
-        except ImportError:
-            pytest.skip("Rebrickable sync module not available")
+        assert rebrickable_sync_bp is not None
 
 
 class TestRouteEndpointsCoverage:
@@ -290,71 +248,6 @@ class TestServiceFunctionsCoverage:
         # Should handle missing file gracefully
 
 
-class TestModelFunctionsCoverage:
-    """Test model functions for coverage."""
-
-    def test_model_creation_and_repr(self):
-        """Test model creation and representation."""
-
-        from brick_manager.app import app
-        from brick_manager.models import Parts, Sets, Storage
-
-        with app.app_context():
-            # Test model instantiation
-            part = Parts()
-            part.part_num = "test123"
-            part.part_name = "Test Part"
-
-            # Test __repr__ method
-            repr_str = repr(part)
-            assert "Parts" in repr_str
-
-            # Test Sets model
-            set_obj = Sets()
-            set_obj.set_num = "set123"
-            set_obj.set_name = "Test Set"
-
-            repr_str = repr(set_obj)
-            assert "Sets" in repr_str
-
-            # Test Storage model
-            storage = Storage()
-            storage.box_id = "B1"
-            storage.location = "A-1-1"
-
-            repr_str = repr(storage)
-            assert "Storage" in repr_str
-
-    def test_additional_model_methods(self):
-        """Test additional model methods."""
-
-        from brick_manager.app import app
-        from brick_manager.models import MissingParts, RebrickableParts, RebrickableSets
-
-        with app.app_context():
-            # Test RebrickableSets
-            rb_set = RebrickableSets()
-            rb_set.set_num = "rb123"
-            rb_set.name = "RB Test Set"
-
-            repr_str = repr(rb_set)
-            assert "RebrickableSets" in repr_str
-
-            # Test RebrickableParts
-            rb_part = RebrickableParts()
-            rb_part.part_num = "rbp123"
-            rb_part.name = "RB Test Part"
-
-            repr_str = repr(rb_part)
-            assert "RebrickableParts" in repr_str
-
-            # Test MissingParts
-            missing = MissingParts()
-            missing.part_num = "mp123"
-            missing.set_num = "set123"
-
-            repr_str = repr(missing)
-            assert "MissingParts" in repr_str
 
 
 class TestErrorHandlingPaths:

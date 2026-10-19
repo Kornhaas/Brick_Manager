@@ -1,239 +1,84 @@
-# Bricks Manager - Docker Deployment Guide
+# Docker Operations
 
-This guide explains how to deploy the Bricks Manager application using Docker and Docker Compose.
+`docker-compose.yml` is the production-oriented configuration. It builds application code into the image and mounts only persistent data directories. Source or template changes therefore require an image rebuild.
 
-## 🚀 Quick Start
+## Initial setup
 
-### Prerequisites
-- Docker Engine 20.10+ 
-- Docker Compose 2.0+
-
-### 1. Clone and Setup
 ```bash
-git clone <your-repo-url>
-cd Bricks_Manager
-
-# Copy and configure environment variables
 cp .env.example .env
-# Edit .env with your settings (especially REBRICKABLE_TOKEN)
-```
+# Set at least SECRET_KEY, REBRICKABLE_TOKEN as needed, and
+# BRICK_MANAGER_CLIENT_API_KEY when the desktop API is used.
 
-### 2. Start the Application
-```bash
-# Build and start the application
-docker-compose up -d
-
-# Check the logs
-docker-compose logs -f bricks-manager
-
-# The application will be available at http://localhost:5000
-```
-
-## 📁 Data Persistence
-
-The following directories are mounted outside the container for persistence:
-
-```
-./data/
-├── instance/        # SQLite database storage
-├── uploads/         # User uploaded files (images, etc.)
-├── output/          # Generated files (labels, exports)
-├── cache/          # Application cache
-└── logs/           # Application logs
-```
-
-These directories are automatically created when you first run the container.
-
-## 🗄️ Database Management
-
-### Automatic Database Creation
-The container automatically:
-- Creates a new SQLite database if none exists
-- Runs database migrations on startup
-- Loads master lookup data
-
-### Manual Database Operations
-```bash
-# Access the container shell
-docker-compose exec bricks-manager bash
-
-# Run Flask commands
-cd /app/brick_manager
-flask db upgrade    # Apply migrations
-flask shell         # Interactive Python shell
-```
-
-## ⚙️ Configuration
-
-### Environment Variables (.env file)
-```bash
-# Required - Get from rebrickable.com
-REBRICKABLE_TOKEN=your-rebrickable-api-token-here
-
-# Security - Change in production
-SECRET_KEY=your-very-secure-secret-key-here
-
-# Optional
-FLASK_ENV=production
-LOG_LEVEL=INFO
-```
-
-### Docker Compose Override
-Create `docker-compose.override.yml` for custom settings:
-
-```yaml
-version: '3.8'
-services:
-  bricks-manager:
-    ports:
-      - "8080:5000"  # Change port
-    environment:
-      - CUSTOM_ENV_VAR=value
-```
-
-## 🔧 Advanced Usage
-
-### Production Deployment with Nginx
-```bash
-# Start with nginx reverse proxy
-docker-compose --profile production up -d
-```
-
-### Backup Data
-```bash
-# Backup all persistent data
-tar -czf bricks-manager-backup-$(date +%Y%m%d).tar.gz data/
-
-# Restore backup
-tar -xzf bricks-manager-backup-YYYYMMDD.tar.gz
-```
-
-### Update Application
-```bash
-# Pull latest changes
-git pull
-
-# Rebuild and restart
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-### Scaling and Resources
-```yaml
-# In docker-compose.yml
-services:
-  bricks-manager:
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Permission Issues**
-   ```bash
-   # Fix data directory permissions
-   sudo chown -R 1000:1000 data/
-   ```
-
-2. **Database Locked**
-   ```bash
-   # Stop all containers accessing the database
-   docker-compose down
-   # Restart
-   docker-compose up -d
-   ```
-
-3. **Port Already in Use**
-   ```bash
-   # Check what's using port 5000
-   sudo lsof -i :5000
-   # Change port in docker-compose.yml or stop the conflicting service
-   ```
-
-### Logging
-```bash
-# View all logs
-docker-compose logs
-
-# Follow logs in real-time
-docker-compose logs -f bricks-manager
-
-# View specific container logs
-docker logs bricks-manager-app
-```
-
-### Health Check
-```bash
-# Check application health
+docker compose up -d --build
+docker compose ps
 curl http://localhost:5000/health
-
-# Expected response:
-# {"status":"healthy","message":"Application is running properly","database":"connected"}
 ```
 
-## 🔄 Development Mode
+Application: `http://localhost:5000`
 
-For development with live code reloading:
-
-```yaml
-# docker-compose.dev.yml
-version: '3.8'
-services:
-  bricks-manager:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./brick_manager:/app/brick_manager  # Mount source code
-      - ./data:/app/data
-    environment:
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
-```
+## Updating application code
 
 ```bash
-# Run in development mode
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+docker compose up -d --build
+docker compose logs -f bricks-manager
 ```
 
-## 📊 Monitoring
+`docker compose restart` only restarts the existing image. It does not copy changed Python, templates, JavaScript, or CSS into the production container.
 
-### Resource Usage
+## Development mode
+
+The development override mounts `./brick_manager` read-only into the container and enables Flask reload:
+
 ```bash
-# Monitor container resource usage
-docker stats bricks-manager-app
-
-# Container information
-docker inspect bricks-manager-app
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-### Application Metrics
-The application exposes a health endpoint at `/health` for monitoring tools like:
-- Prometheus
-- Nagios
-- Custom monitoring scripts
+Do not expose the development server to an untrusted network.
 
-## 🛡️ Security Considerations
+## Persistent data
 
-1. **Change default secrets** in production
-2. **Use environment variables** for sensitive data
-3. **Regular backups** of the data directory
-4. **Keep Docker images updated**
-5. **Consider using Docker secrets** for production
+| Host path | Container path | Purpose |
+| --- | --- | --- |
+| `./data/instance` | `/app/data/instance` | SQLite database and scheduled backups |
+| `./data/uploads` | `/app/data/uploads` | Uploaded files |
+| `./data/output` | `/app/data/output` | Generated labels and exports |
+| `./data/cache` | `/app/data/cache` | Cached images and lookup data |
+| `./data/logs` | `/app/data/logs` | Application logs |
+| `./data/instructions` | `/app/data/instructions` | Building instructions |
 
-## 📞 Support
+Back up `data/` before upgrades that can affect persisted state:
 
-For issues and questions:
-1. Check the application logs: `docker-compose logs bricks-manager`
-2. Verify configuration in `.env` file
-3. Ensure data directory permissions are correct
-4. Check Docker and Docker Compose versions
+```bash
+make backup
+```
+
+## Database initialization and migrations
+
+`docker-entrypoint.sh` follows this policy:
+
+1. If a versioned migration repository exists at `brick_manager/migrations/`, run `flask db upgrade` and fail startup if the migration fails.
+2. Otherwise, create all declared tables only when the SQLite database does not yet exist.
+3. Without migrations, leave an existing database schema unchanged and log that fact.
+
+`db.create_all()` is not a migration mechanism and cannot add or transform columns in an existing table. Schema changes must include committed migration artifacts.
+
+## Useful commands
+
+```bash
+docker compose logs -f bricks-manager
+docker compose exec bricks-manager sh
+docker compose exec bricks-manager python -m pytest
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+```
+
+`make db-shell` opens Python's SQLite shell inside the container; no separate Alpine SQLite client is required.
+
+## Production notes
+
+- Set a strong `SECRET_KEY`; do not keep the Compose placeholder.
+- Set a strong `BRICK_MANAGER_CLIENT_API_KEY` before enabling trusted desktop clients.
+- Keep port 5000 behind a firewall or reverse proxy; use HTTPS outside localhost or a trusted private LAN.
+- The Flask development server is the current container command. For public or multi-user deployment, replace it with a reviewed production WSGI setup and ensure scheduled jobs run exactly once.
+- Container health is checked through `/health`.

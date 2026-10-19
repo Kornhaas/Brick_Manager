@@ -58,45 +58,6 @@ class TestAppConfiguration:
         assert os.path.exists(instances_dir)
 
 
-class TestBackupDatabase:
-    """Test database backup functionality."""
-
-    @patch("brick_manager.app.shutil.copyfile")
-    @patch("brick_manager.app.datetime")
-    def test_backup_database_success(self, mock_datetime, mock_copyfile):
-        """Test successful database backup."""
-
-        # Setup - the backup function uses strftime('%Y%m%d_%H%M%S')
-        mock_datetime.now.return_value.strftime.return_value = "20231017_120000"
-
-        with app.app_context():
-            # Call the function
-            backup_database()
-
-            # Verify copyfile was called
-            assert mock_copyfile.called
-            call_args = mock_copyfile.call_args[0]
-            assert len(call_args) == 2
-            # Check that the backup filename contains the timestamp format
-            assert ".backup.db" in call_args[1]
-            assert "brick_manager.db" in call_args[1]
-
-    @patch("app.shutil.copyfile")
-    @patch("app.app.logger")
-    def test_backup_database_failure(self, mock_logger, mock_copyfile):
-        """Test database backup failure handling."""
-
-        # Setup
-        mock_copyfile.side_effect = Exception("File not found")
-
-        with app.app_context():
-            # Call the function
-            backup_database()
-
-            # Verify error was logged
-            mock_logger.error.assert_called_once()
-            args, kwargs = mock_logger.error.call_args
-            assert "Failed to backup database" in args[0]
 
 
 class TestScheduledSyncMissingParts:

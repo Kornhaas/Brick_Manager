@@ -111,7 +111,7 @@ restore:
 
 db-shell:
 	@echo "🗄️ Accessing database shell..."
-	docker compose exec bricks-manager sqlite3 /app/data/instance/brick_manager.db
+	docker compose exec bricks-manager python -m sqlite3 /app/data/instance/brick_manager.db
 
 reset-db:
 	@echo "⚠️  This will DESTROY all database data!"

@@ -84,59 +84,6 @@ class TestServiceConstants:
             assert isinstance(e, RebrickableAPIException)
 
 
-class TestPartLookupServiceReal:
-    """Test actual part lookup service functionality."""
-
-    @pytest.mark.unit
-    def test_part_lookup_service_import(self):
-        """Test part lookup service can be imported."""
-
-        from services.part_lookup_service import load_part_lookup, save_part_lookup
-
-        assert callable(load_part_lookup)
-        assert callable(save_part_lookup)
-
-    @pytest.mark.unit
-    @patch("services.part_lookup_service.PartStorage")
-    def test_load_part_lookup_function(self, mock_part_storage):
-        """Test load_part_lookup function."""
-
-        from services.part_lookup_service import load_part_lookup
-
-        # Mock database query
-        mock_query = MagicMock()
-        mock_query.all.return_value = []
-        mock_part_storage.query = mock_query
-
-        result = load_part_lookup()
-
-        assert isinstance(result, dict)
-        mock_query.all.assert_called_once()
-
-    @pytest.mark.unit
-    @patch("services.part_lookup_service.db")
-    @patch("services.part_lookup_service.PartStorage")
-    def test_save_part_lookup_function(self, mock_part_storage, mock_db):
-        """Test save_part_lookup function."""
-
-        from services.part_lookup_service import save_part_lookup
-
-        # Test with empty data (function returns None, not True)
-        result = save_part_lookup({})
-        assert result is None
-
-        # Test with actual data
-        test_data = {"3001": {"location": "A", "level": "1", "box": "B1"}}
-
-        # Mock the PartStorage constructor and database operations
-        mock_storage_instance = MagicMock()
-        mock_part_storage.return_value = mock_storage_instance
-        mock_part_storage.query.filter_by.return_value.first.return_value = None
-
-        result = save_part_lookup(test_data)
-
-        # Should attempt to save
-        assert result is True
 
 
 class TestCacheServiceReal:
@@ -170,7 +117,7 @@ class TestCacheServiceReal:
             assert result == expected, f"URL '{url}' should be {expected}"
 
     @pytest.mark.unit
-    @patch("services.cache_service.current_app")
+    @patch("services.cache_service.current_app", new_callable=MagicMock)
     @patch("services.cache_service.url_for")
     def test_cache_image_with_none(self, mock_url_for, mock_app):
         """Test cache_image function with None input."""
@@ -186,7 +133,7 @@ class TestCacheServiceReal:
 
     @pytest.mark.unit
     @patch("services.cache_service.url_for")
-    @patch("services.cache_service.current_app")
+    @patch("services.cache_service.current_app", new_callable=MagicMock)
     def test_cache_image_with_invalid_url(self, mock_app, mock_url_for):
         """Test cache_image with invalid URL."""
 
@@ -252,39 +199,6 @@ class TestBrickognizeServiceIntegration:
             assert result["items"][0]["part_num"] == "3001"
 
 
-class TestLabelServiceIntegration:
-    """Test label service additional scenarios."""
-
-    @pytest.mark.unit
-    def test_label_service_import(self):
-        """Test label service import."""
-        try:
-            from services.label_service import save_image_as_pdf
-
-            assert callable(save_image_as_pdf)
-        except ImportError:
-            pass
-
-    @pytest.mark.unit
-    @patch("services.label_service.Image.open")
-    @patch("services.label_service.canvas")
-    def test_save_image_as_pdf_error_handling(self, mock_canvas, mock_image_open):
-        """Test PDF generation error handling."""
-
-        from services.label_service import save_image_as_pdf
-
-        # Mock Image.open to return a mock image
-        mock_img = MagicMock()
-        mock_img.size = (100, 100)
-        mock_image_open.return_value = mock_img
-
-        # Mock canvas to raise an exception
-        mock_canvas.Canvas.side_effect = Exception("PDF generation failed")
-
-        result = save_image_as_pdf("test.jpg", "output.pd")
-
-        # Should handle error gracefully
-        assert result is not None or result is None  # Depending on implementation
 
 
 class TestModelValidation:

@@ -3,86 +3,6 @@
 from unittest.mock import Mock, mock_open, patch
 
 
-class TestRebrickableServiceCoverage:
-    """Test rebrickable_service for maximum coverage."""
-
-    @patch("brick_manager.services.rebrickable_service.requests.get")
-    def test_make_request_success(self, mock_get):
-        """Test successful API request."""
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"results": [{"id": 1, "name": "test"}]}
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-
-        from brick_manager.services.rebrickable_service import make_request
-
-        result = make_request("http://test.com/api", {"page": 1})
-        assert result is not None
-        assert "results" in result
-
-    @patch("brick_manager.services.rebrickable_service.requests.get")
-    def test_get_user_sets(self, mock_get):
-        """Test get_user_sets function."""
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "results": [{"set_num": "123-1", "name": "Test Set"}]
-        }
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-
-        from brick_manager.services.rebrickable_service import get_user_sets
-
-        result = get_user_sets("test_token", "test_key")
-        assert result is not None
-
-    @patch("brick_manager.services.rebrickable_service.requests.get")
-    def test_get_set_parts(self, mock_get):
-        """Test get_set_parts function."""
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"results": [{"part": {"part_num": "123"}}]}
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-
-        from brick_manager.services.rebrickable_service import get_set_parts
-
-        result = get_set_parts("123-1", "test_key")
-        assert result is not None
-
-    @patch("brick_manager.services.rebrickable_service.requests.get")
-    def test_get_missing_parts(self, mock_get):
-        """Test get_missing_parts function."""
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"results": [{"part": {"part_num": "123"}}]}
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-
-        from brick_manager.services.rebrickable_service import get_missing_parts
-
-        result = get_missing_parts("test_token", "test_key")
-        assert result is not None
-
-    @patch("brick_manager.services.rebrickable_service.requests.get")
-    def test_get_part_image_url(self, mock_get):
-        """Test get_part_image_url function."""
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"part_img_url": "http://test.com/image.jpg"}
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-
-        from brick_manager.services.rebrickable_service import get_part_image_url
-
-        result = get_part_image_url("123", "4", "test_key")
-        assert result is not None
 
 
 class TestCacheServiceCoverage:
@@ -238,71 +158,9 @@ class TestPartLookupServiceCoverage:
         assert isinstance(result, list)
 
 
-class TestTokenServiceCoverage:
-    """Test token_service for coverage."""
-
-    @patch("brick_manager.services.token_service.UserTokens.query")
-    def test_get_rebrickable_user_token(self, mock_query):
-        """Test getting rebrickable user token."""
-
-        mock_token = Mock()
-        mock_token.token_value = "test_token"
-        mock_query.filter_by.return_value.first.return_value = mock_token
-
-        from brick_manager.services.token_service import get_rebrickable_user_token
-
-        result = get_rebrickable_user_token()
-        assert result == "test_token"
-
-    @patch("brick_manager.services.token_service.UserTokens.query")
-    def test_get_rebrickable_user_token_none(self, mock_query):
-        """Test getting rebrickable user token when none exists."""
-
-        mock_query.filter_by.return_value.first.return_value = None
-
-        from brick_manager.services.token_service import get_rebrickable_user_token
-
-        result = get_rebrickable_user_token()
-        assert result is None
-
-    def test_get_rebrickable_api_key(self):
-        """Test getting rebrickable API key."""
-
-        from brick_manager.services.token_service import get_rebrickable_api_key
-
-        # Test environment variable fallback
-        get_rebrickable_api_key()
         # Should return None or environment value
 
 
-class TestBrickognizeServiceCoverage:
-    """Test brickognize_service for coverage."""
-
-    @patch("brick_manager.services.brickognize_service.requests.post")
-    def test_predict_part(self, mock_post):
-        """Test part prediction."""
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "items": [{"class": "test_part", "score": 0.9}]
-        }
-        mock_post.return_value = mock_response
-
-        from brick_manager.services.brickognize_service import predict_part
-
-        result = predict_part(b"fake_image_data")
-        assert result is not None
-
-    @patch("brick_manager.services.brickognize_service.requests.post")
-    def test_predict_part_error(self, mock_post):
-        """Test part prediction with error."""
-
-        mock_post.side_effect = Exception("API Error")
-
-        from brick_manager.services.brickognize_service import predict_part
-
-        predict_part(b"fake_image_data")
         # Should handle error gracefully
 
 

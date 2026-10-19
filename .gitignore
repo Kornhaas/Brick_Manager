@@ -1,4 +1,6 @@
 **/__pycache__/
+.venv/
+.coverage
 brick_manager/uploads/*
 brick_manager/output/*
 brick_manager/instance/*
@@ -11,4 +13,3 @@ data/*
 brick_manager/logs/brick_manager.log
 brick_manager/coverage.xml
 brick_manager/lego_scanner.log
-brick_manager/logs/brick_manager.log

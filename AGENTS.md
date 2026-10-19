@@ -9,6 +9,6 @@ Repository-specific skills live under `.codex/skills/`. Load the smallest matchi
 
 Use multiple skills when the task genuinely crosses boundaries; for example, a new persisted API field needs development, data-change, sync-contract, and regression-test guidance.
 
-Treat `brick_manager/models.py` and executable tests as the current source of truth. `database_schema.md` and coverage claims in `TESTING.md` may be historical. Preserve user collection data, never expose credentials, and do not perform live remote writes, database resets, restores, or deployments without explicit user authorization.
+Treat `brick_manager/models.py`, versioned migrations, and executable tests as the primary source of truth. Keep `database_schema.md` and `TESTING.md` synchronized with verified behavior and measurements. Preserve user collection data, never expose credentials, and do not perform live remote writes, database resets, restores, or deployments without explicit user authorization.
 
 Use Poetry commands from the repository root. Preserve unrelated working-tree changes.

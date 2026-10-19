@@ -38,7 +38,7 @@ poetry run black brick_manager scripts
 poetry run isort brick_manager scripts
 ```
 
-The October 2026 baseline collected 414 tests: 156 passed and 258 were skipped as obsolete contracts, with 27.35% total statement coverage. Use current results rather than copying this baseline into reports.
+The verified 19 October 2026 baseline collected 169 tests: 169 passed and 0 were skipped, with 30.05% total statement coverage. Re-run before citing these numbers in a later report.
 
 ## Change mapping
 
@@ -50,4 +50,4 @@ The October 2026 baseline collected 414 tests: 156 passed and 258 were skipped a
 
 ## Known documentation drift
 
-`database_schema.md` describes some retired table names and must not be used alone to infer the live schema. `TESTING.md` contains historical coverage estimates. Confirm both against models, fixtures, and an actual test run.
+`database_schema.md` and `TESTING.md` were reconciled on 19 October 2026. Keep them current, while continuing to confirm schema and coverage claims against models, migrations, fixtures, and actual test runs.
