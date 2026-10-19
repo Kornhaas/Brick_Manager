@@ -65,7 +65,7 @@ def check_sync_availability():
             missing.append("API Key")
 
         return jsonify(
-            {"available": False, "message": f'Missing: {", ".join(missing)}'}
+            {"available": False, "message": f"Missing: {', '.join(missing)}"}
         )
 
     except Exception as e:

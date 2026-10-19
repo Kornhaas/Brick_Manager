@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Missing Parts</title>
-    
-    
+
+
     <!-- Favicon -->
     {% include "favicon_links.html" %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -42,7 +42,7 @@
         .parts-section {
             display: none;
         }
-        
+
         /* Page Loading Spinner */
         .page-loading-overlay {
             position: fixed;
@@ -57,19 +57,19 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .page-loading-spinner {
             width: 3rem;
             height: 3rem;
             margin-bottom: 1rem;
         }
-        
+
         .page-loading-text {
             font-size: 1.1rem;
             color: #6c757d;
             text-align: center;
         }
-        
+
         .loading-progress {
             margin-top: 1rem;
             color: #6c757d;
@@ -143,7 +143,7 @@
                         <div class="row mt-3">
                             <div class="col-12">
                                 <div class="alert alert-info mb-0">
-                                    <i class="bi bi-info-circle"></i> 
+                                    <i class="bi bi-info-circle"></i>
                                     <strong>Filtered View:</strong> Showing missing parts for {{ statistics.filtered_sets_count }} of {{ statistics.total_sets_checked }} sets based on internal ID filter: <code>{{ set_filter }}</code>
                                 </div>
                             </div>
@@ -173,17 +173,17 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Set Filter - Always Visible -->
         <div class="card mb-4">
             <div class="card-body">
                 <h6 class="mb-3">Internal ID Filter</h6>
                 <small class="text-muted d-block mb-3">Filter missing parts by specific internal IDs (the number in the Internal ID column). Leave empty to show all sets.</small>
-                
+
                 <form method="GET" id="set-filter-form">
                     <div class="row">
                         <div class="col-md-8">
-                            <input type="text" class="form-control" name="set_filter" id="set_filter_input" 
+                            <input type="text" class="form-control" name="set_filter" id="set_filter_input"
                                    value="{{ set_filter }}" placeholder="e.g. 229 or 200-220 or 200;204;205">
                             <input type="hidden" name="include_spare" value="{% if include_spare %}true{% else %}false{% endif %}">
                         </div>
@@ -195,7 +195,7 @@
                         </div>
                     </div>
                 </form>
-                
+
                 <div class="mt-2">
                     <small class="text-muted">
                         <strong>Supported formats:</strong><br>
@@ -205,7 +205,7 @@
                         • Mixed: <code>200-210;229;250-260</code>
                     </small>
                 </div>
-                
+
                 {% if set_filter %}
                 <div class="mt-3">
                     <div class="alert alert-info mb-0">
@@ -242,7 +242,7 @@
         <div id="category-overview">
             <h3>Categories with Missing Parts</h3>
             <p class="text-muted">Click on a category to view the missing parts in that category.</p>
-            
+
             <div class="row" id="category-grid">
                 {% for category in categories %}
                 <div class="col-md-4 col-lg-3 mb-3">
@@ -371,7 +371,7 @@
                     <p class="mb-3">Great news! You don't have any missing parts.</p>
                     {% endif %}
                 </div>
-                
+
                 {% if set_filter %}
                 <!-- Filter Modification Section -->
                 <div class="card">
@@ -383,7 +383,7 @@
                             <div class="row">
                                 <div class="col-md-8">
                                     <label for="new_set_filter" class="form-label">Internal ID Filter:</label>
-                                    <input type="text" class="form-control" name="set_filter" id="new_set_filter" 
+                                    <input type="text" class="form-control" name="set_filter" id="new_set_filter"
                                            value="{{ set_filter }}" placeholder="e.g. 229 or 200-220 or 200;204;205">
                                     <input type="hidden" name="include_spare" value="{% if include_spare %}true{% else %}false{% endif %}">
                                 </div>
@@ -392,10 +392,10 @@
                                 </div>
                             </div>
                         </form>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
-                                <a href="{{ url_for('missing_parts.missing_parts') }}?include_spare={% if include_spare %}true{% else %}false{% endif %}" 
+                                <a href="{{ url_for('missing_parts.missing_parts') }}?include_spare={% if include_spare %}true{% else %}false{% endif %}"
                                    class="btn btn-outline-secondary w-100">
                                     <i class="fas fa-times"></i> Clear Filter & Show All
                                 </a>
@@ -406,7 +406,7 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <!-- Spare Parts Toggle -->
                         <div class="mt-3 p-3 bg-light rounded">
                             <div class="d-flex align-items-center justify-content-between">
@@ -415,7 +415,7 @@
                                     <small class="text-muted d-block">Include or exclude spare parts from results</small>
                                 </div>
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="no-results-spare-toggle" 
+                                    <input class="form-check-input" type="checkbox" id="no-results-spare-toggle"
                                            {% if include_spare %}checked{% endif %} onchange="toggleSparePartsNoResults(this)">
                                     <label class="form-check-label" for="no-results-spare-toggle">
                                         {% if include_spare %}Include Spare Parts{% else %}Exclude Spare Parts{% endif %}
@@ -423,7 +423,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Filter Help (Initially Hidden) -->
                         <div id="filter-help" class="mt-3 p-3 bg-info text-white rounded" style="display: none;">
                             <h6><i class="fas fa-info-circle"></i> Filter Format Examples:</h6>
@@ -464,24 +464,24 @@
         let currentCategoryParts = [];
         let currentCategoryName = null;
         let allPartsList = [];
-        
+
         // Helper function to determine text color based on background color
         function getContrastColor(hexColor) {
             // Remove # if present
             const hex = hexColor.replace('#', '');
-            
+
             // Convert to RGB
             const r = parseInt(hex.substr(0, 2), 16);
             const g = parseInt(hex.substr(2, 2), 16);
             const b = parseInt(hex.substr(4, 2), 16);
-            
+
             // Calculate luminance
             const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-            
+
             // Return black for light colors, white for dark colors
             return luminance > 0.5 ? '#000000' : '#FFFFFF';
         }
-        
+
         document.addEventListener('DOMContentLoaded', function () {
             const toggleSpareParts = document.getElementById('toggle-spare-parts');
             const globalToggleSpareParts = document.getElementById('global-toggle-spare-parts');
@@ -511,7 +511,7 @@
                     // Update the label text based on toggle state
                     const label = document.getElementById('global-spare-parts-label');
                     label.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
-                    
+
                     // Sync with details toggle
                     if (toggleSpareParts) {
                         toggleSpareParts.checked = this.checked;
@@ -520,7 +520,7 @@
                             detailsLabel.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
                         }
                     }
-                    
+
                     // Check which view is active and reload accordingly
                     const listViewBtn = document.getElementById('listViewBtn');
                     if (listViewBtn && listViewBtn.checked) {
@@ -544,7 +544,7 @@
                     if (label) {
                         label.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
                     }
-                    
+
                     // Sync with global toggle
                     if (globalToggleSpareParts) {
                         globalToggleSpareParts.checked = this.checked;
@@ -553,7 +553,7 @@
                             globalLabel.textContent = this.checked ? 'Include Spare Parts' : 'Exclude Spare Parts';
                         }
                     }
-                    
+
                     if (currentCategoryName) {
                         // If we're viewing a category, reload it with new spare parts setting
                         loadCategoryParts(currentCategoryName);
@@ -567,7 +567,7 @@
             // Setup view mode toggle
             const categoryViewBtn = document.getElementById('categoryViewBtn');
             const listViewBtn = document.getElementById('listViewBtn');
-            
+
             if (categoryViewBtn) {
                 categoryViewBtn.addEventListener('change', function() {
                     if (this.checked) {
@@ -588,7 +588,7 @@
         function loadCategoryParts(categoryName) {
             // Track the current category
             currentCategoryName = categoryName;
-            
+
             // Show loading spinner
             document.getElementById('category-overview').style.display = 'none';
             document.getElementById('parts-section').style.display = 'block';
@@ -609,23 +609,23 @@
             const globalToggle = document.getElementById('global-toggle-spare-parts');
             const detailsToggle = document.getElementById('toggle-spare-parts');
             const includeSpare = globalToggle ? globalToggle.checked : (detailsToggle ? detailsToggle.checked : true);
-            
+
             // Get current set filter value
             const setFilterInput = document.getElementById('set_filter_input');
             const setFilter = setFilterInput ? setFilterInput.value.trim() : '';
-            
+
             // Properly encode the category name for the URL
             const encodedCategoryName = encodeURIComponent(categoryName);
             let url = `/missing_parts_category/${encodedCategoryName}?include_spare=${includeSpare}`;
-            
+
             // Add set filter if provided
             if (setFilter) {
                 url += `&set_filter=${encodeURIComponent(setFilter)}`;
             }
-            
+
             console.log('Loading category:', categoryName);
             console.log('URL:', url);
-            
+
             fetch(url)
                 .then(response => {
                     console.log('Response status:', response.status);
@@ -637,19 +637,19 @@
                 .then(data => {
                     console.log('Received data:', data.length, 'items');
                     currentCategoryParts = data;
-                    
+
                     // Only hide spinner and show table after successful data load
                     document.getElementById('loading-spinner').style.display = 'none';
                     document.getElementById('parts-table-container').style.display = 'block';
-                    
+
                     renderPartsTable(data);
                 })
                 .catch(error => {
                     console.error('Error loading category parts:', error);
-                    
+
                     // Only show error if we're still in loading state
                     if (document.getElementById('loading-spinner').style.display !== 'none') {
-                        document.getElementById('loading-spinner').innerHTML = 
+                        document.getElementById('loading-spinner').innerHTML =
                             `<div class="alert alert-danger">
                                 <h5>Error loading parts</h5>
                                 <p>${error.message}</p>
@@ -663,7 +663,7 @@
         function showCategoryOverview() {
             // Clear current category when going back to overview
             currentCategoryName = null;
-            
+
             document.getElementById('parts-section').style.display = 'none';
             document.getElementById('category-overview').style.display = 'block';
         }
@@ -678,7 +678,7 @@
             document.getElementById('category-overview').style.display = 'none';
             document.getElementById('parts-section').style.display = 'none';
             document.getElementById('all-parts-list-section').style.display = 'block';
-            
+
             // Load all parts if not already loaded
             if (allPartsList.length === 0) {
                 loadAllPartsList();
@@ -693,19 +693,19 @@
             // Get spare parts filter state from global toggle
             const globalSpareToggle = document.getElementById('global-toggle-spare-parts');
             const includeSpare = globalSpareToggle ? globalSpareToggle.checked : true;
-            
+
             // Get current set filter value
             const setFilterInput = document.getElementById('set_filter_input');
             const setFilter = setFilterInput ? setFilterInput.value.trim() : '';
-            
+
             // Build URL
             let url = `/missing_parts_all?include_spare=${includeSpare}`;
             if (setFilter) {
                 url += `&set_filter=${encodeURIComponent(setFilter)}`;
             }
-            
+
             console.log('Loading all parts list, URL:', url);
-            
+
             fetch(url)
                 .then(response => {
                     if (!response.ok) {
@@ -716,16 +716,16 @@
                 .then(data => {
                     console.log('Received all parts:', data.length, 'items');
                     allPartsList = data;
-                    
+
                     // Hide spinner, show table
                     document.getElementById('list-loading-spinner').style.display = 'none';
                     document.getElementById('all-parts-table-container').style.display = 'block';
-                    
+
                     renderAllPartsTable(data);
                 })
                 .catch(error => {
                     console.error('Error loading all parts:', error);
-                    document.getElementById('list-loading-spinner').innerHTML = 
+                    document.getElementById('list-loading-spinner').innerHTML =
                         `<div class="alert alert-danger">
                             <h5>Error loading parts list</h5>
                             <p>${error.message}</p>
@@ -748,11 +748,11 @@
 
             parts.forEach((part, index) => {
                 const row = document.createElement('tr');
-                
+
                 // Color cell background using color_rgb (format: RRGGBB)
                 const colorHex = part.color_rgb ? `#${part.color_rgb}` : '';
                 const colorStyle = colorHex ? `background-color: ${colorHex}; color: ${getContrastColor(colorHex)};` : '';
-                
+
                 // Safely access all properties with fallbacks
                 const imgUrl = part.img_url || '/static/default_image.png';
                 const name = part.name || 'Unknown';
@@ -767,7 +767,7 @@
                 const location = part.location || 'Not stored';
                 const isSpare = part.is_spare || false;
                 const colorId = part.color_id || '';
-                
+
                 row.innerHTML = `
                     <td><img src="${imgUrl}" alt="${name}" style="max-width: 50px; cursor: pointer;" class="part-image-thumbnail" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-url="${imgUrl}" data-part-name="${name}"></td>
                     <td>${type}</td>
@@ -779,8 +779,8 @@
                     <td style="${colorStyle}">${color}</td>
                     <td>${totalQty}</td>
                     <td>
-                        <input type="number" 
-                               class="form-control form-control-sm have-quantity-input" 
+                        <input type="number"
+                               class="form-control form-control-sm have-quantity-input"
                                value="${haveQty}"
                                min="0"
                                max="${totalQty}"
@@ -901,11 +901,11 @@
             // Get state from global toggle
             const globalToggle = document.getElementById('global-toggle-spare-parts');
             const includeSpare = globalToggle ? globalToggle.checked : true;
-            
+
             // Get current set filter value
             const setFilterInput = document.getElementById('set_filter_input');
             const setFilter = setFilterInput ? setFilterInput.value.trim() : '';
-            
+
             // Show loading spinner
             const categoryGrid = document.getElementById('category-grid');
             categoryGrid.innerHTML = `
@@ -916,13 +916,13 @@
                     <p>Updating categories...</p>
                 </div>
             `;
-            
+
             // Build URL with parameters
             let url = `/missing_parts_categories?include_spare=${includeSpare}`;
             if (setFilter) {
                 url += `&set_filter=${encodeURIComponent(setFilter)}`;
             }
-            
+
             // Fetch updated categories
             fetch(url)
                 .then(response => response.json())
@@ -944,12 +944,12 @@
                             </div>
                         `;
                     });
-                    
+
                     if (categories.length === 0) {
                         // Get current set filter for the message
                         const setFilterInput = document.getElementById('set_filter_input');
                         const currentFilter = setFilterInput ? setFilterInput.value.trim() : '';
-                        
+
                         if (currentFilter) {
                             categoryHtml = `
                                 <div class="col-12">
@@ -978,7 +978,7 @@
                             `;
                         }
                     }
-                    
+
                     categoryGrid.innerHTML = categoryHtml;
                 })
                 .catch(error => {
@@ -999,7 +999,7 @@
                 // Check if there's a filter applied
                 const setFilterInput = document.getElementById('set_filter_input');
                 const currentFilter = setFilterInput ? setFilterInput.value.trim() : '';
-                
+
                 if (currentFilter) {
                     tbody.innerHTML = `
                         <tr>
@@ -1044,7 +1044,7 @@
                     <p>Processing ${parts.length} parts...</p>
                 `;
                 document.getElementById('loading-spinner').style.display = 'block';
-                
+
                 // Small delay to allow the processing message to show
                 setTimeout(() => {
                     renderPartsTableContent(parts);
@@ -1057,17 +1057,17 @@
 
         function renderPartsTableContent(parts) {
             const tbody = document.getElementById('parts-table-body');
-            
+
             parts.forEach(item => {
                 const row = document.createElement('tr');
                 row.className = `missing-item ${item.is_spare ? 'spare-part' : ''} ${item.status === 'Not Available' ? 'table-danger' : 'table-success'}`;
-                
+
                 const colorTextColor = parseInt(item.color_rgb, 16) > 0x888888 ? 'black' : 'white';
-                
+
                 row.innerHTML = `
                     <td>
-                        <img src="${item.img_url}" alt="${item.name}" class="img-thumbnail" width="50" 
-                             style="cursor: pointer;" onclick="showImageModal('${item.img_url}', '${item.name} (${item.item_id})')" 
+                        <img src="${item.img_url}" alt="${item.name}" class="img-thumbnail" width="50"
+                             style="cursor: pointer;" onclick="showImageModal('${item.img_url}', '${item.name} (${item.item_id})')"
                              onerror="this.src='/static/default_image.png'"
                              loading="lazy">
                     </td>
@@ -1082,11 +1082,11 @@
                     </td>
                     <td>${item.total_quantity}</td>
                     <td>
-                        <input type="number" class="form-control form-control-sm" 
-                               value="${item.have_quantity || 0}" 
-                               min="0" 
+                        <input type="number" class="form-control form-control-sm"
+                               value="${item.have_quantity || 0}"
+                               min="0"
                                max="${item.total_quantity}"
-                               data-part-id="${item.item_id}" 
+                               data-part-id="${item.item_id}"
                                data-set-id="${item.internal_id}"
                                data-part-type="${item.type}"
                                data-is-spare="${item.is_spare}"
@@ -1098,7 +1098,7 @@
                     <td>${item.location}</td>
                     <td>${item.is_spare ? 'Yes' : 'No'}</td>
                 `;
-                
+
                 tbody.appendChild(row);
             });
 
@@ -1115,7 +1115,7 @@
         function attachSortingHandlers() {
             const table = document.getElementById('missing-parts-table');
             const headers = table.querySelectorAll('th.sortable');
-            
+
             headers.forEach(header => {
                 header.addEventListener('click', function () {
                     const column = header.getAttribute('data-column');
@@ -1171,7 +1171,7 @@
             const colorId = input.dataset.colorId;
             const totalQuantity = parseInt(input.dataset.totalQuantity);
             const newQuantity = parseInt(input.value);
-            
+
             if (isNaN(newQuantity) || newQuantity < 0) {
                 alert('Please enter a valid quantity (0 or greater)');
                 input.focus();
@@ -1187,7 +1187,7 @@
             // Show loading state
             input.disabled = true;
             const originalValue = input.value;
-            
+
             // Prepare the update data with more specific identification
             const updateData = {
                 part_id: partId,
@@ -1219,30 +1219,30 @@
                 console.log('Response data:', data);
                 if (data.success) {
                     console.log('Successfully updated quantity');
-                    
+
                     // Update row styling based on whether all parts are owned
                     const row = input.closest('tr');
                     const neededQuantity = totalQuantity;
                     const missingQuantity = neededQuantity - newQuantity;
-                    
+
                     if (missingQuantity === 0) {
                         // Part is no longer missing - remove from table with animation
                         row.style.transition = 'opacity 0.5s ease-out';
                         row.style.opacity = '0.3';
                         row.style.backgroundColor = '#d4edda';
-                        
+
                         // Show completion message briefly, then remove row
                         setTimeout(() => {
                             row.style.opacity = '0';
                             setTimeout(() => {
                                 row.remove();
-                                
+
                                 // Check if table is now empty
                                 const tbody = document.getElementById('parts-table-body');
                                 if (tbody.children.length === 0) {
                                     tbody.innerHTML = '<tr><td colspan="12" class="text-center text-success"><strong>🎉 All parts completed for this category!</strong></td></tr>';
                                 }
-                                
+
                                 // Update category count in overview (if we came from there)
                                 updateCategoryOverviewCounts();
                             }, 500);
@@ -1253,7 +1253,7 @@
                         row.style.opacity = '1';
                         row.style.backgroundColor = '';
                     }
-                    
+
                     // Show success feedback
                     input.style.borderColor = '#28a745';
                     setTimeout(() => {
@@ -1277,15 +1277,15 @@
                 input.disabled = false;
             });
         }
-        
+
         function clearSetFilter() {
             // Clear the input field
             document.getElementById('set_filter_input').value = '';
-            
+
             // Submit the form to reload without the filter
             document.getElementById('set-filter-form').submit();
         }
-        
+
         function showFilterHelp() {
             const helpElement = document.getElementById('filter-help');
             if (helpElement.style.display === 'none') {
@@ -1294,22 +1294,22 @@
                 helpElement.style.display = 'none';
             }
         }
-        
+
         function toggleSparePartsNoResults(checkbox) {
             // Get current filter value
             const setFilter = new URLSearchParams(window.location.search).get('set_filter') || '';
             const includeSpare = checkbox.checked;
-            
+
             // Redirect with updated spare parts setting
             const url = new URL(window.location.href);
             url.searchParams.set('include_spare', includeSpare ? 'true' : 'false');
             if (setFilter) {
                 url.searchParams.set('set_filter', setFilter);
             }
-            
+
             window.location.href = url.toString();
         }
-        
+
         // Page Loading Control
         window.addEventListener('load', function() {
             const loadingOverlay = document.getElementById('pageLoadingOverlay');
@@ -1317,7 +1317,7 @@
                 loadingOverlay.style.display = 'none';
             }
         });
-        
+
         // Show spinner on navigation away or form submit
         window.addEventListener('beforeunload', function() {
             const loadingOverlay = document.getElementById('pageLoadingOverlay');
@@ -1325,7 +1325,7 @@
                 loadingOverlay.style.display = 'flex';
             }
         });
-        
+
         // Show spinner when submitting forms (filters)
         document.addEventListener('DOMContentLoaded', function() {
             const forms = document.querySelectorAll('form');

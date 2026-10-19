@@ -16,7 +16,7 @@
 
     {% include "favicon_links.html" %}    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <meta charset="UTF-8">
 
-    
+
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    <title>Brick Manager - Home</title>    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -24,23 +24,23 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">        <title>Brick Manager</title>
 
-    
 
-    <style>    <!-- Favicon -->    
+
+    <style>    <!-- Favicon -->
 
         .hero-section {
 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);    {% include "favicon_links.html" %}    
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);    {% include "favicon_links.html" %}
 
             color: white;
 
-            padding: 100px 0;        
+            padding: 100px 0;
 
             text-align: center;
 
         }    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    <!-- Favicon -->
 
-        
+
 
         .feature-card {    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">    {% include "favicon_links.html" %}
 
@@ -52,9 +52,9 @@
 
         }        {% include "favicon_links.html" %}
 
-        
 
-        .feature-card:hover {    <style>    
+
+        .feature-card:hover {    <style>
 
             transform: translateY(-5px);
 
@@ -84,7 +84,7 @@
 
     {% include 'navbar.html' %}                }
 
-    
+
 
     <!-- Hero Section -->        .feature-card {        .quick-scan-btn {
 
@@ -112,7 +112,7 @@
 
     </section>        .feature-card:hover {            display: block;
 
-    
+
 
     <!-- Features Section -->            transform: translateY(-5px);        }
 
@@ -148,7 +148,7 @@
 
                 </div>        }        .loading-spinner {
 
-                
+
 
                 <!-- Set Management -->    </style>            display: none;
 
@@ -200,7 +200,7 @@
 
                 </div>                <i class="bi bi-camera-fill"></i> Start Scanning            }
 
-                
+
 
                 <!-- Part Lookup -->            </a>        }
 
@@ -252,7 +252,7 @@
 
                 </div>                <!-- AI Detection -->    {% include 'navbar.html' %}
 
-                
+
 
                 <!-- Data Sync -->                <div class="col-md-4">    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -284,7 +284,7 @@
 
     </section>                            </div>            <button type="button" class="btn btn-primary btn-lg quick-scan-btn" id="quickScanBtn">
 
-    
+
 
     <!-- Quick Actions -->                        </div>                📷 Quick Scan
 
@@ -294,7 +294,7 @@
 
             <h2 class="text-center mb-5">Quick Actions</h2>
 
-            <div class="row justify-content-center">                </div>            
+            <div class="row justify-content-center">                </div>
 
                 <div class="col-md-8">
 
@@ -302,23 +302,23 @@
 
                         <a href="{{ url_for('manual_entry.manual') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
 
-                            <div>                <!-- Set Management -->            <input type="file" 
+                            <div>                <!-- Set Management -->            <input type="file"
 
                                 <i class="bi bi-plus-circle text-success me-2"></i>
 
-                                <strong>Add Set Manually</strong>                <div class="col-md-4">                   id="cameraInput" 
+                                <strong>Add Set Manually</strong>                <div class="col-md-4">                   id="cameraInput"
 
                                 <p class="mb-0 text-muted">Add a new LEGO set to your collection</p>
 
-                            </div>                    <a href="{{ url_for('set_maintain.maintain') }}" class="text-decoration-none">                   name="file" 
+                            </div>                    <a href="{{ url_for('set_maintain.maintain') }}" class="text-decoration-none">                   name="file"
 
                             <i class="bi bi-chevron-right"></i>
 
-                        </a>                        <div class="card feature-card">                   accept="image/*" 
+                        </a>                        <div class="card feature-card">                   accept="image/*"
 
                         <a href="{{ url_for('main.ai_detection') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
 
-                            <div>                            <div class="card-body text-center">                   capture="environment" 
+                            <div>                            <div class="card-body text-center">                   capture="environment"
 
                                 <i class="bi bi-camera text-primary me-2"></i>
 
@@ -326,7 +326,7 @@
 
                                 <p class="mb-0 text-muted">Scan parts with your camera instantly</p>
 
-                            </div>                                <h3 class="card-title">Set Management</h3>            
+                            </div>                                <h3 class="card-title">Set Management</h3>
 
                             <i class="bi bi-chevron-right"></i>
 
@@ -350,19 +350,19 @@
 
                         <a href="{{ url_for('box_maintenance.box_maintenance') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
 
-                            <div>                                <input type="file" 
+                            <div>                                <input type="file"
 
                                 <i class="bi bi-printer text-info me-2"></i>
 
-                                <strong>Generate Labels</strong>                <!-- Storage Organization -->                       id="fileInput" 
+                                <strong>Generate Labels</strong>                <!-- Storage Organization -->                       id="fileInput"
 
                                 <p class="mb-0 text-muted">Create labels for your storage boxes</p>
 
-                            </div>                <div class="col-md-4">                       name="file" 
+                            </div>                <div class="col-md-4">                       name="file"
 
                             <i class="bi bi-chevron-right"></i>
 
-                        </a>                    <a href="{{ url_for('storage.storage') }}" class="text-decoration-none">                       accept="image/*" 
+                        </a>                    <a href="{{ url_for('storage.storage') }}" class="text-decoration-none">                       accept="image/*"
 
                     </div>
 
@@ -418,7 +418,7 @@
 
                 </div></body>
 
-                
+
 
                 <!-- Set Search --><script>
 
@@ -599,23 +599,23 @@
             .then(html => {
                 // Hide loading
                 loadingSpinner.classList.remove('show');
-                
+
                 // Parse the response
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                
+
                 // Extract results from the response
                 const resultCards = doc.querySelectorAll('.card');
-                
+
                 if (resultCards.length > 0) {
                     resultsContent.innerHTML = '';
                     resultCards.forEach(card => {
                         resultsContent.appendChild(card.cloneNode(true));
                     });
-                    
+
                     // Apply color styling to dynamically loaded color cells
                     applyColorStyling();
-                    
+
                     // Set up increment buttons for dynamically loaded content
                     setupIncrementButtons();
                     resultsPanel.classList.add('show');
@@ -638,7 +638,7 @@
         function applyColorStyling() {
             const colorCells = document.querySelectorAll('.color-cell');
             console.log('Applying color styling to', colorCells.length, 'cells');
-            
+
             colorCells.forEach(cell => {
                 const colorRgb = cell.dataset.colorHex || 'FFFFFF';
                 console.log('Color:', colorRgb, 'for', cell.textContent.trim());
@@ -653,7 +653,7 @@
         function setupIncrementButtons() {
             const haveInputs = document.querySelectorAll('.have-quantity-input');
             console.log('Setting up', haveInputs.length, 'quantity inputs');
-            
+
             haveInputs.forEach(input => {
                 input.addEventListener('change', function() {
                     const partId = this.dataset.partId;
@@ -661,10 +661,10 @@
                     const newHave = parseInt(this.value);
                     const row = this.closest('tr');
                     const missingCell = row.querySelector('.missing-quantity');
-                    
+
                     // Calculate new missing value
                     const newMissing = needed - newHave;
-                    
+
                     // Update backend
                     fetch(`/upload/update_part_quantity/${partId}`, {
                         method: 'POST',
@@ -678,7 +678,7 @@
                         if (data.success) {
                             // Update missing display
                             missingCell.innerHTML = `<strong>${newMissing}</strong>`;
-                            
+
                             // Change styling based on completion
                             if (newMissing === 0) {
                                 row.style.backgroundColor = '#d4edda';

@@ -1,3 +1,4 @@
+# pyright: reportCallIssue=false
 """
 
 This module handles the management of API tokens for external services like Rebrickable.

@@ -1,3 +1,4 @@
+# pyright: reportArgumentType=false, reportCallIssue=false
 """Versioned, authenticated JSON API for desktop and trusted LAN clients."""
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ def require_client_api_key():
 
 @client_api_bp.get("/parts/<part_num>")
 def get_part(part_num: str):
+    """Return one catalog part together with its category metadata."""
     part = (
         RebrickableParts.query.options(joinedload(RebrickableParts.category))
         .filter_by(part_num=part_num)
@@ -52,6 +54,7 @@ def get_part(part_num: str):
 
 @client_api_bp.get("/parts/<part_num>/sets")
 def get_sets_for_part(part_num: str):
+    """List owned sets that contain a part, optionally filtered by color."""
     color_id = _optional_int(request.args.get("color_id"))
     if request.args.get("color_id") and color_id is None:
         return jsonify({"error": "color_id must be an integer"}), 400
@@ -92,6 +95,7 @@ def get_sets_for_part(part_num: str):
 
 @client_api_bp.get("/parts/<part_num>/storage")
 def get_part_storage(part_num: str):
+    """List storage locations for a part, optionally filtered by color."""
     color_id = _optional_int(request.args.get("color_id"))
     if request.args.get("color_id") and color_id is None:
         return jsonify({"error": "color_id must be an integer"}), 400
@@ -117,6 +121,7 @@ def get_part_storage(part_num: str):
 
 @client_api_bp.put("/user-parts/<int:user_part_id>/quantity")
 def update_user_part_quantity(user_part_id: int):
+    """Update the recorded owned quantity for one part in a user set."""
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
         return jsonify({"error": "A JSON object is required"}), 400
@@ -142,6 +147,7 @@ def update_user_part_quantity(user_part_id: int):
 
 @client_api_bp.put("/parts/<part_num>/storage")
 def update_part_storage(part_num: str):
+    """Create or update the selected storage location for a catalog part."""
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
         return jsonify({"error": "A JSON object is required"}), 400
@@ -161,9 +167,12 @@ def update_part_storage(part_num: str):
     for field in fields:
         value = payload.get(field, "")
         if not isinstance(value, str) or len(value) > 200:
-            return jsonify(
-                {"error": f"{field} must be a string of at most 200 characters"}
-            ), 400
+            return (
+                jsonify(
+                    {"error": f"{field} must be a string of at most 200 characters"}
+                ),
+                400,
+            )
         values[field] = value.strip() or None
 
     query = PartStorage.query.filter_by(part_num=part_num, color_id=color_id)

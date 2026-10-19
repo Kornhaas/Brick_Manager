@@ -5,7 +5,7 @@ The pre-commit hooks were automatically adding malformed TODO docstrings that ca
 
 ## Root Cause
 1. **scripts/pre_commit_analysis.py** was automatically inserting `"""TODO: Add docstring for function_name."""` lines
-2. **flake8-docstrings** was complaining about missing docstrings 
+2. **flake8-docstrings** was complaining about missing docstrings
 3. These TODO insertions were malformed and caused syntax errors
 4. Black couldn't format files with syntax errors
 
@@ -16,7 +16,7 @@ The pre-commit hooks were automatically adding malformed TODO docstrings that ca
 - **Change:** Replaced automatic TODO docstring insertion with a pass statement
 - **Result:** No more malformed TODO comments will be automatically added
 
-### 2. Updated Flake8 Configuration  
+### 2. Updated Flake8 Configuration
 - **File:** `.pre-commit-config.yaml` (line 37)
 - **Change:** Added docstring error codes to ignore list: `D100,D101,D102,D103,D104,D105,D106,D107`
 - **Result:** Flake8 no longer complains about missing docstrings
@@ -24,7 +24,7 @@ The pre-commit hooks were automatically adding malformed TODO docstrings that ca
 ### 3. Added Proper Docstrings
 - **Files Modified:**
   - `brick_manager/routes/__init__.py` - Added module docstring
-  - `brick_manager/services/__init__.py` - Added module docstring  
+  - `brick_manager/services/__init__.py` - Added module docstring
   - `brick_manager/tests/__init__.py` - Added module docstring
   - `brick_manager/app.py` - Added function docstrings for fallback functions
   - `brick_manager/routes/import_rebrickable_data.py` - Added function docstrings
@@ -35,14 +35,14 @@ The pre-commit hooks were automatically adding malformed TODO docstrings that ca
 
 ### 4. Verification
 - ✅ All 59 Python files have valid syntax (no syntax errors)
-- ✅ Black formatting works on all files 
+- ✅ Black formatting works on all files
 - ✅ Pytest collection works (405 tests collected)
 - ✅ Flake8 runs without docstring complaints
 
 ## Prevention Strategy
 The combination of:
 1. Disabling automatic TODO generation
-2. Ignoring docstring warnings in flake8  
+2. Ignoring docstring warnings in flake8
 3. Adding proper docstrings where needed
 
 ...ensures this issue will never happen again.
@@ -55,7 +55,7 @@ poetry run python -c "import ast, os; [print(f'ERROR: {f}') if not ast.parse(ope
 # Test Black formatting
 poetry run black --check brick_manager/
 
-# Test pytest collection  
+# Test pytest collection
 poetry run pytest --collect-only -q
 
 # Test flake8 with new config

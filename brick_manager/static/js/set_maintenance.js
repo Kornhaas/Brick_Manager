@@ -9,37 +9,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Table Sorting Functionality
   let sortDirection = {}; // Track sort direction for each column
-  
+
   function initTableSorting() {
     const table = document.getElementById('sets-table-main');
     if (!table) return;
-    
+
     const headers = table.querySelectorAll('thead th[data-sort]');
-    
+
     headers.forEach(header => {
       header.addEventListener('click', () => {
         const sortKey = header.getAttribute('data-sort');
         const tbody = table.querySelector('tbody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
-        
+
         // Toggle sort direction
         sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
-        
+
         // Update visual indicators
         headers.forEach(h => {
           const icon = h.querySelector('.sort-icon');
           icon.className = 'bi bi-arrow-down-up sort-icon';
         });
-        
+
         const currentIcon = header.querySelector('.sort-icon');
-        currentIcon.className = sortDirection[sortKey] === 'asc' 
+        currentIcon.className = sortDirection[sortKey] === 'asc'
           ? 'bi bi-arrow-up sort-icon'
           : 'bi bi-arrow-down sort-icon';
-        
+
         // Sort rows
         rows.sort((a, b) => {
           let aVal = '', bVal = '';
-          
+
           switch(sortKey) {
             case 'set_num':
               aVal = a.cells[1].textContent.trim();
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
               bVal = b.cells[7].querySelector('input[type="checkbox"]').checked ? 1 : 0;
               return sortDirection[sortKey] === 'asc' ? aVal - bVal : bVal - aVal;
           }
-          
+
           // String comparison
           if (sortDirection[sortKey] === 'asc') {
             return aVal.localeCompare(bVal, undefined, {numeric: true});
@@ -78,13 +78,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return bVal.localeCompare(aVal, undefined, {numeric: true});
           }
         });
-        
+
         // Reappend sorted rows
         rows.forEach(row => tbody.appendChild(row));
       });
     });
   }
-  
+
   // Enhanced Search and Filter Functionality
   function initSearchAndFilter() {
     const searchInput = document.getElementById('search-input');
@@ -97,15 +97,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const clearFiltersBtn = document.getElementById('clear-filters');
     const filterCount = document.getElementById('filter-count');
     const filterChevron = document.getElementById('filter-chevron');
-    
+
     // Populate theme filter dynamically
     function populateThemeFilter() {
       const table = document.getElementById('sets-table-main');
       if (!table || !themeFilter) return;
-      
+
       const themes = new Set();
       const rows = table.querySelectorAll('tbody tr');
-      
+
       rows.forEach(row => {
         const themeCell = row.cells[3];
         if (themeCell) {
@@ -113,10 +113,10 @@ document.addEventListener("DOMContentLoaded", function () {
           if (theme) themes.add(theme);
         }
       });
-      
+
       // Clear existing options except "All Themes"
       themeFilter.innerHTML = '<option value="">All Themes</option>';
-      
+
       // Add theme options alphabetically
       Array.from(themes).sort().forEach(theme => {
         const option = document.createElement('option');
@@ -125,11 +125,11 @@ document.addEventListener("DOMContentLoaded", function () {
         themeFilter.appendChild(option);
       });
     }
-    
+
     // Update filter count and chevron
     function updateFilterIndicators() {
       let activeFilters = 0;
-      
+
       if (searchInput && searchInput.value.trim()) activeFilters++;
       if (statusFilter && statusFilter.value) activeFilters++;
       if (setNumberFilter && setNumberFilter.value.trim()) activeFilters++;
@@ -137,11 +137,11 @@ document.addEventListener("DOMContentLoaded", function () {
       if (themeFilter && themeFilter.value) activeFilters++;
       if (labelFilter && labelFilter.value) activeFilters++;
       if (completionFilter && completionFilter.value) activeFilters++;
-      
+
       if (filterCount) {
         filterCount.textContent = activeFilters;
       }
-      
+
       // Update chevron based on collapse state
       const advancedFilters = document.getElementById('advancedFilters');
       if (filterChevron && advancedFilters) {
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
     }
-    
+
     function filterTable() {
       const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
       const statusValue = statusFilter ? statusFilter.value.toLowerCase() : '';
@@ -162,11 +162,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const labelValue = labelFilter ? labelFilter.value : '';
       const completionValue = completionFilter ? completionFilter.value : '';
       const table = document.getElementById('sets-table-main');
-      
+
       if (!table) return;
-      
+
       const rows = table.querySelectorAll('tbody tr');
-      
+
       rows.forEach(row => {
         const setNum = row.cells[1].textContent.toLowerCase();
         const setName = row.cells[2].textContent.toLowerCase();
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const status = statusBadge ? statusBadge.textContent.toLowerCase() : '';
         const labelCheckbox = row.cells[7].querySelector('input[type="checkbox"]');
         const isLabelPrinted = labelCheckbox ? labelCheckbox.checked : false;
-        
+
         // Parse parts completion
         const partsCell = row.cells[5];
         const partsText = partsCell ? partsCell.textContent.trim() : '';
@@ -186,36 +186,36 @@ document.addEventListener("DOMContentLoaded", function () {
           const total = parseInt(partsMatch[2]);
           completionPercentage = total > 0 ? (owned / total) * 100 : 0;
         }
-        
+
         // Apply filters
-        const matchesSearch = !searchTerm || 
-          setNum.includes(searchTerm) || 
-          setName.includes(searchTerm) || 
+        const matchesSearch = !searchTerm ||
+          setNum.includes(searchTerm) ||
+          setName.includes(searchTerm) ||
           theme.includes(searchTerm);
-          
+
         const matchesStatus = !statusValue || status.includes(statusValue);
         const matchesSetNum = !setNumValue || setNum.includes(setNumValue);
         const matchesSetName = !setNameValue || setName.includes(setNameValue);
         const matchesTheme = !themeValue || theme.includes(themeValue);
-        
-        const matchesLabel = !labelValue || 
+
+        const matchesLabel = !labelValue ||
           (labelValue === 'printed' && isLabelPrinted) ||
           (labelValue === 'not-printed' && !isLabelPrinted);
-          
+
         const matchesCompletion = !completionValue ||
           (completionValue === 'complete' && completionPercentage >= 100) ||
           (completionValue === 'incomplete' && completionPercentage > 0 && completionPercentage < 100) ||
           (completionValue === 'no-parts' && completionPercentage === 0);
-        
-        const isVisible = matchesSearch && matchesStatus && matchesSetNum && 
+
+        const isVisible = matchesSearch && matchesStatus && matchesSetNum &&
                          matchesSetName && matchesTheme && matchesLabel && matchesCompletion;
-        
+
         row.style.display = isVisible ? '' : 'none';
       });
-      
+
       updateFilterIndicators();
     }
-    
+
     // Clear all filters
     function clearAllFilters() {
       if (searchInput) searchInput.value = '';
@@ -225,10 +225,10 @@ document.addEventListener("DOMContentLoaded", function () {
       if (themeFilter) themeFilter.value = '';
       if (labelFilter) labelFilter.value = '';
       if (completionFilter) completionFilter.value = '';
-      
+
       filterTable();
     }
-    
+
     // Event listeners
     if (searchInput) searchInput.addEventListener('input', filterTable);
     if (statusFilter) statusFilter.addEventListener('change', filterTable);
@@ -238,19 +238,19 @@ document.addEventListener("DOMContentLoaded", function () {
     if (labelFilter) labelFilter.addEventListener('change', filterTable);
     if (completionFilter) completionFilter.addEventListener('change', filterTable);
     if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', clearAllFilters);
-    
+
     // Handle collapse events for chevron
     const advancedFilters = document.getElementById('advancedFilters');
     if (advancedFilters) {
       advancedFilters.addEventListener('shown.bs.collapse', updateFilterIndicators);
       advancedFilters.addEventListener('hidden.bs.collapse', updateFilterIndicators);
     }
-    
+
     // Initialize
     populateThemeFilter();
     updateFilterIndicators();
   }
-  
+
   // Initialize sorting and filtering
   initTableSorting();
   initSearchAndFilter();
@@ -504,7 +504,7 @@ document.addEventListener("DOMContentLoaded", function () {
           });
 
           document.getElementById("status").value = data.status;
-          
+
           // Attach auto-save listeners to all quantity inputs after all tables are populated
           attachAutoSaveListeners();
         })
@@ -649,22 +649,22 @@ document.addEventListener('DOMContentLoaded', function() {
       '#spare-parts-table-body tr td:nth-child(8), ' +
       '#minifigs-table-body table tbody tr td:nth-child(7)'
     );
-    
+
     locationCells.forEach(cell => {
       cell.style.cursor = 'pointer';
       cell.title = 'Click to edit location';
-      
+
       cell.addEventListener('click', function() {
         const row = this.closest('tr');
         const partNumCell = row.querySelector('td:nth-child(2)');
         const partNameCell = row.querySelector('td:nth-child(3)');
-        
+
         if (!partNumCell || !partNameCell) return;
-        
+
         const partNum = partNumCell.textContent.trim();
         const partName = partNameCell.textContent.trim();
         const currentLocation = this.textContent.trim();
-        
+
         // Parse current location (format: "Location Level-Box" or "Not Specified")
         let location = '', level = '', box = '';
         if (currentLocation !== 'Not Specified') {
@@ -676,27 +676,27 @@ document.addEventListener('DOMContentLoaded', function() {
             box = levelBox[1] || '';
           }
         }
-        
+
         // Populate modal
         document.getElementById('modalPartNum').textContent = partNum;
         document.getElementById('modalPartName').textContent = partName;
         document.getElementById('modalLocation').value = location;
         document.getElementById('modalLevel').value = level;
         document.getElementById('modalBox').value = box;
-        
+
         // Store reference to the cell for updating later
         const modal = document.getElementById('locationModal');
         modal.setAttribute('data-current-cell', '');
         modal.currentCell = this;
         modal.currentPartNum = partNum;
-        
+
         // Show modal
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
       });
     });
   }
-  
+
   // Save location button handler
   const saveLocationBtn = document.getElementById('saveLocationBtn');
   if (saveLocationBtn) {
@@ -707,11 +707,11 @@ document.addEventListener('DOMContentLoaded', function() {
       const level = document.getElementById('modalLevel').value.trim();
       const box = document.getElementById('modalBox').value.trim();
       const statusDiv = document.getElementById('locationUpdateStatus');
-      
+
       // Clear previous status
       statusDiv.style.display = 'none';
       statusDiv.className = 'alert';
-      
+
       // Send update request
       fetch('/update_part_location', {
         method: 'POST',
@@ -732,12 +732,12 @@ document.addEventListener('DOMContentLoaded', function() {
           if (modal.currentCell) {
             modal.currentCell.textContent = data.location || 'Not Specified';
           }
-          
+
           // Show success message
           statusDiv.className = 'alert alert-success';
           statusDiv.textContent = data.message;
           statusDiv.style.display = 'block';
-          
+
           // Close modal after short delay
           setTimeout(() => {
             bootstrap.Modal.getInstance(modal).hide();
@@ -758,7 +758,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-  
+
   // Initialize handlers when viewing set details
   const originalViewDetails = document.querySelectorAll('.view-details');
   originalViewDetails.forEach(button => {
@@ -775,16 +775,16 @@ function attachAutoSaveListeners() {
     // Remove any existing listeners to prevent duplicates
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
-    
+
     newInput.addEventListener('change', function() {
       const partId = this.getAttribute('data-part-id');
       const partType = this.getAttribute('data-part-type');
       const newQuantity = parseInt(this.value);
       const row = this.closest('tr');
-      
+
       // Visual feedback - add a subtle border color while saving
       this.style.borderColor = '#ffc107';
-      
+
       fetch('/set_maintain/update_part_quantity', {
         method: 'POST',
         headers: {
@@ -801,20 +801,20 @@ function attachAutoSaveListeners() {
         if (data.success) {
           // Update the input with the clamped value from server
           this.value = data.have_quantity;
-          
+
           // Update row color based on completion status
           if (data.have_quantity >= data.total_quantity) {
             row.className = 'table-success';
           } else {
             row.className = 'table-danger';
           }
-          
+
           // Visual feedback - green border for success
           this.style.borderColor = '#28a745';
           setTimeout(() => {
             this.style.borderColor = '';
           }, 1000);
-          
+
           console.log('Quantity auto-saved successfully');
         } else {
           // Visual feedback - red border for error

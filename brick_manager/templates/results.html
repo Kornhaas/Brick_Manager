@@ -6,8 +6,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Scan Results</title>
-    
-    
+
+
     <!-- Favicon -->
     {% include "favicon_links.html" %}
     <link
@@ -47,15 +47,15 @@
             </div>
             <div class="part-details">
               <p class="mb-2">
-                <strong><i class="bi bi-hash"></i> Part ID:</strong> 
+                <strong><i class="bi bi-hash"></i> Part ID:</strong>
                 <span class="badge bg-secondary">{{ item['id'] }}</span>
               </p>
               <p class="mb-2">
-                <strong><i class="bi bi-tag"></i> Category:</strong> 
+                <strong><i class="bi bi-tag"></i> Category:</strong>
                 {{ item['category_name'] | default('Unknown Category') }}
               </p>
               <p class="mb-2">
-                <strong><i class="bi bi-graph-up"></i> Match Score:</strong> 
+                <strong><i class="bi bi-graph-up"></i> Match Score:</strong>
                 <span class="badge bg-info">{{ "%.2f" % (item['score'] * 100) }}%</span>
               </p>
             </div>
@@ -71,7 +71,7 @@
               </button>
               {% endif %}
             </h5>
-            
+
             <!-- Display Mode -->
             <div id="storage-display-{{ item['id'] }}" class="alert alert-success" role="alert" style="{% if not item['lookup_info'] %}display: none;{% endif %}">
               <div class="storage-info">
@@ -95,7 +95,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Edit/Add Mode -->
             <div id="storage-edit-{{ item['id'] }}" class="alert alert-info" role="alert" style="{% if item['lookup_info'] %}display: none;{% endif %}"
               <h6><i class="bi bi-pencil-square"></i> {% if item['lookup_info'] %}Edit{% else %}Add{% endif %} Storage Location</h6>
@@ -103,20 +103,20 @@
                 <div class="row g-2">
                   <div class="col-4">
                     <label class="form-label"><strong>Schrank:</strong></label>
-                    <input type="number" class="form-control" id="input-location-{{ item['id'] }}" 
-                           value="{{ item['lookup_info']['location'] if item['lookup_info'] else '' }}" 
+                    <input type="number" class="form-control" id="input-location-{{ item['id'] }}"
+                           value="{{ item['lookup_info']['location'] if item['lookup_info'] else '' }}"
                            min="1" required autocomplete="off">
                   </div>
                   <div class="col-4">
                     <label class="form-label"><strong>Fach:</strong></label>
-                    <input type="number" class="form-control" id="input-level-{{ item['id'] }}" 
-                           value="{{ item['lookup_info']['level'] if item['lookup_info'] else '' }}" 
+                    <input type="number" class="form-control" id="input-level-{{ item['id'] }}"
+                           value="{{ item['lookup_info']['level'] if item['lookup_info'] else '' }}"
                            min="1" required autocomplete="off">
                   </div>
                   <div class="col-4">
                     <label class="form-label"><strong>Box:</strong></label>
-                    <input type="number" class="form-control" id="input-box-{{ item['id'] }}" 
-                           value="{{ item['lookup_info']['box'] if item['lookup_info'] else '' }}" 
+                    <input type="number" class="form-control" id="input-box-{{ item['id'] }}"
+                           value="{{ item['lookup_info']['box'] if item['lookup_info'] else '' }}"
                            min="1" required autocomplete="off">
                   </div>
                 </div>
@@ -145,7 +145,7 @@
             </h5>
             {% if item['missing_sets'] and item['missing_sets']|length > 0 %}
             <div class="alert alert-danger" role="alert">
-              <i class="bi bi-exclamation-circle"></i> 
+              <i class="bi bi-exclamation-circle"></i>
               <strong>Missing in {{ item['missing_sets']|length }} set(s)</strong>
             </div>
             <div class="table-responsive">
@@ -170,10 +170,10 @@
                     </td>
                     <td><span class="badge bg-primary">{{ set_info['needed'] }}</span></td>
                     <td>
-                      <input type="number" 
-                             class="form-control form-control-sm have-quantity-input" 
-                             value="{{ set_info['have'] }}" 
-                             min="0" 
+                      <input type="number"
+                             class="form-control form-control-sm have-quantity-input"
+                             value="{{ set_info['have'] }}"
+                             min="0"
                              max="{{ set_info['needed'] }}"
                              data-part-id="{{ set_info['part_id'] }}"
                              data-needed="{{ set_info['needed'] }}"
@@ -189,7 +189,7 @@
             </div>
             {% else %}
             <div class="alert alert-success" role="alert">
-              <i class="bi bi-check-circle-fill"></i> 
+              <i class="bi bi-check-circle-fill"></i>
               <strong>Complete!</strong> This part is not missing in any of your sets.
             </div>
             {% endif %}
@@ -207,15 +207,15 @@
         console.log('Toggle edit mode for part:', partId);
         const displayDiv = document.getElementById(`storage-display-${partId}`);
         const editDiv = document.getElementById(`storage-edit-${partId}`);
-        
+
         console.log('Display div:', displayDiv);
         console.log('Edit div:', editDiv);
-        
+
         if (!displayDiv || !editDiv) {
           console.error('Could not find storage divs for part:', partId);
           return;
         }
-        
+
         if (displayDiv.style.display === 'none') {
           displayDiv.style.display = 'block';
           editDiv.style.display = 'none';
@@ -224,21 +224,21 @@
           editDiv.style.display = 'block';
         }
       }
-      
+
       // Save storage location
       function saveStorage(event, partId) {
         event.preventDefault();
-        
+
         const location = document.getElementById(`input-location-${partId}`).value;
         const level = document.getElementById(`input-level-${partId}`).value;
         const box = document.getElementById(`input-box-${partId}`).value;
         const saveButton = event.target.querySelector('button[type="submit"]') || event.target;
-        
+
         // Show spinner and disable button
         const originalButtonHTML = saveButton.innerHTML;
         saveButton.disabled = true;
         saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving...';
-        
+
         // Save to backend
         fetch('/upload/save_storage_location', {
           method: 'POST',
@@ -257,7 +257,7 @@
             document.getElementById(`display-location-${partId}`).textContent = location;
             document.getElementById(`display-level-${partId}`).textContent = level;
             document.getElementById(`display-box-${partId}`).textContent = box;
-            
+
             // Switch to display mode
             document.getElementById(`storage-display-${partId}`).style.display = 'block';
             document.getElementById(`storage-edit-${partId}`).style.display = 'none';
@@ -275,7 +275,7 @@
           alert('Failed to save storage location');
         });
       }
-      
+
       function generateLabel(location, level, box) {
         if (!location || !level || !box) {
           alert("Please provide valid location, level, and box.");
@@ -315,7 +315,7 @@
       document.addEventListener('DOMContentLoaded', function() {
         // Apply color styling to color cells (matching set_maintenance.js)
         const colorCells = document.querySelectorAll('.color-cell');
-        
+
         colorCells.forEach(cell => {
           const colorRgb = cell.dataset.colorHex || 'FFFFFF';
           const brightness = parseInt(colorRgb, 16);
@@ -328,7 +328,7 @@
 
         // Handle input field changes
         const haveInputs = document.querySelectorAll('.have-quantity-input');
-        
+
         haveInputs.forEach(input => {
           input.addEventListener('change', function() {
             const partId = this.dataset.partId;
@@ -336,10 +336,10 @@
             const newHave = parseInt(this.value);
             const row = this.closest('tr');
             const missingCell = row.querySelector('.missing-quantity');
-            
+
             // Calculate new missing value
             const newMissing = needed - newHave;
-            
+
             // Update backend
             fetch(`/upload/update_part_quantity/${partId}`, {
               method: 'POST',

@@ -99,9 +99,7 @@ def test_get_part_returns_authoritative_database_record(client, part_records):
 
 
 def test_get_sets_returns_real_missing_quantities(client, part_records):
-    response = client.get(
-        "/api/v1/parts/3001/sets?color_id=5", headers=HEADERS
-    )
+    response = client.get("/api/v1/parts/3001/sets?color_id=5", headers=HEADERS)
     assert response.status_code == 200
     assert response.json["items"] == [
         {
@@ -122,9 +120,7 @@ def test_get_sets_returns_real_missing_quantities(client, part_records):
 
 
 def test_get_storage_returns_server_location_fields(client, part_records):
-    response = client.get(
-        "/api/v1/parts/3001/storage?color_id=5", headers=HEADERS
-    )
+    response = client.get("/api/v1/parts/3001/storage?color_id=5", headers=HEADERS)
     assert response.status_code == 200
     item = response.json["items"][0]
     assert (item["location"], item["level"], item["box"]) == ("Shelf A", "2", "B-07")
@@ -172,7 +168,5 @@ def test_update_storage_rejects_non_string_fields(client, part_records):
 
 
 def test_invalid_color_filter_is_rejected(client):
-    response = client.get(
-        "/api/v1/parts/3001/sets?color_id=red", headers=HEADERS
-    )
+    response = client.get("/api/v1/parts/3001/sets?color_id=red", headers=HEADERS)
     assert response.status_code == 400

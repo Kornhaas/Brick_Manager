@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Set Maintenance</title>
-    
+
     <!-- Favicon -->
     {% include "favicon_links.html" %}
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    
+
     <!-- Page Loading Spinner CSS -->
     <style>
         .page-loading-overlay {
@@ -27,13 +27,13 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .page-loading-spinner {
             width: 3rem;
             height: 3rem;
             margin-bottom: 1rem;
         }
-        
+
         .page-loading-text {
             font-size: 1.1rem;
             color: #6c757d;
@@ -74,16 +74,16 @@
         <!-- Sets Table -->
         <div id="sets-table">
             <h2 class="mt-4">Your User Sets</h2>
-            
+
             <!-- Quick Search -->
             <div class="row mb-3">
                 <div class="col-md-8">
-                    <input type="text" class="form-control form-control-lg" id="search-input" 
+                    <input type="text" class="form-control form-control-lg" id="search-input"
                            placeholder="🔍 Quick search by set number, name, or theme...">
                 </div>
                 <div class="col-md-4">
-                    <button class="btn btn-outline-secondary w-100" type="button" 
-                            data-bs-toggle="collapse" data-bs-target="#advancedFilters" 
+                    <button class="btn btn-outline-secondary w-100" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#advancedFilters"
                             aria-expanded="false" aria-controls="advancedFilters">
                         <i class="bi bi-funnel"></i> Advanced Filters
                         <i class="bi bi-chevron-down" id="filter-chevron"></i>
@@ -110,21 +110,21 @@
                                 <option value="missingparts">Missing Parts</option>
                             </select>
                         </div>
-                        
+
                         <!-- Set Number Filter -->
                         <div class="col-md-3">
                             <label for="set-number-filter" class="form-label">Set Number</label>
-                            <input type="text" class="form-control" id="set-number-filter" 
+                            <input type="text" class="form-control" id="set-number-filter"
                                    placeholder="e.g. 75192, 10221">
                         </div>
-                        
+
                         <!-- Set Name Filter -->
                         <div class="col-md-3">
                             <label for="set-name-filter" class="form-label">Set Name</label>
-                            <input type="text" class="form-control" id="set-name-filter" 
+                            <input type="text" class="form-control" id="set-name-filter"
                                    placeholder="e.g. Millennium Falcon">
                         </div>
-                        
+
                         <!-- Theme Filter -->
                         <div class="col-md-3">
                             <label for="theme-filter" class="form-label">Theme</label>
@@ -134,7 +134,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <!-- Additional Filter Row -->
                     <div class="row g-3 mt-2">
                         <!-- Label Status Filter -->
@@ -146,7 +146,7 @@
                                 <option value="not-printed">Not Printed</option>
                             </select>
                         </div>
-                        
+
                         <!-- Parts Completion Filter -->
                         <div class="col-md-3">
                             <label for="completion-filter" class="form-label">Parts Completion</label>
@@ -157,7 +157,7 @@
                                 <option value="no-parts">No Parts Collected</option>
                             </select>
                         </div>
-                        
+
                         <!-- Clear Filters Button -->
                         <div class="col-md-6 d-flex align-items-end">
                             <button type="button" class="btn btn-outline-warning me-2" id="clear-filters">
@@ -170,7 +170,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="table-responsive">
                 <table class="table table-bordered table-striped" id="sets-table-main">
                     <thead class="table-secondary">
@@ -275,7 +275,7 @@
                                     <br><small class="text-danger">Not Printed</small>
                                 {% endif %}
                                 <div class="form-check mt-1">
-                                    <input class="form-check-input set-label-printed-checkbox" type="checkbox" 
+                                    <input class="form-check-input set-label-printed-checkbox" type="checkbox"
                                            id="set-label-{{ entry.user_set.id }}" data-user-set-id="{{ entry.user_set.id }}"
                                            {{ 'checked' if entry.user_set.label_printed else '' }}>
                                 </div>
@@ -486,7 +486,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/set_maintenance.js') }}"></script>
-    
+
     <!-- Page Loading Control -->
     <script>
         // Hide loading spinner when page is fully loaded
@@ -496,7 +496,7 @@
                 loadingOverlay.style.display = 'none';
             }
         });
-        
+
         // Show spinner on navigation away
         window.addEventListener('beforeunload', function() {
             const loadingOverlay = document.getElementById('pageLoadingOverlay');

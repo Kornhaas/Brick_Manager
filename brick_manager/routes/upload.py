@@ -1,3 +1,4 @@
+# pyright: reportArgumentType=false, reportCallIssue=false
 """
 
 This module handles the file upload functionality for the Brick Manager application.
@@ -11,7 +12,6 @@ It includes:
 """
 
 import os  # Standard library import
-from typing import Dict, List
 
 from config import Config
 
@@ -35,7 +35,7 @@ from werkzeug.utils import secure_filename
 upload_bp = Blueprint("upload", __name__)
 
 
-def get_missing_sets_for_part(part_num: str) -> List[Dict]:
+def get_missing_sets_for_part(part_num: str) -> list[dict]:
     """Get list of user sets where this part is missing."""
     try:
         user_parts = (

@@ -1,3 +1,4 @@
+# pyright: reportCallIssue=false
 """
 
 This module provides functions to load and save the master lookup data

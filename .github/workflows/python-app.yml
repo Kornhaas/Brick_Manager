@@ -26,16 +26,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: 🧪 Test Python ${{ matrix.python-version }}
-    
+
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
-        
+
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v5
-    
+
     - name: 🐍 Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
@@ -45,7 +45,7 @@ jobs:
       uses: abatilo/actions-poetry@v2
       with:
         poetry-version: latest
-    
+
     - name: 🗄️ Cache dependencies
       uses: actions/cache@v5
       with:
@@ -67,20 +67,20 @@ jobs:
       run: |
         echo "## 🧪 Test Results (Python ${{ matrix.python-version }})" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
+
         # Set PYTHONPATH to include the brick_manager directory
         export PYTHONPATH="${PWD}/brick_manager:${PYTHONPATH}"
-        
+
         # Run tests with coverage from the root directory
         if poetry run pytest --verbose > test_output.txt 2>&1; then
           echo "✅ **All tests passed!**" >> $GITHUB_STEP_SUMMARY
-          
+
           # Extract coverage percentage if available
           if grep -q "TOTAL" test_output.txt; then
             COVERAGE=$(grep "TOTAL" test_output.txt | awk '{print $NF}')
             echo "**Coverage:** $COVERAGE" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Also show test summary
           if grep -q "passed" test_output.txt; then
             TEST_SUMMARY=$(grep "====.*passed" test_output.txt | tail -1)
@@ -113,4 +113,3 @@ jobs:
           coverage.xml
         if-no-files-found: warn
         retention-days: 30
-

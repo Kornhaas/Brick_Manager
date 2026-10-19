@@ -29,37 +29,37 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
-    
+
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v5
-      
+
     - name: 🐍 Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
-        
+
     - name: 📦 Install Poetry
       uses: abatilo/actions-poetry@v2
       with:
         poetry-version: latest
-        
+
     - name: 🔧 Configure Poetry
       run: |
         poetry config virtualenvs.create false
-        
+
     - name: 📚 Install dependencies
       run: |
         poetry install --only main,dev --no-root
-        
+
     - name: 🧹 Run Pylint
       run: |
         echo "## 🧹 Pylint Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
+
         # Set PYTHONPATH to include the brick_manager directory
         export PYTHONPATH="${PWD}/brick_manager:${PYTHONPATH}"
-        
+
         # Run pylint and capture output
         if poetry run pylint brick_manager/ --output-format=text --reports=yes > pylint_output.txt 2>&1; then
           echo "✅ **No linting issues found!**" >> $GITHUB_STEP_SUMMARY
@@ -70,11 +70,11 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat pylint_output.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          
+
           # Don't fail the build for linting issues, just warn
           echo "::warning::Pylint found code quality issues. Check the summary for details."
         fi
-        
+
     - name: 📤 Upload Pylint report
       uses: actions/upload-artifact@v5
       if: always()

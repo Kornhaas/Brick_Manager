@@ -3,7 +3,7 @@
 max-line-length = 88
 
 # Error codes to ignore
-ignore = 
+ignore =
     # Line too long (handled by black)
     E501,
     # Whitespace before ':' (handled by black)
@@ -40,7 +40,7 @@ ignore =
     D402
 
 # Exclude test files and specific directories from some checks
-exclude = 
+exclude =
     .git,
     __pycache__,
     .venv,

@@ -21,7 +21,7 @@ from flask import (
 )
 from models import db
 from sqlalchemy import text
-from werkzeug.utils import safe_join
+from werkzeug.security import safe_join
 
 main_bp = Blueprint("main", __name__)
 

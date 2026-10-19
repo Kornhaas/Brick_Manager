@@ -1,7 +1,5 @@
 #!/bin/bash
-"""
-Install Git hooks for the Brick Manager project.
-"""
+# Install Git hooks for the Brick Manager project.
 
 set -e
 
@@ -10,34 +8,7 @@ echo "🔧 Installing Git hooks..."
 # Create hooks directory if it doesn't exist
 mkdir -p .git/hooks
 
-# Create pre-commit hook
-cat > .git/hooks/pre-commit << 'EOF'
-#!/bin/bash
-#
-# Pre-commit hook for Brick Manager
-# Runs code quality checks before allowing commit
-#
-
-set -e
-
-echo "🔍 Running pre-commit checks..."
-
-# Run the pre-commit analysis script
-if ! poetry run python scripts/pre_commit_analysis.py --no-tests; then
-    echo ""
-    echo "❌ Pre-commit checks failed!"
-    echo "Please fix the issues above before committing."
-    echo ""
-    echo "To run checks manually: ./scripts/manual_precommit.sh"
-    echo "To bypass this hook (not recommended): git commit --no-verify"
-    exit 1
-fi
-
-echo "✅ Pre-commit checks passed!"
-EOF
-
-# Make the hook executable
-chmod +x .git/hooks/pre-commit
+poetry run pre-commit install --install-hooks
 
 # Create commit-msg hook for conventional commits
 cat > .git/hooks/commit-msg << 'EOF'
@@ -72,36 +43,10 @@ EOF
 
 chmod +x .git/hooks/commit-msg
 
-# Create pre-push hook
-cat > .git/hooks/pre-push << 'EOF'
-#!/bin/bash
-#
-# Pre-push hook for running tests
-#
-
-set -e
-
-echo "🧪 Running tests before push..."
-
-if ! poetry run pytest --tb=short -q; then
-    echo ""
-    echo "❌ Tests failed! Cannot push."
-    echo "Please fix failing tests before pushing."
-    echo ""
-    echo "To bypass this hook (not recommended): git push --no-verify"
-    exit 1
-fi
-
-echo "✅ All tests passed!"
-EOF
-
-chmod +x .git/hooks/pre-push
-
 echo "✅ Git hooks installed successfully!"
 echo ""
 echo "Hooks installed:"
-echo "  • pre-commit: Runs code quality checks"
+echo "  • pre-commit: Runs Ruff linting and formatting"
 echo "  • commit-msg: Enforces conventional commit format"
-echo "  • pre-push: Runs tests before push"
 echo ""
 echo "To bypass hooks (not recommended): use --no-verify flag"

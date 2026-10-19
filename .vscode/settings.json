@@ -9,15 +9,35 @@
     ],
     "python.testing.cwd": "${workspaceFolder}",
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python-envs.workspaceSearchPaths": [
+        "${workspaceFolder}/.venv"
+    ],
+    "python-envs.pythonProjects": [
+        {
+            "path": "${workspaceFolder}",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
+    ],
     "python.terminal.activateEnvironment": true,
     "python.envFile": "${workspaceFolder}/.env",
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.typeCheckingMode": "off",
+    "basedpyright.analysis.typeCheckingMode": "basic",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
     "files.exclude": {
         "**/__pycache__": true,
         "**/*.pyc": true,
         "**/htmlcov": true,
         "**/.coverage": true,
         "**/.pytest_cache": true
-    }
+    },
+    "python.languageServer": "None"
 }

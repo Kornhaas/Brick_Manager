@@ -1,6 +1,6 @@
 [MAIN]
 init-hook = "import sys; sys.path.insert(0, 'brick_manager')"
-ignore = migrations,htmlcov,data,instance
+ignore = migrations,htmlcov,data,instance,tests
 jobs = 0
 
 [FORMAT]
@@ -43,3 +43,6 @@ disable =
     # Dynamic Flask/SQLAlchemy attributes produce false positives:
     no-member,
     no-name-in-module,
+    # Test modules are excluded; production has intentional import cycles.
+    cyclic-import,
+    line-too-long

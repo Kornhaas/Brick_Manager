@@ -32,8 +32,10 @@ bandit = "^1.7.5"
 mypy = "^1.8.0"
 pre-commit = "^3.6.0"
 flake8-docstrings = "^1.7.0"
-flake8-import-order = "^0.18.2"
 autoflake = "^2.3.1"
+ruff = "^0.17.1"
+basedpyright = "^1.40.2"
+pip-audit = "^2.10.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -121,7 +123,7 @@ exclude = [
 
 [tool.bandit]
 exclude_dirs = ["tests", "migrations"]
-skips = ["B101"]  # Skip assert_used test
+skips = ["B101"]
 
 [tool.flake8]
 max-line-length = 88
@@ -134,3 +136,23 @@ exclude = [
     "build",
     "dist"
 ]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+extend-exclude = ["brick_manager/migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]
+
+[tool.basedpyright]
+include = ["brick_manager"]
+exclude = [
+    "brick_manager/migrations",
+    "brick_manager/tests",
+    ".venv",
+    "data",
+]
+extraPaths = ["brick_manager"]
+typeCheckingMode = "basic"

@@ -100,9 +100,8 @@ def download_and_extract_csv(file_name):
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
     logging.info(f"Extracting {gz_path} ...")
-    with gzip.open(gz_path, "rb") as f_in:
-        with open(csv_path, "wb") as f_out:
-            shutil.copyfileobj(f_in, f_out)
+    with gzip.open(gz_path, "rb") as f_in, open(csv_path, "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
     os.remove(gz_path)
     return csv_path
 

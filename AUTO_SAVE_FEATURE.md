@@ -83,7 +83,7 @@ Added `User_Parts` to the imports in `set_maintain.py` to support the new endpoi
 - **Yellow border**: Saving in progress
 - **Green border (1s)**: Successfully saved
 - **Red border (2s)**: Save failed
-- **Row color change**: 
+- **Row color change**:
   - Red background → Green when part becomes complete
   - Green background → Red when part becomes incomplete
 
@@ -104,7 +104,7 @@ Added `User_Parts` to the imports in `set_maintain.py` to support the new endpoi
 2. Click "View Details" on any set
 3. Change a quantity value in any of the tables:
    - Non-Spare Parts
-   - Spare Parts  
+   - Spare Parts
    - Minifigure Parts
 4. Observe:
    - Input border turns yellow briefly

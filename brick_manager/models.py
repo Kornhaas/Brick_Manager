@@ -17,7 +17,6 @@ Models include:
 
 # pylint: disable=C0301,R0903,C0103
 
-
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Boolean, ForeignKey, Integer, Text
 

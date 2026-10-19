@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Building Instructions - Brick Manager</title>
-    
+
     <!-- Favicon -->
     {% include "favicon_links.html" %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -119,7 +119,7 @@
         <!-- No Sets Message -->
         {% if sets|length == 0 and not error %}
         <div class="alert alert-info text-center" role="alert">
-            <i class="fas fa-info-circle"></i> No building instructions found. 
+            <i class="fas fa-info-circle"></i> No building instructions found.
             <br><small>Add instruction files to the <code>data/instructions</code> folder with folders named like "SET_NUMBER-description"</small>
         </div>
         {% endif %}
@@ -130,8 +130,8 @@
             <div class="col set-item" data-set-num="{{ set.set_num }}" data-set-name="{{ set.set_name|lower }}">
                 <div class="card set-card">
                     <div class="position-relative">
-                        <img src="{{ set.img_url or url_for('static', filename='default_image.png') }}" 
-                             class="card-img-top set-image" 
+                        <img src="{{ set.img_url or url_for('static', filename='default_image.png') }}"
+                             class="card-img-top set-image"
                              alt="{{ set.set_name }}">
                         <span class="badge bg-primary file-badge">
                             <i class="fas fa-file"></i> {{ set.file_count }}
@@ -151,8 +151,8 @@
                         <div class="instruction-files">
                             {% for file in set.files %}
                             <div class="file-item">
-                                <a href="{{ url_for('building_instructions.download_instruction_file', file_path=file.path) }}" 
-                                   target="_blank" 
+                                <a href="{{ url_for('building_instructions.download_instruction_file', file_path=file.path) }}"
+                                   target="_blank"
                                    title="{{ file.name }}">
                                     {% if file.type == 'pdf' %}
                                     <i class="fas fa-file-pdf file-icon"></i>
@@ -187,7 +187,7 @@
             setItems.forEach(item => {
                 const setNum = item.dataset.setNum.toLowerCase();
                 const setName = item.dataset.setName;
-                
+
                 if (setNum.includes(searchTerm) || setName.includes(searchTerm)) {
                     item.style.display = '';
                     visibleCount++;

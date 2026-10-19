@@ -9,7 +9,7 @@ This document provides an overview of all GitHub Actions workflows in the Bricks
 
 **Purpose**: Complete CI/CD pipeline with Docker image building, testing, and deployment preparation.
 
-**Triggers**: 
+**Triggers**:
 - Push to `main`, `develop` branches
 - Version tags (`v*.*.*`)
 - Pull requests to `main`
@@ -25,7 +25,7 @@ This document provides an overview of all GitHub Actions workflows in the Bricks
 
 **Purpose**: Fast feedback on code changes with comprehensive testing across multiple Python versions.
 
-**Triggers**: 
+**Triggers**:
 - Push/PR with Python file changes
 - Changes to `pyproject.toml`, `poetry.lock`, or test files
 
@@ -40,7 +40,7 @@ This document provides an overview of all GitHub Actions workflows in the Bricks
 
 **Purpose**: Continuous code quality monitoring with linting across multiple Python versions.
 
-**Triggers**: 
+**Triggers**:
 - Push/PR with Python file changes
 - Changes to `pyproject.toml` or `poetry.lock`
 
@@ -78,7 +78,7 @@ The workflows are designed to run efficiently:
 
 ### Expected Run Times
 - 🧹 **Code Quality**: ~2-3 minutes
-- 🧪 **Python Tests**: ~3-5 minutes  
+- 🧪 **Python Tests**: ~3-5 minutes
 - 🐳 **Docker Build**: ~8-12 minutes (includes multi-platform build)
 
 ### Resource Optimization
@@ -97,7 +97,7 @@ DOCKER_TOKEN        # Docker Hub access token
 ### Optional Secrets (for automatic deployment)
 ```
 DEPLOY_HOST         # Production server hostname
-DEPLOY_USER         # SSH username for deployment  
+DEPLOY_USER         # SSH username for deployment
 DEPLOY_SSH_KEY      # Private SSH key for server access
 ```
 

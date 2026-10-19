@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Part Location Management</title>
-    
-    
+
+
     <!-- Favicon -->
     {% include "favicon_links.html" %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <div class="container mt-5">
         <h1>Manage Part Locations</h1>
-    
+
         <!-- Collapsible Card for Select Category Form -->
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -48,7 +48,7 @@
                 </div>
             </div>
         </div>
-   
+
         <!-- Parts Table -->
         {% if parts %}
         <h2 class="mt-4">
@@ -91,24 +91,24 @@
                         <td>{{ part.part_num }}</td>
                         <td>{{ part.name }}</td>
                         <td>
-                            <input type="number" class="form-control location-input" name="location_{{ part.part_num }}" 
+                            <input type="number" class="form-control location-input" name="location_{{ part.part_num }}"
                                    placeholder="Enter Location" value="{{ part.location }}" step="1" min="0"
                                    data-part-num="{{ part.part_num }}">
                         </td>
                         <td>
-                            <input type="number" class="form-control location-input" name="level_{{ part.part_num }}" 
+                            <input type="number" class="form-control location-input" name="level_{{ part.part_num }}"
                                    placeholder="Enter Level" value="{{ part.level }}" step="1" min="0"
                                    data-part-num="{{ part.part_num }}">
                         </td>
                         <td>
-                            <input type="number" class="form-control location-input" name="box_{{ part.part_num }}" 
+                            <input type="number" class="form-control location-input" name="box_{{ part.part_num }}"
                                    placeholder="Enter Box" value="{{ part.box }}" step="1" min="0"
                                    data-part-num="{{ part.part_num }}">
                         </td>
                         <td>{{ part.print_of if part.print_of else 'None' }}</td>
                         <td>
                             {% if part.location or part.level or part.box %}
-                            <button type="button" class="btn btn-sm btn-danger delete-location-btn" 
+                            <button type="button" class="btn btn-sm btn-danger delete-location-btn"
                                     data-part-num="{{ part.part_num }}"
                                     data-part-name="{{ part.name }}"
                                     title="Delete storage location">
@@ -235,12 +235,12 @@
                 btn.addEventListener('click', function () {
                     const partNum = this.dataset.partNum;
                     const partName = this.dataset.partName;
-                    
+
                     if (confirm(`Are you sure you want to delete the storage location for:\n\nPart: ${partNum}\nName: ${partName}\n\nThis action cannot be undone.`)) {
                         // Disable button and show loading state
                         this.disabled = true;
                         this.innerHTML = '<i class="bi bi-hourglass-split"></i> Deleting...';
-                        
+
                         fetch('/delete_location', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -254,10 +254,10 @@
                                 row.querySelectorAll('.location-input').forEach(input => {
                                     input.value = '';
                                 });
-                                
+
                                 // Update button state
                                 this.closest('td').innerHTML = '<span class="text-muted">No location</span>';
-                                
+
                                 // Show success notification
                                 showNotification();
                             } else if (data.error) {

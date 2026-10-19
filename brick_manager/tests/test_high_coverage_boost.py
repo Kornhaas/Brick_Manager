@@ -1,16 +1,7 @@
 """High coverage tests to reach 80% coverage target."""
 
-from unittest.mock import Mock, patch
-
-import pytest
-from flask import Flask
-
 # Import modules directly to boost coverage
 import brick_manager.app as app_module
-
-
-
-
 
 
 class TestRoutesCoverage:
@@ -71,10 +62,6 @@ class TestConfigCoverage:
         assert hasattr(config, "REBRICKABLE_TOKEN") or hasattr(
             Config, "REBRICKABLE_TOKEN"
         )
-
-
-
-
 
 
 class TestUtilityFunctions:

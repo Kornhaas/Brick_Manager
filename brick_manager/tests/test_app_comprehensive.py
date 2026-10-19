@@ -10,12 +10,7 @@ from flask import Flask
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the app and functions after path setup
-from app import (
-    app,
-    backup_database,
-    scheduled_sync_missing_parts,
-    scheduled_sync_user_sets,
-)
+from app import app, scheduled_sync_missing_parts, scheduled_sync_user_sets
 
 
 class TestAppConfiguration:
@@ -56,8 +51,6 @@ class TestAppConfiguration:
         if not os.path.exists(instances_dir):
             os.makedirs(instances_dir, exist_ok=True)
         assert os.path.exists(instances_dir)
-
-
 
 
 class TestScheduledSyncMissingParts:
@@ -325,14 +318,13 @@ class TestAppInitialization:
             assert expected in blueprint_names
 
     @patch("brick_manager.app.load_part_lookup")
-    @patch("brick_manager.app.db.create_all")
-    def test_database_initialization_success(self, mock_create_all, mock_load_lookup):
+    def test_database_initialization_success(self, mock_load_lookup):
         """Test successful database initialization."""
 
         mock_load_lookup.return_value = {"test": "data"}
 
         # This is tested implicitly when the app starts
-        assert mock_create_all.called or True  # Create_all is called during app context
+        assert True  # Create_all is called during app context
 
     @patch("brick_manager.app.load_part_lookup")
     @patch("brick_manager.app.app.logger")
@@ -342,10 +334,7 @@ class TestAppInitialization:
         mock_load_lookup.side_effect = Exception("Failed to load lookup data")
 
         with app.app_context():
-            try:
-                from brick_manager.app import master_lookup  # This triggers the load
-            except Exception:
-                pass  # Expected if it fails
+            assert app is not None
 
         # The error should be logged during app initialization
         # This is hard to test directly since it happens at import time

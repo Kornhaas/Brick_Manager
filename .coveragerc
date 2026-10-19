@@ -1,6 +1,6 @@
 [run]
 source = brick_manager
-omit = 
+omit =
     */tests/*
     */test_*.py
     brick_manager/tests/*

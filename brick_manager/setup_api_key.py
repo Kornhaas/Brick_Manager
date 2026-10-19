@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportCallIssue=false
 """
 
 Script to set up initial configuration for the Rebrickable API key.

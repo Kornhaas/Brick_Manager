@@ -12,6 +12,7 @@ import time
 
 import requests
 from models import User_Set, UserMinifigurePart
+
 from services.token_service import get_rebrickable_api_key, get_rebrickable_user_token
 
 logger = logging.getLogger(__name__)
@@ -103,9 +104,7 @@ def find_inventory_part_id_from_user_sets(part_num, color_id, user_set_num=None)
                 )
                 update_rate_limit_tracker(True)  # Rate limited
                 # Continue with just the user_set_num if we have it
-        except (
-            Exception
-        ) as e:  # nosec B110 - Intentional: backup lookup failure should not stop processing
+        except Exception as e:  # nosec B110 - Intentional: backup lookup failure should not stop processing
             logger.debug(f"Backup lookup failed for {part_num}/{color_id}: {e}")
             # If backup lookup fails, continue with what we have
 
@@ -562,7 +561,7 @@ def add_lost_parts_individually(parts_data, headers, user_token):
                     # Rate limited - this is expected for large sync operations
                     rate_limited_count += 1
                     logger.info(
-                        f"Rate limited on part {part_data.get('inv_part_id')} (attempt {i+1}/{len(parts_data)})"
+                        f"Rate limited on part {part_data.get('inv_part_id')} (attempt {i + 1}/{len(parts_data)})"
                     )
                     # Don't treat this as an error - just note it for summary
                 else:
@@ -917,9 +916,9 @@ def add_parts_to_part_list(list_id, parts_to_add):
         if success:
             result["message"] = f"Successfully added {total_added} parts to part list"
             if total_rate_limited > 0:
-                result[
-                    "message"
-                ] += f" ({total_rate_limited} parts were rate limited and will be synced in next run)"
+                result["message"] += (
+                    f" ({total_rate_limited} parts were rate limited and will be synced in next run)"
+                )
         else:
             result["message"] = (
                 f"Failed to add parts to part list. Errors: {'; '.join(total_errors[:3])}"
@@ -1074,7 +1073,7 @@ def clear_part_list(list_id):
         for i, part in enumerate(current_parts):
             if should_skip_api_calls():
                 logger.warning(
-                    f"Stopping part removal at {i+1}/{len(current_parts)} due to rate limiting"
+                    f"Stopping part removal at {i + 1}/{len(current_parts)} due to rate limiting"
                 )
                 break
 
@@ -1099,7 +1098,7 @@ def clear_part_list(list_id):
 
                 elif response and response.status_code == 429:
                     logger.warning(
-                        f"Rate limited removing part {part_num}/{color_id} ({i+1}/{len(current_parts)})"
+                        f"Rate limited removing part {part_num}/{color_id} ({i + 1}/{len(current_parts)})"
                     )
                     update_rate_limit_tracker(True)
                     # Continue trying with rate limiting delays
@@ -1275,7 +1274,7 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
         for i, part in enumerate(parts_to_remove):
             if should_skip_api_calls():
                 logger.warning(
-                    f"Stopping part removal at {i+1}/{len(parts_to_remove)} due to rate limiting"
+                    f"Stopping part removal at {i + 1}/{len(parts_to_remove)} due to rate limiting"
                 )
                 break
 
@@ -1299,7 +1298,7 @@ def remove_parts_from_part_list(list_id, parts_to_remove):
 
                 elif response and response.status_code == 429:
                     logger.warning(
-                        f"Rate limited removing part {part_num}/{color_id} ({i+1}/{len(parts_to_remove)})"
+                        f"Rate limited removing part {part_num}/{color_id} ({i + 1}/{len(parts_to_remove)})"
                     )
                     update_rate_limit_tracker(True)
                     # Continue trying with rate limiting delays

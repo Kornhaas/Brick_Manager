@@ -26,6 +26,10 @@ help:
 	@echo "  make check       - Run all checks without auto-fixes"
 	@echo "  make format      - Format code (Black + isort)"
 	@echo "  make lint        - Run linters (flake8 + pylint)"
+	@echo "  make ruff        - Run Ruff lint and format checks"
+	@echo "  make typecheck   - Run BasedPyright type checks"
+	@echo "  make audit       - Audit Python dependencies for known vulnerabilities"
+	@echo "  make dead-code   - Report likely unused Python code"
 	@echo "  make security    - Run security analysis"
 	@echo "  make test        - Run test suite"
 	@echo "  make test-cov    - Run tests with coverage report"
@@ -162,7 +166,7 @@ setup:
 	@echo "🎉 Setup completed! Please edit .env file and restart with 'make restart'"
 
 # Code Quality & Development Commands
-.PHONY: install test lint format check security clean-code hooks pre-commit
+.PHONY: install test lint format check security clean-code hooks pre-commit ruff typecheck audit dead-code
 
 install:
 	@echo "📦 Installing dependencies with Poetry..."
@@ -189,6 +193,23 @@ lint:
 	@echo "🔍 Running linters..."
 	poetry run flake8 brick_manager/
 	poetry run pylint brick_manager/ --output-format=text --reports=no
+
+ruff:
+	@echo "🔍 Running Ruff checks..."
+	poetry run ruff check brick_manager scripts
+	poetry run ruff format --check brick_manager scripts
+
+typecheck:
+	@echo "🔎 Running BasedPyright..."
+	poetry run basedpyright
+
+audit:
+	@echo "🔒 Auditing Python dependencies..."
+	poetry run pip-audit
+
+dead-code:
+	@echo "🧟 Reporting likely unused code..."
+	poetry run vulture brick_manager --min-confidence 80
 
 security:
 	@echo "🔒 Running security analysis..."

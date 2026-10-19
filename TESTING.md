@@ -32,11 +32,33 @@ poetry run pytest -m "not slow"
 poetry run black --check brick_manager scripts
 poetry run isort --check-only brick_manager scripts
 
+# Fast linting and formatting for changed code
+make ruff
+
+# Production type checks and dependency audit
+make typecheck
+make audit
+
+# Review likely unused code before deleting it
+make dead-code
+
 # Repository quality checks without automatic fixes
 poetry run python scripts/pre_commit_analysis.py --no-fix
 ```
 
 The full pytest configuration is in `pytest.ini`; coverage exclusions are in `.coveragerc`. The configured global coverage floor is currently 16%. This is a minimum release gate, not a claim that every critical path has enough tests.
+
+## Editor and hooks
+
+The development container installs Ruff, BasedPyright, Bandit, Vulture, pytest, and pip-audit through Poetry. VS Code formats Python with Ruff and offers its safe fixes and import organization on an explicit save. BasedPyright checks production code in basic mode and uses `brick_manager/` as an import root.
+
+Install the repository hooks once per clone with:
+
+```bash
+make hooks
+```
+
+The hook runs Ruff only on files included in the commit. The first change to a legacy file can surface existing findings in that file; fix them as part of that change instead of globally weakening the configured rules.
 
 ## Current suite state
 

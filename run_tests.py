@@ -5,7 +5,6 @@ Provides easy commands for running different test suites and generating coverage
 """
 
 import argparse
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -13,14 +12,14 @@ from pathlib import Path
 
 def run_command(cmd, description):
     """Run a command and handle errors."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"🧪 {description}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Command: {' '.join(cmd)}")
     print()
 
     try:
-        result = subprocess.run(cmd, check=True, cwd=Path(__file__).parent)
+        subprocess.run(cmd, check=True, cwd=Path(__file__).parent)
         print(f"✅ {description} completed successfully!")
         return True
     except subprocess.CalledProcessError as e:
@@ -119,13 +118,13 @@ def main():
 
     # Show next steps
     if success:
-        print(f"\n🎉 Test run completed successfully!")
+        print("\n🎉 Test run completed successfully!")
         print("\nNext steps:")
         print("  • View coverage report: python run_tests.py coverage")
         print("  • Run specific tests: python run_tests.py models")
         print("  • Generate HTML report: python run_tests.py all --html")
     else:
-        print(f"\n❌ Test run failed!")
+        print("\n❌ Test run failed!")
         print("\nTroubleshooting:")
         print("  • Check test logs above for specific errors")
         print("  • Run with --verbose for more details")

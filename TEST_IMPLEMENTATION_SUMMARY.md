@@ -35,7 +35,7 @@
 
 **Existing Working Tests:**
 - ✅ `test_brickognize_service.py` - 4 tests passing (79% service coverage)
-- ✅ `test_label_service.py` - 1 test passing (13% service coverage)  
+- ✅ `test_label_service.py` - 1 test passing (13% service coverage)
 - ✅ `test_simple.py` - 2 basic tests passing
 
 #### 3. Test Utilities & Tools
@@ -49,7 +49,7 @@
 [tool:pytest]
 addopts = --cov=brick_manager --cov-report=html --cov-report=xml --cov-report=term-missing
 testpaths = brick_manager/tests
-markers = 
+markers =
     unit: Unit tests
     integration: Integration tests
     slow: Slow tests
@@ -78,7 +78,7 @@ python run_tests.py all --verbose --html --fail-fast
 ### Test Categories & Markers
 - **@pytest.mark.unit** - Fast unit tests
 - **@pytest.mark.integration** - Integration tests
-- **@pytest.mark.slow** - Performance/slow tests  
+- **@pytest.mark.slow** - Performance/slow tests
 - **@pytest.mark.performance** - Performance benchmarks
 
 ## 📈 Test Coverage Analysis

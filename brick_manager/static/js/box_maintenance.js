@@ -159,8 +159,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     card.className = "col-md-4 mb-3";
                     card.innerHTML = `
                         <div class="card h-100">
-                            <img src="${item.image || '/static/default_image.png'}" class="card-img-top" alt="${item.name}" 
-                                 onerror="console.error('Image failed to load:', this.src); this.src='/static/default_image.png'" 
+                            <img src="${item.image || '/static/default_image.png'}" class="card-img-top" alt="${item.name}"
+                                 onerror="console.error('Image failed to load:', this.src); this.src='/static/default_image.png'"
                                  onload="console.log('Image loaded successfully:', this.src)"
                                  style="height: 200px; object-fit: contain;">
                             <div class="card-body">
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 <p class="card-text"><strong>Category:</strong> ${item.category}</p>
                                 <p class="card-text"><strong>Part Number:</strong> ${item.part_num}</p>
                                 <div class="form-check">
-                                    <input class="form-check-input label-printed-checkbox" type="checkbox" 
+                                    <input class="form-check-input label-printed-checkbox" type="checkbox"
                                            id="label-${item.storage_id}" data-storage-id="${item.storage_id}"
                                            ${item.label_printed ? 'checked' : ''}>
                                     <label class="form-check-label" for="label-${item.storage_id}">
@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error("Error generating label:", error);
                 alert(`Failed to generate label: ${error.message}`);
             });
-        
+
     });
 
     // Function to add event listeners for label printed checkboxes
@@ -238,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
             checkbox.addEventListener('change', function() {
                 const storageId = this.getAttribute('data-storage-id');
                 const isChecked = this.checked;
-                
+
                 // Update the database
                 fetch('/box_maintenance/update_label_status', {
                     method: 'POST',

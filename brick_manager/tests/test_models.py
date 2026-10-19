@@ -7,21 +7,7 @@ This test suite validates the functionality of all database models
 in the Bricks Manager application.
 """
 
-from models import (
-    PartStorage,
-    RebrickableColors,
-    RebrickableInventories,
-    RebrickableInventoryParts,
-    RebrickablePartCategories,
-    RebrickableParts,
-    RebrickableSets,
-    RebrickableThemes,
-    User_Minifigures,
-    User_Parts,
-    User_Set,
-    UserMinifigurePart,
-    db,
-)
+from models import RebrickableSets, db
 
 
 class TestRebrickableSets:

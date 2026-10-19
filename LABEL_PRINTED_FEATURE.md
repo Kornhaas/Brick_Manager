@@ -14,7 +14,7 @@ Two tables have been updated with a new `label_printed` column:
 - Added `label_printed` BOOLEAN column (default: FALSE)
 - Tracks whether a label has been printed for each user set
 
-### `part_storage` table  
+### `part_storage` table
 - Added `label_printed` BOOLEAN column (default: FALSE)
 - Tracks whether a label has been printed for each part storage entry
 
@@ -37,7 +37,7 @@ Two tables have been updated with a new `label_printed` column:
   - Updates label_printed status for part storage entries
   - Body: `{"storage_id": int, "label_printed": boolean}`
 
-### Set Maintenance  
+### Set Maintenance
 - `POST /set_maintain/update_label_status`
   - Updates label_printed status for user sets
   - Body: `{"user_set_id": int, "label_printed": boolean}`

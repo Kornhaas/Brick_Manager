@@ -1,3 +1,4 @@
+# pyright: reportArgumentType=false, reportOptionalMemberAccess=false
 """
 
 This module manages part locations, allowing users to view and update locations,

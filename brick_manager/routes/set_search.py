@@ -1,3 +1,4 @@
+# pyright: reportAttributeAccessIssue=false
 """
 
 This module handles the search, retrieval, and addition of Brick sets, parts, and minifigures.

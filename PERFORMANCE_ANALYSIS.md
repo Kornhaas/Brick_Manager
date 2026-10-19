@@ -87,7 +87,7 @@ for part in user_set.parts_in_set:
 # Use bulk query approach:
 all_part_nums = [part.part_num for part in all_missing_parts]
 part_info_bulk = {
-    p.part_num: p for p in 
+    p.part_num: p for p in
     db.session.query(RebrickableParts).filter(RebrickableParts.part_num.in_(all_part_nums)).all()
 }
 ```

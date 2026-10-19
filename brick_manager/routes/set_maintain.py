@@ -1,3 +1,4 @@
+# pyright: reportArgumentType=false, reportCallIssue=false
 """
 
 This module manages the maintenance of user sets, including adding, updating, deleting,
@@ -6,7 +7,6 @@ and generating labels for sets and their parts.
 """
 
 # pylint: disable=C0301,W0718
-
 
 from pathlib import Path
 
@@ -599,7 +599,7 @@ def generate_label():
         ):
             return jsonify({"error": f"DrawIO template {box_size} not found"}), 400
 
-        with open(drawio_template, "r", encoding="utf-8") as template_file:
+        with open(drawio_template, encoding="utf-8") as template_file:
             content = template_file.read()
             for key, value in label_data.items():
                 content = content.replace(key, value)

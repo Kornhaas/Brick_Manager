@@ -26,7 +26,7 @@ def test_set_maintenance_exposes_every_supported_status():
     )
     option_values = set(re.findall(r'<option value="([a-z]+)">', template))
 
-    assert USER_SET_STATUSES <= option_values
+    assert option_values >= USER_SET_STATUSES
 
 
 def test_documented_statuses_match_supported_statuses():

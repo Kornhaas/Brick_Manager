@@ -1,10 +1,6 @@
 """Large module coverage tests to reach 80% target."""
 
-from unittest.mock import Mock, patch
-
-import pytest
-
-
+from unittest.mock import patch
 
 
 class TestRebrickableSetsServiceLarge:
@@ -77,12 +73,7 @@ class TestRoutesCoverageBoost:
 
         assert hasattr(admin_sync, "admin_sync_bp")
 
-
-
-
         # Should handle gracefully
-
-
 
 
 class TestConfigAdditionalCoverage:

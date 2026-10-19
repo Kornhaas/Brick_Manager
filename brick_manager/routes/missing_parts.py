@@ -540,9 +540,12 @@ def get_missing_parts_categories(include_spare=True, set_filter=""):
 
         for minifig_part in user_minifigure_parts:
             # Apply internal ID filter for minifigure parts
-            if hasattr(minifig_part, "user_set") and minifig_part.user_set:
-                if not should_include_set(minifig_part.user_set, allowed_internal_ids):
-                    continue
+            if (
+                hasattr(minifig_part, "user_set")
+                and minifig_part.user_set
+                and not should_include_set(minifig_part.user_set, allowed_internal_ids)
+            ):
+                continue
 
             if minifig_part.quantity > minifig_part.have_quantity:
                 missing_quantity = minifig_part.quantity - minifig_part.have_quantity
@@ -679,9 +682,12 @@ def missing_parts_category(category_name):
         user_minifigure_parts = UserMinifigurePart.query.all()
         for minifig_part in user_minifigure_parts:
             # Apply internal ID filter for minifigure parts
-            if hasattr(minifig_part, "user_set") and minifig_part.user_set:
-                if not should_include_set(minifig_part.user_set, allowed_internal_ids):
-                    continue
+            if (
+                hasattr(minifig_part, "user_set")
+                and minifig_part.user_set
+                and not should_include_set(minifig_part.user_set, allowed_internal_ids)
+            ):
+                continue
 
             if minifig_part.quantity > minifig_part.have_quantity:
                 if not include_spare and minifig_part.is_spare:
@@ -876,9 +882,12 @@ def missing_parts_all():
         user_minifigure_parts = UserMinifigurePart.query.all()
         for minifig_part in user_minifigure_parts:
             # Apply internal ID filter for minifigure parts
-            if hasattr(minifig_part, "user_set") and minifig_part.user_set:
-                if not should_include_set(minifig_part.user_set, allowed_internal_ids):
-                    continue
+            if (
+                hasattr(minifig_part, "user_set")
+                and minifig_part.user_set
+                and not should_include_set(minifig_part.user_set, allowed_internal_ids)
+            ):
+                continue
 
             if minifig_part.quantity > minifig_part.have_quantity:
                 if not include_spare and minifig_part.is_spare:

@@ -31,7 +31,7 @@ function loadLocations() {
                 document.getElementById('locationOverviewSelect'),
                 document.getElementById('levelLocationSelect')
             ];
-            
+
             selects.forEach(select => {
                 data.locations.forEach(location => {
                     const option = document.createElement('option');
@@ -308,10 +308,10 @@ function displayLocationOverview(boxes) {
     `;
 
     boxes.forEach(box => {
-        const multiplePartsHtml = box.part_count > 1 
-            ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">+${box.part_count - 1} more</span>` 
+        const multiplePartsHtml = box.part_count > 1
+            ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">+${box.part_count - 1} more</span>`
             : '';
-        
+
         html += `
             <div class="col-md-4 col-lg-3 mb-3">
                 <div class="card h-100 border-success box-card">
@@ -355,11 +355,11 @@ function displayLocationOverview(boxes) {
             document.getElementById('single-box-tab').click();
             document.getElementById('location').value = location;
             document.getElementById('location').dispatchEvent(new Event('change'));
-            
+
             setTimeout(() => {
                 document.getElementById('level').value = level;
                 document.getElementById('level').dispatchEvent(new Event('change'));
-                
+
                 setTimeout(() => {
                     document.getElementById('box').value = box;
                     document.getElementById('singleBoxForm').dispatchEvent(new Event('submit'));
@@ -386,10 +386,10 @@ function displayLevelOverview(boxes) {
     `;
 
     boxes.forEach(box => {
-        const multiplePartsHtml = box.part_count > 1 
-            ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">+${box.part_count - 1} more</span>` 
+        const multiplePartsHtml = box.part_count > 1
+            ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">+${box.part_count - 1} more</span>`
             : '';
-        
+
         html += `
             <div class="col-md-3 col-lg-2 mb-3">
                 <div class="card h-100 border-info box-card">
@@ -432,11 +432,11 @@ function displayLevelOverview(boxes) {
             document.getElementById('single-box-tab').click();
             document.getElementById('location').value = location;
             document.getElementById('location').dispatchEvent(new Event('change'));
-            
+
             setTimeout(() => {
                 document.getElementById('level').value = level;
                 document.getElementById('level').dispatchEvent(new Event('change'));
-                
+
                 setTimeout(() => {
                     document.getElementById('box').value = box;
                     document.getElementById('singleBoxForm').dispatchEvent(new Event('submit'));

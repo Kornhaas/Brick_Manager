@@ -338,15 +338,17 @@ class TestServiceComprehensive:
             mock_response.content = b"fake_image_data"
             mock_get.return_value = mock_response
 
-            with patch("services.cache_service.open", mock_open()) as mock_file:
-                with patch("services.cache_service.os.makedirs"):
-                    with patch("services.cache_service.url_for") as mock_url_for:
-                        mock_url_for.return_value = "/cached/image.jpg"
+            with (
+                patch("services.cache_service.open", mock_open()),
+                patch("services.cache_service.os.makedirs"),
+                patch("services.cache_service.url_for") as mock_url_for,
+            ):
+                mock_url_for.return_value = "/cached/image.jpg"
 
-                        result = cache_image("https://example.com/image.jpg")
+                result = cache_image("https://example.com/image.jpg")
 
-                        # Should return cached URL
-                        assert result is not None
+                # Should return cached URL
+                assert result is not None
 
         except ImportError:
             pass
@@ -401,7 +403,7 @@ class TestServiceComprehensive:
 
             # Test exception if it exists
             if hasattr(token_svc, "TokenException"):
-                exc_class = getattr(token_svc, "TokenException")
+                exc_class = token_svc.TokenException
                 exc = exc_class("Test")
                 assert str(exc) == "Test"
 
@@ -469,31 +471,30 @@ class TestServiceComprehensive:
             assert callable(save_part_lookup)
 
             # Test with comprehensive mocking
-            with patch("services.part_lookup_service.PartStorage") as mock_storage:
-                with patch("services.part_lookup_service.db") as mock_db:
-                    # Mock multiple part storage entries
-                    mock_parts = []
-                    for i in range(5):
-                        mock_part = MagicMock()
-                        mock_part.part_number = f"part_{i}"
-                        mock_part.box_number = f"box_{i}"
-                        mock_part.x_coordinate = i
-                        mock_part.y_coordinate = i
-                        mock_part.z_coordinate = i
-                        mock_parts.append(mock_part)
+            with (
+                patch("services.part_lookup_service.PartStorage") as mock_storage,
+                patch("services.part_lookup_service.db"),
+            ):
+                # Mock multiple part storage entries
+                mock_parts = []
+                for i in range(5):
+                    mock_part = MagicMock()
+                    mock_part.part_number = f"part_{i}"
+                    mock_part.box_number = f"box_{i}"
+                    mock_part.x_coordinate = i
+                    mock_part.y_coordinate = i
+                    mock_part.z_coordinate = i
+                    mock_parts.append(mock_part)
 
-                    mock_storage.query.all.return_value = mock_parts
+                mock_storage.query.all.return_value = mock_parts
 
-                    # Test load function with data
-                    result = load_part_lookup()
-                    assert isinstance(result, dict)
+                # Test load function with data
+                result = load_part_lookup()
+                assert isinstance(result, dict)
 
-                    # Test save function with data
-                    test_data = {f"part_{i}": {"box": f"box_{i}"} for i in range(3)}
-                    save_part_lookup(test_data)
-
-                    # Should have called database operations
-                    assert mock_db.session.query.called or True  # Flexible assertion
+                # Test save function with data
+                test_data = {f"part_{i}": {"box": f"box_{i}"} for i in range(3)}
+                save_part_lookup(test_data)
 
         except ImportError:
             pass

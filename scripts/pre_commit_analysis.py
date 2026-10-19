@@ -5,12 +5,10 @@ This script runs comprehensive checks and automatically fixes common issues.
 """
 
 import json
-import os
 import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 
 class PreCommitAnalyzer:
@@ -22,7 +20,7 @@ class PreCommitAnalyzer:
         self.warnings = []
         self.fixes_applied = []
 
-    def run_command(self, command: List[str], cwd: str = None) -> Tuple[int, str, str]:
+    def run_command(self, command: list[str], cwd: str = None) -> tuple[int, str, str]:
         """Run a shell command and return exit code, stdout, stderr."""
         try:
             result = subprocess.run(
@@ -182,7 +180,7 @@ class PreCommitAnalyzer:
         bandit_report = self.project_root / "bandit-report.json"
         if bandit_report.exists():
             try:
-                with open(bandit_report, "r") as f:
+                with open(bandit_report) as f:
                     report = json.load(f)
 
                 if report.get("results"):
@@ -230,7 +228,7 @@ class PreCommitAnalyzer:
                 continue
 
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 original_content = content
@@ -300,20 +298,19 @@ class PreCommitAnalyzer:
         new_lines = []
 
         for line in lines:
-            if len(line) > 88 and "=" in line and 'f"' in line:
+            if len(line) > 88 and "=" in line and 'f"' in line and ' = f"' in line:
                 # Try to break long f-string assignments
-                if ' = f"' in line:
-                    parts = line.split(' = f"', 1)
-                    if len(parts) == 2:
-                        var_part = parts[0]
-                        string_part = 'f"' + parts[1]
+                parts = line.split(' = f"', 1)
+                if len(parts) == 2:
+                    var_part = parts[0]
+                    string_part = 'f"' + parts[1]
 
-                        if len(var_part) < 40:  # Only if variable part is reasonable
-                            indent = len(line) - len(line.lstrip())
-                            new_lines.append(f"{var_part} = (")
-                            new_lines.append(f"{' ' * (indent + 4)}{string_part}")
-                            new_lines.append(f"{' ' * indent})")
-                            continue
+                    if len(var_part) < 40:  # Only if variable part is reasonable
+                        indent = len(line) - len(line.lstrip())
+                        new_lines.append(f"{var_part} = (")
+                        new_lines.append(f"{' ' * (indent + 4)}{string_part}")
+                        new_lines.append(f"{' ' * indent})")
+                        continue
 
             new_lines.append(line)
 

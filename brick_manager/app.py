@@ -20,10 +20,10 @@ from models import db  # Import the db instance from models
 # Import service functions that tests expect to be available at module level
 # pylint: disable=unused-import,ungrouped-imports
 try:
+    from services.rebrickable_sets_sync_service import sync_user_sets_with_rebrickable
     from services.rebrickable_sync_service import (
         sync_missing_minifigure_parts_with_rebrickable,
         sync_missing_parts_with_rebrickable,
-        sync_user_sets_with_rebrickable,
     )
     from services.token_service import (
         get_rebrickable_api_key,
@@ -31,11 +31,11 @@ try:
     )
 except ImportError:
     # Graceful fallback if services aren't available
-    def get_rebrickable_user_token():
+    def get_rebrickable_user_token() -> str | None:
         """Get the Rebrickable user token (fallback implementation)."""
         return None
 
-    def get_rebrickable_api_key():
+    def get_rebrickable_api_key() -> str | None:
         """Get the Rebrickable API key (fallback implementation)."""
         return None
 
@@ -361,4 +361,4 @@ scheduler.start()
 atexit.register(scheduler.shutdown)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=False)  # nosec B201
+    app.run(host="0.0.0.0", port=5001, debug=False)  # nosec B104

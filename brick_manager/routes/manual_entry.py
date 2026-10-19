@@ -1,3 +1,4 @@
+# pyright: reportArgumentType=false, reportCallIssue=false, reportOptionalMemberAccess=false
 """
 
 This module handles the manual entry of Brick parts into the master lookup.

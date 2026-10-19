@@ -6,14 +6,14 @@ echo "=== Bricks Manager Docker Entrypoint ==="
 # Fix permissions if running as root
 if [ "$(id -u)" = "0" ]; then
     echo "Running as root, fixing permissions for mounted volumes..."
-    
+
     # Create data directories if they don't exist
     mkdir -p /app/data/uploads /app/data/cache/images /app/data/output /app/data/instance /app/data/logs
-    
+
     # Fix ownership and permissions
     chown -R appuser:appuser /app/data 2>/dev/null || true
     chmod -R 777 /app/data 2>/dev/null || true
-    
+
     echo "Permissions fixed. Switching to appuser..."
     # Use su-exec to switch to appuser and re-execute this script
     exec su-exec appuser "$0" "$@"

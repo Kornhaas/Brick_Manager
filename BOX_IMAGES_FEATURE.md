@@ -81,8 +81,8 @@ def get_level_overview(location, level):
 
 #### Card Generation Logic
 ```javascript
-const multiplePartsHtml = box.part_count > 1 
-    ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">+${box.part_count - 1} more</span>` 
+const multiplePartsHtml = box.part_count > 1
+    ? `<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">+${box.part_count - 1} more</span>`
     : '';
 
 // Card structure with image and badge

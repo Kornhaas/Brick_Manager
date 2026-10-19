@@ -84,8 +84,6 @@ class TestServiceConstants:
             assert isinstance(e, RebrickableAPIException)
 
 
-
-
 class TestCacheServiceReal:
     """Test cache service with real function calls."""
 
@@ -119,7 +117,7 @@ class TestCacheServiceReal:
     @pytest.mark.unit
     @patch("services.cache_service.current_app", new_callable=MagicMock)
     @patch("services.cache_service.url_for")
-    def test_cache_image_with_none(self, mock_url_for, mock_app):
+    def test_cache_image_with_none(self, mock_url_for, _mock_app):
         """Test cache_image function with None input."""
 
         from services.cache_service import cache_image
@@ -134,7 +132,7 @@ class TestCacheServiceReal:
     @pytest.mark.unit
     @patch("services.cache_service.url_for")
     @patch("services.cache_service.current_app", new_callable=MagicMock)
-    def test_cache_image_with_invalid_url(self, mock_app, mock_url_for):
+    def test_cache_image_with_invalid_url(self, _mock_app, mock_url_for):
         """Test cache_image with invalid URL."""
 
         from services.cache_service import cache_image
@@ -197,8 +195,6 @@ class TestBrickognizeServiceIntegration:
             assert "items" in result
             assert len(result["items"]) == 1
             assert result["items"][0]["part_num"] == "3001"
-
-
 
 
 class TestModelValidation:

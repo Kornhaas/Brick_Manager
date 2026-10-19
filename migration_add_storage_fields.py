@@ -34,8 +34,8 @@ def migrate_database():
         if "color_id" not in columns:
             print("Adding color_id column to part_storage table...")
             cursor.execute("""
-                ALTER TABLE part_storage 
-                ADD COLUMN color_id INTEGER 
+                ALTER TABLE part_storage
+                ADD COLUMN color_id INTEGER
                 REFERENCES rebrickable_colors(id)
             """)
             changes_made = True
@@ -47,7 +47,7 @@ def migrate_database():
         if "notes" not in columns:
             print("Adding notes column to part_storage table...")
             cursor.execute("""
-                ALTER TABLE part_storage 
+                ALTER TABLE part_storage
                 ADD COLUMN notes TEXT
             """)
             changes_made = True
@@ -59,7 +59,7 @@ def migrate_database():
         print("Creating index for part_storage lookups...")
         try:
             cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_part_location 
+                CREATE INDEX IF NOT EXISTS idx_part_location
                 ON part_storage(part_num, location, level, box)
             """)
             print("✓ Index created")

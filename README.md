@@ -76,7 +76,7 @@ A comprehensive Flask-based web application for managing brick collections, sets
    ```bash
    git clone https://github.com/Kornhaas/Bricks_Manager.git
    cd Bricks_Manager
-   
+
    # Configure environment
    cp .env.example .env
    # Edit .env with your settings (especially REBRICKABLE_TOKEN)
@@ -86,7 +86,7 @@ A comprehensive Flask-based web application for managing brick collections, sets
    ```bash
    # Quick start
    make setup
-   
+
    # Or manually
    docker compose up -d
    ```
@@ -106,14 +106,14 @@ A comprehensive Flask-based web application for managing brick collections, sets
    ```bash
    git clone https://github.com/Kornhaas/Bricks_Manager.git
    cd Bricks_Manager
-   
+
    # Install dependencies
    poetry install
-   
+
    # Set up environment
    cp .env.example .env
    # Configure your .env file
-   
+
    # Start application
    poetry run flask --app brick_manager/app.py run
    # For a trusted private LAN only:
@@ -130,14 +130,14 @@ Bricks_Manager/
 │   ├── docker-compose.dev.yml     # Development overrides
 │   ├── docker-entrypoint.sh      # Container startup script
 │   └── .dockerignore             # Build optimization
-├── 
+├──
 ├── 🏠 Application Core
 │   └── brick_manager/
 │       ├── app.py                # Module-level Flask application and scheduler
 │       ├── config.py             # Configuration management
 │       ├── models.py             # Database models
 │       └── manage.py             # CLI management commands
-├── 
+├──
 ├── 🛣️ Routes & Views
 │   └── brick_manager/routes/
 │       ├── main.py               # Home and health endpoints
@@ -146,7 +146,7 @@ Bricks_Manager/
 │       ├── missing_parts.py      # Missing parts tracking
 │       ├── dashboard.py          # Analytics dashboard
 │       └── ...                   # Additional route modules
-├── 
+├──
 ├── 🎨 Frontend Assets
 │   └── brick_manager/
 │       ├── templates/            # Jinja2 HTML templates
@@ -156,14 +156,14 @@ Bricks_Manager/
 │           ├── css/              # Stylesheets
 │           ├── js/               # JavaScript functionality
 │           └── cache/            # Dynamic cache storage
-├── 
+├──
 ├── 🔧 Services & Utilities
 │   └── brick_manager/services/
 │       ├── rebrickable_service.py    # API integration
 │       ├── part_lookup_service.py    # Part search logic
 │       ├── label_service.py          # Label generation
 │       └── cache_service.py          # Caching system
-├── 
+├──
 ├── 📁 Data Storage (Docker Volumes)
 │   └── data/
 │       ├── instance/             # SQLite database
@@ -171,12 +171,12 @@ Bricks_Manager/
 │       ├── output/               # Generated labels/exports
 │       ├── cache/                # Application cache
 │       └── logs/                 # Application logs
-├── 
+├──
 ├── 🧪 Testing & Quality
 │   ├── brick_manager/tests/      # Unit and integration tests
 │   ├── pytest.ini               # Test configuration
 │   └── .pylintrc                # Code quality rules
-├── 
+├──
 └── 📚 Documentation & Config
     ├── README.md                 # This file
     ├── DOCKER_README.md          # Docker deployment guide

@@ -15,4 +15,6 @@ Create tests that fail for the unwanted behavior and prove the intended observab
 6. Avoid broad `try/except`, conditional assertions, `pass`, tests that merely call functions, and coverage-only loops. A test must fail when the promised behavior is removed.
 7. Run the focused test file, then relevant neighboring tests. Use the full suite for cross-cutting changes. Report passed, failed, and skipped counts separately and mention material low coverage.
 
+Run Ruff against any added or changed test file before handoff. BasedPyright is configured for production code; do not treat dynamic Flask or SQLAlchemy diagnostics in tests as a reason to loosen its project-wide configuration.
+
 Read [references/test-strategy.md](references/test-strategy.md) for fixtures, commands, and test patterns specific to this repository.

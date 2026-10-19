@@ -7,7 +7,6 @@ import ast
 import re
 import sys
 from pathlib import Path
-from typing import List, Set, Tuple
 
 
 class CustomChecker(ast.NodeVisitor):
@@ -66,10 +65,10 @@ class CustomChecker(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def check_file_content(file_path: Path) -> List[Tuple[int, str]]:
+def check_file_content(file_path: Path) -> list[tuple[int, str]]:
     """Check file content for various issues."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
     except Exception:
         return [(0, f"Could not read file: {file_path}")]
@@ -108,10 +107,10 @@ def check_file_content(file_path: Path) -> List[Tuple[int, str]]:
     return issues
 
 
-def check_imports(file_path: Path) -> List[Tuple[int, str]]:
+def check_imports(file_path: Path) -> list[tuple[int, str]]:
     """Check import statements for best practices."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
     except Exception:
         return []

@@ -225,7 +225,7 @@ class TestServiceFunctionsCoverage:
 
         from brick_manager.services.cache_service import get_cached_image_path
 
-        result = get_cached_image_path("http://test.com/image.jpg")
+        get_cached_image_path("http://test.com/image.jpg")
         # Should execute without error
 
     def test_label_service_through_routes(self):
@@ -246,8 +246,6 @@ class TestServiceFunctionsCoverage:
 
         load_part_lookup()
         # Should handle missing file gracefully
-
-
 
 
 class TestErrorHandlingPaths:
@@ -271,12 +269,8 @@ class TestErrorHandlingPaths:
 
         from brick_manager.services.rebrickable_service import make_request
 
-        try:
-            result = make_request("http://test.com/api", {})
-            # Should handle error gracefully
-        except Exception:
-            # Expected behavior for error handling
-            pass
+        with pytest.raises(Exception, match="Network error"):
+            make_request("http://test.com/api", {})
 
     def test_model_validation_errors(self):
         """Test model validation error paths."""

@@ -1,8 +1,7 @@
 """Comprehensive services tests for maximum coverage boost."""
 
+from contextlib import suppress
 from unittest.mock import Mock, mock_open, patch
-
-
 
 
 class TestCacheServiceCoverage:
@@ -23,7 +22,7 @@ class TestCacheServiceCoverage:
 
         from brick_manager.services.cache_service import cache_image
 
-        result = cache_image("http://test.com/image.jpg")
+        cache_image("http://test.com/image.jpg")
         assert mock_makedirs.called
         assert mock_file.called
 
@@ -35,7 +34,7 @@ class TestCacheServiceCoverage:
 
         from brick_manager.services.cache_service import cache_image
 
-        result = cache_image("http://test.com/image.jpg")
+        cache_image("http://test.com/image.jpg")
         # Should return early if file exists
 
     @patch("brick_manager.services.cache_service.requests.get")
@@ -46,7 +45,7 @@ class TestCacheServiceCoverage:
 
         from brick_manager.services.cache_service import cache_image
 
-        result = cache_image("http://test.com/image.jpg")
+        cache_image("http://test.com/image.jpg")
         # Should handle error gracefully
 
     @patch("brick_manager.services.cache_service.os.path.exists")
@@ -93,11 +92,8 @@ class TestLabelServiceCoverage:
 
         from brick_manager.services.label_service import create_label_pdf
 
-        try:
+        with suppress(Exception):
             create_label_pdf("Test Label", "test_data", 1, 1, 1)
-            # Function might raise due to mocking, that's OK
-        except Exception:
-            pass  # Expected due to extensive mocking
 
     @patch("brick_manager.services.label_service.Image.new")
     @patch("brick_manager.services.label_service.ImageDraw.Draw")
@@ -117,10 +113,8 @@ class TestLabelServiceCoverage:
 
         from brick_manager.services.label_service import create_storage_label
 
-        try:
+        with suppress(Exception):
             create_storage_label("B1", "A-1-1", "Test Description")
-        except Exception:
-            pass  # Expected due to mocking
 
 
 class TestPartLookupServiceCoverage:
@@ -157,9 +151,7 @@ class TestPartLookupServiceCoverage:
         result = search_parts("test", 10)
         assert isinstance(result, list)
 
-
         # Should return None or environment value
-
 
         # Should handle error gracefully
 
@@ -223,11 +215,8 @@ class TestRebrickableSyncServiceCoverage:
             sync_missing_parts_with_rebrickable,
         )
 
-        try:
+        with suppress(Exception):
             sync_missing_parts_with_rebrickable()
-            # May fail due to database requirements, that's OK
-        except Exception:
-            pass
 
     @patch("brick_manager.services.rebrickable_sync_service.get_rebrickable_user_token")
     def test_sync_missing_parts_no_token(self, mock_token):
@@ -262,11 +251,8 @@ class TestRebrickableSetsServiceCoverage:
             sync_user_sets_with_rebrickable,
         )
 
-        try:
+        with suppress(Exception):
             sync_user_sets_with_rebrickable()
-            # May fail due to database requirements, that's OK
-        except Exception:
-            pass
 
     @patch(
         "brick_manager.services.rebrickable_sets_sync_service.get_rebrickable_user_token"

@@ -15,6 +15,10 @@ Work from the repository root and preserve the existing Flask blueprint, service
 6. Add or update focused behavioral tests. Use `$brick-manager-regression-tests` when the main task is test design or a bug regression. Use `$brick-manager-data-change` for persistent-data changes and `$brick-manager-sync-contracts` for external integrations or `/api/v1` contracts.
 7. Run the narrowest relevant tests first, then broaden verification in proportion to the change. Do not describe skipped legacy tests as passing coverage.
 
+## Quality baseline
+
+Use Poetry-managed quality tools. For changed Python files, run `poetry run ruff check` and `poetry run ruff format --check`; use `poetry run basedpyright` when interfaces or model attributes change. `make audit` checks dependency vulnerabilities and `make dead-code` reports candidates that require human review before removal. Do not suppress Ruff or BasedPyright findings solely to pass a check; add scoped exclusions only for verified framework or dynamic-ORM false positives.
+
 Read [references/project-profile.md](references/project-profile.md) when locating components, choosing commands, or deciding the appropriate verification scope.
 
 Do not perform deployment, database reset, live synchronization, token generation, or destructive cleanup unless the user explicitly requests that operation.

@@ -6,7 +6,6 @@ Custom security checks for the Brick Manager project.
 import ast
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 
 class SecurityChecker(ast.NodeVisitor):
@@ -17,21 +16,21 @@ class SecurityChecker(ast.NodeVisitor):
 
     def visit_Call(self, node):
         """Check function calls for security issues."""
-        if isinstance(node.func, ast.Attribute):
-            if (
-                node.func.attr == "execute"
-                and isinstance(node.func.value, ast.Name)
-                and "session" in node.func.value.id.lower()
-            ):
-                # Check for SQL injection risks
-                for arg in node.args:
-                    if isinstance(arg, ast.BinOp) and isinstance(arg.op, ast.Mod):
-                        self.issues.append(
-                            (
-                                node.lineno,
-                                "Potential SQL injection: Use parameterized queries instead of string formatting",
-                            )
+        if (
+            isinstance(node.func, ast.Attribute)
+            and node.func.attr == "execute"
+            and isinstance(node.func.value, ast.Name)
+            and "session" in node.func.value.id.lower()
+        ):
+            # Check for SQL injection risks
+            for arg in node.args:
+                if isinstance(arg, ast.BinOp) and isinstance(arg.op, ast.Mod):
+                    self.issues.append(
+                        (
+                            node.lineno,
+                            "Potential SQL injection: Use parameterized queries instead of string formatting",
                         )
+                    )
 
         if isinstance(node.func, ast.Name):
             # Check for unsafe eval/exec usage
@@ -76,10 +75,10 @@ class SecurityChecker(ast.NodeVisitor):
             )
 
 
-def check_file(file_path: Path) -> List[Tuple[int, str]]:
+def check_file(file_path: Path) -> list[tuple[int, str]]:
     """Check a single Python file for security issues."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         tree = ast.parse(content)
@@ -101,7 +100,7 @@ def main():
 
     for file_path in sys.argv[1:]:
         path = Path(file_path)
-        if not path.exists() or not path.suffix == ".py":
+        if not path.exists() or path.suffix != ".py":
             continue
 
         issues = check_file(path)

@@ -31,6 +31,15 @@ Non-mutating quality checks:
 poetry run python scripts/pre_commit_analysis.py --no-fix
 ```
 
+Ruff is the formatter and fast lint baseline for changed files. BasedPyright uses the top-level `brick_manager/` import layout and checks production code in basic mode. Use the Make targets below when their concern is relevant:
+
+```bash
+make ruff       # Ruff lint and formatting checks
+make typecheck  # BasedPyright
+make audit      # known vulnerable dependencies
+make dead-code  # Vulture candidates; review Flask routes before removal
+```
+
 Formatting intentionally changes files; use it only when authorized by the implementation task:
 
 ```bash

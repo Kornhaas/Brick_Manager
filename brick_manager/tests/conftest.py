@@ -1,6 +1,5 @@
 import os
 import sys
-import tempfile
 
 import pytest
 from flask import Flask
@@ -12,6 +11,7 @@ from models import db
 # Add the parent directory to the path so we can import from brick_manager
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+
 def create_test_app():
     """Create and configure a new app instance for testing."""
 
@@ -21,13 +21,10 @@ def create_test_app():
     static_folder = os.path.join(basedir, "..", "static")
     app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
 
-    # Create a temporary file for the test database
-    db_fd, db_path = tempfile.mkstemp(suffix=".db")
-
     app.config.update(
         {
             "TESTING": True,
-            "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path}",
+            "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
             "SQLALCHEMY_TRACK_MODIFICATIONS": False,
             "WTF_CSRF_ENABLED": False,
             "SECRET_KEY": "test-secret-key",
@@ -78,14 +75,14 @@ def create_test_app():
         # If blueprints can't be imported, continue without them
         pass
 
-    return app, db_fd, db_path
+    return app
 
 
 @pytest.fixture(scope="session")
 def app():
     """Create and configure a new app instance for testing."""
 
-    test_app, db_fd, db_path = create_test_app()
+    test_app = create_test_app()
 
     with test_app.app_context():
         db.create_all()
@@ -93,10 +90,6 @@ def app():
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
-
-    # Clean up the temporary database file
-    os.close(db_fd)
-    os.unlink(db_path)
 
 
 @pytest.fixture

@@ -9,10 +9,6 @@ This test suite validates the functionality of set search and management.
 from unittest.mock import MagicMock, patch
 
 
-
-
-
-
 class TestMissingPartsRoutes:
     """Test cases for missing parts routes."""
 

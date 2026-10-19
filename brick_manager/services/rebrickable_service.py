@@ -11,7 +11,6 @@ It includes functions to:
 
 import logging
 import time
-from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 from config import Config
@@ -37,7 +36,7 @@ class RebrickableService:
     INITIAL_RETRY_DELAY = 30
 
     @staticmethod
-    def _get_headers() -> Dict[str, str]:
+    def _get_headers() -> dict[str, str]:
         """Return common headers for Rebrickable API requests."""
 
         return {
@@ -47,8 +46,8 @@ class RebrickableService:
 
     @staticmethod
     def _make_request(
-        endpoint: str, params: Optional[Dict] = None, retries: int = MAX_RETRIES
-    ) -> Union[Dict, None]:
+        endpoint: str, params: dict | None = None, retries: int = MAX_RETRIES
+    ) -> dict | None:
         """
 
         Make a request to the Rebrickable API with retry logic.
@@ -119,7 +118,7 @@ class RebrickableService:
         )
 
     @staticmethod
-    def get_all_category_ids() -> List[Tuple[int, str]]:
+    def get_all_category_ids() -> list[tuple[int, str]]:
         """
 
         Fetch all category IDs and names from the local database table rebrickable_part_categories.
@@ -133,7 +132,7 @@ class RebrickableService:
         return [(cat.id, cat.name) for cat in categories]
 
     @staticmethod
-    def get_part_details(part_num: str) -> Dict:
+    def get_part_details(part_num: str) -> dict | None:
         """
 
         Fetch part details from the Rebrickable API.
@@ -151,7 +150,7 @@ class RebrickableService:
         return RebrickableService._make_request(endpoint)
 
     @staticmethod
-    def get_part_image_url(part_num: str) -> Optional[str]:
+    def get_part_image_url(part_num: str) -> str | None:
         """
 
         Lookup the first img_url for a part_num in rebrickable_inventory_parts.
@@ -165,7 +164,7 @@ class RebrickableService:
         return None
 
     @staticmethod
-    def get_part_images_bulk(part_nums: List[str]) -> Dict[str, Optional[str]]:
+    def get_part_images_bulk(part_nums: list[str]) -> dict[str, str | None]:
         """
 
         Bulk lookup img_url for a list of part_nums in rebrickable_inventory_parts.
@@ -190,8 +189,8 @@ class RebrickableService:
 
     @staticmethod
     def get_parts_by_category(
-        part_cat_id: Union[int, str], page_size: int = 1000, page: int = 1
-    ) -> Optional[Dict]:
+        part_cat_id: int | str, page_size: int = 1000, page: int = 1
+    ) -> dict | None:
         """
 
         Fetch parts for a given category from the local database table rebrickable_parts.
@@ -237,11 +236,11 @@ class RebrickableService:
 
     @staticmethod
     def get_parts(
-        filters: Optional[Dict] = None,
+        filters: dict | None = None,
         page: int = 1,
         page_size: int = 1000,
         inc_part_details: bool = False,
-    ) -> Dict:
+    ) -> dict | None:
         """
 
         Fetch a list of parts from the Rebrickable API.
@@ -274,7 +273,7 @@ class RebrickableService:
         return RebrickableService._make_request(endpoint, params=params)
 
     @staticmethod
-    def get_colors(page: int = 1, page_size: int = 100) -> Dict:
+    def get_colors(page: int = 1, page_size: int = 100) -> dict | None:
         """
 
         Fetch a list of colors from the Rebrickable API.
@@ -294,7 +293,7 @@ class RebrickableService:
         return RebrickableService._make_request(endpoint, params=params)
 
     @staticmethod
-    def get_themes(page: int = 1, page_size: int = 100) -> Dict:
+    def get_themes(page: int = 1, page_size: int = 100) -> dict | None:
         """
 
         Fetch a list of themes from the Rebrickable API.

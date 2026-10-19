@@ -1,3 +1,4 @@
+# pyright: reportMissingModuleSource=false
 """
 
 This module provides functions to create label images and save them as PDFs
@@ -19,8 +20,9 @@ from config import Config
 from PIL import Image, ImageDraw, ImageFont
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
-from services.cache_service import cache_image  # Import the cache_image function
 from werkzeug.utils import secure_filename
+
+from services.cache_service import cache_image  # Import the cache_image function
 
 CM = 28.35  # 1 cm in points
 
@@ -106,7 +108,7 @@ def load_fonts():
         font2 = ImageFont.truetype("arial.tt", 24)
         font3 = ImageFont.truetype("arial.tt", 26)
         font4 = ImageFont.truetype("arial.tt", 10)
-    except IOError:
+    except OSError:
         logging.warning("Font not found. Using default fonts.")
         font = ImageFont.load_default()
         font2 = ImageFont.load_default()

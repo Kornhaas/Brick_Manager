@@ -1,5 +1,5 @@
 The currently activated Python version 3.9.2 is not supported by the project (^3.11).
-Trying to find and use a compatible version. 
+Trying to find and use a compatible version.
 Using python3.12 (3.12.11)
 2025-11-23 08:25:55,309 - app - DEBUG - Master lookup data loaded successfully.
 2025-11-23 08:25:55,322 - tzlocal - DEBUG - /etc/timezone found, contents:
