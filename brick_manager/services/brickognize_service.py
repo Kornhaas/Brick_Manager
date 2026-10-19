@@ -12,6 +12,7 @@ It includes functions to:
 import logging
 
 import requests
+
 from services.sqlite_service import get_category_name_from_part_num
 
 

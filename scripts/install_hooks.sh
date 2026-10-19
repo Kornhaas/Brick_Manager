@@ -8,7 +8,7 @@ echo "🔧 Installing Git hooks..."
 # Create hooks directory if it doesn't exist
 mkdir -p .git/hooks
 
-poetry run pre-commit install --install-hooks
+poetry run pre-commit install --install-hooks --overwrite
 
 # Create commit-msg hook for conventional commits
 cat > .git/hooks/commit-msg << 'EOF'

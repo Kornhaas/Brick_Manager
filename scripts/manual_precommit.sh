@@ -1,8 +1,5 @@
 #!/bin/bash
-"""
-Manual pre-commit script that can be run independently.
-This is useful for running checks manually before committing.
-"""
+# Run pre-commit analysis independently before committing.
 
 set -e
 
@@ -47,10 +44,7 @@ fi
 
 # Run the main pre-commit analysis script
 print_status "Running comprehensive pre-commit analysis..."
-poetry run python scripts/pre_commit_analysis.py
-
-# Check exit code
-if [ $? -eq 0 ]; then
+if poetry run python scripts/pre_commit_analysis.py; then
     print_success "All pre-commit checks passed!"
     echo ""
     echo "🎉 Your code is ready for commit!"

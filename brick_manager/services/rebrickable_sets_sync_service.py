@@ -11,6 +11,7 @@ import logging
 
 import requests
 from models import User_Set, db
+
 from services.token_service import get_rebrickable_api_key, get_rebrickable_user_token
 
 logger = logging.getLogger(__name__)

@@ -398,28 +398,24 @@ class PreCommitAnalyzer:
         # Auto-fix issues first
         if fix_issues:
             self.fix_common_issues()
-            self.format_with_black()
-            self.sort_imports_with_isort()
+            success = self.format_with_black() and success
+            success = self.sort_imports_with_isort() and success
 
         # Run checks
-        if not self.run_flake8():
-            success = False
-
-        if not self.run_pylint():
-            success = False  # Don't fail on pylint warnings
+        self.run_flake8()
+        self.run_pylint()
 
         if not self.run_bandit_security_check():
             success = False
 
-        if not self.check_dependencies():
-            success = False  # Don't fail on dependency warnings
+        self.check_dependencies()
 
         if not self.run_tests():
             success = False
 
         self.generate_report()
 
-        return success
+        return success and not self.errors
 
 
 def main():

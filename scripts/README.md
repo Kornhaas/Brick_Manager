@@ -2,6 +2,12 @@
 
 This directory contains scripts and configuration for automated code quality checks and pre-commit analysis.
 
+The installer replaces legacy pre-commit hooks with the configured Ruff and file
+checks. Hooks that fix files fail on that run; review and stage the fixes before
+retrying the commit. The optional analysis script treats flake8, pylint, and
+dependency advisories as warnings, while formatting failures, high-severity
+Bandit findings, and failing tests block success.
+
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
