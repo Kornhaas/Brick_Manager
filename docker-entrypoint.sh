@@ -26,17 +26,16 @@ mkdir -p /app/data/uploads /app/data/cache/images /app/data/output /app/data/ins
 
 # Check if database exists
 DB_PATH="/app/data/instance/brick_manager.db"
+MIGRATIONS_PATH="/app/brick_manager/migrations"
 
-if [ ! -f "$DB_PATH" ]; then
+export SQLALCHEMY_DATABASE_URI="sqlite:////app/data/instance/brick_manager.db"
+cd /app/brick_manager
+
+if [ -d "$MIGRATIONS_PATH" ]; then
+    echo "Applying database migrations..."
+    flask db upgrade
+elif [ ! -f "$DB_PATH" ]; then
     echo "Database not found. Initializing new database..."
-    
-    # Set the database path environment variable
-    export SQLALCHEMY_DATABASE_URI="sqlite:////app/data/instance/brick_manager.db"
-    
-    # Navigate to the brick_manager directory for Flask commands
-    cd /app/brick_manager
-    
-    # Initialize database
     echo "Creating database tables..."
     python -c "
 from app import app, db
@@ -46,26 +45,10 @@ with app.app_context():
     db.create_all()
     print('Database tables created successfully!')
 "
-    
-    # Run migrations if they exist
-    if [ -d "/app/brick_manager/migrations" ]; then
-        echo "Running database migrations..."
-        flask db upgrade || echo "No migrations to run or migration failed (this might be normal for a fresh install)"
-    fi
-    
     echo "Database initialization completed!"
 else
     echo "Database already exists at $DB_PATH"
-    export SQLALCHEMY_DATABASE_URI="sqlite:////app/data/instance/brick_manager.db"
-    
-    # Navigate to the brick_manager directory
-    cd /app/brick_manager
-    
-    # Run migrations for existing database
-    if [ -d "/app/brick_manager/migrations" ]; then
-        echo "Checking for database migrations..."
-        flask db upgrade || echo "No migrations to run or migration failed"
-    fi
+    echo "No migration repository is bundled; existing schema is left unchanged."
 fi
 
 echo "Starting Bricks Manager application..."

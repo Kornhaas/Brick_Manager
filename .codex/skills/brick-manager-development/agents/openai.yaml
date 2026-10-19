@@ -1,0 +1,4 @@
+interface:
+  display_name: "Brick Manager Development"
+  short_description: "Implement and review Brick Manager changes"
+  default_prompt: "Use $brick-manager-development to implement this Brick Manager change safely."

@@ -45,32 +45,32 @@ help:
 # Basic operations
 up:
 	@echo "🚀 Starting Bricks Manager..."
-	docker-compose up -d
+	docker compose up -d
 	@echo "✅ Application started! Visit http://localhost:5000"
 
 down:
 	@echo "🛑 Stopping Bricks Manager..."
-	docker-compose down
+	docker compose down
 
 restart:
 	@echo "🔄 Restarting Bricks Manager..."
-	docker-compose restart
+	docker compose restart
 	@echo "✅ Application restarted!"
 
 logs:
-	docker-compose logs bricks-manager
+	docker compose logs bricks-manager
 
 logs-f:
-	docker-compose logs -f bricks-manager
+	docker compose logs -f bricks-manager
 
 # Build operations
 build:
 	@echo "🔨 Building Bricks Manager Docker image..."
-	docker-compose build
+	docker compose build
 
 rebuild:
 	@echo "🔨 Rebuilding Bricks Manager Docker image (no cache)..."
-	docker-compose build --no-cache
+	docker compose build --no-cache
 
 dev:
 	@echo "🚀 Starting Bricks Manager in development mode..."
@@ -83,11 +83,11 @@ dev:
 		echo "      - FLASK_ENV=development" >> docker-compose.dev.yml; \
 		echo "      - FLASK_DEBUG=1" >> docker-compose.dev.yml; \
 	fi
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
 shell:
 	@echo "🐚 Accessing container shell..."
-	docker-compose exec bricks-manager bash
+	docker compose exec bricks-manager bash
 
 # Database operations
 backup:
@@ -104,22 +104,22 @@ restore:
 		exit 1; \
 	fi; \
 	echo "Restoring from: $$LATEST"; \
-	docker-compose down; \
+	docker compose down; \
 	tar -xzf "$$LATEST"; \
-	docker-compose up -d; \
+	docker compose up -d; \
 	echo "✅ Restore completed!"
 
 db-shell:
 	@echo "🗄️ Accessing database shell..."
-	docker-compose exec bricks-manager sqlite3 /app/data/instance/brick_manager.db
+	docker compose exec bricks-manager sqlite3 /app/data/instance/brick_manager.db
 
 reset-db:
 	@echo "⚠️  This will DESTROY all database data!"
 	@echo "Are you sure? Press Ctrl+C to cancel, Enter to continue..."
 	@read confirm
-	docker-compose down
+	docker compose down
 	rm -f data/instance/brick_manager.db
-	docker-compose up -d
+	docker compose up -d
 	@echo "✅ Database reset completed!"
 
 # Monitoring
@@ -141,9 +141,9 @@ clean:
 update:
 	@echo "🔄 Updating Bricks Manager..."
 	git pull
-	docker-compose down
-	docker-compose build --no-cache
-	docker-compose up -d
+	docker compose down
+	docker compose build --no-cache
+	docker compose up -d
 	@echo "✅ Update completed!"
 
 # Setup for first time users

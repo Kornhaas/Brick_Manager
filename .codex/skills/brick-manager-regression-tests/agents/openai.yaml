@@ -1,0 +1,4 @@
+interface:
+  display_name: "Brick Manager Regression Tests"
+  short_description: "Create meaningful regression coverage"
+  default_prompt: "Use $brick-manager-regression-tests to add focused tests for this behavior."

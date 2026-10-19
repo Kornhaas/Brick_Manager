@@ -1,12 +1,10 @@
 **/__pycache__/
 brick_manager/uploads/*
 brick_manager/output/*
-brick_manager/migrations/*
 brick_manager/instance/*
 brick_manager/__pycache__/*
 brick_manager/static/cache/*
 brick_manager/brick_manager.log
-coverage.xml
 coverage.xml
 .env
 data/*

@@ -104,6 +104,7 @@
                                 <option value="unknown">Unknown</option>
                                 <option value="konvolut">Konvolut</option>
                                 <option value="assembled">Assembled</option>
+                                <option value="sealed">Sealed</option>
                                 <option value="complete">Complete</option>
                                 <option value="completenospareparts">Complete (No Spare Parts)</option>
                                 <option value="missingparts">Missing Parts</option>
@@ -242,6 +243,8 @@
                                     <i class="bi bi-box-seam"></i> Konvolut
                                     {% elif entry.user_set.status == "assembled" %}
                                     <i class="bi bi-tools"></i> Assembled
+                                    {% elif entry.user_set.status == "sealed" %}
+                                    <i class="bi bi-box2-heart-fill"></i> Sealed
                                     {% elif entry.user_set.status == "complete" %}
                                     <i class="bi bi-check-circle-fill"></i> Complete
                                     {% elif entry.user_set.status == "completenospareparts" %}
@@ -302,13 +305,19 @@
                                     >
                                         <i class="bi bi-box-fill"></i> Big Box
                                     </button>
-                                    <button
-                                        class="btn btn-danger btn-sm delete-user-set"
-                                        data-user-set-id="{{ entry.user_set.id }}"
-                                        title="Delete Set"
+                                    <form
+                                        class="delete-form"
+                                        method="post"
+                                        action="{{ url_for('set_maintain.delete_user_set', user_set_id=entry.user_set.id) }}"
                                     >
-                                        <i class="bi bi-trash"></i> Delete
-                                    </button>
+                                        <button
+                                            class="btn btn-danger btn-sm w-100"
+                                            type="submit"
+                                            title="Delete Set"
+                                        >
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -408,6 +417,7 @@
             <select name="status" id="status" class="form-control">
               <option value="unknown">Unknown</option>
               <option value="assembled">Assembled</option>
+              <option value="sealed">Sealed</option>
               <option value="konvolut">Konvolut</option>
               <option value="missingparts">Missing Parts</option>
               <option value="complete">Complete</option>

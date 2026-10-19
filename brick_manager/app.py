@@ -75,10 +75,6 @@ from services.part_lookup_service import load_part_lookup
 
 # Initialize the Flask application
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Set your secret key here
-app.config.from_object(Config)  # Load the configuration
-
-# Configure database using Config class
 app.config.from_object(Config)
 
 # Get base directory for local development

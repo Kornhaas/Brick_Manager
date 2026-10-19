@@ -7,6 +7,7 @@ including viewing summaries, details, and updating quantities.
 
 from flask import Blueprint, current_app, jsonify, render_template, request, url_for
 from models import (
+    NON_LOOSE_PART_STATUSES,
     RebrickableInventoryParts,
     RebrickableParts,
     User_Parts,
@@ -82,7 +83,7 @@ def dashboard():
     """Displays an overview of total and missing parts/minifigure parts."""
     parts_in_sets = (
         User_Parts.query.join(User_Set)
-        .filter(~User_Set.status.in_(["assembled", "konvolut"]))
+        .filter(~User_Set.status.in_(NON_LOOSE_PART_STATUSES))
         .all()
     )
 
@@ -90,7 +91,7 @@ def dashboard():
         UserMinifigurePart.query.join(User_Set)
         .filter(
             UserMinifigurePart.quantity > UserMinifigurePart.have_quantity,
-            ~User_Set.status.in_(["assembled", "konvolut"]),
+            ~User_Set.status.in_(NON_LOOSE_PART_STATUSES),
         )
         .all()
     )
@@ -212,7 +213,7 @@ def details(category):
             User_Parts.query.join(User_Set)
             .filter(
                 User_Parts.quantity > User_Parts.have_quantity,
-                ~User_Set.status.in_(["assembled", "konvolut"]),
+                ~User_Set.status.in_(NON_LOOSE_PART_STATUSES),
             )
             .all()
         )
@@ -222,7 +223,7 @@ def details(category):
             UserMinifigurePart.query.join(User_Set)
             .filter(
                 UserMinifigurePart.quantity > UserMinifigurePart.have_quantity,
-                ~User_Set.status.in_(["assembled", "konvolut"]),
+                ~User_Set.status.in_(NON_LOOSE_PART_STATUSES),
             )
             .all()
         )
@@ -259,7 +260,7 @@ def api_missing_parts():
         User_Parts.query.join(User_Set)
         .filter(
             User_Parts.quantity > User_Parts.have_quantity,
-            ~User_Set.status.in_(["assembled", "konvolut"]),
+            ~User_Set.status.in_(NON_LOOSE_PART_STATUSES),
         )
         .all()
     )
@@ -277,7 +278,7 @@ def api_missing_minifigure_parts():
         UserMinifigurePart.query.join(User_Set)
         .filter(
             UserMinifigurePart.quantity > UserMinifigurePart.have_quantity,
-            ~User_Set.status.in_(["assembled", "konvolut"]),
+            ~User_Set.status.in_(NON_LOOSE_PART_STATUSES),
         )
         .all()
     )

@@ -92,9 +92,35 @@
       </div>
 
       <!-- Save Form -->
-      <form id="save-set-form" method="post" action="{{ url_for('set_search.add_set') }}" class="mt-4">
+      {% if existing_sets %}
+      <div class="alert alert-warning mt-4" role="alert" id="existing-set-warning">
+        <h5 class="alert-heading">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          Already in your collection
+        </h5>
+        <p class="mb-2">
+          You already have {{ existing_sets|length }}
+          {% if existing_sets|length == 1 %}copy{% else %}copies{% endif %}
+          of set {{ set_info['set_num'] }}. You can still save another copy.
+        </p>
+        <ul class="mb-0">
+          {% for existing_set in existing_sets %}
+          <li>Box ID {{ existing_set.id }} &mdash; {{ existing_set.status|replace('completenospareparts', 'complete (no spare parts)')|replace('missingparts', 'missing parts')|title }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <form
+        id="save-set-form"
+        method="post"
+        action="{{ url_for('set_search.add_set') }}"
+        class="mt-4"
+        data-existing-count="{{ existing_sets|length }}"
+      >
         <input type="hidden" name="set_number" value="{{ set_info['set_num'] }}" />
         <input type="hidden" id="set-status" name="status" value="unknown" />
+        <input type="hidden" id="confirm-duplicate" name="confirm_duplicate" value="no" />
         <div class="btn-group" role="group" aria-label="Save options">
           <button
             type="button"
@@ -111,6 +137,14 @@
             aria-label="Save assembled set"
           >
             Save Assembled
+          </button>
+          <button
+            type="button"
+            class="btn btn-info"
+            onclick="saveAsSealed(event)"
+            aria-label="Save sealed set"
+          >
+            Save Sealed
           </button>
           <button
             type="button"
@@ -285,20 +319,46 @@
 
       function saveAsComplete(event) {
         event.preventDefault();
-        document.getElementById("set-status").value = "complete";
-        document.getElementById("save-set-form").submit();
+        submitSet("complete");
       }
 
       function saveAsAssembled(event) {
         event.preventDefault();
-        document.getElementById("set-status").value = "assembled";
-        document.getElementById("save-set-form").submit();
+        submitSet("assembled");
+      }
+
+      function saveAsSealed(event) {
+        event.preventDefault();
+        submitSet("sealed");
       }
 
       function saveAsUnknown(event) {
         event.preventDefault();
-        document.getElementById("set-status").value = "unknown";
-        document.getElementById("save-set-form").submit();
+        submitSet("unknown");
+      }
+
+      function submitSet(status) {
+        const form = document.getElementById("save-set-form");
+        const existingCount = Number.parseInt(form.dataset.existingCount || "0", 10);
+        const duplicateField = document.getElementById("confirm-duplicate");
+
+        duplicateField.value = "no";
+        if (existingCount > 0) {
+          const copyLabel = existingCount === 1 ? "copy" : "copies";
+          const confirmed = window.confirm(
+            `You already have ${existingCount} ${copyLabel} of this set. Save another copy?`
+          );
+          if (!confirmed) {
+            return;
+          }
+          duplicateField.value = "yes";
+        }
+
+        document.getElementById("set-status").value = status;
+        form.querySelectorAll("button").forEach((button) => {
+          button.disabled = true;
+        });
+        form.submit();
       }
 
       document.getElementById("set-search-form").addEventListener("submit", function () {

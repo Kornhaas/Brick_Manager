@@ -22,6 +22,7 @@ from flask import (
     url_for,
 )
 from models import (
+    USER_SET_STATUSES,
     PartStorage,
     RebrickablePartCategories,
     RebrickableParts,
@@ -473,6 +474,9 @@ def update_user_set():
             if have_quantity is not None:
                 part.have_quantity = max(0, min(part.quantity, int(have_quantity)))
                 db.session.add(part)
+
+        if status and status not in USER_SET_STATUSES:
+            raise ValueError("Invalid set status")
 
         if status:
             user_set.status = status

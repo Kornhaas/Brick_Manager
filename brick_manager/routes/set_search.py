@@ -15,6 +15,8 @@ from flask import (
     url_for,
 )
 from models import (
+    FULL_OWNERSHIP_STATUSES,
+    USER_SET_STATUSES,
     RebrickableColors,
     RebrickableInventories,
     RebrickableInventoryMinifigs,
@@ -57,6 +59,7 @@ def set_search():
 
     parts_info = []
     minifigs_info = []
+    existing_sets = []
 
     if request.method == "POST":
         set_number = request.form.get("set_number")
@@ -73,6 +76,11 @@ def set_search():
             set_info = fetch_set_info(set_number)
             if set_info:
                 current_app.logger.debug("Set info fetched: %s", set_info)
+                existing_sets = (
+                    User_Set.query.filter_by(set_num=set_info["set_num"])
+                    .order_by(User_Set.id)
+                    .all()
+                )
             else:
                 current_app.logger.warning(
                     "No data found for set number: %s", set_number
@@ -104,6 +112,7 @@ def set_search():
         set_info=set_info,
         parts_info=parts_info,
         minifigs_info=minifigs_info,
+        existing_sets=existing_sets,
     )
 
 
@@ -116,6 +125,7 @@ def add_set():
     set_number = request.form.get("set_number")
 
     status = request.form.get("status", "unknown")
+    duplicate_confirmed = request.form.get("confirm_duplicate") == "yes"
     current_app.logger.debug(
         "Adding set %s to the database with status %s.", set_number, status
     )
@@ -123,6 +133,19 @@ def add_set():
     try:
         if not set_number:
             flash("Set number is required.", category="danger")
+            return redirect(url_for("set_search.set_search"))
+
+        if status not in USER_SET_STATUSES:
+            flash("Invalid set status.", category="danger")
+            return redirect(url_for("set_search.set_search"))
+
+        existing_count = User_Set.query.filter_by(set_num=set_number).count()
+        if existing_count and not duplicate_confirmed:
+            flash(
+                f"Set {set_number} is already saved {existing_count} time(s). "
+                "Search for it again and confirm if you want to add another copy.",
+                category="warning",
+            )
             return redirect(url_for("set_search.set_search"))
 
         # Check if set number already contains a dash followed by a number
@@ -185,7 +208,7 @@ def add_set():
             user_part.user_set_id = user_set.id
 
             # Set have_quantity based on status
-            if status in ["complete", "assembled"]:
+            if status in FULL_OWNERSHIP_STATUSES:
                 user_part.have_quantity = part["quantity"]  # Have all parts
             else:  # unknown
                 user_part.have_quantity = 0  # Have no parts
@@ -246,7 +269,7 @@ def add_set():
                 )  # Link to specific minifigure
 
                 # Set have_quantity based on status
-                if status in ["complete", "assembled"]:
+                if status in FULL_OWNERSHIP_STATUSES:
                     minifig_part.have_quantity = minifig_part.quantity  # Have all parts
                 else:  # unknown
                     minifig_part.have_quantity = 0  # Have no parts
@@ -258,6 +281,7 @@ def add_set():
         status_messages = {
             "complete": "complete (all parts marked as owned)",
             "assembled": "assembled (all parts marked as owned)",
+            "sealed": "sealed in the original packaging (all parts marked as owned)",
             "unknown": "unknown (no parts marked as owned)",
         }
         status_description = status_messages.get(status, status)

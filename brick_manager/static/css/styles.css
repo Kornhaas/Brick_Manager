@@ -207,6 +207,10 @@ footer.dark-mode {
   background-color: #0d6efd;
 }
 
+.status-sealed {
+  background-color: #6f42c1;
+}
+
 .status-complete,
 .status-completenospareparts {
   background-color: #198754;

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Brick Manager Sync Contracts"
+  short_description: "Protect sync and API contracts"
+  default_prompt: "Use $brick-manager-sync-contracts to implement or review this integration change."

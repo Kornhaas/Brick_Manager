@@ -23,6 +23,20 @@ from sqlalchemy import Boolean, ForeignKey, Integer, Text
 
 db = SQLAlchemy()
 
+USER_SET_STATUSES = frozenset(
+    {
+        "unknown",
+        "konvolut",
+        "assembled",
+        "sealed",
+        "missingparts",
+        "complete",
+        "completenospareparts",
+    }
+)
+FULL_OWNERSHIP_STATUSES = frozenset({"complete", "assembled", "sealed"})
+NON_LOOSE_PART_STATUSES = frozenset({"assembled", "konvolut", "sealed"})
+
 
 class User_Set(db.Model):
     """Represents a user's collection of sets."""

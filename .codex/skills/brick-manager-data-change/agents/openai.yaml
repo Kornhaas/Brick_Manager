@@ -1,0 +1,4 @@
+interface:
+  display_name: "Brick Manager Data Changes"
+  short_description: "Safely evolve Brick Manager data"
+  default_prompt: "Use $brick-manager-data-change to plan and verify this database or import change."
