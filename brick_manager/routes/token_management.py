@@ -189,7 +189,7 @@ def generate_token():
             )
 
         # Error from Rebrickable
-        logger.error(f"Rebrickable API error: {response.status_code} - {response.text}")
+        logger.error("Rebrickable API error: status=%s", response.status_code)
         return jsonify(
             {
                 "success": False,
@@ -203,7 +203,9 @@ def generate_token():
             {"success": False, "message": "Timeout connecting to Rebrickable API"}
         )
     except requests.exceptions.RequestException as e:
-        logger.error(f"Network error connecting to Rebrickable API: {e}")
+        logger.error(
+            "Network error connecting to Rebrickable API: %s", type(e).__name__
+        )
         return jsonify(
             {"success": False, "message": "Network error connecting to Rebrickable API"}
         )
@@ -275,7 +277,7 @@ def test_token():
                 }
             )
 
-        logger.error(f"Token test failed: {response.status_code} - {response.text}")
+        logger.error("Token test failed: status=%s", response.status_code)
         return jsonify(
             {
                 "success": False,

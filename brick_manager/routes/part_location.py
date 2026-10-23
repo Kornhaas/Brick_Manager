@@ -31,7 +31,9 @@ def part_location():
         master_lookup = load_part_lookup()
     except Exception as error:
         logging.error("Error loading categories or master lookup: %s", error)
-        return render_template("error.html", message=str(error))
+        return render_template(
+            "error.html", message="Unable to load part-location data."
+        ), 500
 
     if request.method == "POST":
         try:
@@ -84,7 +86,9 @@ def part_location():
 
         except Exception as error:
             logging.error("Error fetching parts: %s", error)
-            return render_template("error.html", message=str(error))
+            return render_template(
+                "error.html", message="Unable to load parts for this category."
+            ), 500
 
         return render_template(
             "part_location.html",

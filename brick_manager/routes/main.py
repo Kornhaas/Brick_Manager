@@ -78,6 +78,7 @@ def health_check():
             200,
         )
     except Exception as e:
+        db.session.rollback()
         current_app.logger.error(f"Health check failed: {e}", exc_info=True)
         return (
             jsonify(
@@ -139,6 +140,9 @@ def debug_cache():
     Returns:
         JSON: Cache status and test results
     """
+    if not (current_app.debug or current_app.testing):
+        abort(404)
+
     try:
         from services.cache_service import cache_image, get_cache_directory
 

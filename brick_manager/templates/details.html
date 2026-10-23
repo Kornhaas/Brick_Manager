@@ -62,6 +62,7 @@
                     <th>Color</th>
                     <th>Total Quantity</th>
                     <th>Have Quantity</th>
+                    <th>Storage Location</th>
                     <th>Image</th>
                 </tr>
             </thead>
@@ -90,6 +91,7 @@
                             aria-label="Have quantity for part {{ item.name }}"
                         />
                     </td>
+                    <td>{{ item.location }}</td>
                     <td>
                         <img data-src="{{ item.image_url }}"
                              data-part="{{ item.part_num }}"

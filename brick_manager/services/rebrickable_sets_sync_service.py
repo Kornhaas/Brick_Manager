@@ -43,7 +43,7 @@ def get_rebrickable_lists():
             data = response.json()
             return data.get("results", [])
 
-        logger.error(f"Failed to get lists: {response.status_code} - {response.text}")
+        logger.error("Failed to get lists: status=%s", response.status_code)
         return []
 
     except Exception as e:
@@ -87,10 +87,10 @@ def create_brick_manager_list():
                 "message": "Brick_Manager list created successfully",
             }
 
-        logger.error(f"Failed to create list: {response.status_code} - {response.text}")
+        logger.error("Failed to create list: status=%s", response.status_code)
         return {
             "success": False,
-            "message": f"Failed to create list: {response.text}",
+            "message": f"Failed to create list: HTTP {response.status_code}",
         }
 
     except Exception as e:
@@ -179,9 +179,7 @@ def get_list_sets(list_id):
                     break
                 page += 1
             else:
-                logger.error(
-                    f"Failed to get list sets: {response.status_code} - {response.text}"
-                )
+                logger.error("Failed to get list sets: status=%s", response.status_code)
                 break
 
         return all_sets
@@ -273,7 +271,8 @@ def add_sets_to_list(list_id, set_data):
                 )
 
             logger.warning(
-                f"Bulk set addition failed ({response.status_code}), falling back to individual requests: {response.text}"
+                "Bulk set addition failed (status=%s); falling back to individual requests",
+                response.status_code,
             )
             return add_sets_individually(list_id, sets_to_process, headers, user_token)
 
@@ -327,7 +326,8 @@ def add_sets_individually(list_id, sets_to_process, headers, user_token):
                 # Don't treat this as an error - just note it for summary
             else:
                 error_msg = (
-                    f"Failed to add {set_num} (qty: {quantity}): {response.text}"
+                    f"Failed to add {set_num} (qty: {quantity}): "
+                    f"HTTP {response.status_code}"
                 )
                 logger.warning(error_msg)
                 errors.append(error_msg)
@@ -383,7 +383,9 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
             404,
         ]:  # 404 is okay if set wasn't in list
             logger.warning(
-                f"Failed to remove set {set_num} for update: {delete_response.status_code} - {delete_response.text}"
+                "Failed to remove set %s for update: status=%s",
+                set_num,
+                delete_response.status_code,
             )
             return {
                 "success": False,
@@ -413,7 +415,9 @@ def update_set_quantity_in_list(list_id, set_num, new_quantity):
             }
 
         logger.error(
-            f"Failed to add set {set_num} with new quantity: {add_response.status_code} - {add_response.text}"
+            "Failed to add set %s with new quantity: status=%s",
+            set_num,
+            add_response.status_code,
         )
         return {
             "success": False,
@@ -460,7 +464,9 @@ def remove_sets_from_list(list_id, set_nums):
                     removed_count += 1
                     logger.debug(f"Removed set {set_num} from list")
                 else:
-                    error_msg = f"Failed to remove {set_num}: {response.text}"
+                    error_msg = (
+                        f"Failed to remove {set_num}: HTTP {response.status_code}"
+                    )
                     logger.warning(error_msg)
                     errors.append(error_msg)
 

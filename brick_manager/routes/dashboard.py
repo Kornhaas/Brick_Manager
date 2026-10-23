@@ -151,33 +151,31 @@ def dashboard():
 @dashboard_bp.route("/update_quantity", methods=["POST"])
 def update_quantity():
     """Batch update `have_quantity` for parts or minifigure parts."""
-    data = request.get_json()
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "A JSON object is required"}), 400
 
-    changes = data.get("changes", [])
+    changes = data.get("changes")
+    if not isinstance(changes, list) or not changes:
+        return jsonify({"error": "At least one change is required"}), 400
 
-    if not changes:
-        return jsonify({"error": "No changes provided"}), 400
+    validated_changes, validation_error = _validate_quantity_changes(changes)
+    if validation_error:
+        return jsonify({"error": validation_error}), 400
 
     try:
         updated_records = 0
-        for change in changes:
-            part_id = change.get("part_id")
-            new_quantity = change.get("new_quantity")
-
-            if not part_id or new_quantity is None:
-                current_app.logger.warning(f"Invalid entry in changes: {change}")
-                continue
-
+        for part_id, new_quantity in validated_changes:
             part = User_Parts.query.filter_by(id=part_id).first()
             if part:
-                part.have_quantity = max(0, min(part.quantity, int(new_quantity)))
+                part.have_quantity = max(0, min(part.quantity, new_quantity))
                 db.session.add(part)
                 updated_records += 1
             else:
                 minifigure_part = UserMinifigurePart.query.filter_by(id=part_id).first()
                 if minifigure_part:
                     minifigure_part.have_quantity = max(
-                        0, min(minifigure_part.quantity, int(new_quantity))
+                        0, min(minifigure_part.quantity, new_quantity)
                     )
                     db.session.add(minifigure_part)
                     updated_records += 1
@@ -199,6 +197,25 @@ def update_quantity():
         current_app.logger.error("Failed to update quantities: %s", e)
         db.session.rollback()
         return jsonify({"error": "Failed to update quantities."}), 500
+
+
+def _validate_quantity_changes(
+    changes: list[object],
+) -> tuple[list[tuple[int, int]], str | None]:
+    """Validate every batch entry before mutating persistent collection data."""
+    validated_changes: list[tuple[int, int]] = []
+    for change in changes:
+        if not isinstance(change, dict):
+            return [], "Each change must be an object"
+
+        part_id = change.get("part_id")
+        new_quantity = change.get("new_quantity")
+        if isinstance(part_id, bool) or not isinstance(part_id, int) or part_id < 1:
+            return [], "part_id must be a positive integer"
+        if isinstance(new_quantity, bool) or not isinstance(new_quantity, int):
+            return [], "new_quantity must be an integer"
+        validated_changes.append((part_id, new_quantity))
+    return validated_changes, None
 
 
 @dashboard_bp.route("/details/<category>", methods=["GET"])

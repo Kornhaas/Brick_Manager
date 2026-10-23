@@ -262,7 +262,7 @@ class RebrickableService:
             filters,
         )
         endpoint = "parts/"
-        params = filters or {}
+        params = dict(filters) if filters else {}
         params.update(
             {
                 "page": page,

@@ -92,17 +92,34 @@ def download_and_extract_csv(file_name):
 
     gz_path = os.path.join(IMPORT_DIR, file_name)
     csv_path = os.path.join(IMPORT_DIR, file_name.replace(".gz", ""))
+    partial_gz_path = f"{gz_path}.part"
+    partial_csv_path = f"{csv_path}.part"
     url = f"{BASE_URL}/{file_name}"
     logging.info(f"Downloading {url} ...")
-    with requests.get(url, stream=True, timeout=30) as r:
-        r.raise_for_status()
-        with open(gz_path, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
-    logging.info(f"Extracting {gz_path} ...")
-    with gzip.open(gz_path, "rb") as f_in, open(csv_path, "wb") as f_out:
-        shutil.copyfileobj(f_in, f_out)
-    os.remove(gz_path)
+    try:
+        with requests.get(url, stream=True, timeout=30) as response:
+            response.raise_for_status()
+            with open(partial_gz_path, "wb") as output:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        output.write(chunk)
+        os.replace(partial_gz_path, gz_path)
+
+        logging.info(f"Extracting {gz_path} ...")
+        with (
+            gzip.open(gz_path, "rb") as compressed,
+            open(partial_csv_path, "wb") as extracted,
+        ):
+            shutil.copyfileobj(compressed, extracted)
+        os.replace(partial_csv_path, csv_path)
+    except Exception:
+        for partial_path in (partial_gz_path, partial_csv_path):
+            if os.path.exists(partial_path):
+                os.remove(partial_path)
+        raise
+    finally:
+        if os.path.exists(gz_path):
+            os.remove(gz_path)
     return csv_path
 
 
@@ -138,19 +155,14 @@ def import_csv_to_sqlite(csv_path, model_class):
     # This will create the table with correct primary keys, foreign keys, etc.
     db.create_all()
 
-    # Clear existing data but preserve table structure using SQLAlchemy
-    try:
-        # Use SQLAlchemy's delete method to maintain proper constraints
-        db.session.query(model_class).delete()
-        db.session.commit()
-        logging.info(f"Cleared existing data from {model_class.__tablename__}")
-    except Exception as e:
-        logging.warning(f"Could not clear table {model_class.__tablename__}: {e}")
-        db.session.rollback()
-
-    # Import data while preserving table structure
-    # Use 'append' instead of 'replace' to keep the SQLAlchemy-created structure
-    df.to_sql(model_class.__tablename__, db.engine, if_exists="append", index=False)
+    # Replace one catalog table in a single transaction. If the append fails,
+    # the previous reference data remains intact.
+    with db.engine.begin() as connection:
+        connection.execute(model_class.__table__.delete())
+        df.to_sql(
+            model_class.__tablename__, connection, if_exists="append", index=False
+        )
+    db.session.expire_all()
 
     # Clean up the CSV file
     os.remove(csv_path)

@@ -20,6 +20,25 @@ logger = logging.getLogger(__name__)
 admin_sync_bp = Blueprint("admin_sync", __name__)
 
 
+def _read_batch_size():
+    """Read an optional positive integer batch size from a JSON object."""
+    data = request.get_json(silent=True)
+    if data is None:
+        return None, None
+    if not isinstance(data, dict):
+        return None, "A JSON object is required."
+    batch_size = data.get("batch_size")
+    if batch_size is None:
+        return None, None
+    if (
+        isinstance(batch_size, bool)
+        or not isinstance(batch_size, int)
+        or batch_size < 1
+    ):
+        return None, "batch_size must be a positive integer."
+    return batch_size, None
+
+
 @admin_sync_bp.route("/admin/sync")
 def admin_sync_page():
     """Display the admin synchronization page."""
@@ -106,8 +125,9 @@ def sync_missing_parts():
             )
 
         # Get batch size from request data (optional)
-        data = request.get_json() or {}
-        batch_size = data.get("batch_size")
+        batch_size, validation_error = _read_batch_size()
+        if validation_error:
+            return jsonify({"success": False, "message": validation_error}), 400
 
         # Perform the synchronization
         result = sync_missing_parts_with_rebrickable(batch_size=batch_size)
@@ -163,8 +183,9 @@ def sync_missing_minifigure_parts():
             )
 
         # Get batch size from request data (optional)
-        data = request.get_json() or {}
-        batch_size = data.get("batch_size")
+        batch_size, validation_error = _read_batch_size()
+        if validation_error:
+            return jsonify({"success": False, "message": validation_error}), 400
 
         # Perform the synchronization
         result = sync_missing_minifigure_parts_with_rebrickable(batch_size=batch_size)
@@ -220,8 +241,9 @@ def sync_all_missing_parts():
             )
 
         # Get batch size from request data (optional)
-        data = request.get_json() or {}
-        batch_size = data.get("batch_size")
+        batch_size, validation_error = _read_batch_size()
+        if validation_error:
+            return jsonify({"success": False, "message": validation_error}), 400
 
         # Perform both synchronizations
         regular_result = sync_missing_parts_with_rebrickable(batch_size=batch_size)

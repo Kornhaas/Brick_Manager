@@ -397,7 +397,13 @@ def get_user_set_details(user_set_id):  # noqa: C901
 def update_part_quantity():
     """Update the have_quantity for a specific part in real-time"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({"success": False, "message": "Invalid input value"}), 400
+        if isinstance(data.get("part_id"), bool) or isinstance(
+            data.get("have_quantity"), bool
+        ):
+            return jsonify({"success": False, "message": "Invalid input value"}), 400
         part_id = int(data.get("part_id"))
         part_type = data.get("part_type", "regular")  # 'regular' or 'minifig'
         new_quantity = int(data.get("have_quantity"))
@@ -439,7 +445,7 @@ def update_part_quantity():
             }
         )
 
-    except ValueError as e:
+    except (TypeError, ValueError) as e:
         current_app.logger.error(f"Invalid value in request: {e}")
         return jsonify({"success": False, "message": "Invalid input value"}), 400
     except Exception as e:
@@ -500,7 +506,7 @@ def update_set_label_status():
     """Updates the label_printed status for a user set."""
     try:
         current_app.logger.info("update_set_label_status endpoint called")
-        data = request.get_json()
+        data = request.get_json(silent=True)
         current_app.logger.info(f"Received data: {data}")
 
         if not data:
@@ -513,10 +519,12 @@ def update_set_label_status():
             f"user_set_id: {user_set_id}, label_printed: {label_printed}"
         )
 
-        if user_set_id is None or label_printed is None:
+        if user_set_id is None or not isinstance(label_printed, bool):
             current_app.logger.error("Missing required fields")
             return (
-                jsonify({"error": "user_set_id and label_printed are required."}),
+                jsonify(
+                    {"error": "user_set_id and boolean label_printed are required."}
+                ),
                 400,
             )
 

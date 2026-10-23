@@ -46,7 +46,7 @@ make dead-code
 poetry run python scripts/pre_commit_analysis.py --no-fix
 ```
 
-The full pytest configuration is in `pytest.ini`; coverage exclusions are in `.coveragerc`. The configured global coverage floor is currently 16%. This is a minimum release gate, not a claim that every critical path has enough tests.
+The full pytest configuration is in `pytest.ini`; coverage exclusions are in `.coveragerc`. The configured global coverage floor is currently 60%. This is a minimum release gate, not a claim that every critical path has enough tests.
 
 ## Editor and hooks
 
@@ -64,13 +64,14 @@ The hook runs Ruff only on files included in the commit. The first change to a l
 
 Historical generated tests for APIs and models that no longer exist were removed instead of being hidden behind collection-time skips. The suite must not introduce broad skip lists to make the release gate green. Always report passed, failed, and skipped counts separately.
 
-Verified full-suite baseline from 19 October 2026:
+Verified full-suite state from 23 October 2026:
 
-- 169 tests collected.
-- 169 passed.
+- 355 tests collected.
+- 355 passed.
 - 0 skipped.
-- 30.05% total statement coverage.
-- Known weak areas: Rebrickable synchronization, label generation, token management, and several write-heavy HTML routes.
+- 62.93% line coverage and 50.56% branch coverage.
+- 60.21% combined pytest-cov coverage.
+- Known weak areas: administrative and Rebrickable synchronization, token management, missing-parts workflows, and several write-heavy HTML routes.
 
 Do not use the number of test files or collected tests as a substitute for executed behavioral coverage.
 

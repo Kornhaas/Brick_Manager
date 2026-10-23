@@ -12,6 +12,7 @@ It includes:
 """
 
 import os  # Standard library import
+from uuid import uuid4
 
 from config import Config
 
@@ -108,9 +109,12 @@ def upload():
         return redirect(url_for("main.index"))
 
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
-        file.save(file_path)
+        try:
+            file_path, filename = save_uploaded_file(file)
+        except OSError:
+            current_app.logger.exception("Unable to save uploaded image")
+            flash("Unable to save the uploaded file")
+            return redirect(url_for("main.index"))
 
         result = get_predictions(file_path, filename)
 
@@ -146,7 +150,7 @@ def upload():
         flash("Invalid result structure or no items found")
         return redirect(url_for("main.index"))
 
-    flash("Allowed file types are png, jpg, jpeg, gi")
+    flash("Allowed file types are png, jpg, jpeg, gif")
     return redirect(url_for("main.index"))
 
 
@@ -168,6 +172,20 @@ def allowed_file(filename):
     )
 
 
+def save_uploaded_file(file) -> tuple[str, str]:
+    """Persist an upload under a generated name to prevent accidental overwrite."""
+    original_filename = secure_filename(file.filename or "")
+    if not original_filename:
+        raise OSError("Upload filename is empty after sanitization")
+
+    extension = original_filename.rsplit(".", 1)[1].lower()
+    stored_filename = f"{uuid4().hex}.{extension}"
+    os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+    file_path = os.path.join(Config.UPLOAD_FOLDER, stored_filename)
+    file.save(file_path)
+    return file_path, stored_filename
+
+
 @upload_bp.route("/upload/increment_part/<int:part_id>", methods=["POST"])
 def increment_part(part_id):
     """Increment the have_quantity for a User_Part by 1."""
@@ -184,6 +202,7 @@ def increment_part(part_id):
             "new_missing": user_part.quantity - user_part.have_quantity,
         }
     except Exception:
+        db.session.rollback()
         current_app.logger.exception("Error incrementing part quantity")
         return {"success": False, "error": "Unable to update quantity."}, 400
 
@@ -195,7 +214,9 @@ def update_part_quantity(part_id):
 
     try:
         user_part = User_Parts.query.get_or_404(part_id)
-        data = request.get_json()
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or isinstance(data.get("have_quantity"), bool):
+            return jsonify({"success": False, "error": "Invalid quantity"}), 400
         new_have = int(data.get("have_quantity", 0))
 
         # Validate the new quantity
@@ -235,7 +256,9 @@ def save_storage_location():
     from app import db
 
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({"success": False, "error": "Invalid request body"}), 400
         part_num = data.get("part_num")
         location = data.get("location")
         level = data.get("level")

@@ -7,6 +7,7 @@ import hmac
 
 from flask import Blueprint, current_app, jsonify, request
 from models import PartStorage, RebrickableParts, User_Parts, User_Set, db
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
 client_api_bp = Blueprint("client_api", __name__, url_prefix="/api/v1")
@@ -134,7 +135,8 @@ def update_user_part_quantity(user_part_id: int):
         return jsonify({"error": "User part not found"}), 404
 
     user_part.have_quantity = min(quantity, user_part.quantity)
-    db.session.commit()
+    if not _commit_or_respond():
+        return jsonify({"error": "Unable to update user part"}), 500
     return jsonify(
         {
             "part_id": user_part.id,
@@ -183,7 +185,8 @@ def update_part_storage(part_num: str):
 
     for field, value in values.items():
         setattr(storage, field, value)
-    db.session.commit()
+    if not _commit_or_respond():
+        return jsonify({"error": "Unable to update storage"}), 500
 
     return jsonify(
         {
@@ -205,3 +208,14 @@ def _optional_int(value: str | None) -> int | None:
         return int(value)
     except ValueError:
         return None
+
+
+def _commit_or_respond() -> bool:
+    """Commit one API write and leave the session usable if persistence fails."""
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        current_app.logger.exception("Desktop API database write failed")
+        return False
+    return True

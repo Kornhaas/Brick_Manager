@@ -187,6 +187,10 @@ Bricks_Manager/
 
 ## ⚙️ Configuration
 
+Weitere, verifizierte Referenzen: [Architektur](docs/ARCHITECTURE.md),
+[Entwicklung](docs/DEVELOPMENT.md), [Konfiguration](docs/CONFIGURATION.md) und
+[Modernisierungsfortschritt](docs/MODERNIZATION_SUMMARY.md).
+
 ### Environment Variables (.env)
 
 ```bash

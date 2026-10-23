@@ -48,6 +48,15 @@
                     </div>
                 </a>
             </div>
+            <!-- Missing Spare Parts -->
+            <div class="col-md-3">
+                <a href="{{ url_for('dashboard.details', category='missing_parts') }}" class="text-decoration-none">
+                    <div class="dashboard-card bg-secondary text-white">
+                        <h2>{{ missing_spare_parts }}</h2>
+                        <p>Missing Spare Parts</p>
+                    </div>
+                </a>
+            </div>
         </div>
         <!-- New Row for Line Break -->
         <div class="row mt-4">
