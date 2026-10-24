@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 
 import pytest
 from flask import Flask
@@ -10,6 +11,20 @@ from models import db
 
 # Add the parent directory to the path so we can import from brick_manager
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+# A few legacy tests import ``app`` while pytest is collecting modules.  The
+# production app initializes its configured database at import time, so point
+# those imports at an isolated temporary database before any test module can
+# load the application.  Keep the historical path suffix for app-config
+# assertions and retain the TemporaryDirectory object for the test session.
+_runtime_database_directory = tempfile.TemporaryDirectory(
+    prefix="brick-manager-pytest-"
+)
+_runtime_instance_directory = os.path.join(_runtime_database_directory.name, "instance")
+os.makedirs(_runtime_instance_directory, exist_ok=True)
+os.environ["SQLALCHEMY_DATABASE_URI"] = (
+    f"sqlite:///{_runtime_instance_directory}/brick_manager.db"
+)
 
 
 def create_test_app():
