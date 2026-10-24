@@ -11,6 +11,16 @@ erDiagram
     USER_SETS ||--o{ USER_MINIFIGURES : contains
     USER_SETS ||--o{ USER_MINIFIGURE_PARTS : tracks
     USER_MINIFIGURES ||--o{ USER_MINIFIGURE_PARTS : consists_of
+    COLLECTION_SNAPSHOTS {
+        integer id PK
+        date captured_on UK
+        integer total_sets
+        integer owned_parts
+        integer required_parts
+        integer missing_parts
+        integer complete_sets
+        integer incomplete_sets
+    }
 
     REBRICKABLE_PART_CATEGORIES ||--o{ REBRICKABLE_PARTS : categorizes
     REBRICKABLE_PARTS ||--o{ USER_PARTS : identifies
@@ -96,6 +106,7 @@ The catalog tables omitted from the field-level diagram for readability are list
 | `user_minifigure_parts` | Required and owned parts belonging to a minifigure | References both the owning set and the specific `user_minifigure`. |
 | `part_storage` | Physical locations for catalog parts | A part may have several rows. Color is optional; notes and label state are per row. |
 | `config_settings` | Application settings and encrypted tokens | `key` is unique. `to_dict()` masks values marked as encrypted. |
+| `collection_snapshots` | Daily aggregate history for dashboard trends | One row per date; same-day refreshes update the existing snapshot. No collection detail rows are duplicated. |
 
 ### Set statuses
 

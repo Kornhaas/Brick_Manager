@@ -13,8 +13,12 @@ poetry install
 Poetry creates the environment in `.venv`. The checked-in VS Code settings use
 `.venv/bin/python`, so test discovery and terminal test runs use the same Python.
 After changing an already open workspace, run **Python: Select Interpreter**, choose
-`.venv/bin/python`, and refresh the Test Explorer once. A rebuilt development
-container installs the dependencies automatically.
+`.venv/bin/python`, then run **Python Environments: Refresh All Environment
+Managers** and refresh the Test Explorer once. The Python Environments search
+path is workspace-relative (`./.venv`); do not put `${workspaceFolder}` in
+`python-envs.pythonProjects`, because that setting treats project paths as literal
+relative paths. A rebuilt development container installs the dependencies
+automatically.
 
 ## Commands
 
@@ -66,11 +70,11 @@ Historical generated tests for APIs and models that no longer exist were removed
 
 Verified full-suite state from 23 October 2026:
 
-- 355 tests collected.
-- 355 passed.
+- 368 tests collected.
+- 368 passed.
 - 0 skipped.
-- 62.93% line coverage and 50.56% branch coverage.
-- 60.21% combined pytest-cov coverage.
+- 64.03% line coverage and 51.46% branch coverage.
+- 61.26% combined pytest-cov coverage.
 - Known weak areas: administrative and Rebrickable synchronization, token management, missing-parts workflows, and several write-heavy HTML routes.
 
 Do not use the number of test files or collected tests as a substitute for executed behavioral coverage.

@@ -11,6 +11,17 @@ from models import RebrickablePartCategories, db
 from routes import import_rebrickable_data as importer
 
 
+@pytest.fixture(autouse=True)
+def reset_import_jobs():
+    with importer._IMPORT_JOBS_LOCK:
+        importer._IMPORT_JOBS.clear()
+        importer._ACTIVE_IMPORT_JOB_ID = None
+    yield
+    with importer._IMPORT_JOBS_LOCK:
+        importer._IMPORT_JOBS.clear()
+        importer._ACTIVE_IMPORT_JOB_ID = None
+
+
 class StreamingResponse:
     """Small context-managed response double for streamed downloads."""
 
@@ -145,4 +156,94 @@ def test_import_page_renders(client):
     response = client.get("/import_data")
 
     assert response.status_code == 200
-    assert b"Import" in response.data
+    assert b"Import progress" in response.data
+    assert b"fileChecklist" in response.data
+    assert b"/import_data/start" in response.data
+
+
+def test_background_import_reports_checklist_progress(app, client, monkeypatch):
+    submit = Mock()
+    monkeypatch.setattr(importer._IMPORT_EXECUTOR, "submit", submit)
+    monkeypatch.setattr(importer, "ensure_table_structure", Mock())
+    monkeypatch.setattr(
+        importer,
+        "_get_model_map",
+        Mock(return_value={name: Mock(__tablename__=name) for name in importer.FILES}),
+    )
+    monkeypatch.setattr(
+        importer,
+        "download_and_extract_csv",
+        Mock(side_effect=lambda name: f"/tmp/{name[:-3]}"),
+    )
+    monkeypatch.setattr(importer, "import_csv_to_sqlite", Mock(return_value=42))
+
+    started = client.post("/import_data/start")
+
+    assert started.status_code == 202
+    job_id = started.get_json()["job_id"]
+    queued = client.get(f"/import_data/status/{job_id}").get_json()
+    assert queued["status"] == "queued"
+    assert len(queued["files"]) == len(importer.FILES)
+    assert all(item["status"] == "pending" for item in queued["files"])
+
+    worker, worker_app, worker_job_id = submit.call_args.args
+    assert worker_app is app
+    worker(worker_app, worker_job_id)
+
+    completed = client.get(f"/import_data/status/{job_id}").get_json()
+    assert completed["status"] == "completed"
+    assert completed["percent"] == 100
+    assert completed["completed"] == len(importer.FILES)
+    assert all(item["status"] == "completed" for item in completed["files"])
+    assert all(item["records"] == 42 for item in completed["files"])
+
+
+def test_start_reconnects_to_active_import(client, monkeypatch):
+    monkeypatch.setattr(importer._IMPORT_EXECUTOR, "submit", Mock())
+
+    first = client.post("/import_data/start")
+    second = client.post("/import_data/start")
+
+    assert first.status_code == 202
+    assert second.status_code == 202
+    assert second.get_json() == {
+        "status": "running",
+        "job_id": first.get_json()["job_id"],
+        "already_running": True,
+    }
+
+
+def test_background_import_reports_failure_without_internal_details(
+    client, monkeypatch
+):
+    submit = Mock()
+    monkeypatch.setattr(importer._IMPORT_EXECUTOR, "submit", submit)
+    monkeypatch.setattr(importer, "ensure_table_structure", Mock())
+    monkeypatch.setattr(
+        importer,
+        "_get_model_map",
+        Mock(return_value={name: Mock(__tablename__=name) for name in importer.FILES}),
+    )
+    monkeypatch.setattr(
+        importer,
+        "download_and_extract_csv",
+        Mock(side_effect=RuntimeError("private filesystem detail")),
+    )
+
+    client.post("/import_data/start")
+    worker, worker_app, job_id = submit.call_args.args
+    worker(worker_app, job_id)
+    failed = client.get(f"/import_data/status/{job_id}")
+
+    assert failed.status_code == 200
+    payload = failed.get_json()
+    assert payload["status"] == "error"
+    assert payload["files"][0]["status"] == "error"
+    assert "private filesystem detail" not in failed.get_data(as_text=True)
+
+
+def test_unknown_import_status_returns_404(client):
+    response = client.get("/import_data/status/not-a-job")
+
+    assert response.status_code == 404
+    assert response.get_json()["status"] == "not_found"

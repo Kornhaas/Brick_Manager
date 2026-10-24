@@ -26,11 +26,11 @@ Sie sind die wichtigsten Kandidaten für behutsame, testgestützte Entkopplung.
 
 ## Verifizierte Testbasis
 
-Der vollständige konfigurierte Lauf sammelte 355 Tests; alle bestanden ohne
-Skips. Die erzeugte Cobertura-Datei enthält 2.781 abgedeckte von 4.419
-ausführbaren Produktivzeilen: **62,93 % Line Coverage**. Zusätzlich sind 631
-von 1.248 Branches abgedeckt (**50,56 %**); pytest-cov weist kombiniert
-**60,21 %** aus. Das Repository erzwingt nun 60 % Coverage (`pytest.ini`).
+Der vollständige konfigurierte Lauf sammelte 361 Tests; alle bestanden ohne
+Skips. Die erzeugte Cobertura-Datei enthält 2.860 abgedeckte von 4.498
+ausführbaren Produktivzeilen: **63,58 % Line Coverage**. Zusätzlich sind 649
+von 1.268 Branches abgedeckt (**51,18 %**); pytest-cov weist kombiniert
+**60,86 %** aus. Das Repository erzwingt nun 60 % Coverage (`pytest.ini`).
 
 ## Stärken
 

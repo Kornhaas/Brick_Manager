@@ -4,7 +4,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from flask import render_template
 from models import (
+    CollectionSnapshot,
     RebrickableColors,
     RebrickablePartCategories,
     RebrickableParts,
@@ -14,6 +16,7 @@ from models import (
     User_Set,
     db,
 )
+from sqlalchemy import event
 
 
 @pytest.fixture
@@ -89,20 +92,36 @@ def test_dashboard_renders_owned_missing_and_spare_part_totals(
     response = client.get("/dashboard")
 
     assert response.status_code == 200
-    assert b"<h2>4</h2>\n                    <p>Total Parts Owned</p>" in response.data
-    assert b"<h2>6</h2>\n                        <p>Missing Parts</p>" in response.data
+    assert b"Collection intelligence" in response.data
+    assert b'Parts owned</div><div class="metric-value">5</div>' in response.data
     assert (
-        b"<h2>6</h2>\n                        <p>Missing Spare Parts</p>"
-        in response.data
+        b'Parts still missing</div><div class="metric-value">8</div>' in response.data
     )
-    assert (
-        b"<h2>1</h2>\n                    <p>Total Konvolut Parts Owned</p>"
-        in response.data
-    )
-    assert (
-        b"<h2>2</h2>\n                        <p>Missing Konvolut Parts</p>"
-        in response.data
-    )
+    assert b"Missing spares</small>" in response.data
+    assert b"Konvolut parts owned</span><strong>1</strong>" in response.data
+    assert b"Missing Konvolut parts</span><strong>2</strong>" in response.data
+    assert b'id="collectionTrend"' in response.data
+    assert b'id="historyData"' in response.data
+    assert b'id="statusData"' in response.data
+    assert b"/static/css/dashboard.css" in response.data
+    assert b"/static/js/dashboard.js" in response.data
+
+
+def test_dashboard_daily_snapshot_is_idempotent_and_refreshes(
+    client, collection_records
+):
+    first_response = client.get("/dashboard")
+    part = User_Parts.query.filter_by(user_set_id=collection_records.id).one()
+    part.have_quantity = 7
+    db.session.commit()
+    second_response = client.get("/dashboard")
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 200
+    snapshots = CollectionSnapshot.query.all()
+    assert len(snapshots) == 1
+    assert snapshots[0].owned_parts == 8
+    assert snapshots[0].missing_parts == 5
 
 
 def test_set_maintenance_renders_escaped_collection_data_and_ui_hooks(
@@ -119,6 +138,84 @@ def test_set_maintenance_renders_escaped_collection_data_and_ui_hooks(
     assert b'id="search-input"' in response.data
     assert b'id="sets-table-main"' in response.data
     assert b"/static/js/set_maintenance.js" in response.data
+    assert b'loading="lazy"' in response.data
+    assert b'decoding="async"' in response.data
+    assert b"document.addEventListener('DOMContentLoaded'" in response.data
+    assert b"window.addEventListener('load'" not in response.data
+    assert b"Sets with missing parts" in response.data
+
+
+def test_set_maintenance_template_tolerates_legacy_route_context(app):
+    """Template reloads must not fail while an older route remains in memory."""
+    with app.test_request_context("/set_maintain"):
+        html = render_template("set_maintain.html", sets_with_completeness=[])
+
+    assert "Collection overview" in html
+    assert "0 matching sets" in html
+
+
+def test_set_maintenance_query_count_does_not_grow_per_set(client, collection_records):
+    """Loading minifigure parts must not issue one query for every user set."""
+    select_counts = []
+
+    def count_selects(_connection, _cursor, statement, *_args):
+        if statement.lstrip().upper().startswith("SELECT"):
+            select_counts[-1] += 1
+
+    event.listen(db.engine, "before_cursor_execute", count_selects)
+    try:
+        select_counts.append(0)
+        first_response = client.get("/set_maintain")
+
+        db.session.add(User_Set(set_num=collection_records.set_num, status="unknown"))
+        db.session.commit()
+
+        select_counts.append(0)
+        second_response = client.get("/set_maintain")
+    finally:
+        event.remove(db.engine, "before_cursor_execute", count_selects)
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 200
+    assert select_counts[1] == select_counts[0]
+
+
+def test_set_maintenance_filters_by_box_and_missing_parts(client, collection_records):
+    active_part = User_Parts.query.filter_by(user_set_id=collection_records.id).one()
+    active_part.have_quantity = active_part.quantity
+    db.session.commit()
+
+    box_response = client.get(
+        "/set_maintain", query_string={"box_id": collection_records.id}
+    )
+    missing_response = client.get(
+        "/set_maintain", query_string={"completion": "incomplete"}
+    )
+
+    assert box_response.status_code == 200
+    assert b"Explorer &amp; Research" in box_response.data
+    assert b"Loose Bricks" not in box_response.data
+    assert missing_response.status_code == 200
+    assert b"Explorer &amp; Research" not in missing_response.data
+    assert b"Loose Bricks" in missing_response.data
+    assert b"Only sets with missing parts" in missing_response.data
+
+
+def test_set_maintenance_paginates_large_collections(client, collection_records):
+    db.session.add_all(
+        [
+            User_Set(set_num=collection_records.set_num, status="unknown")
+            for _ in range(30)
+        ]
+    )
+    db.session.commit()
+
+    response = client.get("/set_maintain", query_string={"per_page": 25})
+
+    assert response.status_code == 200
+    assert response.data.count(b'class="set-row"') == 25
+    assert b'aria-label="Set result pages"' in response.data
+    assert b"32 matching sets" in response.data
 
 
 def test_dashboard_quantity_update_clamps_and_persists(client, collection_records):

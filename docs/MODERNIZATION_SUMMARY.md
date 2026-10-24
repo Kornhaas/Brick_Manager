@@ -9,8 +9,8 @@ die Desktop-API. Die getesteten Endpunkte validieren JSON-Typen strenger,
 rollen fehlgeschlagene Transaktionen zurück und geben keine internen
 Datenbankfehler mehr an Clients weiter.
 
-Der vollständige Lauf umfasst 355 bestandene Tests ohne Fehler oder Skips. Die
-Messung beträgt 62,93 % Line Coverage, 50,56 % Branch Coverage und 60,21 %
+Der vollständige Lauf umfasst 361 bestandene Tests ohne Fehler oder Skips. Die
+Messung beträgt 63,58 % Line Coverage, 51,18 % Branch Coverage und 60,86 %
 kombinierte pytest-cov Coverage. Das geforderte Mindestziel von 80 % ist damit
 noch nicht erreicht und wird nicht als abgeschlossen dargestellt.
 
@@ -31,3 +31,13 @@ Die zweite TDD-Runde sichert zusätzlich Token-Verschlüsselung, authentifiziert
 Rebrickable-Aufrufe, Rate-Limits, Pagination, Setlisten-Abgleich sowie atomare
 Katalogimporte ab. Fehlgeschlagene Imports bewahren die vorherigen Katalogdaten
 und temporäre Downloads werden bei Fehlern bereinigt.
+
+Die Logging-Konfiguration bindet keinen importzeitlichen Root-Stream mehr.
+Flasks dynamischer CLI-/WSGI-Handler bleibt erhalten, die Konfiguration ist
+idempotent und der lokale Flask-Start wurde ohne Logging-Ausnahme verifiziert.
+
+Der Katalogimport läuft für die Weboberfläche nun als einzelner Hintergrundjob.
+Eine per Polling aktualisierte Checkliste zeigt Download, Import, Datensatzanzahl,
+Gesamtfortschritt und Fehlerzustand je Archiv. Ein zweiter Start verbindet sich
+mit dem laufenden Job; ein Neuladen der Seite setzt die Beobachtung über die
+lokal gespeicherte Job-ID fort.

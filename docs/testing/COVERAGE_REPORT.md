@@ -4,13 +4,13 @@ Messdatum: 23. Oktober 2026
 
 | Kennzahl | Ergebnis | Nachweis |
 |---|---:|---|
-| Gesammelte Tests | 355 | vollständiger pytest-Lauf |
-| Bestandene/fehlgeschlagene/übersprungene Tests | 355 / 0 / 0 | vollständiger pytest-Lauf |
-| Produktivzeilen | 4.419 | erzeugte `coverage.xml` |
-| Abgedeckte Produktivzeilen | 2.781 | erzeugte `coverage.xml` |
-| Line Coverage | 62,93 % | 2.781 / 4.419 |
-| Branch Coverage | 50,56 % | 631 / 1.248 |
-| Kombinierte pytest-cov Coverage | 60,21 % | vollständiger pytest-Lauf |
+| Gesammelte Tests | 361 | vollständiger pytest-Lauf |
+| Bestandene/fehlgeschlagene/übersprungene Tests | 361 / 0 / 0 | vollständiger pytest-Lauf |
+| Produktivzeilen | 4.498 | erzeugte `coverage.xml` |
+| Abgedeckte Produktivzeilen | 2.860 | erzeugte `coverage.xml` |
+| Line Coverage | 63,58 % | 2.860 / 4.498 |
+| Branch Coverage | 51,18 % | 649 / 1.268 |
+| Kombinierte pytest-cov Coverage | 60,86 % | vollständiger pytest-Lauf |
 | Erzwungene Mindestquote | 60 % | `pytest.ini` |
 
 Die Messung ist reproduzierbar und umfasst Line- und Branch-Coverage. Das vom

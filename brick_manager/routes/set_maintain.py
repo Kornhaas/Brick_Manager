@@ -26,12 +26,15 @@ from models import (
     PartStorage,
     RebrickablePartCategories,
     RebrickableParts,
+    RebrickableSets,
+    RebrickableThemes,
     User_Parts,
     User_Set,
     UserMinifigurePart,
     db,
 )
-from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
+from sqlalchemy.orm import joinedload, selectinload
 from werkzeug.utils import secure_filename
 
 set_maintain_bp = Blueprint("set_maintain", __name__)
@@ -103,13 +106,90 @@ def set_maintain():
 
     Displays the list of user sets with enhanced information including theme data.
     """
-    user_sets = (
-        User_Set.query.options(
-            joinedload(User_Set.template_set),
-            joinedload(User_Set.parts_in_set),
-            joinedload(User_Set.minifigures_in_set),
+    search = request.args.get("q", "").strip()
+    box_id = request.args.get("box_id", type=int)
+    status = request.args.get("status", "").strip()
+    theme_id = request.args.get("theme", type=int)
+    label = request.args.get("label", "").strip()
+    completion = request.args.get("completion", "").strip()
+    group_by = request.args.get("group", "").strip()
+    page = max(request.args.get("page", 1, type=int), 1)
+    per_page = request.args.get("per_page", 50, type=int)
+    if per_page not in {25, 50, 100}:
+        per_page = 50
+
+    query = User_Set.query.join(User_Set.template_set).options(
+        joinedload(User_Set.template_set),
+        selectinload(User_Set.parts_in_set),
+        selectinload(User_Set.minifigures_in_set),
+        selectinload(User_Set.user_minifigure_parts),
+    )
+
+    if search:
+        search_pattern = f"%{search}%"
+        search_conditions = [
+            RebrickableSets.set_num.ilike(search_pattern),
+            RebrickableSets.name.ilike(search_pattern),
+            RebrickableSets.theme.has(RebrickableThemes.name.ilike(search_pattern)),
+        ]
+        if search.isdigit():
+            search_conditions.append(User_Set.id == int(search))
+        query = query.filter(or_(*search_conditions))
+    if box_id is not None:
+        query = query.filter(User_Set.id == box_id)
+    if status in USER_SET_STATUSES:
+        query = query.filter(User_Set.status == status)
+    if theme_id is not None:
+        query = query.filter(RebrickableSets.theme_id == theme_id)
+    if label == "printed":
+        query = query.filter(User_Set.label_printed.is_(True))
+    elif label == "not-printed":
+        query = query.filter(User_Set.label_printed.is_(False))
+
+    missing_parts = or_(
+        User_Set.parts_in_set.any(User_Parts.have_quantity < User_Parts.quantity),
+        User_Set.user_minifigure_parts.any(
+            UserMinifigurePart.have_quantity < UserMinifigurePart.quantity
+        ),
+    )
+    has_parts = or_(User_Set.parts_in_set.any(), User_Set.user_minifigure_parts.any())
+    has_owned_parts = or_(
+        User_Set.parts_in_set.any(User_Parts.have_quantity > 0),
+        User_Set.user_minifigure_parts.any(UserMinifigurePart.have_quantity > 0),
+    )
+    if completion == "incomplete":
+        query = query.filter(missing_parts)
+    elif completion == "complete":
+        query = query.filter(has_parts, ~missing_parts)
+    elif completion == "no-parts":
+        query = query.filter(~has_owned_parts)
+
+    if group_by == "theme":
+        query = query.join(RebrickableSets.theme).order_by(
+            RebrickableThemes.name.asc(), User_Set.id.desc()
         )
-        .order_by(User_Set.id.desc())
+    else:
+        query = query.order_by(User_Set.id.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    user_sets = pagination.items
+
+    theme_summary = (
+        db.session.query(
+            RebrickableThemes.id,
+            RebrickableThemes.name,
+            db.func.count(User_Set.id).label("set_count"),
+        )
+        .join(RebrickableSets, RebrickableSets.theme_id == RebrickableThemes.id)
+        .join(User_Set, User_Set.set_num == RebrickableSets.set_num)
+        .group_by(RebrickableThemes.id, RebrickableThemes.name)
+        .order_by(db.func.count(User_Set.id).desc(), RebrickableThemes.name.asc())
+        .limit(12)
+        .all()
+    )
+    status_summary = dict(
+        db.session.query(User_Set.status, db.func.count(User_Set.id))
+        .group_by(User_Set.status)
         .all()
     )
 
@@ -118,9 +198,7 @@ def set_maintain():
         total_quantity = sum(part.quantity for part in user_set.parts_in_set)
         total_have_quantity = sum(part.have_quantity for part in user_set.parts_in_set)
 
-        user_minifigure_parts = UserMinifigurePart.query.filter_by(
-            user_set_id=user_set.id
-        ).all()
+        user_minifigure_parts = user_set.user_minifigure_parts
         total_quantity += sum(part.quantity for part in user_minifigure_parts)
         total_have_quantity += sum(part.have_quantity for part in user_minifigure_parts)
 
@@ -155,7 +233,24 @@ def set_maintain():
         )
 
     return render_template(
-        "set_maintain.html", sets_with_completeness=sets_with_completeness
+        "set_maintain.html",
+        sets_with_completeness=sets_with_completeness,
+        pagination=pagination,
+        total_sets=User_Set.query.count(),
+        missing_sets=User_Set.query.filter(missing_parts).count(),
+        theme_summary=theme_summary,
+        status_summary=status_summary,
+        themes=RebrickableThemes.query.order_by(RebrickableThemes.name).all(),
+        filters={
+            "q": search,
+            "box_id": box_id,
+            "status": status,
+            "theme": theme_id,
+            "label": label,
+            "completion": completion,
+            "group": group_by,
+            "per_page": per_page,
+        },
     )
 
 

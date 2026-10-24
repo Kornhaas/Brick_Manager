@@ -7,19 +7,13 @@
     "python.analysis.extraPaths": [
         "./brick_manager"
     ],
-    "python.testing.cwd": "${workspaceFolder}",
-    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.testing.cwd": ".",
+    "python.defaultInterpreterPath": ".venv/bin/python",
     "python-envs.workspaceSearchPaths": [
-        "${workspaceFolder}/.venv"
+        "./.venv"
     ],
-    "python-envs.pythonProjects": [
-        {
-            "path": "${workspaceFolder}",
-            "envManager": "ms-python.python:venv",
-            "packageManager": "ms-python.python:pip"
-        }
-    ],
-    "python.terminal.activateEnvironment": true,
+    "python-envs.pythonProjects": [],
+    "python-envs.terminal.autoActivationType": "command",
     "python.envFile": "${workspaceFolder}/.env",
     "python.analysis.autoImportCompletions": true,
     "python.analysis.typeCheckingMode": "off",

@@ -42,6 +42,15 @@
     </style>
 </head>
 <body>
+    {# Keep template auto-reload compatible with an older route still in memory. #}
+    {% set total_sets = total_sets | default(sets_with_completeness | length) %}
+    {% set missing_sets = missing_sets | default(0) %}
+    {% set status_summary = status_summary | default({}) %}
+    {% set theme_summary = theme_summary | default([]) %}
+    {% set themes = themes | default([]) %}
+    {% set pagination = pagination | default({'total': sets_with_completeness | length, 'pages': 0}) %}
+    {% set filters = filters | default({'q': '', 'box_id': none, 'status': '', 'theme': none, 'label': '', 'completion': '', 'group': '', 'per_page': 50}) %}
+
     <!-- Include the navigation bar -->
     {% include 'navbar.html' %}
 
@@ -56,6 +65,51 @@
 
     <div class="container mt-5">
         <h1 class="text-center">Set Maintenance</h1>
+
+        <section class="mb-4" aria-labelledby="collection-overview-title">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0" id="collection-overview-title">Collection overview</h2>
+                <a href="#set-filters" class="btn btn-sm btn-outline-primary">Open complete list</a>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-lg-3">
+                    <a class="card h-100 text-decoration-none text-body shadow-sm" href="{{ url_for('set_maintain.set_maintain') }}">
+                        <div class="card-body"><div class="text-muted">All sets</div><div class="display-6">{{ total_sets }}</div></div>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a class="card h-100 text-decoration-none text-body shadow-sm border-danger" href="{{ url_for('set_maintain.set_maintain', completion='incomplete') }}">
+                        <div class="card-body"><div class="text-danger">Sets with missing parts</div><div class="display-6">{{ missing_sets }}</div></div>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a class="card h-100 text-decoration-none text-body shadow-sm" href="{{ url_for('set_maintain.set_maintain', status='sealed') }}">
+                        <div class="card-body"><div class="text-muted">Sealed</div><div class="display-6">{{ status_summary.get('sealed', 0) }}</div></div>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a class="card h-100 text-decoration-none text-body shadow-sm" href="{{ url_for('set_maintain.set_maintain', status='assembled') }}">
+                        <div class="card-body"><div class="text-muted">Assembled</div><div class="display-6">{{ status_summary.get('assembled', 0) }}</div></div>
+                    </a>
+                </div>
+            </div>
+
+            {% if theme_summary %}
+            <h3 class="h5">Explore by theme</h3>
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2">
+                {% for theme_id, theme_name, set_count in theme_summary %}
+                <div class="col">
+                    <a class="card h-100 text-decoration-none text-body" href="{{ url_for('set_maintain.set_maintain', theme=theme_id, group='theme') }}">
+                        <div class="card-body py-3">
+                            <div class="fw-semibold text-truncate" title="{{ theme_name }}">{{ theme_name }}</div>
+                            <small class="text-muted">{{ set_count }} set{% if set_count != 1 %}s{% endif %}</small>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -75,100 +129,81 @@
         <div id="sets-table">
             <h2 class="mt-4">Your User Sets</h2>
 
-            <!-- Quick Search -->
-            <div class="row mb-3">
-                <div class="col-md-8">
-                    <input type="text" class="form-control form-control-lg" id="search-input"
-                           placeholder="🔍 Quick search by set number, name, or theme...">
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-outline-secondary w-100" type="button"
-                            data-bs-toggle="collapse" data-bs-target="#advancedFilters"
-                            aria-expanded="false" aria-controls="advancedFilters">
-                        <i class="bi bi-funnel"></i> Advanced Filters
-                        <i class="bi bi-chevron-down" id="filter-chevron"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Advanced Filters (Collapsible) -->
-            <div class="collapse" id="advancedFilters">
-                <div class="card card-body mb-3 bg-light">
-                    <h6 class="text-muted mb-3"><i class="bi bi-gear"></i> Advanced Filter Options</h6>
-                    <div class="row g-3">
-                        <!-- Status Filter -->
-                        <div class="col-md-3">
-                            <label for="status-filter" class="form-label">Status</label>
-                            <select class="form-select" id="status-filter">
-                                <option value="">All Statuses</option>
-                                <option value="unknown">Unknown</option>
-                                <option value="konvolut">Konvolut</option>
-                                <option value="assembled">Assembled</option>
-                                <option value="sealed">Sealed</option>
-                                <option value="complete">Complete</option>
-                                <option value="completenospareparts">Complete (No Spare Parts)</option>
-                                <option value="missingparts">Missing Parts</option>
-                            </select>
-                        </div>
-
-                        <!-- Set Number Filter -->
-                        <div class="col-md-3">
-                            <label for="set-number-filter" class="form-label">Set Number</label>
-                            <input type="text" class="form-control" id="set-number-filter"
-                                   placeholder="e.g. 75192, 10221">
-                        </div>
-
-                        <!-- Set Name Filter -->
-                        <div class="col-md-3">
-                            <label for="set-name-filter" class="form-label">Set Name</label>
-                            <input type="text" class="form-control" id="set-name-filter"
-                                   placeholder="e.g. Millennium Falcon">
-                        </div>
-
-                        <!-- Theme Filter -->
-                        <div class="col-md-3">
-                            <label for="theme-filter" class="form-label">Theme</label>
-                            <select class="form-select" id="theme-filter">
-                                <option value="">All Themes</option>
-                                <!-- Themes will be populated dynamically -->
-                            </select>
-                        </div>
+            <form method="get" class="card card-body mb-3 bg-light" id="set-filters">
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <label for="search-input" class="form-label">Search</label>
+                        <input type="search" class="form-control" id="search-input" name="q"
+                               value="{{ filters.q }}"
+                               placeholder="Set number, name, or theme">
                     </div>
-
-                    <!-- Additional Filter Row -->
-                    <div class="row g-3 mt-2">
-                        <!-- Label Status Filter -->
-                        <div class="col-md-3">
-                            <label for="label-filter" class="form-label">Label Status</label>
-                            <select class="form-select" id="label-filter">
-                                <option value="">All Labels</option>
-                                <option value="printed">Printed</option>
-                                <option value="not-printed">Not Printed</option>
-                            </select>
-                        </div>
-
-                        <!-- Parts Completion Filter -->
-                        <div class="col-md-3">
-                            <label for="completion-filter" class="form-label">Parts Completion</label>
-                            <select class="form-select" id="completion-filter">
-                                <option value="">All Sets</option>
-                                <option value="complete">100% Complete</option>
-                                <option value="incomplete">Incomplete</option>
-                                <option value="no-parts">No Parts Collected</option>
-                            </select>
-                        </div>
-
-                        <!-- Clear Filters Button -->
-                        <div class="col-md-6 d-flex align-items-end">
-                            <button type="button" class="btn btn-outline-warning me-2" id="clear-filters">
-                                <i class="bi bi-x-circle"></i> Clear All Filters
-                            </button>
-                            <small class="text-muted align-self-center">
-                                <span id="filter-count">0</span> active filters
-                            </small>
-                        </div>
+                    <div class="col-lg-2">
+                        <label for="box-id-filter" class="form-label">Box ID</label>
+                        <input type="number" min="1" class="form-control" id="box-id-filter" name="box_id"
+                               value="{{ filters.box_id or '' }}" placeholder="e.g. 42">
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="theme-filter" class="form-label">Theme</label>
+                        <select class="form-select" id="theme-filter" name="theme">
+                            <option value="">All themes</option>
+                            {% for theme in themes %}
+                            <option value="{{ theme.id }}" {% if filters.theme == theme.id %}selected{% endif %}>{{ theme.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label for="status-filter" class="form-label">Status</label>
+                        <select class="form-select" id="status-filter" name="status">
+                            <option value="">All statuses</option>
+                            {% for value, label in [('unknown', 'Unknown'), ('konvolut', 'Konvolut'), ('assembled', 'Assembled'), ('sealed', 'Sealed'), ('complete', 'Complete'), ('completenospareparts', 'Complete (no spares)'), ('missingparts', 'Missing parts')] %}
+                            <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label for="completion-filter" class="form-label">Inventory</label>
+                        <select class="form-select" id="completion-filter" name="completion">
+                            <option value="">All sets</option>
+                            <option value="incomplete" {% if filters.completion == 'incomplete' %}selected{% endif %}>Sets with missing parts</option>
+                            <option value="complete" {% if filters.completion == 'complete' %}selected{% endif %}>100% complete</option>
+                            <option value="no-parts" {% if filters.completion == 'no-parts' %}selected{% endif %}>Nothing collected</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="label-filter" class="form-label">Label</label>
+                        <select class="form-select" id="label-filter" name="label">
+                            <option value="">All labels</option>
+                            <option value="printed" {% if filters.label == 'printed' %}selected{% endif %}>Printed</option>
+                            <option value="not-printed" {% if filters.label == 'not-printed' %}selected{% endif %}>Not printed</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="group-filter" class="form-label">Organisation</label>
+                        <select class="form-select" id="group-filter" name="group">
+                            <option value="">Newest boxes first</option>
+                            <option value="theme" {% if filters.group == 'theme' %}selected{% endif %}>Group by theme</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label for="page-size" class="form-label">Per page</label>
+                        <select class="form-select" id="page-size" name="per_page">
+                            {% for size in [25, 50, 100] %}
+                            <option value="{{ size }}" {% if filters.per_page == size %}selected{% endif %}>{{ size }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-4 d-flex align-items-end gap-2">
+                        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Apply filters</button>
+                        <a class="btn btn-outline-secondary" id="clear-filters" href="{{ url_for('set_maintain.set_maintain') }}">Reset</a>
                     </div>
                 </div>
+            </form>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">{{ pagination.total }} matching set{% if pagination.total != 1 %}s{% endif %}</span>
+                {% if filters.completion == 'incomplete' %}
+                <span class="badge bg-danger">Only sets with missing parts</span>
+                {% endif %}
             </div>
 
             <div class="table-responsive">
@@ -203,13 +238,22 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% set grouping = namespace(theme=None) %}
                         {% for entry in sets_with_completeness %}
-                        <tr>
+                        {% if filters.group == 'theme' and grouping.theme != entry.theme_name %}
+                        {% set grouping.theme = entry.theme_name %}
+                        <tr class="theme-group-row table-primary">
+                            <th colspan="9"><i class="bi bi-collection"></i> {{ entry.theme_name }}</th>
+                        </tr>
+                        {% endif %}
+                        <tr class="set-row">
                             <td>
                                 <img
                                     src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
                                     alt="{{ entry.set_num }}"
                                     width="150"
+                                    loading="lazy"
+                                    decoding="async"
                                     class="img-thumbnail set-image-clickable"
                                     style="cursor: pointer;"
                                     data-image-src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
@@ -325,6 +369,22 @@
                     </tbody>
                 </table>
             </div>
+
+            {% if pagination.pages > 1 %}
+            <nav aria-label="Set result pages">
+                <ul class="pagination justify-content-center">
+                    {% for page_number in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+                        {% if page_number %}
+                        <li class="page-item {% if page_number == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('set_maintain.set_maintain', page=page_number, q=filters.q, box_id=filters.box_id, status=filters.status, theme=filters.theme, label=filters.label, completion=filters.completion, group=filters.group, per_page=filters.per_page) }}">{{ page_number }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
         </div>
 
       <!-- Set Details -->
@@ -489,8 +549,9 @@
 
     <!-- Page Loading Control -->
     <script>
-        // Hide loading spinner when page is fully loaded
-        window.addEventListener('load', function() {
+        // The table is usable as soon as its markup has been parsed. Do not wait
+        // for every remote set image to finish downloading.
+        document.addEventListener('DOMContentLoaded', function() {
             const loadingOverlay = document.getElementById('pageLoadingOverlay');
             if (loadingOverlay) {
                 loadingOverlay.style.display = 'none';

@@ -16,6 +16,11 @@ from models import (
     db,
 )
 from services.cache_service import cache_image
+from services.dashboard_service import (
+    build_dashboard_data,
+    load_snapshot_history,
+    record_daily_snapshot,
+)
 from services.part_lookup_service import load_part_lookup
 
 # pylint: disable=C0301
@@ -80,71 +85,29 @@ def enrich_part(item, master_lookup):
 
 @dashboard_bp.route("/dashboard", methods=["GET"])
 def dashboard():
-    """Displays an overview of total and missing parts/minifigure parts."""
-    parts_in_sets = (
-        User_Parts.query.join(User_Set)
-        .filter(~User_Set.status.in_(NON_LOOSE_PART_STATUSES))
-        .all()
-    )
-
-    minifigure_parts = (
-        UserMinifigurePart.query.join(User_Set)
-        .filter(
-            UserMinifigurePart.quantity > UserMinifigurePart.have_quantity,
-            ~User_Set.status.in_(NON_LOOSE_PART_STATUSES),
-        )
-        .all()
-    )
-
-    total_parts = sum(part.have_quantity for part in parts_in_sets)
-
-    missing_parts = sum(
-        part.quantity - part.have_quantity
-        for part in parts_in_sets
-        if part.quantity > part.have_quantity
-    )
-
-    missing_spare_parts = sum(
-        part.quantity - part.have_quantity
-        for part in parts_in_sets
-        if part.is_spare and part.quantity > part.have_quantity
-    )
-
-    missing_minifigure_parts = sum(
-        part.quantity - part.have_quantity for part in minifigure_parts
-    )
-
-    konvolut_parts = (
-        User_Parts.query.join(User_Set).filter(User_Set.status == "konvolut").all()
-    )
-
-    missing_konvolut_parts = sum(
-        part.quantity - part.have_quantity
-        for part in konvolut_parts
-        if part.quantity > part.have_quantity
-    )
-
-    konvolut_minifigure_parts = (
-        UserMinifigurePart.query.join(User_Set)
-        .filter(User_Set.status == "konvolut")
-        .all()
-    )
-
-    missing_konvolut_minifigure_parts = sum(
-        part.quantity - part.have_quantity
-        for part in konvolut_minifigure_parts
-        if part.quantity > part.have_quantity
+    """Display fast collection intelligence metrics and trend charts."""
+    metrics = build_dashboard_data()
+    record_daily_snapshot(metrics)
+    history = load_snapshot_history()
+    completion_rate = (
+        round(metrics["owned_parts"] / metrics["required_parts"] * 100, 1)
+        if metrics["required_parts"]
+        else 0
     )
 
     return render_template(
         "dashboard.html",
-        total_parts=total_parts,
-        missing_parts=missing_parts,
-        missing_spare_parts=missing_spare_parts,
-        missing_minifigure_parts=missing_minifigure_parts,
-        konvolut_parts=len(konvolut_parts),
-        missing_konvolut_parts=missing_konvolut_parts,
-        missing_konvolut_minifigure_parts=missing_konvolut_minifigure_parts,
+        metrics=metrics,
+        history=history,
+        completion_rate=completion_rate,
+        # Preserve established template contracts and detail links.
+        total_parts=metrics["loose_owned_parts"],
+        missing_parts=metrics["loose_missing_parts"],
+        missing_spare_parts=metrics["missing_spare_parts"],
+        missing_minifigure_parts=metrics["missing_minifigure_parts"],
+        konvolut_parts=metrics["konvolut_parts"],
+        missing_konvolut_parts=metrics["missing_konvolut_parts"],
+        missing_konvolut_minifigure_parts=metrics["missing_konvolut_minifigure_parts"],
     )
 
 

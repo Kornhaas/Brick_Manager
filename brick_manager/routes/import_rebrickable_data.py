@@ -9,10 +9,14 @@ import gzip
 import logging
 import os
 import shutil
+from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
+from threading import Lock
+from uuid import uuid4
 
 import pandas as pd
 import requests
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, current_app, jsonify, render_template, request
 from models import db
 
 # pylint: disable=C0301
@@ -38,6 +42,113 @@ FILES = [
 
 # Lazy import to avoid circular dependency issues
 MODEL_MAP = None
+
+_IMPORT_EXECUTOR = ThreadPoolExecutor(
+    max_workers=1, thread_name_prefix="catalog-import"
+)
+_IMPORT_JOBS = {}
+_IMPORT_JOBS_LOCK = Lock()
+_ACTIVE_IMPORT_JOB_ID = None
+
+
+def _display_name(file_name):
+    """Return a concise label for one Rebrickable archive."""
+    return file_name.removesuffix(".csv.gz").replace("_", " ").title()
+
+
+def _new_import_job(job_id):
+    return {
+        "job_id": job_id,
+        "status": "queued",
+        "message": "Import queued",
+        "completed": 0,
+        "total": len(FILES),
+        "percent": 0,
+        "files": [
+            {
+                "name": file_name,
+                "label": _display_name(file_name),
+                "status": "pending",
+                "records": None,
+            }
+            for file_name in FILES
+        ],
+    }
+
+
+def _update_import_job(job_id, **changes):
+    with _IMPORT_JOBS_LOCK:
+        _IMPORT_JOBS[job_id].update(changes)
+
+
+def _update_import_file(job_id, file_name, **changes):
+    with _IMPORT_JOBS_LOCK:
+        for file_status in _IMPORT_JOBS[job_id]["files"]:
+            if file_status["name"] == file_name:
+                file_status.update(changes)
+                break
+
+
+def _run_import_job(application, job_id):
+    """Execute one catalog refresh while publishing UI-safe progress state."""
+    global _ACTIVE_IMPORT_JOB_ID  # pylint: disable=global-statement
+
+    with application.app_context():
+        try:
+            _update_import_job(
+                job_id, status="running", message="Checking database tables"
+            )
+            ensure_table_structure()
+            model_map = _get_model_map()
+
+            for index, file_name in enumerate(FILES, start=1):
+                _update_import_file(job_id, file_name, status="downloading")
+                _update_import_job(
+                    job_id,
+                    message=f"Downloading and extracting {_display_name(file_name)}",
+                )
+                csv_path = download_and_extract_csv(file_name)
+
+                _update_import_file(job_id, file_name, status="importing")
+                _update_import_job(
+                    job_id, message=f"Importing {_display_name(file_name)}"
+                )
+                record_count = import_csv_to_sqlite(csv_path, model_map[file_name])
+
+                _update_import_file(
+                    job_id,
+                    file_name,
+                    status="completed",
+                    records=record_count,
+                )
+                _update_import_job(
+                    job_id,
+                    completed=index,
+                    percent=round(index / len(FILES) * 100),
+                )
+
+            _update_import_job(
+                job_id,
+                status="completed",
+                message="All catalog files imported successfully",
+                percent=100,
+            )
+        except Exception:
+            db.session.rollback()
+            logging.exception("Background catalog import failed")
+            with _IMPORT_JOBS_LOCK:
+                job = _IMPORT_JOBS[job_id]
+                for file_status in job["files"]:
+                    if file_status["status"] in {"downloading", "importing"}:
+                        file_status["status"] = "error"
+                job.update(
+                    status="error",
+                    message="Import failed. Existing data for the current file was preserved.",
+                )
+        finally:
+            with _IMPORT_JOBS_LOCK:
+                if job_id == _ACTIVE_IMPORT_JOB_ID:
+                    _ACTIVE_IMPORT_JOB_ID = None
 
 
 def _get_model_map():
@@ -170,6 +281,47 @@ def import_csv_to_sqlite(csv_path, model_class):
     logging.info(
         f"Successfully imported {len(df)} records into {model_class.__tablename__}"
     )
+    return len(df)
+
+
+@import_rebrickable_data_bp.post("/import_data/start")
+def start_import():
+    """Start one background catalog import or reconnect to the active job."""
+    global _ACTIVE_IMPORT_JOB_ID  # pylint: disable=global-statement
+
+    with _IMPORT_JOBS_LOCK:
+        if _ACTIVE_IMPORT_JOB_ID:
+            return (
+                jsonify(
+                    {
+                        "status": "running",
+                        "job_id": _ACTIVE_IMPORT_JOB_ID,
+                        "already_running": True,
+                    }
+                ),
+                202,
+            )
+
+        job_id = uuid4().hex
+        _IMPORT_JOBS.clear()
+        _IMPORT_JOBS[job_id] = _new_import_job(job_id)
+        _ACTIVE_IMPORT_JOB_ID = job_id
+
+    application = current_app.app_context().app
+    _IMPORT_EXECUTOR.submit(_run_import_job, application, job_id)
+    return jsonify({"status": "queued", "job_id": job_id}), 202
+
+
+@import_rebrickable_data_bp.get("/import_data/status/<job_id>")
+def import_status(job_id):
+    """Return a snapshot of background import progress."""
+    with _IMPORT_JOBS_LOCK:
+        job = _IMPORT_JOBS.get(job_id)
+        if job is None:
+            return jsonify(
+                {"status": "not_found", "message": "Import job not found"}
+            ), 404
+        return jsonify(deepcopy(job))
 
 
 @import_rebrickable_data_bp.route("/import_data", methods=["GET", "POST"])
