@@ -1,10 +1,12 @@
 # Development override for docker-compose
 # Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
-version: '3.8'
-
 services:
   bricks-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    pull_policy: build
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1

@@ -1,8 +1,7 @@
 services:
   bricks-manager:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: docker.io/kornhaas/bricks_manager:${BRICK_MANAGER_IMAGE_TAG:-main}
+    pull_policy: always
     container_name: bricks-manager-app
     restart: unless-stopped
     ports:

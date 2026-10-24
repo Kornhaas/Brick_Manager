@@ -1,6 +1,8 @@
 # Docker Operations
 
-`docker-compose.yml` is the production-oriented configuration. It builds application code into the image and mounts only persistent data directories. Source or template changes therefore require an image rebuild.
+`docker-compose.yml` is the production-oriented configuration. It pulls the CI-built
+Docker Hub image and mounts only persistent data directories. Source or template
+changes therefore require a new CI image, not a server-side build.
 
 ## Initial setup
 
@@ -9,21 +11,28 @@ cp .env.example .env
 # Set at least SECRET_KEY, REBRICKABLE_TOKEN as needed, and
 # BRICK_MANAGER_CLIENT_API_KEY when the desktop API is used.
 
-docker compose up -d --build
+docker compose pull
+docker compose up -d --no-build
 docker compose ps
 curl http://localhost:5000/health
 ```
 
 Application: `http://localhost:5000`
 
+By default the server pulls the `main` image tag. For a repeatable production
+deployment, set `BRICK_MANAGER_IMAGE_TAG` in `.env` to a released version (for
+example `1.2.3`) before running `docker compose pull`.
+
 ## Updating application code
 
 ```bash
-docker compose up -d --build
+docker compose pull
+docker compose up -d --no-build
 docker compose logs -f bricks-manager
 ```
 
-`docker compose restart` only restarts the existing image. It does not copy changed Python, templates, JavaScript, or CSS into the production container.
+`docker compose restart` only restarts the existing image. Use `docker compose pull`
+followed by `docker compose up -d --no-build` to deploy a CI-built update.
 
 ## Development mode
 
