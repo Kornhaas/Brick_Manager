@@ -87,7 +87,7 @@ Updated VS Code settings to work properly with the project:
 - 🏷️ **Step summaries** in GitHub Actions UI
 
 ### **Multi-Version Testing**
-- 🐍 **Python 3.11 & 3.12** support
+- 🐍 **Python 3.12** support
 - 🔄 **Matrix builds** for comprehensive testing
 - 💾 **Dependency caching** for faster runs
 

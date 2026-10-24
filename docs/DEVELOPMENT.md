@@ -2,7 +2,7 @@
 
 ## Voraussetzungen
 
-Python 3.11 oder neuer, Poetry und SQLite werden benötigt. Abhängigkeiten aus
+Python 3.12 oder neuer, Poetry und SQLite werden benötigt. Abhängigkeiten aus
 dem Repository-Root installieren:
 
 ```bash

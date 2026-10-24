@@ -30,7 +30,7 @@ This document provides an overview of all GitHub Actions workflows in the Bricks
 - Changes to `pyproject.toml`, `poetry.lock`, or test files
 
 **Features**:
-- Multi-version testing (Python 3.11, 3.12)
+- Testing on Python 3.12
 - Code coverage reporting
 - Integration with Codecov
 - Fast dependency caching
@@ -45,7 +45,7 @@ This document provides an overview of all GitHub Actions workflows in the Bricks
 - Changes to `pyproject.toml` or `poetry.lock`
 
 **Features**:
-- Multi-version linting (Python 3.11, 3.12)
+- Linting on Python 3.12
 - Quality score reporting
 - Non-blocking warnings for code quality issues
 - Detailed reports as artifacts
