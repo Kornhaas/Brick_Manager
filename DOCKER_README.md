@@ -56,9 +56,12 @@ make backup
 
 `docker-entrypoint.sh` follows this policy:
 
-1. If a versioned migration repository exists at `brick_manager/migrations/`, run `flask db upgrade` and fail startup if the migration fails.
-2. Otherwise, create all declared tables only when the SQLite database does not yet exist.
-3. Without migrations, leave an existing database schema unchanged and log that fact.
+1. Create all declared tables only when the SQLite database does not yet exist.
+2. Apply every restart-safe `*.sql` migration in `brick_manager/migrations/` in name order.
+3. Validate foreign-key integrity after migration and fail startup if validation fails.
+
+The repository's migration directory contains versioned SQLite scripts, not an
+Alembic repository; `flask db upgrade` must therefore not be used at startup.
 
 `db.create_all()` is not a migration mechanism and cannot add or transform columns in an existing table. Schema changes must include committed migration artifacts.
 

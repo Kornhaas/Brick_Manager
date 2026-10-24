@@ -1,5 +1,6 @@
 """Repository contracts that prevent schema and status documentation drift."""
 
+import json
 import re
 from pathlib import Path
 
@@ -36,3 +37,14 @@ def test_documented_statuses_match_supported_statuses():
     }
 
     assert documented_statuses == USER_SET_STATUSES
+
+
+def test_vscode_uses_the_workspace_poetry_environment_without_fake_projects():
+    settings = json.loads(
+        (PROJECT_ROOT / ".vscode/settings.json").read_text(encoding="utf-8")
+    )
+
+    assert settings["python.defaultInterpreterPath"] == ".venv/bin/python"
+    assert settings["python-envs.workspaceSearchPaths"] == ["./.venv"]
+    assert settings["python-envs.pythonProjects"] == []
+    assert (PROJECT_ROOT / settings["python.defaultInterpreterPath"]).is_file()

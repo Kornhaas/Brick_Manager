@@ -14,6 +14,7 @@ from logging.handlers import RotatingFileHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 from config import Config
 from flask import Flask
+from flask.logging import default_handler
 from flask_migrate import Migrate
 from models import db  # Import the db instance from models
 
@@ -95,19 +96,39 @@ db.init_app(app)
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
-# Configure logging
-log_path = os.path.join(app.config["LOG_FOLDER"], "brick_manager.log")
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 
-rotating_file_handler = RotatingFileHandler(
-    log_path, maxBytes=1024 * 1024 * 5, backupCount=3
-)
-rotating_file_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-rotating_file_handler.setFormatter(formatter)
-app.logger.addHandler(rotating_file_handler)
+def configure_logging(application: Flask) -> None:
+    """Configure application logging without binding the process stderr stream.
+
+    Flask's default handler resolves the active WSGI/CLI error stream lazily. A
+    root ``basicConfig`` handler instead captures the import-time stream, which
+    can become invalid when Click replaces terminal wrappers during startup.
+    """
+    log_folder = application.config["LOG_FOLDER"]
+    os.makedirs(log_folder, exist_ok=True)
+    log_path = os.path.abspath(os.path.join(log_folder, "brick_manager.log"))
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
+    application.logger.setLevel(logging.DEBUG)
+    application.logger.propagate = False
+    if default_handler not in application.logger.handlers:
+        application.logger.addHandler(default_handler)
+    file_handler_exists = any(
+        isinstance(handler, RotatingFileHandler) and handler.baseFilename == log_path
+        for handler in application.logger.handlers
+    )
+    if not file_handler_exists:
+        rotating_file_handler = RotatingFileHandler(
+            log_path, maxBytes=1024 * 1024 * 5, backupCount=3
+        )
+        rotating_file_handler.setLevel(logging.DEBUG)
+        rotating_file_handler.setFormatter(formatter)
+        application.logger.addHandler(rotating_file_handler)
+
+
+configure_logging(app)
 
 
 def backup_database():

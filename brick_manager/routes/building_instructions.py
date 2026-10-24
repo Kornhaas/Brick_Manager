@@ -22,7 +22,8 @@ def get_instructions_folder():
     """Get the path to the instructions folder"""
     # Check if custom path is configured
     instructions_path = current_app.config.get("INSTRUCTIONS_FOLDER")
-    if instructions_path and os.path.exists(instructions_path):
+    if instructions_path:
+        os.makedirs(instructions_path, exist_ok=True)
         return instructions_path
 
     # Default to 'data/instructions' relative to project root

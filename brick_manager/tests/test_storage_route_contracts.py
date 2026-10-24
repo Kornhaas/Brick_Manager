@@ -163,3 +163,27 @@ class TestManualEntryContracts:
 
         assert response.status_code == 404
         assert response.get_json() == {"error": "Storage location not found"}
+
+
+class TestLegacyStoragePageContracts:
+    def test_storage_form_renders_requested_part(self, client):
+        response = client.get("/add_to_storage/3001")
+
+        assert response.status_code == 200
+        assert b"3001" in response.data
+
+    def test_storage_form_updates_lookup_and_application_cache(self, app, client):
+        with (
+            patch("routes.storage.load_part_lookup", return_value={}) as load,
+            patch("routes.storage.save_part_lookup") as save,
+        ):
+            response = client.post(
+                "/add_to_storage/3001",
+                data={"location": "A", "level": "2", "box": "7"},
+            )
+
+        assert response.status_code == 302
+        load.assert_called_once_with()
+        expected = {"3001": {"location": "A", "level": "2", "box": "7"}}
+        save.assert_called_once_with(expected)
+        assert app.config["MASTER_LOOKUP"] == expected

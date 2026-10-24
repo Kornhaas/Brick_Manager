@@ -17,40 +17,113 @@
     {% include 'navbar.html' %}
     <div class="container mt-5">
         <h1>Import Brick Data</h1>
-        <form id="importDataForm" method="post" action="{{ url_for('import_rebrickable_data.import_data') }}">
+        <p class="text-muted">Refresh the local Rebrickable catalog. Progress remains visible while you stay on this page.</p>
+        <form id="importDataForm" action="{{ url_for('import_rebrickable_data.start_import') }}">
             <button id="submitButton" type="submit" class="btn btn-primary">Import Data</button>
-            <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display: none;">
-                <span class="visually-hidden">Loading...</span>
-            </div>
         </form>
+
+        <section id="progressPanel" class="card mt-4 d-none" aria-live="polite">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h5 mb-0">Import progress</h2>
+                    <span id="progressCount" class="text-muted">0 / 12</span>
+                </div>
+                <div class="progress mb-3" role="progressbar" aria-label="Catalog import progress"
+                     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
+                </div>
+                <div id="currentMessage" class="alert alert-info mb-3">Preparing import…</div>
+                <div id="fileChecklist" class="list-group"></div>
+            </div>
+        </section>
     </div>
 
     <script>
         const form = document.getElementById('importDataForm');
         const submitButton = document.getElementById('submitButton');
-        const loadingSpinner = document.getElementById('loadingSpinner');
+        const progressPanel = document.getElementById('progressPanel');
+        const progressBar = document.getElementById('progressBar');
+        const progressElement = progressBar.parentElement;
+        const progressCount = document.getElementById('progressCount');
+        const currentMessage = document.getElementById('currentMessage');
+        const fileChecklist = document.getElementById('fileChecklist');
+        const statusUrlTemplate = {{ url_for('import_rebrickable_data.import_status', job_id='__JOB_ID__') | tojson }};
+        let pollTimer = null;
+
+        const statusPresentation = {
+            pending: ['○', 'Pending', 'text-muted'],
+            downloading: ['↓', 'Downloading', 'text-primary'],
+            importing: ['↻', 'Importing', 'text-warning'],
+            completed: ['✓', 'Completed', 'text-success'],
+            error: ['!', 'Failed', 'text-danger']
+        };
+
+        function renderProgress(job) {
+            progressPanel.classList.remove('d-none');
+            progressBar.style.width = `${job.percent}%`;
+            progressBar.textContent = `${job.percent}%`;
+            progressElement.setAttribute('aria-valuenow', job.percent);
+            progressCount.textContent = `${job.completed} / ${job.total}`;
+            currentMessage.textContent = job.message;
+            currentMessage.className = `alert mb-3 ${job.status === 'error' ? 'alert-danger' : job.status === 'completed' ? 'alert-success' : 'alert-info'}`;
+            progressBar.classList.toggle('progress-bar-animated', job.status === 'running' || job.status === 'queued');
+
+            fileChecklist.replaceChildren(...job.files.map(file => {
+                const [icon, label, color] = statusPresentation[file.status] || statusPresentation.pending;
+                const row = document.createElement('div');
+                row.className = 'list-group-item d-flex justify-content-between align-items-center';
+                const name = document.createElement('span');
+                name.textContent = `${icon} ${file.label}`;
+                name.className = color;
+                const state = document.createElement('span');
+                state.className = `badge ${file.status === 'completed' ? 'bg-success' : file.status === 'error' ? 'bg-danger' : 'bg-secondary'}`;
+                state.textContent = file.records === null ? label : `${label} · ${file.records.toLocaleString()} records`;
+                row.append(name, state);
+                return row;
+            }));
+        }
+
+        async function pollStatus(jobId) {
+            const response = await fetch(statusUrlTemplate.replace('__JOB_ID__', jobId));
+            if (!response.ok) throw new Error('Import status is no longer available.');
+            const job = await response.json();
+            renderProgress(job);
+            if (job.status === 'completed' || job.status === 'error') {
+                localStorage.removeItem('brickManagerImportJob');
+                submitButton.disabled = false;
+                return;
+            }
+            pollTimer = window.setTimeout(() => pollStatus(jobId).catch(showPollingError), 750);
+        }
+
+        function showPollingError(error) {
+            currentMessage.textContent = error.message;
+            currentMessage.className = 'alert alert-warning mb-3';
+            submitButton.disabled = false;
+            localStorage.removeItem('brickManagerImportJob');
+        }
 
         form.addEventListener('submit', async function (event) {
             event.preventDefault();
-            submitButton.style.display = 'none';
-            loadingSpinner.style.display = 'inline-block';
+            submitButton.disabled = true;
+            if (pollTimer) window.clearTimeout(pollTimer);
 
             try {
                 const response = await fetch(form.action, { method: 'POST' });
                 const data = await response.json();
-
-                if (response.ok) {
-                    alert(data.message);
-                } else {
-                    alert(`Error: ${data.message}`);
-                }
+                if (!response.ok) throw new Error(data.message || 'Unable to start import.');
+                localStorage.setItem('brickManagerImportJob', data.job_id);
+                await pollStatus(data.job_id);
             } catch (error) {
-                alert("An unexpected error occurred.");
-            } finally {
-                submitButton.style.display = 'inline-block';
-                loadingSpinner.style.display = 'none';
+                showPollingError(error);
             }
         });
+
+        const existingJob = localStorage.getItem('brickManagerImportJob');
+        if (existingJob) {
+            submitButton.disabled = true;
+            pollStatus(existingJob).catch(showPollingError);
+        }
     </script>
 </body>
 

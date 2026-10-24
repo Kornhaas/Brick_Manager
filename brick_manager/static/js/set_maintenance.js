@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
       header.addEventListener('click', () => {
         const sortKey = header.getAttribute('data-sort');
         const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const rows = Array.from(tbody.querySelectorAll('tr.set-row'));
 
         // Toggle sort direction
         sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
@@ -87,6 +87,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Enhanced Search and Filter Functionality
   function initSearchAndFilter() {
+    // Large collections are filtered by the server so every matching set is
+    // considered, not just the currently rendered page.
+    if (document.getElementById('set-filters')) return;
+
     const searchInput = document.getElementById('search-input');
     const statusFilter = document.getElementById('status-filter');
     const setNumberFilter = document.getElementById('set-number-filter');

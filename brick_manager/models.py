@@ -18,7 +18,7 @@ Models include:
 # pylint: disable=C0301,R0903,C0103
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Boolean, ForeignKey, Integer, Text
+from sqlalchemy import Boolean, Date, ForeignKey, Integer, Text
 
 db = SQLAlchemy()
 
@@ -35,6 +35,24 @@ USER_SET_STATUSES = frozenset(
 )
 FULL_OWNERSHIP_STATUSES = frozenset({"complete", "assembled", "sealed"})
 NON_LOOSE_PART_STATUSES = frozenset({"assembled", "konvolut", "sealed"})
+
+
+class CollectionSnapshot(db.Model):
+    """Daily aggregate used for collection trend charts."""
+
+    __tablename__ = "collection_snapshots"
+
+    id = db.Column(Integer, primary_key=True)
+    captured_on = db.Column(Date, nullable=False, unique=True, index=True)
+    total_sets = db.Column(Integer, nullable=False, default=0)
+    owned_parts = db.Column(Integer, nullable=False, default=0)
+    required_parts = db.Column(Integer, nullable=False, default=0)
+    missing_parts = db.Column(Integer, nullable=False, default=0)
+    complete_sets = db.Column(Integer, nullable=False, default=0)
+    incomplete_sets = db.Column(Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<CollectionSnapshot {self.captured_on}>"
 
 
 class User_Set(db.Model):

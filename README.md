@@ -2,7 +2,7 @@
 
 A comprehensive Flask-based web application for managing brick collections, sets, and parts. This application helps brick enthusiasts organize their collection, track missing parts, generate labels, and efficiently manage storage systems with integration to the Rebrickable database.
 
-![Python](https://img.shields.io/badge/python-v3.11+-blue.svg)
+![Python](https://img.shields.io/badge/python-v3.12+-blue.svg)
 ![Flask](https://img.shields.io/badge/flask-v3.0+-green.svg)
 ![Docker](https://img.shields.io/badge/docker-supported-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -98,7 +98,7 @@ A comprehensive Flask-based web application for managing brick collections, sets
 ### Local Development
 
 1. **Prerequisites**
-   - Python 3.11+
+   - Python 3.12+
    - Poetry (dependency management)
    - SQLite3
 
@@ -186,6 +186,10 @@ Bricks_Manager/
 ```
 
 ## ⚙️ Configuration
+
+Weitere, verifizierte Referenzen: [Architektur](docs/ARCHITECTURE.md),
+[Entwicklung](docs/DEVELOPMENT.md), [Konfiguration](docs/CONFIGURATION.md) und
+[Modernisierungsfortschritt](docs/MODERNIZATION_SUMMARY.md).
 
 ### Environment Variables (.env)
 

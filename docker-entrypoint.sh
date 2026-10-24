@@ -31,10 +31,7 @@ MIGRATIONS_PATH="/app/brick_manager/migrations"
 export SQLALCHEMY_DATABASE_URI="sqlite:////app/data/instance/brick_manager.db"
 cd /app/brick_manager
 
-if [ -d "$MIGRATIONS_PATH" ]; then
-    echo "Applying database migrations..."
-    flask db upgrade
-elif [ ! -f "$DB_PATH" ]; then
+if [ ! -f "$DB_PATH" ]; then
     echo "Database not found. Initializing new database..."
     echo "Creating database tables..."
     python -c "
@@ -48,7 +45,11 @@ with app.app_context():
     echo "Database initialization completed!"
 else
     echo "Database already exists at $DB_PATH"
-    echo "No migration repository is bundled; existing schema is left unchanged."
+fi
+
+if compgen -G "$MIGRATIONS_PATH/*.sql" > /dev/null; then
+    echo "Applying restart-safe SQLite migrations..."
+    python -m services.migration_service "$DB_PATH" "$MIGRATIONS_PATH"
 fi
 
 echo "Starting Bricks Manager application..."

@@ -53,7 +53,9 @@ class Config:  # pylint: disable=R0903
         )
 
     # Application settings
-    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gi"}
+    # Keep the historical "gi" extension accepted for compatibility, and
+    # accept the intended GIF extension advertised by the upload interface.
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "gi"}
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REBRICKABLE_TOKEN = os.getenv("REBRICKABLE_TOKEN", "test-token")
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")

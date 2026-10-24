@@ -310,8 +310,10 @@ class TestAppInitialization:
             "part_location",
             "box_maintenance",
             "token_management",
+            "client_api",
             "rebrickable_sync",
             "admin_sync",
+            "building_instructions",
         ]
 
         for expected in expected_blueprints:
