@@ -5,14 +5,19 @@ echo "=== Bricks Manager Docker Entrypoint ==="
 
 # Fix permissions if running as root
 if [ "$(id -u)" = "0" ]; then
-    echo "Running as root, fixing permissions for mounted volumes..."
+    echo "Running as root, preparing mounted volume directories..."
 
     # Create data directories if they don't exist
     mkdir -p /app/data/uploads /app/data/cache/images /app/data/output /app/data/instance /app/data/logs
 
-    # Fix ownership and permissions
-    chown -R appuser:appuser /app/data 2>/dev/null || true
-    chmod -R 777 /app/data 2>/dev/null || true
+    # Do not recurse through bind mounts here.  On Docker Desktop mounts (for
+    # example a OneDrive folder on Windows), recursive chmod/chown can delay
+    # startup for minutes.  The application only needs its mount roots to be
+    # writable to create new files and directories.
+    chown appuser:appuser /app/data /app/data/uploads /app/data/cache \
+        /app/data/output /app/data/instance /app/data/logs 2>/dev/null || true
+    chmod 0775 /app/data /app/data/uploads /app/data/cache \
+        /app/data/output /app/data/instance /app/data/logs 2>/dev/null || true
 
     echo "Permissions fixed. Switching to appuser..."
     # Use su-exec to switch to appuser and re-execute this script
