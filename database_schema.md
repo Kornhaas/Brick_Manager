@@ -104,7 +104,7 @@ The catalog tables omitted from the field-level diagram for readability are list
 | `user_parts` | Required and owned part quantities for one set copy | Part, color, quantity, owned quantity, and spare status are tracked separately. |
 | `user_minifigures` | Minifigure instances belonging to a set copy | References a Rebrickable minifigure and its owning `user_set`. |
 | `user_minifigure_parts` | Required and owned parts belonging to a minifigure | References both the owning set and the specific `user_minifigure`. |
-| `part_storage` | Physical locations for catalog parts | A part may have several rows. Color is optional; notes and label state are per row. |
+| `part_storage` | Physical locations for catalog parts | A part may have several rows. Color is optional; notes and label state are per row. A physical box needs a new label while any row in that location/level/box has `label_printed = false`; confirming a successful sheet print marks every selected box row as printed. |
 | `config_settings` | Application settings and encrypted tokens | `key` is unique. `to_dict()` masks values marked as encrypted. |
 | `collection_snapshots` | Daily aggregate history for dashboard trends | One row per date; same-day refreshes update the existing snapshot. No collection detail rows are duplicated. |
 

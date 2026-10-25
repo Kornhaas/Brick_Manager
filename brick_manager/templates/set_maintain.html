@@ -97,9 +97,12 @@
             {% if theme_summary %}
             <h3 class="h5">Explore by theme</h3>
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2">
-                {% for theme_id, theme_name, set_count in theme_summary %}
+                {% for theme_entry in theme_summary %}
+                {% set theme_name = theme_entry[-2] %}
+                {% set set_count = theme_entry[-1] %}
+                {% set theme_filter_value = theme_entry[0] if theme_entry | length == 3 else theme_name %}
                 <div class="col">
-                    <a class="card h-100 text-decoration-none text-body" href="{{ url_for('set_maintain.set_maintain', theme=theme_id, group='theme') }}">
+                    <a class="card h-100 text-decoration-none text-body" href="{{ url_for('set_maintain.set_maintain', theme=theme_filter_value, group='theme') }}">
                         <div class="card-body py-3">
                             <div class="fw-semibold text-truncate" title="{{ theme_name }}">{{ theme_name }}</div>
                             <small class="text-muted">{{ set_count }} set{% if set_count != 1 %}s{% endif %}</small>
@@ -146,8 +149,10 @@
                         <label for="theme-filter" class="form-label">Theme</label>
                         <select class="form-select" id="theme-filter" name="theme">
                             <option value="">All themes</option>
-                            {% for theme in themes %}
-                            <option value="{{ theme.id }}" {% if filters.theme == theme.id %}selected{% endif %}>{{ theme.name }}</option>
+                            {% for theme_entry in themes %}
+                            {% set theme_name = theme_entry.name if theme_entry.name is defined else theme_entry %}
+                            {% set theme_filter_value = theme_entry.id if theme_entry.id is defined else theme_name %}
+                            <option value="{{ theme_filter_value }}" {% if filters.theme == theme_filter_value %}selected{% endif %}>{{ theme_name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -280,7 +285,12 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="status-badge status-{{ entry.user_set.status }} mb-2">
+                                <button type="button"
+                                        class="status-badge status-{{ entry.user_set.status }} border-0 w-100 mb-2 change-set-status"
+                                        data-user-set-id="{{ entry.user_set.id }}"
+                                        data-current-status="{{ entry.user_set.status }}"
+                                        title="Change set status"
+                                        aria-label="Change status for set {{ entry.set_num }}">
                                     {% if entry.user_set.status == "unknown" %}
                                     <i class="bi bi-question-circle-fill"></i> Unknown
                                     {% elif entry.user_set.status == "konvolut" %}
@@ -296,7 +306,7 @@
                                     {% elif entry.user_set.status == "missingparts" %}
                                     <i class="bi bi-exclamation-triangle-fill"></i> Missing Parts
                                     {% endif %}
-                                </div>
+                                </button>
                                 <div class="progress" style="height: 20px;">
                                     <div
                                         class="progress-bar {% if entry.completeness_percentage == 100 %}bg-success{% elif entry.completeness_percentage >= 80 %}bg-warning{% else %}bg-danger{% endif %}"
@@ -492,6 +502,35 @@
         </form>
       </div>
           </div>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="statusModalLabel">Change set status</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <label for="statusModalSelect" class="form-label">New status</label>
+            <select id="statusModalSelect" class="form-select">
+              <option value="unknown">Unknown</option>
+              <option value="konvolut">Konvolut</option>
+              <option value="assembled">Assembled</option>
+              <option value="sealed">Sealed</option>
+              <option value="complete">Complete</option>
+              <option value="completenospareparts">Complete (no spares)</option>
+              <option value="missingparts">Missing parts</option>
+            </select>
+            <div class="alert alert-danger d-none mt-3 mb-0" id="statusUpdateError"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirmStatusChange">Confirm change</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Image Modal -->
     <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">

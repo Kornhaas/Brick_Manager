@@ -1,6 +1,7 @@
 """Server-rendered and JavaScript UI contracts for collection workflows."""
 
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -148,10 +149,27 @@ def test_set_maintenance_renders_escaped_collection_data_and_ui_hooks(
 def test_set_maintenance_template_tolerates_legacy_route_context(app):
     """Template reloads must not fail while an older route remains in memory."""
     with app.test_request_context("/set_maintain"):
-        html = render_template("set_maintain.html", sets_with_completeness=[])
+        html = render_template(
+            "set_maintain.html",
+            sets_with_completeness=[],
+            theme_summary=[(42, "Legacy Space", 3)],
+            themes=[SimpleNamespace(id=42, name="Legacy Space")],
+            filters={
+                "q": "",
+                "box_id": None,
+                "status": "",
+                "theme": 42,
+                "label": "",
+                "completion": "",
+                "group": "",
+                "per_page": 50,
+            },
+        )
 
     assert "Collection overview" in html
     assert "0 matching sets" in html
+    assert "theme=42&amp;group=theme" in html
+    assert '<option value="42" selected>Legacy Space</option>' in html
 
 
 def test_set_maintenance_query_count_does_not_grow_per_set(client, collection_records):
@@ -199,6 +217,53 @@ def test_set_maintenance_filters_by_box_and_missing_parts(client, collection_rec
     assert b"Explorer &amp; Research" not in missing_response.data
     assert b"Loose Bricks" in missing_response.data
     assert b"Only sets with missing parts" in missing_response.data
+
+
+def test_set_maintenance_deduplicates_theme_names_and_filters_all_matching_ids(
+    client, collection_records
+):
+    duplicate_theme = RebrickableThemes(name="Space & Science")
+    db.session.add(duplicate_theme)
+    db.session.flush()
+    duplicate_template = RebrickableSets(
+        set_num="1002-1",
+        name="Second Space Set",
+        year=2025,
+        theme_id=duplicate_theme.id,
+        num_parts=0,
+    )
+    db.session.add(duplicate_template)
+    db.session.flush()
+    db.session.add(User_Set(set_num=duplicate_template.set_num, status="unknown"))
+    db.session.commit()
+
+    response = client.get("/set_maintain", query_string={"theme": "Space & Science"})
+    html = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert html.count('<option value="Space &amp; Science" selected>') == 1
+    assert "Explorer &amp; Research" in html
+    assert "Loose Bricks" in html
+    assert "Second Space Set" in html
+
+
+def test_set_maintenance_exposes_status_dialog_and_scrolls_details_to_top(
+    client, collection_records
+):
+    response = client.get("/set_maintain")
+    script = Path("brick_manager/static/js/set_maintenance.js").read_text()
+
+    assert response.status_code == 200
+    assert b'id="statusModal"' in response.data
+    assert (
+        b'class="status-badge status-unknown border-0 w-100 mb-2 change-set-status"'
+        in response.data
+    )
+    assert (
+        'window.scrollTo({ top: setDetails.offsetTop, behavior: "smooth" });' in script
+    )
+    assert 'fetch("/set_maintain/update", {' in script
+    assert '"Content-Type": "application/x-www-form-urlencoded"' in script
 
 
 def test_set_maintenance_paginates_large_collections(client, collection_records):

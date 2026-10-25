@@ -155,3 +155,35 @@ def test_storage_label_delegates_to_box_label():
     ) as create:
         assert label_service.create_storage_label(info) == "label.png"
     create.assert_called_once_with(info)
+
+
+def test_avery_3474_pdf_has_exact_a4_output_and_valid_start_position():
+    output = label_service.create_avery_3474_pdf(
+        [{"location": "A", "level": "1", "box": "7", "items": []}],
+        start_position=24,
+    )
+
+    assert output.read(4) == b"%PDF"
+    with pytest.raises(ValueError, match="between 1 and 24"):
+        label_service.create_avery_3474_pdf(
+            [{"location": "A", "level": "1", "box": "7", "items": []}],
+            start_position=25,
+        )
+    with pytest.raises(ValueError, match="offsets"):
+        label_service.create_avery_3474_pdf(
+            [{"location": "A", "level": "1", "box": "7", "items": []}],
+            horizontal_offset_mm=10.1,
+        )
+
+
+def test_avery_label_images_keep_300_dpi_print_resolution():
+    source = Image.new("RGB", (1600, 1200), color="red")
+
+    image, draw_width, draw_height = label_service._prepare_pdf_image(
+        source, max_width=100, max_height=50
+    )
+
+    assert (draw_width, draw_height) == pytest.approx((66.67, 50), abs=0.01)
+    assert image.size == (277, 208)
+    assert image.width > round(draw_width)
+    assert image.height > round(draw_height)

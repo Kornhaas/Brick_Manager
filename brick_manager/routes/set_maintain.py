@@ -109,7 +109,7 @@ def set_maintain():
     search = request.args.get("q", "").strip()
     box_id = request.args.get("box_id", type=int)
     status = request.args.get("status", "").strip()
-    theme_id = request.args.get("theme", type=int)
+    theme_name = request.args.get("theme", "").strip()
     label = request.args.get("label", "").strip()
     completion = request.args.get("completion", "").strip()
     group_by = request.args.get("group", "").strip()
@@ -139,8 +139,10 @@ def set_maintain():
         query = query.filter(User_Set.id == box_id)
     if status in USER_SET_STATUSES:
         query = query.filter(User_Set.status == status)
-    if theme_id is not None:
-        query = query.filter(RebrickableSets.theme_id == theme_id)
+    if theme_name:
+        query = query.filter(
+            RebrickableSets.theme.has(RebrickableThemes.name == theme_name)
+        )
     if label == "printed":
         query = query.filter(User_Set.label_printed.is_(True))
     elif label == "not-printed":
@@ -176,13 +178,12 @@ def set_maintain():
 
     theme_summary = (
         db.session.query(
-            RebrickableThemes.id,
             RebrickableThemes.name,
             db.func.count(User_Set.id).label("set_count"),
         )
         .join(RebrickableSets, RebrickableSets.theme_id == RebrickableThemes.id)
         .join(User_Set, User_Set.set_num == RebrickableSets.set_num)
-        .group_by(RebrickableThemes.id, RebrickableThemes.name)
+        .group_by(RebrickableThemes.name)
         .order_by(db.func.count(User_Set.id).desc(), RebrickableThemes.name.asc())
         .limit(12)
         .all()
@@ -240,12 +241,18 @@ def set_maintain():
         missing_sets=User_Set.query.filter(missing_parts).count(),
         theme_summary=theme_summary,
         status_summary=status_summary,
-        themes=RebrickableThemes.query.order_by(RebrickableThemes.name).all(),
+        themes=[
+            name
+            for (name,) in db.session.query(RebrickableThemes.name)
+            .distinct()
+            .order_by(RebrickableThemes.name)
+            .all()
+        ],
         filters={
             "q": search,
             "box_id": box_id,
             "status": status,
-            "theme": theme_id,
+            "theme": theme_name,
             "label": label,
             "completion": completion,
             "group": group_by,

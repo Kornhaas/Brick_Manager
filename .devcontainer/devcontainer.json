@@ -14,7 +14,7 @@
 		}
 	},
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "python:3.12-bullseye",
+	"image": "python:3.12-bookworm",
 	"containerEnv": {
 		"LANG": "C.UTF-8",
 		"LC_ALL": "C.UTF-8"

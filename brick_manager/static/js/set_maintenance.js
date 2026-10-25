@@ -398,6 +398,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((data) => {
           setDetails.classList.remove("hidden");
           setsTable.classList.add("hidden");
+          window.scrollTo({ top: setDetails.offsetTop, behavior: "smooth" });
           document.getElementById("user-set-id").value = User_SetId;
 
           // Populate Parts Table (Split into Non-Spare and Spare Parts)
@@ -534,6 +535,48 @@ document.addEventListener("DOMContentLoaded", function () {
         event.preventDefault();
       }
     });
+  });
+
+  const statusModalElement = document.getElementById("statusModal");
+  const statusSelect = document.getElementById("statusModalSelect");
+  const confirmStatusButton = document.getElementById("confirmStatusChange");
+  const statusError = document.getElementById("statusUpdateError");
+  let activeStatusButton = null;
+
+  document.querySelectorAll(".change-set-status").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeStatusButton = button;
+      statusSelect.value = button.dataset.currentStatus;
+      statusError.classList.add("d-none");
+      bootstrap.Modal.getOrCreateInstance(statusModalElement).show();
+    });
+  });
+
+  confirmStatusButton.addEventListener("click", () => {
+    if (!activeStatusButton || statusSelect.value === activeStatusButton.dataset.currentStatus) {
+      bootstrap.Modal.getInstance(statusModalElement).hide();
+      return;
+    }
+
+    confirmStatusButton.disabled = true;
+    const formData = new URLSearchParams({
+      user_set_id: activeStatusButton.dataset.userSetId,
+      status: statusSelect.value
+    });
+    fetch("/set_maintain/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Status update failed");
+        window.location.reload();
+      })
+      .catch((error) => {
+        statusError.textContent = error.message;
+        statusError.classList.remove("d-none");
+        confirmStatusButton.disabled = false;
+      });
   });
 
   // Handle Generate Label

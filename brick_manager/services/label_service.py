@@ -13,18 +13,29 @@ It includes functionalities to:
 
 import logging
 import os
+from io import BytesIO
 from pathlib import Path
 
 import requests
 from config import Config
 from PIL import Image, ImageDraw, ImageFont
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 from werkzeug.utils import secure_filename
 
 from services.cache_service import cache_image  # Import the cache_image function
 
 CM = 28.35  # 1 cm in points
+AVERY_3474_COLUMNS = 3
+AVERY_3474_ROWS = 8
+AVERY_3474_LABELS_PER_PAGE = AVERY_3474_COLUMNS * AVERY_3474_ROWS
+AVERY_3474_LABEL_WIDTH = 70 * mm
+AVERY_3474_LABEL_HEIGHT = 37 * mm
+LABEL_IMAGE_DPI = 300
+PDF_POINTS_PER_INCH = 72
 
 
 def _label_output_path(box_info, extension):
@@ -63,6 +74,149 @@ def download_image(img_url):
     except Exception as error:
         logging.error("Error processing image for URL %s: %s", img_url, error)
         return None
+
+
+def _draw_fitted_text(pdf, text, x, y, max_width, max_size=9, min_size=5):
+    """Draw one line, shrinking and truncating it to the available width."""
+    value = str(text or "")
+    font_size = max_size
+    while (
+        font_size > min_size and stringWidth(value, "Helvetica", font_size) > max_width
+    ):
+        font_size -= 0.5
+    while value and stringWidth(value, "Helvetica", font_size) > max_width:
+        value = value[:-2].rstrip() + "…"
+    pdf.setFont("Helvetica", font_size)
+    pdf.drawCentredString(x, y, value)
+
+
+def _prepare_pdf_image(source_image, max_width, max_height):
+    """Prepare an image at print resolution while returning its size in PDF points."""
+    image = source_image.convert("RGBA")
+    scale = min(max_width / image.width, max_height / image.height)
+    draw_width = image.width * scale
+    draw_height = image.height * scale
+    max_pixels = (
+        max(1, round(draw_width / PDF_POINTS_PER_INCH * LABEL_IMAGE_DPI)),
+        max(1, round(draw_height / PDF_POINTS_PER_INCH * LABEL_IMAGE_DPI)),
+    )
+    if image.width > max_pixels[0] or image.height > max_pixels[1]:
+        image.thumbnail(max_pixels, Image.Resampling.LANCZOS)
+    return image, draw_width, draw_height
+
+
+def _draw_avery_3474_label(pdf, box_info, x, y):
+    """Draw one 70 x 37 mm storage-box label into an existing PDF canvas."""
+    padding = 3 * mm
+    items = box_info.get("items", [])
+    visible_items = items[:6]
+    item_width = (AVERY_3474_LABEL_WIDTH - 2 * padding) / max(len(visible_items), 1)
+    image_height = 13 * mm
+    image_y = y + AVERY_3474_LABEL_HEIGHT - padding - image_height
+
+    for index, item in enumerate(visible_items):
+        center_x = x + padding + item_width * (index + 0.5)
+        # Use the source URL directly here. Calling the app's own cache URL while
+        # generating a response can deadlock a single-worker deployment.
+        item_image = download_image(item.get("img_url"))
+        if item_image:
+            image, draw_width, draw_height = _prepare_pdf_image(
+                item_image, item_width * 0.86, image_height
+            )
+            pdf.drawImage(
+                ImageReader(image),
+                center_x - draw_width / 2,
+                image_y + (image_height - draw_height) / 2,
+                width=draw_width,
+                height=draw_height,
+                mask="auto",
+                preserveAspectRatio=True,
+            )
+        _draw_fitted_text(
+            pdf,
+            item.get("part_num", "Unknown"),
+            center_x,
+            y + 14 * mm,
+            item_width - 1 * mm,
+            max_size=8,
+        )
+
+    if len(items) > len(visible_items):
+        pdf.setFont("Helvetica", 5)
+        pdf.drawRightString(
+            x + AVERY_3474_LABEL_WIDTH - padding,
+            y + 11.5 * mm,
+            f"+{len(items) - len(visible_items)}",
+        )
+
+    category = items[0].get("category", "Unknown") if items else "Empty box"
+    circle_radius = 4.5 * mm
+    circle_x = x + AVERY_3474_LABEL_WIDTH - padding - circle_radius
+    circle_y = y + padding + circle_radius
+    category_left = x + padding
+    category_right = circle_x - circle_radius - 2 * mm
+    pdf.setFillColorRGB(0, 0.55, 0.85)
+    _draw_fitted_text(
+        pdf,
+        category,
+        (category_left + category_right) / 2,
+        y + padding + 1 * mm,
+        category_right - category_left,
+        max_size=9,
+    )
+    pdf.setFillColorRGB(0, 0, 0)
+
+    pdf.setFillColorRGB(1, 0.85, 0.45)
+    pdf.circle(circle_x, circle_y, circle_radius, fill=1, stroke=1)
+    pdf.setFillColorRGB(0, 0, 0)
+    _draw_fitted_text(
+        pdf,
+        box_info.get("box", "?"),
+        circle_x,
+        circle_y - 1.5 * mm,
+        8 * mm,
+        max_size=10,
+    )
+
+
+def create_avery_3474_pdf(
+    boxes, start_position=1, horizontal_offset_mm=0, vertical_offset_mm=0
+):
+    """Create a print-ready Avery 3474 A4 PDF and return it as a byte stream."""
+    if not 1 <= start_position <= AVERY_3474_LABELS_PER_PAGE:
+        raise ValueError("Start position must be between 1 and 24")
+    if not boxes:
+        raise ValueError("At least one box is required")
+    if not -10 <= horizontal_offset_mm <= 10 or not -10 <= vertical_offset_mm <= 10:
+        raise ValueError("Print offsets must be between -10 and 10 mm")
+
+    output = BytesIO()
+    pdf = canvas.Canvas(output, pagesize=A4, pageCompression=1)
+    pdf.setTitle(
+        f"Avery 3474 box labels (X {horizontal_offset_mm:g} mm, Y {vertical_offset_mm:g} mm)"
+    )
+    slot = start_position - 1
+
+    for box_info in boxes:
+        if slot >= AVERY_3474_LABELS_PER_PAGE:
+            pdf.showPage()
+            slot = 0
+
+        column = slot % AVERY_3474_COLUMNS
+        row = slot // AVERY_3474_COLUMNS
+        x = column * AVERY_3474_LABEL_WIDTH + horizontal_offset_mm * mm
+        y = (
+            A4[1]
+            - 0.5 * mm
+            - (row + 1) * AVERY_3474_LABEL_HEIGHT
+            - vertical_offset_mm * mm
+        )
+        _draw_avery_3474_label(pdf, box_info, x, y)
+        slot += 1
+
+    pdf.save()
+    output.seek(0)
+    return output
 
 
 def wrap_text(text, font, max_width):

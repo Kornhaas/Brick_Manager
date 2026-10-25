@@ -6,6 +6,7 @@ and generating labels for boxes.
 """
 
 import os
+from typing import cast
 
 from config import Config
 from flask import (
@@ -14,11 +15,12 @@ from flask import (
     jsonify,
     render_template,
     request,
+    send_file,
     send_from_directory,
 )
 from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
-from services.label_service import create_box_label_jpg
+from services.label_service import create_avery_3474_pdf, create_box_label_jpg
 from werkzeug.exceptions import BadRequest, NotFound
 
 # pylint: disable=C0301,W0718,W0719
@@ -29,6 +31,176 @@ box_maintenance_bp = Blueprint("box_maintenance", __name__)
 def box_maintenance_page():
     """Renders the Box Maintenance page."""
     return render_template("box_maintenance_new.html")
+
+
+def _parse_box_references(data):
+    """Validate and deduplicate box references received from the browser."""
+    if not isinstance(data, dict) or not isinstance(data.get("boxes"), list):
+        raise BadRequest("A boxes list is required.")
+
+    references = []
+    seen = set()
+    for item in data["boxes"]:
+        if not isinstance(item, dict):
+            raise BadRequest("Invalid box reference.")
+        reference = tuple(item.get(field) for field in ("location", "level", "box"))
+        if any(
+            not isinstance(value, str) or not value.strip() or len(value) > 100
+            for value in reference
+        ):
+            raise BadRequest("Invalid box reference.")
+        normalized = tuple(cast(str, value).strip() for value in reference)
+        if normalized not in seen:
+            references.append(normalized)
+            seen.add(normalized)
+    if not references or len(references) > 240:
+        raise BadRequest("Select between 1 and 240 boxes.")
+    return references
+
+
+def _box_label_info(location, level, box):
+    """Load the catalog information needed to render one physical box label."""
+    contents = (
+        db.session.query(RebrickableParts)
+        .join(PartStorage, RebrickableParts.part_num == PartStorage.part_num)
+        .filter(
+            PartStorage.location == location,
+            PartStorage.level == level,
+            PartStorage.box == box,
+        )
+        .order_by(RebrickableParts.part_num)
+        .all()
+    )
+    if not contents:
+        raise NotFound("Box not found.")
+
+    items = []
+    for part in contents:
+        inventory_part = RebrickableInventoryParts.query.filter(
+            RebrickableInventoryParts.part_num == part.part_num,
+            RebrickableInventoryParts.img_url.isnot(None),
+            RebrickableInventoryParts.img_url != "",
+            RebrickableInventoryParts.img_url != "None",
+        ).first()
+        items.append(
+            {
+                "part_num": part.part_num,
+                "category": part.category.name if part.category else "Unknown",
+                "img_url": (
+                    inventory_part.img_url
+                    if inventory_part and inventory_part.img_url
+                    else part.part_img_url
+                ),
+            }
+        )
+    return {
+        "location": location,
+        "level": level,
+        "box": box,
+        "items": items,
+    }
+
+
+@box_maintenance_bp.route("/box_maintenance/label_queue", methods=["GET"])
+def get_label_queue():
+    """Return one queue entry per physical storage box."""
+    rows = (
+        PartStorage.query.filter(
+            PartStorage.location.isnot(None),
+            PartStorage.level.isnot(None),
+            PartStorage.box.isnot(None),
+            db.func.trim(PartStorage.location) != "",
+            db.func.trim(PartStorage.level) != "",
+            db.func.trim(PartStorage.box) != "",
+        )
+        .order_by(PartStorage.location, PartStorage.level, PartStorage.box)
+        .all()
+    )
+    grouped = {}
+    for storage in rows:
+        key = (storage.location, storage.level, storage.box)
+        entry = grouped.setdefault(
+            key,
+            {
+                "location": storage.location,
+                "level": storage.level,
+                "box": storage.box,
+                "part_count": 0,
+                "label_printed": True,
+            },
+        )
+        entry["part_count"] += 1
+        entry["label_printed"] = entry["label_printed"] and storage.label_printed
+    return jsonify({"boxes": list(grouped.values()), "sheet_capacity": 24})
+
+
+@box_maintenance_bp.route("/box_maintenance/label_sheet", methods=["POST"])
+def generate_label_sheet():
+    """Generate a print-ready Avery 3474 PDF for selected storage boxes."""
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            raise BadRequest("Invalid JSON payload.")
+        references = _parse_box_references(data)
+        start_position = data.get("start_position", 1)
+        if (
+            isinstance(start_position, bool)
+            or not isinstance(start_position, int)
+            or not 1 <= start_position <= 24
+        ):
+            raise BadRequest("Invalid start position.")
+        horizontal_offset = data.get("horizontal_offset_mm", 0)
+        vertical_offset = data.get("vertical_offset_mm", 0)
+        if any(
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not -10 <= value <= 10
+            for value in (horizontal_offset, vertical_offset)
+        ):
+            raise BadRequest("Print offsets must be between -10 and 10 mm.")
+        boxes = [_box_label_info(*reference) for reference in references]
+        pdf = create_avery_3474_pdf(
+            boxes,
+            start_position=start_position,
+            horizontal_offset_mm=horizontal_offset,
+            vertical_offset_mm=vertical_offset,
+        )
+        return send_file(
+            pdf,
+            as_attachment=True,
+            download_name=(
+                f"avery_3474_box_labels_x{horizontal_offset:g}_y{vertical_offset:g}.pdf"
+            ),
+            mimetype="application/pdf",
+        )
+    except (BadRequest, ValueError) as error:
+        current_app.logger.info("Invalid label sheet request: %s", error)
+        return jsonify({"error": str(error)}), 400
+    except NotFound as error:
+        return jsonify({"error": str(error)}), 404
+
+
+@box_maintenance_bp.route("/box_maintenance/label_sheet/printed", methods=["POST"])
+def confirm_label_sheet_printed():
+    """Mark every storage row in the selected boxes as having a current label."""
+    try:
+        references = _parse_box_references(request.get_json(silent=True))
+        updated = 0
+        for location, level, box in references:
+            box_updates = PartStorage.query.filter_by(
+                location=location, level=level, box=box
+            ).update({PartStorage.label_printed: True}, synchronize_session=False)
+            if box_updates == 0:
+                raise NotFound("Box not found.")
+            updated += box_updates
+        db.session.commit()
+        return jsonify({"message": "Labels marked as printed.", "updated": updated})
+    except BadRequest as error:
+        db.session.rollback()
+        return jsonify({"error": str(error)}), 400
+    except NotFound as error:
+        db.session.rollback()
+        return jsonify({"error": str(error)}), 404
 
 
 @box_maintenance_bp.route("/box_maintenance/filter_data", methods=["GET"])
@@ -415,9 +587,16 @@ def update_part_location():
         if not storage:
             raise NotFound("Part storage entry not found.")
 
+        old_location = storage.location
+        old_level = storage.level
+        old_box = storage.box
+        PartStorage.query.filter_by(
+            location=old_location, level=old_level, box=old_box
+        ).update({PartStorage.label_printed: False}, synchronize_session=False)
         storage.location = new_location
         storage.level = new_level
         storage.box = new_box
+        storage.label_printed = False
         db.session.commit()
 
         return jsonify({"message": "Location updated successfully."}), 200
@@ -443,6 +622,9 @@ def delete_part_storage(storage_id):
             raise NotFound("Part storage entry not found.")
 
         part_num = storage.part_num
+        PartStorage.query.filter_by(
+            location=storage.location, level=storage.level, box=storage.box
+        ).update({PartStorage.label_printed: False}, synchronize_session=False)
         db.session.delete(storage)
         db.session.commit()
 

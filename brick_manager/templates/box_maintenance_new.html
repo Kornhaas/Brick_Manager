@@ -59,6 +59,71 @@
             <i class="fas fa-boxes"></i> Box Maintenance
         </h1>
 
+        <section class="card shadow-sm mb-4" aria-labelledby="label-queue-title">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                    <div>
+                        <h2 class="h4 mb-1" id="label-queue-title">Avery 3474 Label Queue</h2>
+                        <p class="text-muted mb-0">Print-ready A4 sheets with 24 labels (70 × 37 mm).</p>
+                    </div>
+                    <span class="badge text-bg-primary fs-6" id="label-sheet-progress">Loading…</span>
+                </div>
+                <div class="row g-3 align-items-end mt-1">
+                    <div class="col-sm-4 col-lg-2">
+                        <label for="label-start-position" class="form-label">First free position</label>
+                        <input class="form-control" id="label-start-position" type="number" min="1" max="24" value="1">
+                    </div>
+                    <div class="col-sm-4 col-lg-2">
+                        <label for="label-horizontal-offset" class="form-label">Horizontal correction</label>
+                        <div class="input-group"><input class="form-control" id="label-horizontal-offset" type="number" min="-10" max="10" step="0.1" value="0"><span class="input-group-text">mm</span></div>
+                        <div class="form-text">− left / + right</div>
+                    </div>
+                    <div class="col-sm-4 col-lg-2">
+                        <label for="label-vertical-offset" class="form-label">Vertical correction</label>
+                        <div class="input-group"><input class="form-control" id="label-vertical-offset" type="number" min="-10" max="10" step="0.1" value="0"><span class="input-group-text">mm</span></div>
+                        <div class="form-text">− up / + down</div>
+                    </div>
+                    <div class="col-lg-6 d-flex flex-wrap align-items-center gap-2">
+                        <button class="btn btn-outline-secondary" type="button" id="select-missing-labels">Select next filtered sheet</button>
+                        <button class="btn btn-outline-secondary" type="button" id="clear-label-selection">Clear selection</button>
+                        <button class="btn btn-primary" type="button" id="generate-label-sheet" disabled>Download PDF</button>
+                        <button class="btn btn-success" type="button" id="confirm-label-sheet" disabled>Confirm successful print</button>
+                    </div>
+                </div>
+                <div class="row g-3 mt-1" aria-label="Label queue filters">
+                    <div class="col-sm-6 col-lg-3">
+                        <label for="label-location-filter" class="form-label">Location</label>
+                        <select class="form-select" id="label-location-filter"><option value="">All locations</option></select>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label for="label-level-filter" class="form-label">Level</label>
+                        <select class="form-select" id="label-level-filter"><option value="">All levels</option></select>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label for="label-box-filter" class="form-label">Box</label>
+                        <input class="form-control" id="label-box-filter" type="search" placeholder="Box number">
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label for="label-status-filter" class="form-label">Status</label>
+                        <select class="form-select" id="label-status-filter">
+                            <option value="">All statuses</option>
+                            <option value="missing">Missing</option>
+                            <option value="printed">Printed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-3 mb-0" id="label-queue-message" role="status">Loading label queue…</div>
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr><th scope="col">Print</th><th scope="col">Location</th><th scope="col">Level</th><th scope="col">Box</th><th scope="col">Parts</th><th scope="col">Status</th></tr>
+                        </thead>
+                        <tbody id="label-queue-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <!-- Navigation Tabs -->
         <ul class="nav nav-tabs mb-4" id="maintenanceTabs" role="tablist">
             <li class="nav-item" role="presentation">

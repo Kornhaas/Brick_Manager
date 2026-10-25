@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize all location selects
     loadLocations();
 
+    // Avery 3474 batch label queue
+    setupLabelQueue();
+
     // Single Box View handlers
     setupSingleBoxView();
 
@@ -532,4 +535,229 @@ function showLoadingSpinner(container, message = 'Loading...') {
             <p class="mt-3 text-muted">${message}</p>
         </div>
     `;
+}
+
+function setupLabelQueue() {
+    const queueBody = document.getElementById('label-queue-body');
+    const message = document.getElementById('label-queue-message');
+    const progress = document.getElementById('label-sheet-progress');
+    const startPosition = document.getElementById('label-start-position');
+    const horizontalOffset = document.getElementById('label-horizontal-offset');
+    const verticalOffset = document.getElementById('label-vertical-offset');
+    const selectMissingButton = document.getElementById('select-missing-labels');
+    const clearSelectionButton = document.getElementById('clear-label-selection');
+    const generateButton = document.getElementById('generate-label-sheet');
+    const confirmButton = document.getElementById('confirm-label-sheet');
+    const locationFilter = document.getElementById('label-location-filter');
+    const levelFilter = document.getElementById('label-level-filter');
+    const boxFilter = document.getElementById('label-box-filter');
+    const statusFilter = document.getElementById('label-status-filter');
+    let boxes = [];
+    let downloadedBoxes = [];
+
+    function selectedBoxes() {
+        return Array.from(queueBody.querySelectorAll('.label-queue-checkbox:checked'))
+            .map(checkbox => boxes[Number(checkbox.dataset.index)]);
+    }
+
+    function boxReference(box) {
+        return { location: box.location, level: box.level, box: box.box };
+    }
+
+    function updateProgress() {
+        const selected = selectedBoxes().length;
+        const firstSlot = Math.max(1, Math.min(24, Number(startPosition.value) || 1));
+        const occupiedSlots = firstSlot - 1 + selected;
+        const sheets = selected ? Math.ceil(occupiedSlots / 24) : 0;
+        const remaining = selected ? (24 - (occupiedSlots % 24)) % 24 : 25 - firstSlot;
+        progress.textContent = selected
+            ? `${selected} selected · ${sheets} sheet${sheets === 1 ? '' : 's'} · ${remaining} free on last sheet`
+            : `${remaining} free positions on first sheet`;
+        generateButton.disabled = selected === 0;
+        downloadedBoxes = [];
+        confirmButton.disabled = true;
+    }
+
+    function selectNextMissingSheet() {
+        const firstSlot = Math.max(1, Math.min(24, Number(startPosition.value) || 1));
+        let available = 25 - firstSlot;
+        queueBody.querySelectorAll('.label-queue-checkbox').forEach(checkbox => {
+            const box = boxes[Number(checkbox.dataset.index)];
+            const visible = !checkbox.closest('tr').hidden;
+            checkbox.checked = visible && !box.label_printed && available > 0;
+            if (checkbox.checked) available -= 1;
+        });
+        updateProgress();
+    }
+
+    function clearSelection() {
+        queueBody.querySelectorAll('.label-queue-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updateProgress();
+    }
+
+    function populateFilter(select, values, emptyLabel) {
+        select.replaceChildren();
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = emptyLabel;
+        select.appendChild(emptyOption);
+        [...new Set(values)].sort((left, right) =>
+            left.localeCompare(right, undefined, { numeric: true })
+        ).forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            select.appendChild(option);
+        });
+    }
+
+    function applyFilters() {
+        const location = locationFilter.value;
+        const level = levelFilter.value;
+        const boxSearch = boxFilter.value.trim().toLowerCase();
+        const status = statusFilter.value;
+        let visibleCount = 0;
+        let visibleMissingCount = 0;
+
+        queueBody.querySelectorAll('tr').forEach(row => {
+            const box = boxes[Number(row.dataset.index)];
+            const matches = (!location || box.location === location) &&
+                (!level || box.level === level) &&
+                (!boxSearch || box.box.toLowerCase().includes(boxSearch)) &&
+                (!status || (status === 'printed') === box.label_printed);
+            row.hidden = !matches;
+            if (matches) {
+                visibleCount += 1;
+                if (!box.label_printed) visibleMissingCount += 1;
+            } else {
+                row.querySelector('.label-queue-checkbox').checked = false;
+            }
+        });
+        message.className = `alert ${visibleMissingCount ? 'alert-warning' : 'alert-success'} mt-3 mb-0`;
+        message.textContent = `${visibleCount} of ${boxes.length} boxes shown · ${visibleMissingCount} missing labels.`;
+        updateProgress();
+    }
+
+    function renderQueue() {
+        queueBody.replaceChildren();
+        boxes.forEach((box, index) => {
+            const row = document.createElement('tr');
+            row.dataset.index = index;
+            const checkboxCell = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'form-check-input label-queue-checkbox';
+            checkbox.dataset.index = index;
+            checkbox.checked = false;
+            checkbox.setAttribute('aria-label', `Print label for box ${box.box}`);
+            checkbox.addEventListener('change', updateProgress);
+            checkboxCell.appendChild(checkbox);
+            row.appendChild(checkboxCell);
+
+            [box.location, box.level, box.box, box.part_count].forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
+            const statusCell = document.createElement('td');
+            const badge = document.createElement('span');
+            badge.className = box.label_printed ? 'badge text-bg-success' : 'badge text-bg-warning';
+            badge.textContent = box.label_printed ? 'Printed' : 'Missing';
+            statusCell.appendChild(badge);
+            row.appendChild(statusCell);
+            queueBody.appendChild(row);
+        });
+        populateFilter(locationFilter, boxes.map(box => box.location), 'All locations');
+        populateFilter(levelFilter, boxes.map(box => box.level), 'All levels');
+        applyFilters();
+    }
+
+    function loadQueue() {
+        fetch('/box_maintenance/label_queue')
+            .then(response => {
+                if (!response.ok) throw new Error('Could not load label queue.');
+                return response.json();
+            })
+            .then(data => {
+                boxes = data.boxes.filter(box =>
+                    ['location', 'level', 'box'].every(field =>
+                        typeof box[field] === 'string' && box[field].trim() !== ''
+                    )
+                );
+                renderQueue();
+            })
+            .catch(error => {
+                message.className = 'alert alert-danger mt-3 mb-0';
+                message.textContent = error.message;
+            });
+    }
+
+    selectMissingButton.addEventListener('click', selectNextMissingSheet);
+    clearSelectionButton.addEventListener('click', clearSelection);
+    startPosition.addEventListener('change', updateProgress);
+    [locationFilter, levelFilter, statusFilter].forEach(filter =>
+        filter.addEventListener('change', applyFilters)
+    );
+    boxFilter.addEventListener('input', applyFilters);
+
+    generateButton.addEventListener('click', function() {
+        const selected = selectedBoxes();
+        const payload = {
+            boxes: selected.map(boxReference),
+            start_position: Number(startPosition.value),
+            horizontal_offset_mm: Number(horizontalOffset.value),
+            vertical_offset_mm: Number(verticalOffset.value)
+        };
+        generateButton.disabled = true;
+        fetch('/box_maintenance/label_sheet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Could not generate label sheet.');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `avery_3474_box_labels_x${payload.horizontal_offset_mm}_y${payload.vertical_offset_mm}.pdf`;
+                link.click();
+                URL.revokeObjectURL(url);
+                downloadedBoxes = selected.map(boxReference);
+                confirmButton.disabled = false;
+                message.className = 'alert alert-info mt-3 mb-0';
+                message.textContent = 'PDF downloaded. Confirm only after the sheet printed successfully.';
+            })
+            .catch(error => {
+                message.className = 'alert alert-danger mt-3 mb-0';
+                message.textContent = error.message;
+            })
+            .finally(() => {
+                generateButton.disabled = selectedBoxes().length === 0;
+            });
+    });
+
+    confirmButton.addEventListener('click', function() {
+        if (!downloadedBoxes.length || !confirm('Did all selected labels print successfully?')) return;
+        fetch('/box_maintenance/label_sheet/printed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ boxes: downloadedBoxes })
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Could not confirm printed labels.');
+                return response.json();
+            })
+            .then(loadQueue)
+            .catch(error => {
+                message.className = 'alert alert-danger mt-3 mb-0';
+                message.textContent = error.message;
+            });
+    });
+
+    loadQueue();
 }
