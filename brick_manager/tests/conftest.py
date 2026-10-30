@@ -27,6 +27,29 @@ os.environ["SQLALCHEMY_DATABASE_URI"] = (
 )
 
 
+def _dispose_all_database_engines() -> None:
+    """Close every Flask-SQLAlchemy engine created while collecting tests.
+
+    Some legacy tests import the production app, which creates an additional
+    Flask application bound to the temporary SQLite file above. Disposing only
+    the fixture app's in-memory engine leaves that file locked on Windows.
+    """
+
+    for application, engines in list(db._app_engines.items()):
+        with application.app_context():
+            db.session.remove()
+        for engine in engines.values():
+            engine.dispose()
+
+
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
+    """Release SQLite handles before ``TemporaryDirectory`` removes its files."""
+
+    del session, exitstatus
+    _dispose_all_database_engines()
+    _runtime_database_directory.cleanup()
+
+
 def create_test_app():
     """Create and configure a new app instance for testing."""
 
