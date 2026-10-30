@@ -1,132 +1,30 @@
-# Testing Brick Manager
+# Tests
 
-The suite uses pytest, a temporary SQLite database, Flask test clients, and mocked external HTTP boundaries. Run commands from the repository root through Poetry.
+Die Suite nutzt pytest, eine temporäre SQLite-Datenbank, Flask-Testclients und gemockte externe HTTP-Grenzen. Die Konfiguration steht in `pytest.ini`, gemeinsame Fixtures in `brick_manager/tests/conftest.py`.
 
-## Local environment and VS Code
+## Befehle
 
-Install the project, including its test dependencies, with:
-
-```bash
-poetry install
-```
-
-Poetry creates the environment in `.venv`. The checked-in VS Code settings use
-`.venv/bin/python`, so test discovery and terminal test runs use the same Python.
-After changing an already open workspace, run **Python: Select Interpreter**, choose
-`.venv/bin/python`, then run **Python Environments: Refresh All Environment
-Managers** and refresh the Test Explorer once. The Python Environments search
-path is workspace-relative (`./.venv`); do not put `${workspaceFolder}` in
-`python-envs.pythonProjects`, because that setting treats project paths as literal
-relative paths. A rebuilt development container installs the dependencies
-automatically.
-
-## Commands
-
-```bash
-# Full configured suite with terminal, HTML, and XML coverage
-poetry run pytest
-
-# One focused test module without applying the repository-wide coverage gate
+```powershell
+# Ein fokussierter Test ohne die globale Coverage-Schwelle
 poetry run pytest --no-cov -q brick_manager/tests/test_client_api.py
 
-# Tests that are not marked slow
-poetry run pytest -m "not slow"
+# Vollständige konfigurierte Suite einschließlich Coverage-Gate
+poetry run pytest -q
 
-# Formatting and import checks
-poetry run black --check brick_manager scripts
-poetry run isort --check-only brick_manager scripts
+# Nur nicht langsame Tests
+poetry run pytest -q -m "not slow"
 
-# Fast linting and formatting for changed code
-make ruff
-
-# Production type checks and dependency audit
-make typecheck
-make audit
-
-# Review likely unused code before deleting it
-make dead-code
-
-# Repository quality checks without automatic fixes
-poetry run python scripts/pre_commit_analysis.py --no-fix
-```
-
-The full pytest configuration is in `pytest.ini`; coverage exclusions are in `.coveragerc`. The configured global coverage floor is currently 60%. This is a minimum release gate, not a claim that every critical path has enough tests.
-
-## Editor and hooks
-
-The development container installs Ruff, BasedPyright, Bandit, Vulture, pytest, and pip-audit through Poetry. VS Code formats Python with Ruff and offers its safe fixes and import organization on an explicit save. BasedPyright checks production code in basic mode and uses `brick_manager/` as an import root.
-
-Install the repository hooks once per clone with:
-
-```bash
-make hooks
-```
-
-The hook runs Ruff only on files included in the commit. The first change to a legacy file can surface existing findings in that file; fix them as part of that change instead of globally weakening the configured rules.
-
-## Current suite state
-
-Historical generated tests for APIs and models that no longer exist were removed instead of being hidden behind collection-time skips. The suite must not introduce broad skip lists to make the release gate green. Always report passed, failed, and skipped counts separately.
-
-Verified full-suite state from 23 October 2026:
-
-- 368 tests collected.
-- 368 passed.
-- 0 skipped.
-- 64.03% line coverage and 51.46% branch coverage.
-- 61.26% combined pytest-cov coverage.
-- Known weak areas: administrative and Rebrickable synchronization, token management, missing-parts workflows, and several write-heavy HTML routes.
-
-Do not use the number of test files or collected tests as a substitute for executed behavioral coverage.
-
-## Fixtures
-
-The shared fixtures in `brick_manager/tests/conftest.py` provide:
-
-- `app`: a Flask application configured with a temporary SQLite database.
-- `client`: Flask HTTP test client.
-- `runner`: Flask CLI runner.
-- automatic table setup and teardown around tests.
-
-The test app registers the real blueprints but avoids importing the production `app.py`, whose module-level startup also initializes logging, tables, lookup data, and scheduler jobs.
-
-## What a regression test must prove
-
-- Routes: status code, stable response fields or rendered contract, validation, authentication where applicable, and resulting database state.
-- Services: business result plus the exact external request boundary, including method, URL, payload, timeout, and relevant failure behavior.
-- Models and migrations: constraints, relationships, cascade behavior, upgrade from the previous schema, and repeat-run safety.
-- File, image, cache, and label operations: deterministic temporary files, output properties, safe paths, and cleanup after failures.
-- JavaScript-backed forms: both the rendered HTML/JavaScript contract and the server-side protection that remains when JavaScript is bypassed.
-
-Avoid tests that catch every exception, contain `pass`, accept several unrelated status codes, or only call a function to increase coverage. Do not add broad collection-time skips merely to make the suite green.
-
-## Quantity keyboard navigation
-
-Run the focused JavaScript tests with Node.js 18 or newer:
-
-```bash
+# JavaScript-Unit-Tests (Node.js 18+)
 node --test tests/js/quantity_navigation.cjs
 ```
 
-These tests exercise the production keyboard handler with a simulated DOM: Tab,
-Shift+Tab, hidden/disabled/read-only fields, boundaries, and unrelated shortcuts.
-They do not verify native browser focus or autosave events. On an iPad with an
-external keyboard, check moving between regular, spare, and minifigure quantities,
-skipping filtered rows, and saving an edited quantity when leaving its field.
+Die globale Coverage-Schwelle beträgt derzeit 60 Prozent. Sie ist ein Release-Gate, nicht der Nachweis ausreichender Testtiefe für jede risikoreiche Funktion. Messwerte werden nur nach einem erfolgreichen vollständigen Lauf dokumentiert; historische Messungen stehen unter `docs/history/`.
 
-## External systems
+## Erwartete Nachweise
 
-Automated tests must not call live Rebrickable or Brickognize endpoints. Mock `requests` where it is looked up by the module and include relevant timeout, authentication, malformed-response, pagination, rate-limit, and partial-batch scenarios.
+- Routen: Status, stabiler HTML-/JSON-Vertrag, ungültige Eingaben, fehlende Ressource und resultierender Datenbankzustand.
+- Services: fachliches Ergebnis und exakter externer Request, inklusive Timeout- und Fehlerverhalten.
+- Modelle und Migrationen: Constraints, Beziehungen, Kaskaden sowie wiederholbare Upgrade-Pfade.
+- Datei-/Label-/Cache-Logik: temporäre, deterministische Ausgaben und Bereinigung bei Fehlern.
 
-## Coverage interpretation
-
-For a focused test file, use `--no-cov` when the repository-wide threshold would make an otherwise successful narrow run fail. Before release, run the complete configured suite so the global threshold and integration behavior are still checked.
-
-When reporting results, include:
-
-```text
-passed: <count>
-failed: <count>
-skipped: <count>
-coverage: <percent, only when measured by a full representative run>
-```
+Tests dürfen keine realen Rebrickable- oder Brickognize-Endpunkte aufrufen. Die Anzahl gesammelter Tests ersetzt keine fachliche Assertion oder Coverage-Bewertung.

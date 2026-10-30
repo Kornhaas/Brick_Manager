@@ -1,7 +1,10 @@
 # Architekturentscheidungen
 
-| Datum | Entscheidung | Begründung |
-|---|---|---|
-| 2026-10-23 | Bestehende Flask-Blueprint-/Service-/Model-Struktur beibehalten. | Sie passt zur Anwendung; ein vollständiger Architekturwechsel hätte hohe Kompatibilitäts- und Datenrisiken. |
-| 2026-10-23 | Keine App-Factory-Migration ohne Charakterisierung und Freigabe. | `app.py` hat Importseiteneffekte; eine Änderung beeinflusst Start, CLI, Tests und Scheduler. |
-| 2026-10-23 | Coverage wird als Messgröße, nicht als Selbstzweck behandelt. | Die aktuelle Messung von 63,58 % Lines und 51,18 % Branches zeigt substanzielle Lücken; neue Tests müssen Verhalten und Risiken absichern. |
+Diese Entscheidungen gelten, bis sie durch einen neuen, datierten Eintrag ersetzt werden.
+
+| Datum | Entscheidung | Begründung und Folgen |
+| --- | --- | --- |
+| 2026-10-30 | Flask-Blueprint-/Service-/Modellstruktur beibehalten. | Sie entspricht der vorhandenen Anwendung. Neue Funktionen folgen den bestehenden Grenzen statt eine parallele Schicht einzuführen. |
+| 2026-10-30 | `app.py` ohne explizites Refactoring nicht zur App-Factory umbauen. | Der Import erzeugt Tabellen, lädt Lookups und startet den Scheduler. Eine Änderung beeinflusst Start, CLI und Tests und braucht Charakterisierungstests. |
+| 2026-10-30 | Referenzdokumentation von historischen Berichten trennen. | Nur Dokumente außerhalb von `docs/history/` sind für neue Arbeit normativ; Historie bleibt nachvollziehbar erhalten. |
+| 2026-10-30 | Ausführbarer Code, Migrationen und Tests stehen über Textdokumentation. | Dokumentation wird in jedem betroffenen Change angepasst und durch Repository-Tests gegen Schema-Drift geschützt. |

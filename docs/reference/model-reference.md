@@ -1,18 +1,11 @@
-# Model Reference
+# Modell-Kurzreferenz
 
-The authoritative SQLAlchemy declarations live in [`models.py`](models.py). See [`../database_schema.md`](../database_schema.md) for the current table inventory, relationships, status semantics, and migration rules.
+Die verbindlichen SQLAlchemy-Deklarationen stehen in `brick_manager/models.py`. Das vollständige Tabelleninventar, Beziehungen, Statuswerte und Migrationsregeln beschreibt das [Datenbankschema](database-schema.md).
 
-This file intentionally does not duplicate every model field. Keeping a second handwritten schema here previously caused the documentation to diverge from the executable model.
+| Gruppe | Modelle |
+| --- | --- |
+| Sammlung | `User_Set`, `User_Parts`, `User_Minifigures`, `UserMinifigurePart`, `PartStorage`, `CollectionSnapshot` |
+| Rebrickable-Katalog | Kategorien, Farben, Teile, Beziehungen, Elemente, Themes, Sets, Minifiguren und Inventartabellen |
+| Konfiguration | `ConfigSettings` mit optional verschlüsselten Werten |
 
-## Model groups
-
-- Collection state: `User_Set`, `User_Parts`, `User_Minifigures`, `UserMinifigurePart`, and `PartStorage`.
-- Rebrickable catalog: categories, colors, parts, relationships, elements, themes, sets, minifigures, and inventory tables.
-- Configuration: `ConfigSettings`, including encrypted token values.
-
-When changing a model:
-
-1. Update `models.py` and its behavioral tests.
-2. Add a forward migration for existing databases when the schema changes.
-3. Update `database_schema.md` when a table, field, relationship, or invariant changes.
-4. Verify catalog imports preserve collection-owned data.
+Bei einer Modelländerung: Modell und Verhaltenstest aktualisieren, für bestehende Datenbanken eine vorwärtsgerichtete Migration ergänzen, das Schema anpassen und sicherstellen, dass Katalogimporte keinen sammlungseigenen Zustand verlieren.

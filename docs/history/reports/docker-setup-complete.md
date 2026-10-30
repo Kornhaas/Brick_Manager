@@ -8,7 +8,7 @@ Docker support is present and maintained through:
 - `docker-entrypoint.sh`
 - Docker-related targets in `Makefile`
 
-This file previously duplicated operational instructions and drifted from the actual container behavior. Use [`DOCKER_README.md`](DOCKER_README.md) as the canonical Docker guide and [`README.md`](README.md) for the project overview.
+This file previously duplicated operational instructions and drifted from the actual container behavior. Use the [Docker guide](../../guides/docker.md) as the canonical Docker reference and the repository-root [README](../../../README.md) for the project overview.
 
 Important current facts:
 

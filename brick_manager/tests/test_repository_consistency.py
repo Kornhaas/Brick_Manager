@@ -7,10 +7,11 @@ from pathlib import Path
 from models import USER_SET_STATUSES, db
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SCHEMA_DOCUMENT = PROJECT_ROOT / "docs" / "reference" / "database-schema.md"
 
 
 def test_database_schema_documents_every_sqlalchemy_table():
-    schema_document = (PROJECT_ROOT / "database_schema.md").read_text(encoding="utf-8")
+    schema_document = SCHEMA_DOCUMENT.read_text(encoding="utf-8")
 
     missing_tables = sorted(
         table_name
@@ -31,12 +32,19 @@ def test_set_maintenance_exposes_every_supported_status():
 
 
 def test_documented_statuses_match_supported_statuses():
-    schema_document = (PROJECT_ROOT / "database_schema.md").read_text(encoding="utf-8")
+    schema_document = SCHEMA_DOCUMENT.read_text(encoding="utf-8")
     documented_statuses = {
         status for status in USER_SET_STATUSES if f"`{status}`" in schema_document
     }
 
     assert documented_statuses == USER_SET_STATUSES
+
+
+def test_documentation_index_links_to_the_schema_reference():
+    index_document = (PROJECT_ROOT / "docs" / "README.md").read_text(encoding="utf-8")
+
+    assert "reference/database-schema.md" in index_document
+    assert SCHEMA_DOCUMENT.is_file()
 
 
 def test_vscode_uses_the_workspace_poetry_environment_without_fake_projects():

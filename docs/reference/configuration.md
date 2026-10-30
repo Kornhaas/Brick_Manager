@@ -1,25 +1,32 @@
-# Konfiguration
+# Konfiguration und Sicherheit
 
-Die Konfiguration liegt in `brick_manager/config.py`. In Docker werden
-Laufzeitdaten unter `/app/data` erwartet; lokal nutzt die Anwendung Verzeichnisse
-unterhalb von `brick_manager/` sowie `data/instructions`.
+Die zur Laufzeit verwendete Konfiguration liegt in `brick_manager/config.py`; `.env.example` ist die kopierbare Vorlage. Zugangsdaten gehören ausschließlich in die lokale `.env` oder in die Deployment-Umgebung, nie in Git, Logs, Tests oder Tickets.
+
+## Umgebungsvariablen
 
 | Variable | Zweck | Verhalten ohne Wert |
-|---|---|---|
+| --- | --- | --- |
+| `SECRET_KEY` | Signiert Flask-Sitzungen | Entwicklungswert aus `Config`; in Produktion zwingend ersetzen |
+| `REBRICKABLE_TOKEN` | Rebrickable-API-Zugang | Entwicklungswert; für echte Synchronisierung einen echten Token setzen |
+| `BRICK_MANAGER_CLIENT_API_KEY` | Bearer-Key für `/api/v1` | leer; die Desktop-API antwortet dann mit `503` |
 | `SQLALCHEMY_DATABASE_URI` | SQLite-/SQLAlchemy-Verbindung | lokaler bzw. Docker-Standardpfad |
-| `SECRET_KEY` | Flask-Sitzungssignierung | Entwicklungswert; in Produktion zwingend setzen |
-| `REBRICKABLE_TOKEN` | Rebrickable-API-Zugang | Entwicklungswert; für echte Syncs sicher setzen |
-| `BRICK_MANAGER_CLIENT_API_KEY` | Bearer-Key für `/api/v1` | leer; API antwortet dann mit 503 |
+| `FLASK_ENV`, `FLASK_DEBUG` | Flask-Umgebung | insbesondere im Docker-Compose gesetzt |
+| `LOG_LEVEL` | derzeit für Betriebsumgebungen reserviert | wird von `Config` nicht ausgewertet |
 
-Beispiel für eine lokale Entwicklungsumgebung:
+Die Desktop-API akzeptiert ausschließlich `Authorization: Bearer <key>`. Sie ist für einen vertrauenswürdigen Client im privaten Netz gedacht. Für nicht-lokale Bereitstellung sind HTTPS, Firewall- und Zugriffsschutz erforderlich.
 
-```bash
-export SECRET_KEY='lokaler-entwicklungswert'
-export REBRICKABLE_TOKEN='kein-echter-token-in-dokumentation'
-export BRICK_MANAGER_CLIENT_API_KEY='lokaler-client-schluessel'
-```
+## Laufzeitpfade
 
-Zugangsdaten gehören nicht in Git, Logs, Tests oder Tickets. Die Verzeichnisse
-für Uploads, Ausgaben, Cache, Datenbank, Logs und Anleitungen werden von der
-Konfiguration angelegt. Upload-Dateinamen akzeptieren PNG, JPG/JPEG, GIF sowie
-aus Kompatibilitätsgründen `.gi`; die maximale Anforderungsgröße beträgt 16 MiB.
+| Umgebung | Datenbank | Weitere Laufzeitdaten |
+| --- | --- | --- |
+| Lokal | `brick_manager/instance/brick_manager.db` | Uploads, Ausgabe, Logs und Cache unter `brick_manager/`; Bauanleitungen unter `data/instructions/` |
+| Docker | `/app/data/instance/brick_manager.db` | `/app/data/{uploads,output,cache,logs,instructions}` |
+
+`Config` legt diese Verzeichnisse beim Import an. Uploads dürfen maximal 16 MiB groß sein; erlaubte Endungen sind `png`, `jpg`, `jpeg`, `gif` sowie das historische Kompatibilitätsformat `gi`.
+
+## Sichere Inbetriebnahme
+
+1. `.env.example` nach `.env` kopieren und `SECRET_KEY` sowie bei Bedarf die API-Keys durch zufällige Werte ersetzen.
+2. Den SQLite-Pfad auf persistente Speicherung prüfen, bevor produktive Daten eingegeben werden.
+3. Für externe Synchronisierung Tokens erst nach dem lokalen Start setzen und nie in Screenshots übernehmen.
+4. Vor Backup, Restore, Datenimport oder Live-Synchronisierung die jeweiligen Betriebsfolgen prüfen.
