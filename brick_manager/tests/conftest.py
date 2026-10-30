@@ -4,13 +4,19 @@ import tempfile
 
 import pytest
 from flask import Flask
-from models import db
 
 """Pytest configuration and fixtures for the Bricks Manager test suite."""
 
 
-# Add the parent directory to the path so we can import from brick_manager
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+# The production code uses top-level imports (for example ``models``), while a
+# few tests use the package form (``brick_manager.services``). Keep both roots
+# available regardless of how Poetry invokes pytest on Windows.
+_package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_project_root = os.path.dirname(_package_root)
+sys.path.insert(0, _project_root)
+sys.path.insert(0, _package_root)
+
+from models import db  # noqa: E402 - import requires the project path above
 
 # A few legacy tests import ``app`` while pytest is collecting modules.  The
 # production app initializes its configured database at import time, so point

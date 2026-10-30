@@ -20,6 +20,10 @@ node --test tests/js/quantity_navigation.cjs
 
 Die globale Coverage-Schwelle beträgt derzeit 60 Prozent. Sie ist ein Release-Gate, nicht der Nachweis ausreichender Testtiefe für jede risikoreiche Funktion. Messwerte werden nur nach einem erfolgreichen vollständigen Lauf dokumentiert; historische Messungen stehen unter `docs/history/`.
 
+Letzter vollständiger Lauf: 30. Oktober 2026, 397 bestanden, 0 fehlgeschlagen,
+0 übersprungen, 62,92 % Gesamt-Coverage. Ein `ResourceWarning` aus einer
+SQLite-Verbindung wurde ausgegeben, hat den Lauf aber nicht fehlschlagen lassen.
+
 ## Erwartete Nachweise
 
 - Routen: Status, stabiler HTML-/JSON-Vertrag, ungültige Eingaben, fehlende Ressource und resultierender Datenbankzustand.
