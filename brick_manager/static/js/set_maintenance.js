@@ -817,8 +817,22 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Handle hardware-keyboard Tab consistently, including iPad browsers.
+function isTabKey(event) {
+  return event.key === 'Tab'
+    || event.key === 'UIKeyInputTab'
+    || event.code === 'Tab'
+    || event.keyCode === 9
+    || event.which === 9
+    || event.keyIdentifier === 'U+0009';
+}
+
 function navigateQuantityInputs(event) {
-  if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+  if (!isTabKey(event) || event.metaKey || event.isComposing) return;
+  // WebKit can incorrectly report Ctrl while Caps Lock is active on an iPad
+  // hardware keyboard. Preserve the real Ctrl+Tab browser shortcut.
+  const capsLockActive = typeof event.getModifierState === 'function'
+    && event.getModifierState('CapsLock');
+  if (event.ctrlKey && !capsLockActive) return;
   const input = event.target;
   if (!input.matches('.auto-save-quantity')) return;
 
@@ -834,9 +848,14 @@ function navigateQuantityInputs(event) {
   event.preventDefault();
   // Moving focus commits the edit through the existing change/autosave listener.
   nextInput.focus();
+  // iPad WebKit may apply its native focus action after the key event. Reassert
+  // our target once that action has completed, but only if it displaced focus.
+  setTimeout(() => {
+    if (document.activeElement !== nextInput) nextInput.focus();
+  }, 0);
 }
 
-document.addEventListener('keydown', navigateQuantityInputs);
+document.addEventListener('keydown', navigateQuantityInputs, true);
 
 // Auto-save function for quantity inputs
 function attachAutoSaveListeners() {

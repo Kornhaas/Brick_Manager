@@ -5,11 +5,15 @@ const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
 const source = readFileSync('brick_manager/static/js/set_maintenance.js', 'utf8');
 const listeners = {};
+const timers = [];
+const documentMock = {
+  addEventListener: (name, callback) => { listeners[name] = callback; },
+  querySelectorAll: () => [],
+  activeElement: null,
+};
 const context = vm.createContext({
-  document: {
-    addEventListener: (name, callback) => { listeners[name] = callback; },
-    querySelectorAll: () => [],
-  },
+  document: documentMock,
+  setTimeout: callback => timers.push(callback),
   console: { log() {} },
 });
 vm.runInContext(source, context);
@@ -21,10 +25,12 @@ function setup(options = [{}, {}, {}]) {
     matches: () => true,
     closest: () => details,
     getClientRects: () => option.hidden ? [] : [{}],
-    focus() { focused = this; },
+    focus() { focused = this; documentMock.activeElement = this; },
     ...option,
   }));
   function press(index, extra = {}) {
+    timers.length = 0;
+    documentMock.activeElement = inputs[index];
     const event = {
       key: 'Tab', target: inputs[index], prevented: false,
       preventDefault() { this.prevented = true; }, ...extra,
@@ -32,7 +38,7 @@ function setup(options = [{}, {}, {}]) {
     listeners.keydown(event);
     return { prevented: event.prevented, focused };
   }
-  return { inputs, press };
+  return { inputs, press, runTimers: () => timers.splice(0).forEach(callback => callback()) };
 }
 
 test('Tab moves forward and Shift+Tab backward', () => {
@@ -53,13 +59,44 @@ test('native navigation remains at both ends', () => {
   assert.equal(press(2).prevented, false);
 });
 
+test('iPad-compatible Tab identities and Option+Tab are handled', () => {
+  for (const identity of [
+    { key: 'Unidentified', code: 'Tab' },
+    { key: 'Unidentified', keyCode: 9 },
+    { key: 'Unidentified', which: 9 },
+    { key: 'Unidentified', keyIdentifier: 'U+0009' },
+    { key: 'UIKeyInputTab' },
+    { altKey: true },
+  ]) {
+    const { inputs, press } = setup();
+    assert.equal(press(0, identity).focused, inputs[1]);
+  }
+});
+
+test('focus is restored if iPad WebKit overrides it after keydown', () => {
+  const { inputs, press, runTimers } = setup();
+  press(0);
+  documentMock.activeElement = inputs[0];
+  runTimers();
+  assert.equal(documentMock.activeElement, inputs[1]);
+});
+
 test('other keys, shortcuts and unrelated controls are untouched', () => {
   for (const extra of [
-    { key: 'Enter' }, { ctrlKey: true }, { altKey: true },
+    { key: 'Enter' }, { key: 'Unidentified' }, { ctrlKey: true },
     { metaKey: true }, { isComposing: true },
     { target: { matches: () => false } },
     { target: { matches: () => true, closest: () => null } },
   ]) {
     assert.equal(setup().press(0, extra).prevented, false);
   }
+});
+
+test('Caps Lock WebKit quirk does not block Tab navigation', () => {
+  const { inputs, press } = setup();
+  const result = press(0, {
+    ctrlKey: true,
+    getModifierState: modifier => modifier === 'CapsLock',
+  });
+  assert.equal(result.focused, inputs[1]);
 });

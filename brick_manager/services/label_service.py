@@ -76,7 +76,9 @@ def download_image(img_url):
         return None
 
 
-def _draw_fitted_text(pdf, text, x, y, max_width, max_size=9, min_size=5):
+def _draw_fitted_text(
+    pdf, text, x_position, y_position, max_width, max_size=9, min_size=5
+):
     """Draw one line, shrinking and truncating it to the available width."""
     value = str(text or "")
     font_size = max_size
@@ -87,7 +89,7 @@ def _draw_fitted_text(pdf, text, x, y, max_width, max_size=9, min_size=5):
     while value and stringWidth(value, "Helvetica", font_size) > max_width:
         value = value[:-2].rstrip() + "…"
     pdf.setFont("Helvetica", font_size)
-    pdf.drawCentredString(x, y, value)
+    pdf.drawCentredString(x_position, y_position, value)
 
 
 def _prepare_pdf_image(source_image, max_width, max_height):
@@ -105,17 +107,17 @@ def _prepare_pdf_image(source_image, max_width, max_height):
     return image, draw_width, draw_height
 
 
-def _draw_avery_3474_label(pdf, box_info, x, y):
+def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
     """Draw one 70 x 37 mm storage-box label into an existing PDF canvas."""
     padding = 3 * mm
     items = box_info.get("items", [])
     visible_items = items[:6]
     item_width = (AVERY_3474_LABEL_WIDTH - 2 * padding) / max(len(visible_items), 1)
     image_height = 13 * mm
-    image_y = y + AVERY_3474_LABEL_HEIGHT - padding - image_height
+    image_y = y_position + AVERY_3474_LABEL_HEIGHT - padding - image_height
 
     for index, item in enumerate(visible_items):
-        center_x = x + padding + item_width * (index + 0.5)
+        center_x = x_position + padding + item_width * (index + 0.5)
         # Use the source URL directly here. Calling the app's own cache URL while
         # generating a response can deadlock a single-worker deployment.
         item_image = download_image(item.get("img_url"))
@@ -136,7 +138,7 @@ def _draw_avery_3474_label(pdf, box_info, x, y):
             pdf,
             item.get("part_num", "Unknown"),
             center_x,
-            y + 14 * mm,
+            y_position + 14 * mm,
             item_width - 1 * mm,
             max_size=8,
         )
@@ -144,23 +146,23 @@ def _draw_avery_3474_label(pdf, box_info, x, y):
     if len(items) > len(visible_items):
         pdf.setFont("Helvetica", 5)
         pdf.drawRightString(
-            x + AVERY_3474_LABEL_WIDTH - padding,
-            y + 11.5 * mm,
+            x_position + AVERY_3474_LABEL_WIDTH - padding,
+            y_position + 11.5 * mm,
             f"+{len(items) - len(visible_items)}",
         )
 
     category = items[0].get("category", "Unknown") if items else "Empty box"
     circle_radius = 4.5 * mm
-    circle_x = x + AVERY_3474_LABEL_WIDTH - padding - circle_radius
-    circle_y = y + padding + circle_radius
-    category_left = x + padding
+    circle_x = x_position + AVERY_3474_LABEL_WIDTH - padding - circle_radius
+    circle_y = y_position + padding + circle_radius
+    category_left = x_position + padding
     category_right = circle_x - circle_radius - 2 * mm
     pdf.setFillColorRGB(0, 0.55, 0.85)
     _draw_fitted_text(
         pdf,
         category,
         (category_left + category_right) / 2,
-        y + padding + 1 * mm,
+        y_position + padding + 1 * mm,
         category_right - category_left,
         max_size=9,
     )
@@ -204,14 +206,14 @@ def create_avery_3474_pdf(
 
         column = slot % AVERY_3474_COLUMNS
         row = slot // AVERY_3474_COLUMNS
-        x = column * AVERY_3474_LABEL_WIDTH + horizontal_offset_mm * mm
-        y = (
+        x_position = column * AVERY_3474_LABEL_WIDTH + horizontal_offset_mm * mm
+        y_position = (
             A4[1]
             - 0.5 * mm
             - (row + 1) * AVERY_3474_LABEL_HEIGHT
             - vertical_offset_mm * mm
         )
-        _draw_avery_3474_label(pdf, box_info, x, y)
+        _draw_avery_3474_label(pdf, box_info, x_position, y_position)
         slot += 1
 
     pdf.save()
