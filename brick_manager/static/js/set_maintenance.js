@@ -816,6 +816,28 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+// Handle hardware-keyboard Tab consistently, including iPad browsers.
+function navigateQuantityInputs(event) {
+  if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+  const input = event.target;
+  if (!input.matches('.auto-save-quantity')) return;
+
+  const details = input.closest('#set-details');
+  if (!details) return;
+  const inputs = Array.from(details.querySelectorAll('.auto-save-quantity'))
+    .filter(candidate => !candidate.disabled && !candidate.readOnly && candidate.getClientRects().length > 0);
+  const index = inputs.indexOf(input);
+  if (index < 0) return;
+  const nextInput = inputs[index + (event.shiftKey ? -1 : 1)];
+  // Keep native navigation at either end so focus can leave the table.
+  if (!nextInput) return;
+  event.preventDefault();
+  // Moving focus commits the edit through the existing change/autosave listener.
+  nextInput.focus();
+}
+
+document.addEventListener('keydown', navigateQuantityInputs);
+
 // Auto-save function for quantity inputs
 function attachAutoSaveListeners() {
   document.querySelectorAll('.auto-save-quantity').forEach(input => {

@@ -100,6 +100,20 @@ The test app registers the real blueprints but avoids importing the production `
 
 Avoid tests that catch every exception, contain `pass`, accept several unrelated status codes, or only call a function to increase coverage. Do not add broad collection-time skips merely to make the suite green.
 
+## Quantity keyboard navigation
+
+Run the focused JavaScript tests with Node.js 18 or newer:
+
+```bash
+node --test tests/js/quantity_navigation.cjs
+```
+
+These tests exercise the production keyboard handler with a simulated DOM: Tab,
+Shift+Tab, hidden/disabled/read-only fields, boundaries, and unrelated shortcuts.
+They do not verify native browser focus or autosave events. On an iPad with an
+external keyboard, check moving between regular, spare, and minifigure quantities,
+skipping filtered rows, and saving an edited quantity when leaving its field.
+
 ## External systems
 
 Automated tests must not call live Rebrickable or Brickognize endpoints. Mock `requests` where it is looked up by the module and include relevant timeout, authentication, malformed-response, pagination, rate-limit, and partial-batch scenarios.
