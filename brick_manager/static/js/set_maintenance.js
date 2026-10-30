@@ -433,7 +433,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td>
                             <input type="number" name="part_id_${part.id
               }" value="${part.have_quantity}" min="0" max="${part.quantity
-              }" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="regular">
+              }" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="regular" enterkeyhint="next">
                         </td>
                         <td>${escapeHtml(part.location || "Not Specified")}</td>
                     </tr>`;
@@ -477,7 +477,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td style="background-color: #${colorRgb}; color: ${textColor};">${part.color || "Not Specified"}</td>
                         <td>${part.quantity}</td>
                         <td>
-                            <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="minifig">
+                            <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="minifig" enterkeyhint="next">
                         </td>
                         <td>${part.location || "Not Specified"}</td>
                     </tr>`;
@@ -826,6 +826,32 @@ function isTabKey(event) {
     || event.keyIdentifier === 'U+0009';
 }
 
+function isEnterKey(event) {
+  return event.key === 'Enter'
+    || event.code === 'Enter'
+    || event.code === 'NumpadEnter'
+    || event.keyCode === 13
+    || event.which === 13;
+}
+
+function getQuantityInputs(input) {
+  const details = input.closest('#set-details');
+  if (!details) return [];
+  return Array.from(details.querySelectorAll('.auto-save-quantity'))
+    .filter(candidate => !candidate.disabled && !candidate.readOnly && candidate.getClientRects().length > 0);
+}
+
+function focusAdjacentQuantityInput(input, backwards = false) {
+  const inputs = getQuantityInputs(input);
+  const index = inputs.indexOf(input);
+  if (index < 0) return false;
+  const nextInput = inputs[index + (backwards ? -1 : 1)];
+  if (!nextInput) return false;
+  nextInput.focus();
+  if (typeof nextInput.select === 'function') nextInput.select();
+  return true;
+}
+
 function navigateQuantityInputs(event) {
   if (!isTabKey(event) || event.metaKey || event.isComposing) return;
   // WebKit can incorrectly report Ctrl while Caps Lock is active on an iPad
@@ -836,18 +862,14 @@ function navigateQuantityInputs(event) {
   const input = event.target;
   if (!input.matches('.auto-save-quantity')) return;
 
-  const details = input.closest('#set-details');
-  if (!details) return;
-  const inputs = Array.from(details.querySelectorAll('.auto-save-quantity'))
-    .filter(candidate => !candidate.disabled && !candidate.readOnly && candidate.getClientRects().length > 0);
-  const index = inputs.indexOf(input);
-  if (index < 0) return;
-  const nextInput = inputs[index + (event.shiftKey ? -1 : 1)];
   // Keep native navigation at either end so focus can leave the table.
-  if (!nextInput) return;
+  const inputs = getQuantityInputs(input);
+  const index = inputs.indexOf(input);
+  if (index < 0 || !inputs[index + (event.shiftKey ? -1 : 1)]) return;
   event.preventDefault();
   // Moving focus commits the edit through the existing change/autosave listener.
-  nextInput.focus();
+  focusAdjacentQuantityInput(input, event.shiftKey);
+  const nextInput = document.activeElement;
   // iPad WebKit may apply its native focus action after the key event. Reassert
   // our target once that action has completed, but only if it displaced focus.
   setTimeout(() => {
@@ -857,6 +879,60 @@ function navigateQuantityInputs(event) {
 
 document.addEventListener('keydown', navigateQuantityInputs, true);
 
+function saveQuantity(input) {
+  const partId = input.getAttribute('data-part-id');
+  const partType = input.getAttribute('data-part-type');
+  const newQuantity = parseInt(input.value, 10);
+  const row = input.closest('tr');
+
+  input.style.borderColor = '#ffc107';
+
+  return fetch('/set_maintain/update_part_quantity', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      part_id: partId,
+      part_type: partType,
+      have_quantity: newQuantity
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) {
+        input.style.borderColor = '#dc3545';
+        setTimeout(() => {
+          input.style.borderColor = '';
+        }, 2000);
+        console.error('Failed to save quantity:', data.message);
+        return false;
+      }
+
+      input.value = data.have_quantity;
+      input.dataset.lastSavedValue = String(data.have_quantity);
+      if (row) {
+        row.className = data.have_quantity >= data.total_quantity
+          ? 'table-success'
+          : 'table-danger';
+      }
+      input.style.borderColor = '#28a745';
+      setTimeout(() => {
+        input.style.borderColor = '';
+      }, 1000);
+      console.log('Quantity auto-saved successfully');
+      return true;
+    })
+    .catch(error => {
+      console.error('Error auto-saving quantity:', error);
+      input.style.borderColor = '#dc3545';
+      setTimeout(() => {
+        input.style.borderColor = '';
+      }, 2000);
+      return false;
+    });
+}
+
 // Auto-save function for quantity inputs
 function attachAutoSaveListeners() {
   document.querySelectorAll('.auto-save-quantity').forEach(input => {
@@ -864,61 +940,18 @@ function attachAutoSaveListeners() {
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
 
+    newInput.dataset.lastSavedValue = newInput.value;
+
     newInput.addEventListener('change', function() {
-      const partId = this.getAttribute('data-part-id');
-      const partType = this.getAttribute('data-part-type');
-      const newQuantity = parseInt(this.value);
-      const row = this.closest('tr');
+      if (this.dataset.lastSavedValue !== this.value) saveQuantity(this);
+    });
 
-      // Visual feedback - add a subtle border color while saving
-      this.style.borderColor = '#ffc107';
-
-      fetch('/set_maintain/update_part_quantity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          part_id: partId,
-          part_type: partType,
-          have_quantity: newQuantity
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Update the input with the clamped value from server
-          this.value = data.have_quantity;
-
-          // Update row color based on completion status
-          if (data.have_quantity >= data.total_quantity) {
-            row.className = 'table-success';
-          } else {
-            row.className = 'table-danger';
-          }
-
-          // Visual feedback - green border for success
-          this.style.borderColor = '#28a745';
-          setTimeout(() => {
-            this.style.borderColor = '';
-          }, 1000);
-
-          console.log('Quantity auto-saved successfully');
-        } else {
-          // Visual feedback - red border for error
-          this.style.borderColor = '#dc3545';
-          setTimeout(() => {
-            this.style.borderColor = '';
-          }, 2000);
-          console.error('Failed to save quantity:', data.message);
-        }
-      })
-      .catch(error => {
-        console.error('Error auto-saving quantity:', error);
-        this.style.borderColor = '#dc3545';
-        setTimeout(() => {
-          this.style.borderColor = '';
-        }, 2000);
+    newInput.addEventListener('keydown', function(event) {
+      if (!isEnterKey(event) || event.isComposing) return;
+      event.preventDefault();
+      event.stopPropagation();
+      saveQuantity(this).then(saved => {
+        if (saved) focusAdjacentQuantityInput(this, event.shiftKey);
       });
     });
   });

@@ -266,6 +266,23 @@ def test_set_maintenance_exposes_status_dialog_and_scrolls_details_to_top(
     assert '"Content-Type": "application/x-www-form-urlencoded"' in script
 
 
+def test_set_maintenance_enter_saves_one_quantity_then_focuses_next(
+    client, collection_records
+):
+    response = client.get("/set_maintain")
+    html = response.get_data(as_text=True)
+    script = Path("brick_manager/static/js/set_maintenance.js").read_text()
+
+    assert response.status_code == 200
+    assert "set_maintenance.js?v=ipad-enter-next-1" in html
+    assert 'enterkeyhint="next"' in script
+    assert "event.preventDefault();" in script
+    assert "event.stopPropagation();" in script
+    assert "saveQuantity(this).then(saved =>" in script
+    assert "if (saved) focusAdjacentQuantityInput(this, event.shiftKey);" in script
+    assert "fetch('/set_maintain/update_part_quantity', {" in script
+
+
 def test_set_maintenance_paginates_large_collections(client, collection_records):
     db.session.add_all(
         [
