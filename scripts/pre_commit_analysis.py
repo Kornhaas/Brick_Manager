@@ -6,7 +6,9 @@ This script runs comprehensive checks and automatically fixes common issues.
 
 import json
 import re
-import subprocess
+
+# This local quality runner executes repository-owned argv lists without a shell.
+import subprocess  # nosec B404
 import sys
 from pathlib import Path
 
@@ -23,7 +25,8 @@ class PreCommitAnalyzer:
     def run_command(self, command: list[str], cwd: str = None) -> tuple[int, str, str]:
         """Run a shell command and return exit code, stdout, stderr."""
         try:
-            result = subprocess.run(
+            # Every production caller supplies a fixed analyzer command list.
+            result = subprocess.run(  # nosec B603
                 command,
                 cwd=cwd or self.project_root,
                 capture_output=True,

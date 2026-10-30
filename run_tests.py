@@ -5,7 +5,9 @@ Provides easy commands for running different test suites and generating coverage
 """
 
 import argparse
-import subprocess
+
+# This developer-only runner executes fixed argv lists without a shell.
+import subprocess  # nosec B404
 import sys
 from pathlib import Path
 
@@ -19,7 +21,10 @@ def run_command(cmd, description):
     print()
 
     try:
-        subprocess.run(cmd, check=True, cwd=Path(__file__).parent)
+        # Callers build argv exclusively from argparse choices and boolean flags.
+        subprocess.run(  # nosec B603
+            cmd, check=True, cwd=Path(__file__).parent
+        )
         print(f"✅ {description} completed successfully!")
         return True
     except subprocess.CalledProcessError as e:
@@ -57,7 +62,7 @@ def main():
     args = parser.parse_args()
 
     # Base pytest command
-    cmd = ["python", "-m", "pytest"]
+    cmd = [sys.executable, "-m", "pytest"]
 
     # Add verbosity
     if args.verbose:
@@ -97,7 +102,7 @@ def main():
         cmd.extend(["-m", "not slow", "brick_manager/tests/"])
     elif args.test_type == "coverage":
         # Just run coverage report without tests
-        coverage_cmd = ["python", "-m", "coverage", "report"]
+        coverage_cmd = [sys.executable, "-m", "coverage", "report"]
         return run_command(coverage_cmd, "Coverage Report")
 
     # Add coverage if not disabled

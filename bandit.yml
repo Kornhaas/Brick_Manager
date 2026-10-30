@@ -2,5 +2,7 @@
 exclude_dirs:
   - brick_manager/tests
   - brick_manager/migrations
+  - .venv
+  - htmlcov
 skips:
   - B101

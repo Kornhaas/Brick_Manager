@@ -2,6 +2,7 @@
 
 import pytest
 from models import (
+    PartStorage,
     RebrickableColors,
     RebrickablePartCategories,
     RebrickableParts,
@@ -58,6 +59,29 @@ def test_quantity_update_clamps_and_persists(client, maintained_records):
     assert response.status_code == 200
     assert response.get_json()["have_quantity"] == 5
     assert db.session.get(User_Parts, user_part.id).have_quantity == 5
+
+
+def test_location_update_persists_in_isolated_database(client, maintained_records):
+    _, user_part = maintained_records
+
+    response = client.post(
+        "/update_part_location",
+        json={
+            "part_num": user_part.part_num,
+            "location": "A",
+            "level": "1",
+            "box": "5",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "success": True,
+        "location": "Location: A, Level: 1, Box: 5",
+        "message": "Location updated successfully",
+    }
+    stored = PartStorage.query.filter_by(part_num=user_part.part_num).one()
+    assert (stored.location, stored.level, stored.box) == ("A", "1", "5")
 
 
 @pytest.mark.parametrize(
