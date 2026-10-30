@@ -20,7 +20,7 @@ cryptography = "^50.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.1.1"
-pylint = "^3.2.6"
+pylint = ">=3.2.6,<5.0.0"
 flask-testing = "^0.8.1"
 vulture = "^2.14"
 pytest-cov = "^7.1.0"
