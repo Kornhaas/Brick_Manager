@@ -1,4 +1,9 @@
 {
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "text": "Generate a Conventional Commit message: <type>[optional scope]: <description>. Allowed lowercase types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert. Scope is optional and goes in parentheses. Use a colon followed by one space; do not use ! before the colon. Write a concrete English imperative description of the staged changes, at most 50 characters in the description. Avoid generic wording. Output only the commit message, without Markdown fences or explanation. Example: fix(ui): support quantity navigation on iPad"
+        }
+    ],
     "python.testing.pytestArgs": [
         "brick_manager/tests"
     ],

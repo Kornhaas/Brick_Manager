@@ -12,3 +12,22 @@ Use multiple skills when the task genuinely crosses boundaries; for example, a n
 Treat `brick_manager/models.py`, versioned migrations, and executable tests as the primary source of truth. Keep `database_schema.md` and `TESTING.md` synchronized with verified behavior and measurements. Preserve user collection data, never expose credentials, and do not perform live remote writes, database resets, restores, or deployments without explicit user authorization.
 
 Use Poetry commands from the repository root. Preserve unrelated working-tree changes.
+
+## Commit messages
+
+Whenever generating or suggesting a commit message, including editor-generated
+messages, use Conventional Commits as required by `scripts/install_hooks.sh`:
+
+```text
+<type>[optional scope]: <description>
+```
+
+- Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`, `build`, `revert`.
+- Use a lowercase type, an optional scope in parentheses, and a colon followed by one space.
+- Write a concrete English description in the imperative, with at most 50 characters in the description.
+- Describe the actual staged changes; avoid generic messages such as "Implement code changes".
+- Do not add `!` before the colon: the current commit hook does not accept that syntax.
+- When asked only for a commit message, return the message without Markdown fences or explanatory text.
+
+Examples: `fix(ui): support quantity navigation on iPad`,
+`chore(devcontainer): provide UTF-8 locales`.
