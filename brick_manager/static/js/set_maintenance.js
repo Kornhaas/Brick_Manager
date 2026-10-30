@@ -933,6 +933,46 @@ function saveQuantity(input) {
     });
 }
 
+function saveAndMoveFromQuantityInput(input, backwards = false) {
+  if (input.dataset.quantitySavePending === 'true') return;
+  input.dataset.quantitySavePending = 'true';
+  saveQuantity(input)
+    .then(saved => {
+      if (saved) focusAdjacentQuantityInput(input, backwards);
+    })
+    .finally(() => {
+      delete input.dataset.quantitySavePending;
+    });
+}
+
+function handleQuantityEnter(event) {
+  const input = event.target;
+  if (!input || typeof input.matches !== 'function') return;
+  if (!input.matches('.auto-save-quantity') || event.isComposing) return;
+  if (!isEnterKey(event)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  saveAndMoveFromQuantityInput(input, event.shiftKey);
+}
+
+// Safari on iPad can trigger implicit form submission through keypress even
+// when keydown has already been handled. Capture both event variants before
+// the containing set form sees them.
+document.addEventListener('keydown', handleQuantityEnter, true);
+document.addEventListener('keypress', handleQuantityEnter, true);
+
+// Final safeguard for iPadOS versions that submit the form without exposing a
+// usable Enter key event. An explicit click on "Save Changes" still works
+// because the submit button, rather than a quantity input, is then active.
+document.addEventListener('submit', event => {
+  const input = document.activeElement;
+  if (!input || typeof input.matches !== 'function') return;
+  if (!input.matches('.auto-save-quantity') || !input.closest('#set-details')) return;
+  event.preventDefault();
+  event.stopPropagation();
+  saveAndMoveFromQuantityInput(input);
+}, true);
+
 // Auto-save function for quantity inputs
 function attachAutoSaveListeners() {
   document.querySelectorAll('.auto-save-quantity').forEach(input => {
@@ -946,13 +986,5 @@ function attachAutoSaveListeners() {
       if (this.dataset.lastSavedValue !== this.value) saveQuantity(this);
     });
 
-    newInput.addEventListener('keydown', function(event) {
-      if (!isEnterKey(event) || event.isComposing) return;
-      event.preventDefault();
-      event.stopPropagation();
-      saveQuantity(this).then(saved => {
-        if (saved) focusAdjacentQuantityInput(this, event.shiftKey);
-      });
-    });
   });
 }

@@ -274,12 +274,13 @@ def test_set_maintenance_enter_saves_one_quantity_then_focuses_next(
     script = Path("brick_manager/static/js/set_maintenance.js").read_text()
 
     assert response.status_code == 200
-    assert "set_maintenance.js?v=ipad-enter-next-1" in html
+    assert "set_maintenance.js?v=ipad-enter-next-2" in html
     assert 'enterkeyhint="next"' in script
-    assert "event.preventDefault();" in script
-    assert "event.stopPropagation();" in script
-    assert "saveQuantity(this).then(saved =>" in script
-    assert "if (saved) focusAdjacentQuantityInput(this, event.shiftKey);" in script
+    assert "document.addEventListener('keydown', handleQuantityEnter, true);" in script
+    assert "document.addEventListener('keypress', handleQuantityEnter, true);" in script
+    assert "document.addEventListener('submit', event => {" in script
+    assert "saveAndMoveFromQuantityInput(input, event.shiftKey);" in script
+    assert "saveAndMoveFromQuantityInput(input);" in script
     assert "fetch('/set_maintain/update_part_quantity', {" in script
 
 
