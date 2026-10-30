@@ -1,0 +1,6 @@
+---
+exclude_dirs:
+  - brick_manager/tests
+  - brick_manager/migrations
+skips:
+  - B101

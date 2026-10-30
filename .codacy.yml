@@ -1,0 +1,7 @@
+---
+exclude_paths:
+  - "brick_manager/tests/**"
+  - "brick_manager/test_*.py"
+  - "brick_manager/migrations/**"
+  - ".venv/**"
+  - "htmlcov/**"
