@@ -545,6 +545,7 @@ function setupLabelQueue() {
     const horizontalOffset = document.getElementById('label-horizontal-offset');
     const verticalOffset = document.getElementById('label-vertical-offset');
     const selectMissingButton = document.getElementById('select-missing-labels');
+    const selectAllDisplayedButton = document.getElementById('select-all-displayed');
     const clearSelectionButton = document.getElementById('clear-label-selection');
     const generateButton = document.getElementById('generate-label-sheet');
     const confirmButton = document.getElementById('confirm-label-sheet');
@@ -586,6 +587,13 @@ function setupLabelQueue() {
             const visible = !checkbox.closest('tr').hidden;
             checkbox.checked = visible && !box.label_printed && available > 0;
             if (checkbox.checked) available -= 1;
+        });
+        updateProgress();
+    }
+
+    function selectAllDisplayed() {
+        queueBody.querySelectorAll('.label-queue-checkbox').forEach(checkbox => {
+            checkbox.checked = !checkbox.closest('tr').hidden;
         });
         updateProgress();
     }
@@ -695,6 +703,7 @@ function setupLabelQueue() {
     }
 
     selectMissingButton.addEventListener('click', selectNextMissingSheet);
+    selectAllDisplayedButton.addEventListener('click', selectAllDisplayed);
     clearSelectionButton.addEventListener('click', clearSelection);
     startPosition.addEventListener('change', updateProgress);
     [locationFilter, levelFilter, statusFilter].forEach(filter =>

@@ -444,6 +444,44 @@
             }, 1500);
         });
 
+        function buildStorageLocationRow(storage, index, partNum) {
+            const div = document.createElement('div');
+            div.className = 'mb-2 p-2 border rounded bg-light d-flex justify-content-between align-items-center';
+
+            const details = document.createElement('div');
+            const title = document.createElement('strong');
+            title.textContent = `Location ${index + 1}: `;
+            details.appendChild(title);
+            [['bg-info', storage.color], ['bg-secondary', storage.notes]].forEach(([style, value]) => {
+                if (value) {
+                    const badge = document.createElement('span');
+                    badge.className = `badge ${style}`;
+                    badge.textContent = value;
+                    details.appendChild(badge);
+                    details.appendChild(document.createTextNode(' '));
+                }
+            });
+            details.appendChild(document.createElement('br'));
+            [['Schrank', storage.location], ['Fach', storage.level], ['Box', storage.box]].forEach(([label, value]) => {
+                const badge = document.createElement('span');
+                badge.className = 'info-badge';
+                badge.textContent = `${label}: ${value}`;
+                details.appendChild(badge);
+                details.appendChild(document.createTextNode(' '));
+            });
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-sm btn-danger delete-storage-btn';
+            button.dataset.storageId = storage.id;
+            button.dataset.partNum = partNum;
+            button.title = 'Delete this storage location';
+            const icon = document.createElement('i');
+            icon.className = 'bi bi-trash';
+            button.appendChild(icon);
+            div.append(details, button);
+            return div;
+        }
+
         function validateSinglePart(partNum) {
             console.log('Validating single part:', partNum);
             fetch(`/manual_entry/validate_part/${partNum}`)
@@ -506,48 +544,13 @@
                             listContainer.innerHTML = '';
 
                             data.storage_list.forEach((storage, index) => {
-                                const div = document.createElement('div');
-                                div.className = 'mb-2 p-2 border rounded bg-light d-flex justify-content-between align-items-center';
-
-                                const details = document.createElement('div');
-                                const title = document.createElement('strong');
-                                title.textContent = `Location ${index + 1}: `;
-                                details.appendChild(title);
-                                [['bg-info', storage.color], ['bg-secondary', storage.notes]].forEach(([style, value]) => {
-                                    if (value) {
-                                        const badge = document.createElement('span');
-                                        badge.className = `badge ${style}`;
-                                        badge.textContent = value;
-                                        details.appendChild(badge);
-                                        details.appendChild(document.createTextNode(' '));
-                                    }
-                                });
-                                details.appendChild(document.createElement('br'));
-                                [['Schrank', storage.location], ['Fach', storage.level], ['Box', storage.box]].forEach(([label, value]) => {
-                                    const badge = document.createElement('span');
-                                    badge.className = 'info-badge';
-                                    badge.textContent = `${label}: ${value}`;
-                                    details.appendChild(badge);
-                                    details.appendChild(document.createTextNode(' '));
-                                });
-                                const button = document.createElement('button');
-                                button.type = 'button';
-                                button.className = 'btn btn-sm btn-danger delete-storage-btn';
-                                button.dataset.storageId = storage.id;
-                                button.dataset.partNum = partNum;
-                                button.title = 'Delete this storage location';
-                                const icon = document.createElement('i');
-                                icon.className = 'bi bi-trash';
-                                button.appendChild(icon);
-                                div.append(details, button);
-                                listContainer.appendChild(div);
+                                listContainer.appendChild(buildStorageLocationRow(storage, index, partNum));
                             });
                         } else {
                             storageWarning.style.display = 'none';
                         }
                     } else {
                         invalidIcon.style.display = 'block';
-                        alert('Part not found in Rebrickable database. Please check the part number.');
                     }
                 })
                 .catch(error => {
@@ -606,14 +609,24 @@
                                 <div class="part-list-info">
                                     <h6><strong>${result.partNum}</strong> - ${result.data.part_info.name}</h6>
                                     <p><span class="badge bg-secondary part-list-badge">${result.data.part_info.category}</span></p>
-                                    ${result.data.has_storage ?
-                                        `<p class="text-warning"><small><i class="bi bi-exclamation-triangle"></i> Has existing storage location</small></p>` :
-                                        ''}
                                 </div>
                                 <div>
                                     <span class="badge bg-success">Valid</span>
                                 </div>
                             `;
+
+                            // Show existing storage locations with delete buttons
+                            const storageList = result.data.storage_list || [];
+                            if (result.data.has_storage && storageList.length > 0) {
+                                const info = div.querySelector('.part-list-info');
+                                const hint = document.createElement('p');
+                                hint.className = 'text-warning mb-1';
+                                hint.innerHTML = '<small><i class="bi bi-exclamation-triangle"></i> Already stored at:</small>';
+                                info.appendChild(hint);
+                                storageList.forEach((storage, idx) => {
+                                    info.appendChild(buildStorageLocationRow(storage, idx, result.partNum));
+                                });
+                            }
                         } else {
                             div.innerHTML = `
                                 <div class="part-list-info">
@@ -629,13 +642,8 @@
                         container.appendChild(div);
                     });
 
-                    if (validatedParts.length !== results.length) {
-                        const invalidCount = results.length - validatedParts.length;
-                        alert(`${invalidCount} part number(s) not found and will be skipped.`);
-                    }
                 } else {
                     invalidIcon.style.display = 'block';
-                    alert('None of the part numbers were found in the database.');
                 }
             });
         }

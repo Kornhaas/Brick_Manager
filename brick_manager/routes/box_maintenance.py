@@ -85,6 +85,7 @@ def _box_label_info(location, level, box):
         items.append(
             {
                 "part_num": part.part_num,
+                "name": part.name,
                 "category": part.category.name if part.category else "Unknown",
                 "img_url": (
                     inventory_part.img_url

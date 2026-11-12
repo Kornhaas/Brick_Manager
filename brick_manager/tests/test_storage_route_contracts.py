@@ -41,6 +41,7 @@ class TestBoxMaintenanceContracts:
         assert b'id="label-start-position"' in response.data
         assert b'id="confirm-label-sheet"' in response.data
         assert b"Select next filtered sheet" in response.data
+        assert b'id="select-all-displayed"' in response.data
         assert b'id="clear-label-selection"' in response.data
         assert b'id="label-location-filter"' in response.data
         assert b'id="label-level-filter"' in response.data

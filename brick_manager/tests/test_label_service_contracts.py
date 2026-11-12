@@ -157,6 +157,24 @@ def test_storage_label_delegates_to_box_label():
     create.assert_called_once_with(info)
 
 
+def test_label_category_summarizes_mixed_boxes():
+    assert label_service._label_category([]) == "Empty box"
+    assert (
+        label_service._label_category([{"category": "Bricks"}, {"category": "Bricks"}])
+        == "Bricks"
+    )
+    assert (
+        label_service._label_category([{"category": "Bricks"}, {"category": "Plates"}])
+        == "Bricks / Plates"
+    )
+    assert (
+        label_service._label_category(
+            [{"category": "Bricks"}, {"category": "Plates"}, {"category": "Tiles"}]
+        )
+        == "Mixed (3 categories)"
+    )
+
+
 def test_avery_3474_pdf_has_exact_a4_output_and_valid_start_position():
     output = label_service.create_avery_3474_pdf(
         [{"location": "A", "level": "1", "box": "7", "items": []}],

@@ -107,17 +107,39 @@ def _prepare_pdf_image(source_image, max_width, max_height):
     return image, draw_width, draw_height
 
 
+def _label_category(items):
+    """Summarize the categories of all items on one box label."""
+    if not items:
+        return "Empty box"
+    categories = list(dict.fromkeys(item.get("category", "Unknown") for item in items))
+    if len(categories) == 1:
+        return categories[0]
+    if len(categories) == 2:
+        return " / ".join(categories)
+    return f"Mixed ({len(categories)} categories)"
+
+
 def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
     """Draw one 70 x 37 mm storage-box label into an existing PDF canvas."""
     padding = 3 * mm
     items = box_info.get("items", [])
     visible_items = items[:6]
     item_width = (AVERY_3474_LABEL_WIDTH - 2 * padding) / max(len(visible_items), 1)
-    image_height = 13 * mm
-    image_y = y_position + AVERY_3474_LABEL_HEIGHT - padding - image_height
+    name_y = y_position + AVERY_3474_LABEL_HEIGHT - padding - 2 * mm
+    image_height = 10 * mm
+    image_y = y_position + AVERY_3474_LABEL_HEIGHT - padding - 3 * mm - image_height
 
     for index, item in enumerate(visible_items):
         center_x = x_position + padding + item_width * (index + 0.5)
+        _draw_fitted_text(
+            pdf,
+            item.get("name", ""),
+            center_x,
+            name_y,
+            item_width - 1 * mm,
+            max_size=6,
+            min_size=4,
+        )
         # Use the source URL directly here. Calling the app's own cache URL while
         # generating a response can deadlock a single-worker deployment.
         item_image = download_image(item.get("img_url"))
@@ -151,7 +173,7 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
             f"+{len(items) - len(visible_items)}",
         )
 
-    category = items[0].get("category", "Unknown") if items else "Empty box"
+    category = _label_category(items)
     circle_radius = 4.5 * mm
     circle_x = x_position + AVERY_3474_LABEL_WIDTH - padding - circle_radius
     circle_y = y_position + padding + circle_radius

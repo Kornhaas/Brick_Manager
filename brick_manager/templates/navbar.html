@@ -100,18 +100,24 @@
             </a>
           </li>
 
-          <!-- Dashboard Dropdown -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dashboardDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <!-- Dashboard Link -->
+          <li class="nav-item {% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}">
+            <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}">
               <i class="fas fa-chart-line"></i> Dashboard
             </a>
-            <ul class="dropdown-menu" aria-labelledby="dashboardDropdown">
+          </li>
+
+          <!-- Parts Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="partsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-cubes"></i> Parts
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="partsDropdown">
               <li>
-                <a class="dropdown-item" href="{{ url_for('dashboard.dashboard') }}">
-                  <i class="fas fa-chart-bar"></i> Dashboard Overview
+                <a class="dropdown-item" href="{{ url_for('part_lookup.lookup_part') }}">
+                  <i class="fas fa-search"></i> Part Lookup
                 </a>
               </li>
-              <li><hr class="dropdown-divider"></li>
               <li>
                 <a class="dropdown-item" href="{{ url_for('manual_entry.manual_entry') }}">
                   <i class="fas fa-keyboard"></i> Manual Entry
@@ -120,30 +126,6 @@
               <li>
                 <a class="dropdown-item" href="{{ url_for('part_location.part_location') }}">
                   <i class="fas fa-map-marker-alt"></i> Part Location
-                </a>
-              </li>
-            </ul>
-          </li>
-
-          <!-- Part Management Dropdown -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="partManagementDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-cubes"></i> Parts & Sets
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="partManagementDropdown">
-              <li>
-                <a class="dropdown-item" href="{{ url_for('part_lookup.lookup_part') }}">
-                  <i class="fas fa-search"></i> Part Lookup
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('set_search.set_search') }}">
-                  <i class="fas fa-puzzle-piece"></i> Set Search
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('set_maintain.set_maintain') }}">
-                  <i class="fas fa-tools"></i> Set Maintenance
                 </a>
               </li>
               <li><hr class="dropdown-divider"></li>
@@ -155,6 +137,25 @@
               <li>
                 <a class="dropdown-item" href="{{ url_for('box_maintenance.box_maintenance_page') }}">
                   <i class="fas fa-box"></i> Box Maintenance
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Sets Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="setsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-puzzle-piece"></i> Sets
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="setsDropdown">
+              <li>
+                <a class="dropdown-item" href="{{ url_for('set_search.set_search') }}">
+                  <i class="fas fa-puzzle-piece"></i> Set Search
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('set_maintain.set_maintain') }}">
+                  <i class="fas fa-tools"></i> Set Maintenance
                 </a>
               </li>
               <li>
