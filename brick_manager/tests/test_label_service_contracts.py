@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from PIL import Image, ImageFont
+from reportlab.pdfbase.pdfmetrics import getAscentDescent, stringWidth
 from services import label_service
 
 
@@ -175,31 +176,46 @@ def test_label_category_summarizes_mixed_boxes():
     )
 
 
-def test_avery_label_layout_wraps_names_and_preserves_category_position():
+@pytest.mark.parametrize("item_count", [1, 6, 7])
+@pytest.mark.parametrize("image_size", [(100, 200), (400, 50)])
+def test_avery_label_layout_keeps_content_clear_of_cut_edges(item_count, image_size):
     class PdfRecorder:
         def __init__(self):
             self.font_size = None
             self.text = []
             self.images = []
+            self.bounds = []
 
         def setFont(self, _font, font_size):
             self.font_size = font_size
 
         def drawCentredString(self, x, y, text):
             self.text.append((text, x, y, self.font_size))
+            width = stringWidth(text, "Helvetica", self.font_size)
+            ascent, descent = getAscentDescent("Helvetica", self.font_size)
+            self.bounds.append((x - width / 2, y + descent, x + width / 2, y + ascent))
 
-        def drawImage(self, _image, _x, _y, width, height, **_kwargs):
-            self.images.append((width, height))
+        def drawImage(self, _image, x, y, width, height, **_kwargs):
+            bounds = (x, y, x + width, y + height)
+            self.images.append(bounds)
+            self.bounds.append(bounds)
+
+        def drawRightString(self, x, y, text):
+            width = stringWidth(text, "Helvetica", self.font_size)
+            self.drawCentredString(x - width / 2, y, text)
 
         def setFillColorRGB(self, *_args):
             pass
 
-        def circle(self, *_args, **_kwargs):
-            pass
+        def circle(self, x, y, radius, **_kwargs):
+            outer_radius = radius + 0.5
+            self.bounds.append(
+                (x - outer_radius, y - outer_radius, x + outer_radius, y + outer_radius)
+            )
 
     pdf = PdfRecorder()
     name = "Large articulated construction vehicle upper chassis assembly"
-    item_image = Image.new("RGB", (100, 200))
+    item_image = Image.new("RGB", image_size)
     with patch("services.label_service.download_image", return_value=item_image):
         label_service._draw_avery_3474_label(
             pdf,
@@ -212,24 +228,36 @@ def test_avery_label_layout_wraps_names_and_preserves_category_position():
                         "category": "Bricks",
                         "img_url": "part-image",
                     }
-                ],
+                ]
+                * item_count,
             },
             0,
             0,
         )
 
+    category = "Bricks (+1)" if item_count > 6 else "Bricks"
     name_lines = [
-        entry for entry in pdf.text if entry[0] not in {"3001", "Bricks", "7"}
+        entry for entry in pdf.text if entry[0] not in {"3001", category, "7"}
     ]
-    assert len(name_lines) == 2
-    assert all(entry[3] > 6 for entry in name_lines)
-    assert next(entry for entry in pdf.text if entry[0] == "3001")[2] == pytest.approx(
-        8.5 * label_service.mm
-    )
-    assert next(entry for entry in pdf.text if entry[0] == "Bricks")[
-        2
-    ] == pytest.approx(4 * label_service.mm)
-    assert pdf.images[0][1] == pytest.approx(14.5 * label_service.mm)
+    assert len(name_lines) == 2 * min(item_count, 6)
+    assert all(entry[3] >= 6 for entry in name_lines)
+    assert category in [entry[0] for entry in pdf.text]
+    assert len(pdf.images) == min(item_count, 6)
+    for left, bottom, right, top in pdf.bounds:
+        assert left >= 5 * label_service.mm - 0.01
+        assert bottom >= 5 * label_service.mm - 0.01
+        assert right <= 65 * label_service.mm + 0.01
+        assert top <= 32 * label_service.mm + 0.01
+    for text, x, y, size in pdf.text:
+        width = stringWidth(text, "Helvetica", size)
+        ascent, descent = getAscentDescent("Helvetica", size)
+        for left, bottom, right, top in pdf.images:
+            assert (
+                x + width / 2 <= left
+                or x - width / 2 >= right
+                or y + ascent <= bottom
+                or y + descent >= top
+            ), f"Text overlaps an image: {text}"
 
 
 def test_avery_3474_pdf_has_exact_a4_output_and_valid_start_position():

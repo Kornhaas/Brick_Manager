@@ -723,8 +723,17 @@ function setupLabelQueue() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         })
-            .then(response => {
-                if (!response.ok) throw new Error('Could not generate label sheet.');
+            .then(async response => {
+                if (!response.ok) {
+                    const contentType = response.headers.get('Content-Type') || '';
+                    if (contentType.includes('application/json')) {
+                        const data = await response.json();
+                        if (typeof data.error === 'string' && data.error) {
+                            throw new Error(data.error);
+                        }
+                    }
+                    throw new Error('Could not generate label sheet.');
+                }
                 return response.blob();
             })
             .then(blob => {

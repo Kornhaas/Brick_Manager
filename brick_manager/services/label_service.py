@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw, ImageFont
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import getAscent, getDescent, stringWidth
 from reportlab.pdfgen import canvas
 from werkzeug.utils import secure_filename
 
@@ -176,13 +176,12 @@ def _label_category(items):
 
 def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
     """Draw one 70 x 37 mm storage-box label into an existing PDF canvas."""
-    padding = 3 * mm
+    padding = 5 * mm
     items = box_info.get("items", [])
     visible_items = items[:6]
     item_width = (AVERY_3474_LABEL_WIDTH - 2 * padding) / max(len(visible_items), 1)
-    name_y = y_position + 34 * mm
-    image_height = 14.5 * mm
-    image_y = y_position + AVERY_3474_LABEL_HEIGHT - padding - 5.5 * mm - image_height
+    image_height = 10 * mm
+    image_y = y_position + 15 * mm
 
     for index, item in enumerate(visible_items):
         center_x = x_position + padding + item_width * (index + 0.5)
@@ -190,9 +189,15 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
             item.get("name", ""),
             item_width - 1 * mm,
         )
+        name_y = (
+            y_position
+            + AVERY_3474_LABEL_HEIGHT
+            - padding
+            - getAscent("Helvetica", name_size)
+        )
         for line_index, line in enumerate(name_lines):
             pdf.setFont("Helvetica", name_size)
-            pdf.drawCentredString(center_x, name_y - line_index * 3.8 * mm, line)
+            pdf.drawCentredString(center_x, name_y - line_index * 3.2 * mm, line)
         # Use the source URL directly here. Calling the app's own cache URL while
         # generating a response can deadlock a single-worker deployment.
         item_image = download_image(item.get("img_url"))
@@ -213,23 +218,18 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
             pdf,
             item.get("part_num", "Unknown"),
             center_x,
-            y_position + 8.5 * mm,
+            y_position + 12.25 * mm,
             item_width - 1 * mm,
             max_size=8,
         )
 
-    if len(items) > len(visible_items):
-        pdf.setFont("Helvetica", 5)
-        pdf.drawRightString(
-            x_position + AVERY_3474_LABEL_WIDTH - padding,
-            y_position + 11.5 * mm,
-            f"+{len(items) - len(visible_items)}",
-        )
-
     category = _label_category(items)
-    circle_radius = 4.5 * mm
-    circle_x = x_position + AVERY_3474_LABEL_WIDTH - padding - circle_radius
-    circle_y = y_position + padding + circle_radius
+    if len(items) > len(visible_items):
+        category += f" (+{len(items) - len(visible_items)})"
+    circle_radius = 3 * mm
+    # Keep the circle's stroke inside the same safe area as the text and images.
+    circle_x = x_position + AVERY_3474_LABEL_WIDTH - padding - circle_radius - 0.25 * mm
+    circle_y = y_position + padding + circle_radius + 0.25 * mm
     category_left = x_position + padding
     category_right = circle_x - circle_radius - 2 * mm
     pdf.setFillColorRGB(0, 0.55, 0.85)
@@ -250,8 +250,8 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
         pdf,
         box_info.get("box", "?"),
         circle_x,
-        circle_y - 1.5 * mm,
-        8 * mm,
+        circle_y - (getAscent("Helvetica", 10) + getDescent("Helvetica", 10)) / 2,
+        5 * mm,
         max_size=10,
     )
 

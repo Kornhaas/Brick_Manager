@@ -31,4 +31,27 @@ SQLite-Verbindung wurde ausgegeben, hat den Lauf aber nicht fehlschlagen lassen.
 - Modelle und Migrationen: Constraints, Beziehungen, Kaskaden sowie wiederholbare Upgrade-Pfade.
 - Datei-/Label-/Cache-Logik: temporäre, deterministische Ausgaben und Bereinigung bei Fehlern.
 
+Die Box-Label-Regressionstests prüfen PDF-Ausgaben auch bei fehlenden
+Katalogeinträgen und unveränderte Lagerkennungen mit Leerzeichen beim Download
+und bei der Druckbestätigung. Fehlende Katalogdaten werden auf dem Label
+ausgewiesen und protokolliert; nur eine tatsächlich fehlende Box liefert 404.
+Für das Avery-Raster (70 × 37 mm, 3 Spalten, 8 Reihen) prüfen die Layouttests
+mindestens 5 mm Abstand von Text, Bildern und Boxnummernkreis zu den
+Schnittkanten sowie kollisionsfreie Text-/Bildbereiche bei langen Namen,
+schmalen und breiten Bildern und bis zu sechs sichtbaren Teilen pro Label.
+Beim Drucken A4 und 100 % / tatsächliche Größe ohne Seitenanpassung wählen.
+Die X-/Y-Korrektur verschiebt nur den gesamten Bogen; sie korrigiert keine
+Skalierung oder abweichende Etikettenabstände.
+
+```powershell
+poetry run pytest --no-cov -q brick_manager/tests/test_storage_route_contracts.py brick_manager/tests/test_label_service_contracts.py
+```
+
 Tests dürfen keine realen Rebrickable- oder Brickognize-Endpunkte aufrufen. Die Anzahl gesammelter Tests ersetzt keine fachliche Assertion oder Coverage-Bewertung.
+
+Der Regressionstest `test_manual_entry_contracts.py` prüft beim manuellen
+Speichern den Erhalt bestehender Lagerplätze, Cache-Invalidierung und
+wiederholtes Absenden ohne Duplikate. Mit 40 vorhandenen Lagerplätzen
+erlaubt er höchstens vier SQL-Anweisungen für einen neuen Eintrag und
+schließt Inventartabellen-Abfragen sowie Updates vorhandener Plätze aus.
+Das ist eine Prüfung des Abfrageaufwands, keine Browser-Laufzeitmessung.

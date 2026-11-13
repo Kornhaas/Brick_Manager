@@ -16,6 +16,13 @@ _part_lookup_cache = None  # pylint: disable=invalid-name
 _cache_timestamp = None  # pylint: disable=invalid-name
 
 
+def invalidate_part_lookup_cache():
+    """Discard derived lookup data after a storage change."""
+    global _part_lookup_cache, _cache_timestamp
+    _part_lookup_cache = None
+    _cache_timestamp = None
+
+
 def load_part_lookup():
     """
 

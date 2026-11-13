@@ -49,10 +49,10 @@ def _parse_box_references(data):
             for value in reference
         ):
             raise BadRequest("Invalid box reference.")
-        normalized = tuple(cast(str, value).strip() for value in reference)
-        if normalized not in seen:
-            references.append(normalized)
-            seen.add(normalized)
+        validated = tuple(cast(str, value) for value in reference)
+        if validated not in seen:
+            references.append(validated)
+            seen.add(validated)
     if not references or len(references) > 240:
         raise BadRequest("Select between 1 and 240 boxes.")
     return references
@@ -61,36 +61,45 @@ def _parse_box_references(data):
 def _box_label_info(location, level, box):
     """Load the catalog information needed to render one physical box label."""
     contents = (
-        db.session.query(RebrickableParts)
-        .join(PartStorage, RebrickableParts.part_num == PartStorage.part_num)
+        db.session.query(PartStorage.part_num, RebrickableParts)
+        .outerjoin(RebrickableParts, RebrickableParts.part_num == PartStorage.part_num)
         .filter(
             PartStorage.location == location,
             PartStorage.level == level,
             PartStorage.box == box,
         )
-        .order_by(RebrickableParts.part_num)
+        .distinct()
+        .order_by(PartStorage.part_num)
         .all()
     )
     if not contents:
-        raise NotFound("Box not found.")
+        raise NotFound(
+            f"Box not found. Location: {location}, level: {level}, box: {box}."
+        )
 
     items = []
-    for part in contents:
+    for part_num, part in contents:
+        if part is None:
+            current_app.logger.warning(
+                "Catalog data unavailable for stored part %s", part_num
+            )
         inventory_part = RebrickableInventoryParts.query.filter(
-            RebrickableInventoryParts.part_num == part.part_num,
+            RebrickableInventoryParts.part_num == part_num,
             RebrickableInventoryParts.img_url.isnot(None),
             RebrickableInventoryParts.img_url != "",
             RebrickableInventoryParts.img_url != "None",
         ).first()
         items.append(
             {
-                "part_num": part.part_num,
-                "name": part.name,
-                "category": part.category.name if part.category else "Unknown",
+                "part_num": part_num,
+                "name": part.name if part else "Catalog data unavailable",
+                "category": part.category.name if part and part.category else "Unknown",
                 "img_url": (
                     inventory_part.img_url
                     if inventory_part and inventory_part.img_url
                     else part.part_img_url
+                    if part
+                    else None
                 ),
             }
         )
@@ -178,7 +187,10 @@ def generate_label_sheet():
         current_app.logger.info("Invalid label sheet request: %s", error)
         return jsonify({"error": str(error)}), 400
     except NotFound as error:
-        return jsonify({"error": str(error)}), 404
+        current_app.logger.warning(
+            "Label sheet box lookup failed: %s", error.description
+        )
+        return jsonify({"error": error.description}), 404
 
 
 @box_maintenance_bp.route("/box_maintenance/label_sheet/printed", methods=["POST"])

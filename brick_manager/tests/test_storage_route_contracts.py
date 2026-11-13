@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from models import PartStorage, RebrickablePartCategories, RebrickableParts, db
+from routes.box_maintenance import _box_label_info
 
 
 @pytest.fixture
@@ -38,6 +39,8 @@ class TestBoxMaintenanceContracts:
 
         assert response.status_code == 200
         assert b"Avery 3474 Label Queue" in response.data
+        assert b"100% / Actual size" in response.data
+        assert b"without Fit to page" in response.data
         assert b'id="label-start-position"' in response.data
         assert b'id="confirm-label-sheet"' in response.data
         assert b"Select next filtered sheet" in response.data
@@ -201,6 +204,72 @@ class TestBoxMaintenanceContracts:
         assert response.get_json()["updated"] == 1
         with app.app_context():
             assert db.session.get(PartStorage, stored_part).label_printed is True
+
+    @pytest.mark.parametrize("include_catalog_part", [False, True])
+    def test_label_sheet_keeps_stored_parts_without_catalog_data(
+        self, client, stored_part, include_catalog_part, caplog
+    ):
+        db.session.add(
+            PartStorage(part_num="uncatalogued", location="A", level="1", box="3")
+        )
+        if include_catalog_part:
+            db.session.add(
+                PartStorage(part_num="3001", location="A", level="1", box="3")
+            )
+        db.session.commit()
+        reference = next(
+            box
+            for box in client.get("/box_maintenance/label_queue").get_json()["boxes"]
+            if box["box"] == "3"
+        )
+
+        with patch("services.label_service.download_image", return_value=None):
+            response = client.post(
+                "/box_maintenance/label_sheet", json={"boxes": [reference]}
+            )
+
+        assert response.status_code == 200
+        assert response.mimetype == "application/pdf"
+        assert response.data.startswith(b"%PDF")
+        assert "Catalog data unavailable for stored part uncatalogued" in caplog.text
+        items = _box_label_info("A", "1", "3")["items"]
+        assert [item["part_num"] for item in items] == (
+            ["3001", "uncatalogued"] if include_catalog_part else ["uncatalogued"]
+        )
+        assert items[-1]["name"] == "Catalog data unavailable"
+
+    def test_label_queue_references_preserve_stored_whitespace(
+        self, client, stored_part
+    ):
+        storage = db.session.get(PartStorage, stored_part)
+        storage.location, storage.level, storage.box = " A ", " 1 ", " 2 "
+        db.session.commit()
+        references = client.get("/box_maintenance/label_queue").get_json()["boxes"]
+
+        with patch("services.label_service.download_image", return_value=None):
+            response = client.post(
+                "/box_maintenance/label_sheet", json={"boxes": references}
+            )
+
+        assert response.status_code == 200
+        assert response.data.startswith(b"%PDF")
+        assert storage.label_printed is False
+        confirmation = client.post(
+            "/box_maintenance/label_sheet/printed", json={"boxes": references}
+        )
+        assert confirmation.status_code == 200
+        assert confirmation.get_json()["updated"] == 1
+        db.session.refresh(storage)
+        assert storage.label_printed is True
+
+    def test_label_sheet_rejects_a_box_absent_from_storage(self, client):
+        response = client.post(
+            "/box_maintenance/label_sheet",
+            json={"boxes": [{"location": "missing", "level": "1", "box": "2"}]},
+        )
+
+        assert response.status_code == 404
+        assert "Box not found." in response.get_json()["error"]
 
     @pytest.mark.parametrize(
         "payload",

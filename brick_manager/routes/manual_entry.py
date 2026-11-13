@@ -7,6 +7,8 @@ Users can manually enter part details such as part ID, location (schrank), level
 The data is either added to or updated in the master lookup.
 """
 
+from time import perf_counter
+
 from flask import (
     Blueprint,
     current_app,
@@ -18,7 +20,7 @@ from flask import (
 )
 from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
-from services.part_lookup_service import load_part_lookup, save_part_lookup
+from services.part_lookup_service import invalidate_part_lookup_cache
 
 # pylint: disable=W0718
 
@@ -27,19 +29,9 @@ manual_entry_bp = Blueprint("manual_entry", __name__)
 
 @manual_entry_bp.route("/manual_entry", methods=["GET", "POST"])
 def manual_entry():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements  # noqa: C901
-    """
-
-    Handles manual entry of part information. If the part ID already exists in the master lookup,
-
-    it shows a confirmation dialog before overwriting the entry.
-    """
-    try:
-        master_lookup = load_part_lookup()
-    except Exception as error:
-        flash(f"Error loading master lookup: {error}", "danger")
-        return render_template("manual_entry.html", existing_entry=None)
-
+    """Add storage locations while preserving existing locations for each part."""
     if request.method == "POST":
+        request_started = perf_counter()
         part_num_input = request.form.get("part_num")
         schrank = request.form.get("schrank")
         fach = request.form.get("fach")
@@ -58,7 +50,7 @@ def manual_entry():  # pylint: disable=too-many-locals,too-many-branches,too-man
         # Validate inputs
         if not part_num_input or not part_num_input.strip():
             flash("Part ID cannot be empty.", "danger")
-        elif not all(val.isdigit() for val in [schrank, fach, box]):
+        elif not all(val and val.isdigit() for val in [schrank, fach, box]):
             flash("Location, Level, and Box must be numeric.", "danger")
         else:
             # Handle comma-separated part numbers
@@ -69,13 +61,7 @@ def manual_entry():  # pylint: disable=too-many-locals,too-many-branches,too-man
             invalid_parts = []
 
             for part_num in part_numbers:
-                part_info = RebrickableInventoryParts.query.filter_by(
-                    part_num=part_num
-                ).first()
-                if not part_info:
-                    part_info = RebrickableParts.query.filter_by(
-                        part_num=part_num
-                    ).first()
+                part_info = RebrickableParts.query.filter_by(part_num=part_num).first()
 
                 if part_info:
                     valid_parts.append(part_num)
@@ -91,6 +77,8 @@ def manual_entry():  # pylint: disable=too-many-locals,too-many-branches,too-man
             if not valid_parts:
                 flash("No valid part numbers to add.", "danger")
                 return render_template("manual_entry.html", existing_entry=None)
+
+            validation_finished = perf_counter()
 
             # Process all valid parts
             added_count = 0
@@ -123,18 +111,13 @@ def manual_entry():  # pylint: disable=too-many-locals,too-many-branches,too-man
                     db.session.add(new_storage)
                     added_count += 1
 
-                # Also maintain master_lookup for backward compatibility (use first/primary location)
-                if part_num not in master_lookup:
-                    master_lookup[part_num] = {
-                        "location": schrank,
-                        "level": fach,
-                        "box": box,
-                    }
+            storage_finished = perf_counter()
 
             # Save changes
             try:
                 db.session.commit()
-                save_part_lookup(master_lookup)
+                commit_finished = perf_counter()
+                invalidate_part_lookup_cache()
 
                 # Build success message
                 messages = []
@@ -145,13 +128,15 @@ def manual_entry():  # pylint: disable=too-many-locals,too-many-branches,too-man
 
                 flash(f"Successfully saved: {', '.join(messages)}.", "success")
 
-            except Exception as save_error:
-                flash(f"Error saving master lookup: {save_error}", "danger")
+            except Exception:
+                db.session.rollback()
+                current_app.logger.exception("Error saving manual entry")
+                flash("Unable to save part storage.", "danger")
                 return render_template("manual_entry.html", existing_entry=None)
 
             # Prepare for next entry with incremented box number
             next_box = str(int(box) + 1)
-            return render_template(
+            response = render_template(
                 "manual_entry.html",
                 part_num="",
                 schrank=schrank,
@@ -159,6 +144,17 @@ def manual_entry():  # pylint: disable=too-many-locals,too-many-branches,too-man
                 box=next_box,
                 existing_entry=None,
             )
+            render_finished = perf_counter()
+            current_app.logger.info(
+                "Manual entry timings: validation=%.3fs storage=%.3fs "
+                "commit=%.3fs render=%.3fs total=%.3fs",
+                validation_finished - request_started,
+                storage_finished - validation_finished,
+                commit_finished - storage_finished,
+                render_finished - commit_finished,
+                render_finished - request_started,
+            )
+            return response
 
     return render_template("manual_entry.html", existing_entry=None)
 

@@ -11,6 +11,7 @@ Voraussetzungen: Python 3.12, Poetry und SQLite.
 ```powershell
 Copy-Item .env.example .env
 poetry install
+poetry update
 poetry run flask --app brick_manager/app.py run
 ```
 
