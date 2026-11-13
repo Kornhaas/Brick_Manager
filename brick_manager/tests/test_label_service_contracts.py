@@ -175,6 +175,63 @@ def test_label_category_summarizes_mixed_boxes():
     )
 
 
+def test_avery_label_layout_wraps_names_and_preserves_category_position():
+    class PdfRecorder:
+        def __init__(self):
+            self.font_size = None
+            self.text = []
+            self.images = []
+
+        def setFont(self, _font, font_size):
+            self.font_size = font_size
+
+        def drawCentredString(self, x, y, text):
+            self.text.append((text, x, y, self.font_size))
+
+        def drawImage(self, _image, _x, _y, width, height, **_kwargs):
+            self.images.append((width, height))
+
+        def setFillColorRGB(self, *_args):
+            pass
+
+        def circle(self, *_args, **_kwargs):
+            pass
+
+    pdf = PdfRecorder()
+    name = "Large articulated construction vehicle upper chassis assembly"
+    item_image = Image.new("RGB", (100, 200))
+    with patch("services.label_service.download_image", return_value=item_image):
+        label_service._draw_avery_3474_label(
+            pdf,
+            {
+                "box": "7",
+                "items": [
+                    {
+                        "name": name,
+                        "part_num": "3001",
+                        "category": "Bricks",
+                        "img_url": "part-image",
+                    }
+                ],
+            },
+            0,
+            0,
+        )
+
+    name_lines = [
+        entry for entry in pdf.text if entry[0] not in {"3001", "Bricks", "7"}
+    ]
+    assert len(name_lines) == 2
+    assert all(entry[3] > 6 for entry in name_lines)
+    assert next(entry for entry in pdf.text if entry[0] == "3001")[2] == pytest.approx(
+        8.5 * label_service.mm
+    )
+    assert next(entry for entry in pdf.text if entry[0] == "Bricks")[
+        2
+    ] == pytest.approx(4 * label_service.mm)
+    assert pdf.images[0][1] == pytest.approx(14.5 * label_service.mm)
+
+
 def test_avery_3474_pdf_has_exact_a4_output_and_valid_start_position():
     output = label_service.create_avery_3474_pdf(
         [{"location": "A", "level": "1", "box": "7", "items": []}],

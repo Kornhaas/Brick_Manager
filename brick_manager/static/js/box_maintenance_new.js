@@ -639,8 +639,6 @@ function setupLabelQueue() {
             if (matches) {
                 visibleCount += 1;
                 if (!box.label_printed) visibleMissingCount += 1;
-            } else {
-                row.querySelector('.label-queue-checkbox').checked = false;
             }
         });
         message.className = `alert ${visibleMissingCount ? 'alert-warning' : 'alert-success'} mt-3 mb-0`;

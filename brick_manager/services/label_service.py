@@ -92,6 +92,61 @@ def _draw_fitted_text(
     pdf.drawCentredString(x_position, y_position, value)
 
 
+def _wrap_label_name(text, max_width, max_lines=2, max_size=9, min_size=6):
+    """Wrap an item name into a bounded number of readable label lines."""
+    value = " ".join(str(text or "").split())
+    if not value:
+        return [], max_size
+
+    def wrap_at_size(font_size):
+        words = []
+        for word in value.split():
+            if stringWidth(word, "Helvetica", font_size) <= max_width:
+                words.append(word)
+                continue
+            segment = ""
+            for character in word:
+                if (
+                    segment
+                    and stringWidth(segment + character, "Helvetica", font_size)
+                    > max_width
+                ):
+                    words.append(segment)
+                    segment = character
+                else:
+                    segment += character
+            if segment:
+                words.append(segment)
+
+        lines = []
+        for word in words:
+            candidate = f"{lines[-1]} {word}" if lines else word
+            if lines and stringWidth(candidate, "Helvetica", font_size) <= max_width:
+                lines[-1] = candidate
+            else:
+                lines.append(word)
+        return lines
+
+    font_size = max_size
+    while font_size > min_size:
+        lines = wrap_at_size(font_size)
+        if len(lines) <= max_lines:
+            return lines, font_size
+        font_size -= 0.5
+
+    lines = wrap_at_size(min_size)
+    if len(lines) > max_lines:
+        lines = lines[:max_lines]
+        last_line = lines[-1]
+        while (
+            last_line
+            and stringWidth(f"{last_line}…", "Helvetica", min_size) > max_width
+        ):
+            last_line = last_line[:-1].rstrip()
+        lines[-1] = f"{last_line}…" if last_line else "…"
+    return lines, min_size
+
+
 def _prepare_pdf_image(source_image, max_width, max_height):
     """Prepare an image at print resolution while returning its size in PDF points."""
     image = source_image.convert("RGBA")
@@ -125,27 +180,25 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
     items = box_info.get("items", [])
     visible_items = items[:6]
     item_width = (AVERY_3474_LABEL_WIDTH - 2 * padding) / max(len(visible_items), 1)
-    name_y = y_position + AVERY_3474_LABEL_HEIGHT - padding - 2 * mm
-    image_height = 10 * mm
-    image_y = y_position + AVERY_3474_LABEL_HEIGHT - padding - 3 * mm - image_height
+    name_y = y_position + 34 * mm
+    image_height = 14.5 * mm
+    image_y = y_position + AVERY_3474_LABEL_HEIGHT - padding - 5.5 * mm - image_height
 
     for index, item in enumerate(visible_items):
         center_x = x_position + padding + item_width * (index + 0.5)
-        _draw_fitted_text(
-            pdf,
+        name_lines, name_size = _wrap_label_name(
             item.get("name", ""),
-            center_x,
-            name_y,
             item_width - 1 * mm,
-            max_size=6,
-            min_size=4,
         )
+        for line_index, line in enumerate(name_lines):
+            pdf.setFont("Helvetica", name_size)
+            pdf.drawCentredString(center_x, name_y - line_index * 3.8 * mm, line)
         # Use the source URL directly here. Calling the app's own cache URL while
         # generating a response can deadlock a single-worker deployment.
         item_image = download_image(item.get("img_url"))
         if item_image:
             image, draw_width, draw_height = _prepare_pdf_image(
-                item_image, item_width * 0.86, image_height
+                item_image, item_width * 0.9, image_height
             )
             pdf.drawImage(
                 ImageReader(image),
@@ -160,7 +213,7 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
             pdf,
             item.get("part_num", "Unknown"),
             center_x,
-            y_position + 14 * mm,
+            y_position + 8.5 * mm,
             item_width - 1 * mm,
             max_size=8,
         )

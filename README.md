@@ -9,8 +9,8 @@ Die vollständige, gepflegte Dokumentation beginnt unter [docs/README.md](docs/R
 Voraussetzungen: Python 3.12, Poetry und SQLite.
 
 ```powershell
-poetry install
 Copy-Item .env.example .env
+poetry install
 poetry run flask --app brick_manager/app.py run
 ```
 
