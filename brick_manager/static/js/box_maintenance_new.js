@@ -709,6 +709,15 @@ function setupLabelQueue() {
     );
     boxFilter.addEventListener('input', applyFilters);
 
+    document.getElementById('download-cut-lines')?.addEventListener('click', function() {
+        if (!horizontalOffset.reportValidity() || !verticalOffset.reportValidity()) return;
+        const params = new URLSearchParams({
+            horizontal_offset_mm: horizontalOffset.value || '0',
+            vertical_offset_mm: verticalOffset.value || '0'
+        });
+        window.location.href = `/box_maintenance/label_sheet/cut_lines?${params}`;
+    });
+
     generateButton.addEventListener('click', function() {
         const selected = selectedBoxes();
         const payload = {

@@ -13,6 +13,7 @@ Copy-Item .env.example .env
 poetry install
 poetry update
 poetry run flask --app brick_manager/app.py run
+env -u SQLALCHEMY_DATABASE_URI poetry run flask --app brick_manager/app.py run
 ```
 
 Die Anwendung ist danach unter `http://127.0.0.1:5000` erreichbar. Vor einem echten Rebrickable-Abgleich und vor dem Einsatz der Desktop-API müssen die Zugangsdaten in `.env` gesetzt werden.

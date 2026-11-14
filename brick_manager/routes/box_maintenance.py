@@ -20,7 +20,11 @@ from flask import (
 )
 from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
-from services.label_service import create_avery_3474_pdf, create_box_label_jpg
+from services.label_service import (
+    create_avery_3474_cut_lines_pdf,
+    create_avery_3474_pdf,
+    create_box_label_jpg,
+)
 from werkzeug.exceptions import BadRequest, NotFound
 
 # pylint: disable=C0301,W0718,W0719
@@ -142,6 +146,25 @@ def get_label_queue():
         entry["part_count"] += 1
         entry["label_printed"] = entry["label_printed"] and storage.label_printed
     return jsonify({"boxes": list(grouped.values()), "sheet_capacity": 24})
+
+
+@box_maintenance_bp.route("/box_maintenance/label_sheet/cut_lines", methods=["GET"])
+def download_label_cut_lines():
+    """Download a calibration grid without selecting or marking any boxes."""
+    try:
+        horizontal_offset = float(request.args.get("horizontal_offset_mm", "0"))
+        vertical_offset = float(request.args.get("vertical_offset_mm", "0"))
+        pdf = create_avery_3474_cut_lines_pdf(horizontal_offset, vertical_offset)
+    except ValueError:
+        return jsonify({"error": "Print offsets must be between -10 and 10 mm."}), 400
+    return send_file(
+        pdf,
+        as_attachment=True,
+        download_name=(
+            f"avery_3474_cut_lines_x{horizontal_offset:g}_y{vertical_offset:g}.pdf"
+        ),
+        mimetype="application/pdf",
+    )
 
 
 @box_maintenance_bp.route("/box_maintenance/label_sheet", methods=["POST"])

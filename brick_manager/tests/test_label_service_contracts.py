@@ -245,9 +245,9 @@ def test_avery_label_layout_keeps_content_clear_of_cut_edges(item_count, image_s
     assert len(pdf.images) == min(item_count, 6)
     for left, bottom, right, top in pdf.bounds:
         assert left >= 5 * label_service.mm - 0.01
-        assert bottom >= 5 * label_service.mm - 0.01
+        assert bottom >= 8 * label_service.mm - 0.01
         assert right <= 65 * label_service.mm + 0.01
-        assert top <= 32 * label_service.mm + 0.01
+        assert top <= 29 * label_service.mm + 0.01
     for text, x, y, size in pdf.text:
         width = stringWidth(text, "Helvetica", size)
         ascent, descent = getAscentDescent("Helvetica", size)
@@ -290,3 +290,24 @@ def test_avery_label_images_keep_300_dpi_print_resolution():
     assert image.size == (277, 208)
     assert image.width > round(draw_width)
     assert image.height > round(draw_height)
+
+
+def test_cut_line_sample_matches_label_grid_without_content():
+    with patch("services.label_service.canvas.Canvas") as canvas_factory:
+        label_service.create_avery_3474_cut_lines_pdf(2, -1)
+    pdf = canvas_factory.return_value
+    lines = pdf.line.call_args_list
+    assert len(lines) == 13
+    left = 2 * label_service.mm
+    top = label_service.A4[1] + 0.5 * label_service.mm
+    right = left + 3 * label_service.AVERY_3474_LABEL_WIDTH
+    bottom = top - 8 * label_service.AVERY_3474_LABEL_HEIGHT
+    for row, call in enumerate(lines[:9]):
+        y = top - row * label_service.AVERY_3474_LABEL_HEIGHT
+        assert call.args == pytest.approx((left, y, right, y))
+    for column, call in enumerate(lines[9:]):
+        x = left + column * label_service.AVERY_3474_LABEL_WIDTH
+        assert call.args == pytest.approx((x, bottom, x, top))
+    pdf.drawString.assert_not_called()
+    pdf.drawCentredString.assert_not_called()
+    pdf.drawImage.assert_not_called()

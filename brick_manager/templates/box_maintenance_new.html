@@ -65,7 +65,7 @@
                     <div>
                         <h2 class="h4 mb-1" id="label-queue-title">Avery 3474 Label Queue</h2>
                         <p class="text-muted mb-0">Print-ready A4 sheets with 24 labels (70 × 37 mm).</p>
-                        <p class="text-muted small mb-0">Print on A4 at 100% / Actual size, without Fit to page. Content stays at least 5 mm inside each label's cut edges. Use corrections only to shift the whole sheet, not to correct scaling.</p>
+                        <p class="text-muted small mb-0">Print on A4 at 100% / Actual size, without Fit to page. Content stays at least 5 mm inside the side edges and 8 mm inside the top and bottom cut edges. Use corrections only to shift the whole sheet, not to correct scaling.</p>
                     </div>
                     <span class="badge text-bg-primary fs-6" id="label-sheet-progress">Loading…</span>
                 </div>
@@ -88,6 +88,7 @@
                         <button class="btn btn-outline-secondary" type="button" id="select-missing-labels">Select next filtered sheet</button>
                         <button class="btn btn-outline-secondary" type="button" id="select-all-displayed">Select all displayed</button>
                         <button class="btn btn-outline-secondary" type="button" id="clear-label-selection">Clear selection</button>
+                        <button class="btn btn-outline-primary" type="button" id="download-cut-lines">Download cut-line sample</button>
                         <button class="btn btn-primary" type="button" id="generate-label-sheet" disabled>Download PDF</button>
                         <button class="btn btn-success" type="button" id="confirm-label-sheet" disabled>Confirm successful print</button>
                     </div>

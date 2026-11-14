@@ -177,11 +177,12 @@ def _label_category(items):
 def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
     """Draw one 70 x 37 mm storage-box label into an existing PDF canvas."""
     padding = 5 * mm
+    vertical_padding = 8 * mm
     items = box_info.get("items", [])
     visible_items = items[:6]
     item_width = (AVERY_3474_LABEL_WIDTH - 2 * padding) / max(len(visible_items), 1)
-    image_height = 10 * mm
-    image_y = y_position + 15 * mm
+    image_height = 7.5 * mm
+    image_y = y_position + 14.5 * mm
 
     for index, item in enumerate(visible_items):
         center_x = x_position + padding + item_width * (index + 0.5)
@@ -192,7 +193,7 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
         name_y = (
             y_position
             + AVERY_3474_LABEL_HEIGHT
-            - padding
+            - vertical_padding
             - getAscent("Helvetica", name_size)
         )
         for line_index, line in enumerate(name_lines):
@@ -229,7 +230,7 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
     circle_radius = 3 * mm
     # Keep the circle's stroke inside the same safe area as the text and images.
     circle_x = x_position + AVERY_3474_LABEL_WIDTH - padding - circle_radius - 0.25 * mm
-    circle_y = y_position + padding + circle_radius + 0.25 * mm
+    circle_y = y_position + vertical_padding + circle_radius + 0.25 * mm
     category_left = x_position + padding
     category_right = circle_x - circle_radius - 2 * mm
     pdf.setFillColorRGB(0, 0.55, 0.85)
@@ -237,7 +238,7 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
         pdf,
         category,
         (category_left + category_right) / 2,
-        y_position + padding + 1 * mm,
+        y_position + vertical_padding + 1 * mm,
         category_right - category_left,
         max_size=9,
     )
@@ -254,6 +255,29 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
         5 * mm,
         max_size=10,
     )
+
+
+def create_avery_3474_cut_lines_pdf(horizontal_offset_mm=0, vertical_offset_mm=0):
+    """Create an A4 calibration sheet containing only the label cut lines."""
+    if not -10 <= horizontal_offset_mm <= 10 or not -10 <= vertical_offset_mm <= 10:
+        raise ValueError("Print offsets must be between -10 and 10 mm")
+    output = BytesIO()
+    pdf = canvas.Canvas(output, pagesize=A4, pageCompression=1)
+    pdf.setTitle("Avery 3474 cut lines")
+    pdf.setLineWidth(0.25)
+    left = horizontal_offset_mm * mm
+    top = A4[1] - 0.5 * mm - vertical_offset_mm * mm
+    right = left + AVERY_3474_COLUMNS * AVERY_3474_LABEL_WIDTH
+    bottom = top - AVERY_3474_ROWS * AVERY_3474_LABEL_HEIGHT
+    for row in range(AVERY_3474_ROWS + 1):
+        y = top - row * AVERY_3474_LABEL_HEIGHT
+        pdf.line(left, y, right, y)
+    for column in range(AVERY_3474_COLUMNS + 1):
+        x = left + column * AVERY_3474_LABEL_WIDTH
+        pdf.line(x, bottom, x, top)
+    pdf.save()
+    output.seek(0)
+    return output
 
 
 def create_avery_3474_pdf(

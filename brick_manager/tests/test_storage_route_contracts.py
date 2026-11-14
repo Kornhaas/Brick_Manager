@@ -405,3 +405,39 @@ class TestLegacyStoragePageContracts:
         expected = {"3001": {"location": "A", "level": "2", "box": "7"}}
         save.assert_called_once_with(expected)
         assert app.config["MASTER_LOOKUP"] == expected
+
+
+def test_cut_line_download_requires_no_box_selection(client):
+    response = client.get(
+        "/box_maintenance/label_sheet/cut_lines?horizontal_offset_mm=2&vertical_offset_mm=-1"
+    )
+    assert response.status_code == 200
+    assert response.mimetype == "application/pdf"
+    assert response.data.startswith(b"%PDF")
+    assert "avery_3474_cut_lines_x2_y-1.pdf" in response.headers["Content-Disposition"]
+
+
+@pytest.mark.parametrize("offset", ["abc", "nan", "inf", "10.1", "-11"])
+def test_cut_line_download_rejects_invalid_offsets(client, offset):
+    response = client.get(
+        "/box_maintenance/label_sheet/cut_lines",
+        query_string={"vertical_offset_mm": offset},
+    )
+    assert response.status_code == 400
+    assert "error" in response.get_json()
+
+
+def test_box_maintenance_renders_all_label_queue_controls(client):
+    import re
+
+    from flask import current_app
+
+    response = client.get("/box_maintenance")
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert 'id="download-cut-lines"' in html
+    script_path = Path(current_app.static_folder) / "js" / "box_maintenance_new.js"
+    script = script_path.read_text()
+    queue_script = script[script.index("function setupLabelQueue()") :]
+    for element_id in re.findall(r"getElementById\('([^']+)'\)", queue_script):
+        assert f'id="{element_id}"' in html, f"Missing queue control: {element_id}"
