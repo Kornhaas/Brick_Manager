@@ -2,6 +2,12 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-15 – Lokale Builds des zusammengeführten Commits geprüft
+
+**Ergebnis:** `poetry check --lock` für `4c8bcea` erfolgreich. Wheel und Quellpaket aus einem sauberen Git-Archiv gebaut; 99 Pythondateien im Wheel kompilieren. Original-Lagermigration und neuer Bildindex sind bytegleich enthalten. README und neue Migration sind im Quellpaket vorhanden; beide Archive enthalten keine Datenbank oder `.env`. Der langsame erste Workspace-Build wurde beendet und durch den erfolgreichen isolierten Build ersetzt. Testanleitung ergänzt und lokale Dokumentverweise geprüft.
+
+**Grenzen und nächster Schritt:** Kein lokales Docker-/Podman-/BuildKit-Werkzeug vorhanden. GitHub bestätigt null Workflow-Läufe für den neuen Commit; der entfernte `main` steht weiterhin auf `845921b`, dessen vorhandene Läufe erfolgreich sind. Das bestätigt noch nicht den neuen Stand. Ein Push würde auch das Docker-Image veröffentlichen und ist für diese Prüfung noch nicht freigegeben. Keine Live-Datenbank geöffnet, keine Anwendung gestartet und kein Server verändert. Die vorherigen 554 erfolgreichen Tests wurden für die reine Paketprüfung nicht wiederholt.
+
 ## 2026-11-15 – Lagerverbesserungen für lokale Übernahme nach main zusammengefasst
 
 **Auftrag und Stand:** Alle offenen Projektänderungen auf `feat/warehouse-overview-reprints` zusammengefasst: vorhandene Lagerinhalte, Teilevorschauen in Karten/Details, Spaltennummerierung, dauerhafte Etikettenvormerkungen mit Sammeldruck, fachweise Datenabfrage und Bildindex sowie Startauswahl/Cachekorrektur. Zugehörige Regressionen, Betriebsgrenzen für Live-Daten und zentrale Dokumentation gehören zum selben Commit. Ziel ist die vom Nutzer beauftragte lokale Fast-forward-Übernahme nach `main`; kein Push oder Deployment.

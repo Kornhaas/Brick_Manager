@@ -210,3 +210,26 @@ Anwendungsmodule an eine temporäre SQLite-Datei; die vorhandenen Live-Daten
 werden nicht als Testdatenbank verwendet. Alle anwendbaren Pre-commit-Hooks,
 projektweites BasedPyright und JavaScript-Syntaxprüfungen bestanden ebenfalls.
 Browser- und Build-Nachweise der vorherigen Arbeit wurden dabei nicht wiederholt.
+
+### Paketbuild für den zusammengeführten Stand
+
+Commit `4c8bcea` wurde mit `poetry check --lock` geprüft: erfolgreich, lediglich
+bestehende Poetry-Hinweise zur älteren Metadatenstruktur. Wheel und Quellpaket
+wurden aus einem sauberen `git archive` dieses Commits unter `/tmp` gebaut.
+Der zunächst im eingebundenen Workspace gestartete Paketbuild wurde wegen der
+langsamen Dateisystemzugriffe beendet und durch diesen reproduzierbaren
+Build ohne Laufzeitdateien ersetzt. Beide Artefakte sind erfolgreich:
+
+- `brick_manager-0.0.1-py3-none-any.whl`: 99 enthaltene Pythondateien kompilierbar;
+  beide geprüften Migrationsartefakte bytegleich zum Commit.
+- `brick_manager-0.0.1.tar.gz`: README und neue Indexmigration enthalten.
+
+Beide Archive enthalten weder Datenbankdateien noch `.env`. Keine Anwendung
+wurde für diese Prüfung gestartet und keine Live-Datenbank geöffnet.
+In der aktuellen Arbeitsumgebung ist weder Docker noch Podman/BuildKit
+verfügbar; ein tatsächlicher Containerbuild ist lokal daher nicht nachgewiesen.
+Für diesen Commit existierte zum Prüfzeitpunkt kein GitHub-Actions-Lauf, weil
+der entfernte `main` noch auf `845921b` stand. Ein Push auf `main` startet laut
+`.github/workflows/docker-image.yml` auch die Veröffentlichung des Docker-Images.
+Diese Veröffentlichung braucht eine ausdrückliche Freigabe; lokale Paketbuilds
+sind kein Nachweis für einen erfolgreichen GitHub-/Multiarch-Dockerbuild.
