@@ -22,3 +22,7 @@ Use Poetry-managed quality tools. For changed Python files, run `poetry run ruff
 Read [references/project-profile.md](references/project-profile.md) when locating components, choosing commands, or deciding the appropriate verification scope.
 
 Do not perform deployment, database reset, live synchronization, token generation, or destructive cleanup unless the user explicitly requests that operation.
+
+## Documentation handoff
+
+Follow the documentation completion rule in `AGENTS.md`. Update affected design/reference/guide documents under `docs/` with the implementation. Report documentation impacts to the parent; when coordinating the task, append the integrated result and actual verification to `docs/logbook.md`. Use `docs/README.md` to select documents and avoid duplicate sources of truth.

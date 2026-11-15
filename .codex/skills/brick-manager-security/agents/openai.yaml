@@ -1,0 +1,3 @@
+interface:
+  display_name: "Brick Manager Security"
+  short_description: "Review trust boundaries and security evidence"
