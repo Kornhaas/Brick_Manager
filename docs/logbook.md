@@ -2,6 +2,16 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-15 – Push freigegeben und GitHub-Builds erfolgreich geprüft
+
+**Freigabe und Ergebnis:** Der Nutzer hat Push und anschließende Buildprüfung einschließlich Docker-Image-Veröffentlichung ausdrücklich bestätigt. `main` mit Commit `c6b4b0e` wurde ohne Force-Push übertragen. Der reguläre Pre-push-Hook bestand erneut **554 Tests**, ohne Fehler/Skips, mit **72,24 % Coverage**. Keine Hook-Umgehung.
+
+**GitHub-Nachweise:** [Python-Tests](https://github.com/Kornhaas/Brick_Manager/actions/runs/43744852911), [Pylint-Workflow](https://github.com/Kornhaas/Brick_Manager/actions/runs/43744852642), [Codacy](https://github.com/Kornhaas/Brick_Manager/actions/runs/43744852831) und [Docker-Workflow](https://github.com/Kornhaas/Brick_Manager/actions/runs/43744852562) erfolgreich abgeschlossen. Docker-Jobs für Build/Push, anschließenden Containerstart mit Healthcheck und Trivy-Scan sind erfolgreich. Der Job namens „Deploy“ gibt ausschließlich eine Bereitstellungsinformation aus; der Workflow enthält keinen aktiven Server-Deployment-Schritt. Auch die automatisch gestarteten Dependabot-Läufe waren erfolgreich.
+
+**Veröffentlichtes Artefakt:** Multiarch-Image für `linux/amd64` und `linux/arm64` unter `kornhaas/bricks_manager:main` und `:latest`, Manifest-Digest `sha256:2551531470ef5087dc7a84090d6dd16bf9c25e32e53271180565a228f41bd8e4`. Nachgewiesen durch erfolgreiche Buildjobs und deren Publikationslogs, nicht durch einen lokalen Dockerbuild. Der Healthcheck läuft im frischen GitHub-Testcontainer; es wurden keine Live-Daten eingebunden. Lokale Live-Daten und lokaler bzw. entfernter Anwendungsserver wurden nicht verändert.
+
+**Einordnung:** Pylint ist im bestehenden Workflow nicht blockierend; ein grüner Lauf bedeutet nicht, dass sämtliche Pylint-Hinweise behoben wurden. Ein erfolgreicher Scan ist kein vollständiger Sicherheitsaudit. Keine Änderung an Anwendungscode oder Workflow für diese Prüfung erforderlich. Testanleitung und Logbuch enthalten die Nachweise.
+
 ## 2026-11-15 – Lokale Builds des zusammengeführten Commits geprüft
 
 **Ergebnis:** `poetry check --lock` für `4c8bcea` erfolgreich. Wheel und Quellpaket aus einem sauberen Git-Archiv gebaut; 99 Pythondateien im Wheel kompilieren. Original-Lagermigration und neuer Bildindex sind bytegleich enthalten. README und neue Migration sind im Quellpaket vorhanden; beide Archive enthalten keine Datenbank oder `.env`. Der langsame erste Workspace-Build wurde beendet und durch den erfolgreichen isolierten Build ersetzt. Testanleitung ergänzt und lokale Dokumentverweise geprüft.

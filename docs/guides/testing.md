@@ -233,3 +233,18 @@ der entfernte `main` noch auf `845921b` stand. Ein Push auf `main` startet laut
 `.github/workflows/docker-image.yml` auch die Veröffentlichung des Docker-Images.
 Diese Veröffentlichung braucht eine ausdrückliche Freigabe; lokale Paketbuilds
 sind kein Nachweis für einen erfolgreichen GitHub-/Multiarch-Dockerbuild.
+
+### GitHub-Prüfung nach freigegebenem Push
+
+Für Commit `c6b4b0e` wurden nach ausdrücklicher Push-/Publikationsfreigabe alle
+relevanten Workflows erfolgreich abgeschlossen:
+[Python-Tests](https://github.com/Kornhaas/Brick_Manager/actions/runs/43744852911),
+[Pylint](https://github.com/Kornhaas/Brick_Manager/actions/runs/43744852642),
+[Codacy](https://github.com/Kornhaas/Brick_Manager/actions/runs/43744852831) und
+[Docker](https://github.com/Kornhaas/Brick_Manager/actions/runs/43744852562).
+Docker baute/veröffentlichte beide Zielarchitekturen, prüfte Start/Health im
+isolierten CI-Container und schloss den Trivy-Job erfolgreich ab. Der bestehende
+Pylint-Workflow behandelt Hinweise nicht als Buildfehler. Der „Deploy“-Job ist
+lediglich eine Benachrichtigung mit manuellen Deployment-Anweisungen.
+Der Pre-push-Hook bestand nochmals 554 Tests mit 72,24 % Coverage.
+Keine Live-Daten oder bestehenden Anwendungsserver wurden dafür verändert.
