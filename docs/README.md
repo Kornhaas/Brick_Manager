@@ -33,9 +33,11 @@ Ist-Verhalten und Vorschläge klar kennzeichnen. Inhalte an genau einer fachlich
 
 ## Planungsvorschläge
 
+- [Architektur- und Usability-Verbesserungen](plans/architecture-usability-improvements.md): projektweiter Review, testgetriebene erste Welle und priorisiertes Altlasten-Backlog.
+
 - [Lageransicht, Archivierung und Einlagerung](plans/storage-archive-intake.md): Ist-Analyse, Zielmodell, Migration, UI-Abläufe, frei wählbares Pilotfach und Akzeptanztests. Umsetzung einschließlich V1-Archivprüfung vorhanden; [Abnahme und Nachweise](plans/storage-acceptance.md). Regal 1/Fach 5 ist nur ein Dummy-Beispiel.
 
-Diese Pläne sind als Vorschläge gekennzeichnet und beschreiben keine bereits implementierten Funktionen.
+Die verlinkten Pläne unterscheiden Vorschläge, laufende Pakete und bereits abgenommene Umsetzung. Maßgeblich sind die jeweils dokumentierten Nachweise.
 
 ## Historie
 

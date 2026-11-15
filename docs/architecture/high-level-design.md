@@ -50,3 +50,21 @@ zur manuellen Archivprüfung angezeigt; bei Teileaufnahme bleibt das
 Kategorieregal Standard. Externe Modelle oder zusätzliche KI-Dienste sind dafür
 nicht erforderlich. Details: [Softwaredesign](software-design.md),
 [Lageranleitung](../guides/warehouse.md), [Umsetzungsabnahme](../plans/storage-acceptance.md).
+
+## Zuverlässige Sammlungsbearbeitung
+
+Sammlungszeilen werden nach Datensatztyp und interner ID unterschieden, damit
+reguläre und Minifigurenteile mit gleicher Nummer nicht verwechselt werden.
+Mengenänderungen bestätigen die tatsächlich gespeicherten Werte; fehlende oder
+mehrdeutige Batchziele führen ohne Teiländerung zu einem erklärten Fehler.
+Browserwarteschlangen erhalten die neueste Eingabe und machen Speicherfehler
+sichtbar. Parallele unabhängige Sitzungen benötigen weiterhin eine eigene
+Versions-/Konfliktstrategie.
+
+Übersichten berechnen Summen direkt in der Datenbank für die sichtbare Seite,
+statt vollständige Inventare für reine Zähler zu laden. Geplante Sicherungen
+verwenden konsistente SQLite-Snapshots einschließlich bestätigter WAL-Daten.
+Die Umsetzung folgt weiterhin Blueprint, Service, Modell und Vanilla JavaScript;
+Details und stufenweiser Folgeplan stehen im
+[Softwaredesign](software-design.md#sammlungsstabilität-und-skalare-übersichten)
+und [Verbesserungsplan](../plans/architecture-usability-improvements.md).

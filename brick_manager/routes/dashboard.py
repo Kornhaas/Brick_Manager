@@ -16,12 +16,14 @@ from models import (
     db,
 )
 from services.cache_service import cache_image
+from services.collection_quantity_service import apply_batch
 from services.dashboard_service import (
     build_dashboard_data,
     load_snapshot_history,
     record_daily_snapshot,
 )
 from services.part_lookup_service import load_part_lookup
+from werkzeug.exceptions import HTTPException
 
 # pylint: disable=C0301
 
@@ -65,6 +67,7 @@ def enrich_part(item, master_lookup):
 
     return {
         "part_id": item.id,
+        "part_type": "minifig" if isinstance(item, UserMinifigurePart) else "regular",
         "set_id": item.user_set.template_set.set_num if item.user_set else None,
         "internal_id": item.user_set.id if item.user_set else None,
         "part_num": item.part_num,
@@ -127,34 +130,17 @@ def update_quantity():
         return jsonify({"error": validation_error}), 400
 
     try:
-        updated_records = 0
-        for part_id, new_quantity in validated_changes:
-            part = User_Parts.query.filter_by(id=part_id).first()
-            if part:
-                part.have_quantity = max(0, min(part.quantity, new_quantity))
-                db.session.add(part)
-                updated_records += 1
-            else:
-                minifigure_part = UserMinifigurePart.query.filter_by(id=part_id).first()
-                if minifigure_part:
-                    minifigure_part.have_quantity = max(
-                        0, min(minifigure_part.quantity, new_quantity)
-                    )
-                    db.session.add(minifigure_part)
-                    updated_records += 1
-
-        if updated_records > 0:
-            db.session.commit()
-            current_app.logger.info(f"Updated {updated_records} records.")
-            return (
-                jsonify(
-                    {"message": f"{updated_records} records updated successfully!"}
-                ),
-                200,
-            )
-
-        current_app.logger.warning("No records were updated.")
-        return jsonify({"message": "No records found to update."}), 404
+        updates = apply_batch(validated_changes)
+        db.session.commit()
+        return jsonify(
+            {
+                "message": f"{len(updates)} records updated successfully!",
+                "updates": updates,
+            }
+        )
+    except HTTPException as error:
+        db.session.rollback()
+        return jsonify({"error": error.description}), error.code or 500
 
     except Exception as e:
         current_app.logger.error("Failed to update quantities: %s", e)
@@ -164,20 +150,29 @@ def update_quantity():
 
 def _validate_quantity_changes(
     changes: list[object],
-) -> tuple[list[tuple[int, int]], str | None]:
+) -> tuple[list[tuple[int, int, str | None]], str | None]:
     """Validate every batch entry before mutating persistent collection data."""
-    validated_changes: list[tuple[int, int]] = []
+    validated_changes: list[tuple[int, int, str | None]] = []
     for change in changes:
         if not isinstance(change, dict):
             return [], "Each change must be an object"
 
         part_id = change.get("part_id")
         new_quantity = change.get("new_quantity")
-        if isinstance(part_id, bool) or not isinstance(part_id, int) or part_id < 1:
+        if (
+            isinstance(part_id, bool)
+            or not isinstance(part_id, int)
+            or not 1 <= part_id <= 2**63 - 1
+        ):
             return [], "part_id must be a positive integer"
         if isinstance(new_quantity, bool) or not isinstance(new_quantity, int):
             return [], "new_quantity must be an integer"
-        validated_changes.append((part_id, new_quantity))
+        kind = change.get("part_type")
+        if "part_type" in change and (
+            not isinstance(kind, str) or kind not in {"regular", "minifig"}
+        ):
+            return [], "part_type must be regular or minifig"
+        validated_changes.append((part_id, new_quantity, kind))
     return validated_changes, None
 
 

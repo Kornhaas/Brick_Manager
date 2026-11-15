@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const statusClass = part.quantity > part.have_quantity ? "table-danger" : "table-success";
 
             // Determine text color based on background color brightness
-            const colorRgb = part.color_rgb || "FFFFFF";
+            const colorRgb = /^[0-9a-f]{6}$/i.test(part.color_rgb || "") ? part.color_rgb : "FFFFFF";
             const brightness = parseInt(colorRgb, 16);
             const textColor = brightness > 0x888888 ? "black" : "white";
 
@@ -455,8 +455,8 @@ document.addEventListener("DOMContentLoaded", function () {
             minifigsTableBody.innerHTML += `
                                 <tr>
                                     <td><img src="${escapeHtml(minifig.img_url)}" alt="${escapeHtml(minifig.name)}" data-image-src="${escapeHtml(minifig.img_url)}" data-image-name="${escapeHtml(`${minifig.name} (${minifig.fig_num})`)}" class="img-thumbnail set-image-clickable" width="50" style="cursor: pointer;" /></td>
-                                    <td>${minifig.fig_num}</td>
-                                    <td>${minifig.name}</td>
+                                    <td>${escapeHtml(minifig.fig_num)}</td>
+                                    <td>${escapeHtml(minifig.name)}</td>
                                     <td>${minifig.quantity}</td>
                                 </tr>`;
 
@@ -465,28 +465,28 @@ document.addEventListener("DOMContentLoaded", function () {
               const partsTableRows = minifig.parts.map(part => {
                 // Use table-danger for missing parts, table-success for complete parts
                 const statusClass = part.quantity > part.have_quantity ? "table-danger" : "table-success";
-                const colorRgb = part.color_rgb || "FFFFFF";
+                const colorRgb = /^[0-9a-f]{6}$/i.test(part.color_rgb || "") ? part.color_rgb : "FFFFFF";
                 const brightness = parseInt(colorRgb, 16);
                 const textColor = brightness > 0x888888 ? "black" : "white";
 
                 return `
                     <tr class="${statusClass}">
                         <td><img src="${escapeHtml(part.part_img_url)}" alt="${escapeHtml(part.name)}" data-image-src="${escapeHtml(part.part_img_url)}" data-image-name="${escapeHtml(`${part.name} (${part.part_num})`)}" class="img-thumbnail set-image-clickable" width="30" style="cursor: pointer;" /></td>
-                        <td>${part.part_num}</td>
-                        <td>${part.name}</td>
-                        <td style="background-color: #${colorRgb}; color: ${textColor};">${part.color || "Not Specified"}</td>
+                        <td>${escapeHtml(part.part_num)}</td>
+                        <td>${escapeHtml(part.name)}</td>
+                        <td style="background-color: #${colorRgb}; color: ${textColor};">${escapeHtml(part.color || "Not Specified")}</td>
                         <td>${part.quantity}</td>
                         <td>
                             <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="minifig" enterkeyhint="next">
                         </td>
-                        <td>${part.location || "Not Specified"}</td>
+                        <td>${escapeHtml(part.location || "Not Specified")}</td>
                     </tr>`;
               }).join('');
 
               minifigsTableBody.innerHTML += `
                                 <tr>
                                     <td colspan="4">
-                                        <h6>Parts for ${minifig.name} (${minifig.quantity} ${minifig.quantity > 1 ? 'minifigures' : 'minifigure'}) - Total quantities shown:</h6>
+                                        <h6>Parts for ${escapeHtml(minifig.name)} (${minifig.quantity} ${minifig.quantity > 1 ? 'minifigures' : 'minifigure'}) - Total quantities shown:</h6>
                                         <table class="table table-sm table-bordered">
                                             <thead>
                                                 <tr>
@@ -879,70 +879,115 @@ function navigateQuantityInputs(event) {
 
 document.addEventListener('keydown', navigateQuantityInputs, true);
 
-function saveQuantity(input) {
-  const partId = input.getAttribute('data-part-id');
-  const partType = input.getAttribute('data-part-type');
-  const newQuantity = parseInt(input.value, 10);
-  const row = input.closest('tr');
+// Serialize writes by logical part, including when the details table is rebuilt.
+const quantitySaveStates = new Map();
 
-  input.style.borderColor = '#ffc107';
+function quantitySaveKey(input) {
+  return `${input.getAttribute('data-part-type')}:${input.getAttribute('data-part-id')}`;
+}
 
-  return fetch('/set_maintain/update_part_quantity', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      part_id: partId,
-      part_type: partType,
-      have_quantity: newQuantity
-    })
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (!data.success) {
-        input.style.borderColor = '#dc3545';
-        setTimeout(() => {
-          input.style.borderColor = '';
-        }, 2000);
-        console.error('Failed to save quantity:', data.message);
+function quantitySaveFeedback(input, state, message) {
+  input.dataset.quantitySaveStatus = state;
+  input.style.borderColor = state === 'saved' ? '#28a745' : state === 'saving' ? '#ffc107' : '#dc3545';
+  input.setAttribute('aria-busy', state === 'saving' ? 'true' : 'false');
+  const parent = input.parentElement;
+  if (!parent) return;
+  let status = parent.querySelector('.quantity-save-status');
+  if (!status) {
+    status = document.createElement('span');
+    status.className = 'quantity-save-status small d-block mt-1';
+    status.id = `quantity-save-${quantitySaveKey(input).replace(':', '-')}`;
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    parent.append(status);
+    const describedBy = input.getAttribute('aria-describedby') || '';
+    input.setAttribute('aria-describedby', `${describedBy} ${status.id}`.trim());
+    const retry = document.createElement('button');
+    retry.type = 'button'; retry.className = 'quantity-save-retry btn btn-link btn-sm p-0';
+    retry.textContent = 'Erneut speichern';
+    retry.addEventListener('click', () => saveQuantity(input));
+    parent.append(retry);
+  }
+  status.textContent = message;
+  parent.querySelector('.quantity-save-retry').hidden = state !== 'error';
+}
+
+async function drainQuantitySaves(state, key) {
+  try {
+    while (state.latest) {
+      const requested = state.latest;
+      let data;
+      try {
+        const response = await fetch('/set_maintain/update_part_quantity', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ part_id: requested.input.getAttribute('data-part-id'),
+            part_type: requested.input.getAttribute('data-part-type'), have_quantity: requested.value })
+        });
+        data = await response.json();
+        if (!response.ok || !data.success || !Number.isSafeInteger(data.have_quantity)
+          || !Number.isSafeInteger(data.total_quantity)) throw new Error('Save failed');
+      } catch (_) {
+        if (state.latest && state.latest.value !== requested.value) continue;
+        if (state.latest) quantitySaveFeedback(state.latest.input, 'error', 'Nicht gespeichert. Bitte erneut versuchen.');
         return false;
       }
-
-      input.value = data.have_quantity;
-      input.dataset.lastSavedValue = String(data.have_quantity);
-      if (row) {
-        row.className = data.have_quantity >= data.total_quantity
-          ? 'table-success'
-          : 'table-danger';
+      const current = state.latest;
+      if (!current) return false; // A newer invalid edit must remain visible.
+      current.input.dataset.lastSavedValue = String(data.have_quantity);
+      if (current.value !== requested.value) continue;
+      if (Number(current.input.value) !== requested.value || current.input.value.trim() === '') {
+        quantitySaveFeedback(current.input, 'unsaved', 'Änderung noch nicht gespeichert.');
+        return false;
       }
-      input.style.borderColor = '#28a745';
-      setTimeout(() => {
-        input.style.borderColor = '';
-      }, 1000);
-      console.log('Quantity auto-saved successfully');
+      current.input.value = String(data.have_quantity);
+      const row = current.input.closest('tr');
+      if (row) row.className = data.have_quantity >= data.total_quantity ? 'table-success' : 'table-danger';
+      quantitySaveFeedback(current.input, 'saved', 'Gespeichert.');
+      state.latest = null;
       return true;
-    })
-    .catch(error => {
-      console.error('Error auto-saving quantity:', error);
-      input.style.borderColor = '#dc3545';
-      setTimeout(() => {
-        input.style.borderColor = '';
-      }, 2000);
-      return false;
-    });
+    }
+    return false;
+  } finally {
+    quantitySaveStates.delete(key);
+  }
+}
+
+function saveQuantity(input) {
+  const raw = input.value.trim();
+  const value = Number(raw);
+  const maximum = input.max === undefined || input.max === '' ? Infinity : Number(input.max);
+  const key = quantitySaveKey(input);
+  let state = quantitySaveStates.get(key);
+  if (!/^\d+$/.test(raw) || !Number.isSafeInteger(value) || value < 0 || value > maximum) {
+    if (state) state.latest = null;
+    const message = 'Bitte eine ganze Menge zwischen 0 und der benötigten Anzahl eingeben.';
+    input.setAttribute('aria-invalid', 'true');
+    input.setCustomValidity(message);
+    quantitySaveFeedback(input, 'invalid', message);
+    return Promise.resolve(false);
+  }
+  input.removeAttribute('aria-invalid');
+  input.setCustomValidity('');
+  quantitySaveFeedback(input, 'saving', 'Wird gespeichert …');
+  if (state) {
+    state.latest = { input, value };
+    return state.promise;
+  }
+  state = { latest: { input, value }, promise: null };
+  quantitySaveStates.set(key, state);
+  state.promise = drainQuantitySaves(state, key);
+  return state.promise;
 }
 
 function saveAndMoveFromQuantityInput(input, backwards = false) {
-  if (input.dataset.quantitySavePending === 'true') return;
+  // Duplicate key events share the write; changed values still update its queue.
+  const saved = saveQuantity(input);
+  if (input.dataset.quantitySavePending === 'true') return saved;
   input.dataset.quantitySavePending = 'true';
-  saveQuantity(input)
-    .then(saved => {
-      if (saved) focusAdjacentQuantityInput(input, backwards);
-    })
-    .finally(() => {
-      delete input.dataset.quantitySavePending;
-    });
+  return saved.then(success => {
+    if (success) focusAdjacentQuantityInput(input, backwards);
+    return success;
+  }).finally(() => { delete input.dataset.quantitySavePending; });
 }
 
 function handleQuantityEnter(event) {
@@ -964,13 +1009,43 @@ document.addEventListener('keypress', handleQuantityEnter, true);
 // Final safeguard for iPadOS versions that submit the form without exposing a
 // usable Enter key event. An explicit click on "Save Changes" still works
 // because the submit button, rather than a quantity input, is then active.
+function waitForQuantitySavesBeforeSubmit(event) {
+  const form = event.target;
+  if (!form || typeof form.closest !== 'function' || !form.closest('#set-details')) return;
+  const pendingInputs = Array.from(form.querySelectorAll('.auto-save-quantity'))
+    .filter(input => quantitySaveStates.has(quantitySaveKey(input)));
+  if (!pendingInputs.length) return;
+  event.preventDefault(); event.stopPropagation();
+  if (form.dataset.quantityFormPending === 'true') return;
+  form.dataset.quantityFormPending = 'true';
+  const submitter = event.submitter;
+  const originalSet = form.querySelector('[name="user_set_id"]')?.value;
+  if (submitter) submitter.disabled = true;
+  Promise.all(pendingInputs.map(saveQuantity)).finally(() => {
+    delete form.dataset.quantityFormPending;
+    if (submitter) submitter.disabled = false;
+  }).then(saved => {
+    if (!saved.every(Boolean) || form.isConnected === false
+      || originalSet !== form.querySelector('[name="user_set_id"]')?.value
+      || form.closest('#set-details')?.classList?.contains('hidden')) return;
+    // Re-enter the normal handler to catch writes begun while we were waiting.
+    form.dataset.quantityFormResubmit = 'true';
+    form.requestSubmit(submitter);
+    delete form.dataset.quantityFormResubmit;
+  });
+}
+
 document.addEventListener('submit', event => {
+  const form = event.target;
+  const resumed = form && form.dataset && form.dataset.quantityFormResubmit === 'true';
+  if (resumed) delete form.dataset.quantityFormResubmit;
   const input = document.activeElement;
-  if (!input || typeof input.matches !== 'function') return;
-  if (!input.matches('.auto-save-quantity') || !input.closest('#set-details')) return;
-  event.preventDefault();
-  event.stopPropagation();
-  saveAndMoveFromQuantityInput(input);
+  if (!resumed && input && typeof input.matches === 'function'
+    && input.matches('.auto-save-quantity') && input.closest('#set-details')) {
+    event.preventDefault(); event.stopPropagation(); saveAndMoveFromQuantityInput(input);
+    return;
+  }
+  waitForQuantitySavesBeforeSubmit(event);
 }, true);
 
 // Auto-save function for quantity inputs

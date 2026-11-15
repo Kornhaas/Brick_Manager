@@ -79,3 +79,20 @@ Der Anwendungsstart führt Migrationen aus und kann Hintergrundjobs aktivieren.
 Tests verwenden isolierte temporäre Datenbanken; realistische Messungen und
 Migrationstests verwenden eine wegwerfbare Kopie. Produktionsinspektion erfolgt
 über SQLite `mode=ro` und nach Möglichkeit `PRAGMA query_only=ON`.
+
+## Geplante SQLite-Sicherungen
+
+Der vorhandene Sechs-Stunden-Job sichert die tatsächliche, von Flask aufgelöste
+SQLite-Datei über die SQLite-Backup-API einschließlich bestätigter WAL-Daten.
+Relative SQLite-URLs werden nicht relativ zum Prozessverzeichnis interpretiert.
+Nicht dateibasierte/in-memory oder Nicht-SQLite-Konfigurationen werden für diesen
+Job übersprungen. Quelle und Laufzeit werden dabei nicht automatisch umgestellt.
+
+Neue geplante Dateien heißen
+`brick_manager_YYYYMMDD_HHMMSS_microseconds_uuid.backup.db` im benachbarten
+`backups`-Verzeichnis. Rotation nach erfolgreicher Sicherung entfernt nur eigene
+reguläre Dateien mit mehr als sieben Tagen Alter. Alte geplante Dateinamen ohne
+UUID werden ebenfalls erkannt; fremde/manuelle Sicherungen und Symlinks bleiben
+erhalten. Fehler werden protokolliert, ein fehlgeschlagenes Backup löst keine
+Rotation aus. Keine Wiederherstellung und kein automatischer Produktions-Rollout
+sind Teil dieser Änderung.

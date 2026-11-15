@@ -85,3 +85,13 @@ neuer Oberfläche, damit keine unsichere Schreibalternative entsteht.
 
 Die [Lagerabnahme](../plans/storage-acceptance.md) dokumentiert automatisierte
 Nachweise und die getrennten offenen Vor-Ort-Messungen.
+
+## Schrittweise Altlastenbereinigung
+
+Die erste Architektur-/Usability-Welle ergänzt spezialisierte Services für
+Sammlungsmengenidentität, seitenspezifische Mengenübersichten und konsistente
+SQLite-Sicherungen. Routen bleiben HTTP-/Transaktionsgrenze; vorhandene
+Blueprints und externe API-Verträge bleiben erhalten. Browseränderungen nutzen
+weiter Vanilla JavaScript und gekapselte Speicherwarteschlangen. Details und
+Grenzen stehen im [Softwaredesign](software-design.md#sammlungsstabilität-und-skalare-übersichten),
+weitere priorisierte Schritte im [Verbesserungsplan](../plans/architecture-usability-improvements.md).

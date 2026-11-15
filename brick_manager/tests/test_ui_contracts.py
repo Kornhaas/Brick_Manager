@@ -310,7 +310,10 @@ def test_dashboard_quantity_update_clamps_and_persists(client, collection_record
     )
 
     assert response.status_code == 200
-    assert response.json == {"message": "1 records updated successfully!"}
+    assert response.json["message"] == "1 records updated successfully!"
+    assert response.json["updates"] == [
+        {"part_id": part.id, "part_type": "regular", "have_quantity": 10}
+    ]
     assert db.session.get(User_Parts, part.id).have_quantity == 10
 
 

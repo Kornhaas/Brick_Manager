@@ -248,3 +248,60 @@ Pylint-Workflow behandelt Hinweise nicht als Buildfehler. Der „Deploy“-Job i
 lediglich eine Benachrichtigung mit manuellen Deployment-Anweisungen.
 Der Pre-push-Hook bestand nochmals 554 Tests mit 72,24 % Coverage.
 Keine Live-Daten oder bestehenden Anwendungsserver wurden dafür verändert.
+
+### Erste Architektur-/Usability-Welle
+
+Die neuen Python-Regressionen in `test_collection_hardening.py` reproduzierten
+zunächst 13 Fehler bei Tabellen-ID-Kollisionen, Batches, Setlisten und Filtern;
+weitere Skalartests reproduzierten sechs Fehler durch Trunkierung/Typverwechslung.
+Die 13 Backup-Tests in `test_backup_service.py` führen echte SQLite-WAL-Fälle aus
+und extrahieren ausschließlich die zwei Scheduler-Wrapper aus dem AST, ohne die
+Produktiv-App zu importieren. Quelle, Rotation, Symlinks, Kollisionen und
+Fehlerisolation werden mit temporären Dateien geprüft.
+
+JavaScript-Prüfung ohne zusätzliche npm-Abhängigkeiten:
+
+```bash
+node --test tests/js/*.cjs
+```
+
+Der ausgeführte Lauf bestand **25 Prüfungen**, darunter vorhandene Navigation,
+13 neue Speicherszenarien, drei Katalog-Renderingfälle und der Dashboard-Controller.
+Letzterer prüft mehrere Zusicherungen in einem Harness: serialisierte Writes,
+neueste Absicht, Typidentität, Dezimalfehler, Server-Clamping, Retry und Rücknahme
+während eines laufenden Saves. Rote Fälle wurden vor der jeweiligen Korrektur
+nachgewiesen.
+
+Zusätzlicher isolierter Browserlauf:
+
+```bash
+PYTHONPATH=/tmp/brick-browser PLAYWRIGHT_BROWSERS_PATH=/tmp/brick-browser-cache poetry run python tests/browser/collection_hardening_smoke.py
+```
+
+Er bedient echte Dashboard-Eingaben mit kollidierenden Datensatz-IDs und
+kontrolliert verzögerten Antworten, Netzfehler/Retry, Dezimalprüfung, tatsächliche
+Datenbankänderung und den unveränderten anderen Bestand. Externe DataTables-
+Initialisierung wird bewusst gestubbt; der neue native Mengencontroller läuft
+real. Zwei weitere isolierte Chromium-Prüfungen der Setpflege bestätigten
+Mengen/Bulkabschluss und wörtliche Katalogdarstellung mit abgefangenen Requests.
+Das sind automatisierte DOM-Prüfungen, keine Nutzertests mit Personen.
+
+Synthetischer Setlistenvergleich mit 30 Sets und 6.000 Teilezeilen: zuvor 6.000
+Teileobjekte/10 Queries/0,1891 s, danach 0 Teileobjekte/9 Queries/0,0979 s.
+Je ein isolierter Lauf, kein Live-Benchmark und keine garantierte Latenz.
+Die dauerhaft zugesicherte Regression prüft unveränderte Summen ohne geladene
+Inventarobjekte, nicht eine fragile Zeitgrenze.
+
+`test_release_gate.py` scheiterte zunächst am auskommentierten Pytest-Schritt im
+Docker-Testjob. Der Schritt wird jetzt vor dem abhängigen Veröffentlichungsjob
+ausgeführt. Diese Welle löst keine Remote-Pipeline oder Image-Publikation aus;
+deren tatsächliches Ergebnis ist damit noch nicht geprüft.
+
+Abschließender Gesamtlauf dieser Welle am 15. November 2026 nach dem CI-Gate-Fix:
+**589 bestanden, 0 fehlgeschlagen, 0 übersprungen, 73,06 % Coverage**.
+Projektweites Ruff und BasedPyright sowie Formatprüfung (108 Pythondateien)
+bestanden. Wheel und Quellpaket wurden aus einem isolierten Quellbaum
+(Commitbasis plus Arbeitsdiff und neuen Quelldateien) gebaut; neue Services und
+Controller sind enthalten, alle enthaltenen Pythondateien kompilieren und keine
+Datenbank oder `.env` liegt im Paket. Der lokale Paketbuild prüft keinen
+Multiarch-Container und löst keine CI-Veröffentlichung aus.

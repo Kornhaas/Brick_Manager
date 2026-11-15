@@ -33,8 +33,10 @@ from models import (
     UserMinifigurePart,
     db,
 )
+from services.collection_quantity_service import parse_integer
+from services.collection_summary_service import set_quantity_totals
 from sqlalchemy import or_
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
 
 set_maintain_bp = Blueprint("set_maintain", __name__)
@@ -119,10 +121,7 @@ def set_maintain():
         per_page = 50
 
     query = User_Set.query.join(User_Set.template_set).options(
-        joinedload(User_Set.template_set),
-        selectinload(User_Set.parts_in_set),
-        selectinload(User_Set.minifigures_in_set),
-        selectinload(User_Set.user_minifigure_parts),
+        joinedload(User_Set.template_set)
     )
 
     if search:
@@ -194,23 +193,20 @@ def set_maintain():
         .all()
     )
 
+    totals = set_quantity_totals(user_set.id for user_set in user_sets)
     sets_with_completeness = []
     for user_set in user_sets:
-        total_quantity = sum(part.quantity for part in user_set.parts_in_set)
-        total_have_quantity = sum(part.have_quantity for part in user_set.parts_in_set)
-
-        user_minifigure_parts = user_set.user_minifigure_parts
-        total_quantity += sum(part.quantity for part in user_minifigure_parts)
-        total_have_quantity += sum(part.have_quantity for part in user_minifigure_parts)
+        total_quantity = totals[user_set.id]["required"]
+        total_have_quantity = totals[user_set.id]["owned"]
 
         completeness_percentage = (
             (total_have_quantity / total_quantity) * 100 if total_quantity > 0 else 0
         )
 
         # Get theme information
-        theme_name = "Unknown"
+        row_theme_name = "Unknown"
         if user_set.template_set and user_set.template_set.theme:
-            theme_name = user_set.template_set.theme.name
+            row_theme_name = user_set.template_set.theme.name
 
         # Get set name
         set_name = "Unknown Set"
@@ -221,7 +217,7 @@ def set_maintain():
             {
                 "user_set": user_set,
                 "completeness_percentage": round(completeness_percentage, 2),
-                "theme_name": theme_name,
+                "theme_name": row_theme_name,
                 "set_name": set_name,
                 "set_num": (
                     user_set.template_set.set_num
@@ -506,9 +502,11 @@ def update_part_quantity():
             data.get("have_quantity"), bool
         ):
             return jsonify({"success": False, "message": "Invalid input value"}), 400
-        part_id = int(data.get("part_id"))
+        part_id = parse_integer(data.get("part_id"), positive_id=True)
         part_type = data.get("part_type", "regular")  # 'regular' or 'minifig'
-        new_quantity = int(data.get("have_quantity"))
+        if not isinstance(part_type, str) or part_type not in {"regular", "minifig"}:
+            return jsonify({"success": False, "message": "Invalid input value"}), 400
+        new_quantity = parse_integer(data.get("have_quantity"))
 
         current_app.logger.info(
             f"Auto-updating {part_type} quantity: part_id={part_id}, quantity={new_quantity}"

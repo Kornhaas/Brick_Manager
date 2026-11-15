@@ -7,8 +7,6 @@ It configures the application, registers blueprints, and loads the master lookup
 import atexit
 import logging
 import os
-import shutil
-from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -136,76 +134,32 @@ configure_logging(app)
 
 
 def backup_database():
-    """
-    Backup the database at regular intervals.
-    Creates backups in a dedicated directory and maintains rotation.
-    """
+    """Isolate scheduled failures while backing up the engine's actual SQLite file."""
+    from services.backup_service import create_database_backup
+
     try:
-        db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
-        # Standard SQLite URI format:
-        # sqlite:////absolute/path -> /absolute/path (4 slashes)
-        # sqlite:///relative/path -> relative/path (3 slashes)
-        if db_uri.startswith("sqlite:////"):
-            # Absolute path: sqlite:////app/... -> /app/...
-            db_source_path = db_uri[len("sqlite:///") :]  # Keep one slash
-        elif db_uri.startswith("sqlite:///"):
-            # Relative path: sqlite:///path -> path
-            db_source_path = db_uri[len("sqlite:///") :]
-        else:
-            # Non-SQLite or already a path
-            db_source_path = db_uri
-
-        # Check if source database exists
-        if not os.path.exists(db_source_path):
-            app.logger.error("Source database does not exist: %s", db_source_path)
+        # Flask resolves relative SQLite URIs under instance_path. The engine URL
+        # therefore identifies the collection, independently of process CWD.
+        with app.app_context():
+            target = create_database_backup(db.engine)
+        if target is None:
+            app.logger.info("Database backup skipped: no file-backed SQLite database")
             return
-
-        # Create backup directory
-        backup_dir = os.path.join(os.path.dirname(db_source_path), "backups")
-        os.makedirs(backup_dir, exist_ok=True)
-
-        # Verify backup directory is writable
-        if not os.access(backup_dir, os.W_OK):
-            app.logger.error("Backup directory is not writable: %s", backup_dir)
-            return
-
-        # Create backup filename with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_filename = f"brick_manager_{timestamp}.backup.db"
-        backup_db_path = os.path.join(backup_dir, backup_filename)
-
-        # Create the backup
-        shutil.copyfile(db_source_path, backup_db_path)
-        app.logger.info("Database backed up successfully to %s", backup_db_path)
-
-        # Cleanup old backups (keep last 7 days)
-        cleanup_old_backups(backup_dir)
-
-    except Exception as e:
-        app.logger.error("Failed to backup database: %s", e)
+        app.logger.info("Database backed up successfully to %s", target)
+        cleanup_old_backups(target.parent)
+    except Exception as error:
+        app.logger.error("Failed to backup database: %s", error)
 
 
 def cleanup_old_backups(backup_dir):
-    """
-    Remove backup files older than 7 days to prevent disk space issues.
+    """Preserve seven-day scheduled retention without deleting unrelated files."""
+    from services.backup_service import prune_database_backups
 
-    Args:
-        backup_dir (str): Directory containing backup files
-    """
     try:
-        cutoff_time = datetime.now() - timedelta(days=7)
-
-        for filename in os.listdir(backup_dir):
-            if filename.endswith(".backup.db"):
-                file_path = os.path.join(backup_dir, filename)
-                file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
-
-                if file_mtime < cutoff_time:
-                    os.remove(file_path)
-                    app.logger.info("Removed old backup: %s", filename)
-
-    except Exception as e:
-        app.logger.warning("Failed to cleanup old backups: %s", e)
+        for path in prune_database_backups(backup_dir):
+            app.logger.info("Removed old backup: %s", path.name)
+    except Exception as error:
+        app.logger.warning("Failed to cleanup old backups: %s", error)
 
 
 def scheduled_sync_missing_parts():

@@ -153,3 +153,41 @@ Der additive Index `ix_inventory_part_color_image` auf
 Bildsuche ab und vermeidet den Scan der gesamten Inventartabelle. Die neue
 Migration `20261115_warehouse_image_lookup.sql` erzeugt ausschließlich diesen
 Index; angewendete frühere Migrationsartefakte bleiben unverändert.
+
+## Sammlungsstabilität und skalare Übersichten
+
+`collection_quantity_service.py` behandelt die Identität einer Mengenzeile als
+`(part_type, part_id)`: `regular` und `minifig` haben unabhängige ID-Räume.
+Dashboard-Batches werden vollständig validiert und aufgelöst, bevor eine Menge
+zugewiesen wird. Fehlende Ziele liefern 404, mehrdeutige untypisierte Altaufrufe
+409 und doppelte/ungültige Ziele 400; der gesamte Batch bleibt dabei unverändert.
+Die Route besitzt Commit/Rollback. Erfolgsantworten enthalten additiv `updates`
+mit Typ, ID und tatsächlich gespeicherter (begrenzter) Menge. Eindeutige alte
+Payloads ohne Typ bleiben gültig. Die Setpflege akzeptiert weiterhin ganzzahlige
+Ziffernstrings, aber keine Booleans, Dezimalwerte oder unbekannten Typen.
+
+`static/js/detail_quantities.js` ersetzt den alten jQuery-Inline-Autosave in den
+Dashboarddetails. Delegierte Eingaben und eine Batch-Warteschlange erhalten die
+neueste Eingabe, bestätigen konkrete Serverwerte und behalten Fehler bis zum
+sichtbaren Retry. Die Setpflege serialisiert analog pro logischer Teilidentität;
+ein expliziter Formularabschluss wartet auf laufende Mengenänderungen und darf
+nach einem Setwechsel kein anderes Formular absenden. Diese Warteschlangen lösen
+keine gleichzeitigen Änderungen durch unabhängige Browser/Sitzungen; eine solche
+Versionsprüfung bleibt ein eigenes Schema-/Vertragsthema.
+
+`collection_summary_service.py:set_quantity_totals` berechnet pro paginierter
+Setliste nur skalare Summen regulärer, Ersatz- und Minifigurenteilzeilen für die
+sichtbaren Set-IDs. Es werden dafür keine Inventarobjekte geladen. Physische
+Setkopien bleiben nach `user_set_id` getrennt, leere Sets ergeben null. Suchfilter
+und dargestellte Zeilenthemen verwenden getrennte Variablen.
+
+`backup_service.py` verwendet die vorhandene SQLite-Backup-API und den tatsächlichen
+Engine-Pfad. Der geplante App-Wrapper beschafft diesen im App-Kontext und isoliert
+Fehler weiterhin vom Scheduler. Gleichzeitige Sicherungen haben kollisionsfreie
+Namen; Rotation erfolgt erst nach erfolgreicher Sicherung und ausschließlich für
+eigene, ältere reguläre Backup-Dateien. Fremde/manuelle Dateien und Symlinks
+werden nicht entfernt. In-memory- und Nicht-SQLite-Engines werden übersprungen.
+App-Initialisierung und Schedulerkonfiguration wurden dabei nicht umgebaut.
+
+Weitere bestätigte Altlasten und ihre noch nicht umgesetzten Prüfungen stehen im
+[Verbesserungsplan](../plans/architecture-usability-improvements.md).

@@ -24,3 +24,25 @@ Der Desktop-Client verwendet die versionierte API unter `/api/v1`. Sie stellt Te
 - Ersatzteile bleiben bei Mengen- und Fehlteilberechnungen von regulären Teilen getrennt.
 - Ein Teil kann mehrere Lagerorte haben; Änderungen müssen den betroffenen Ort eindeutig adressieren.
 - Externe Abgleiche und Katalogimporte können Daten verändern. Sie werden bewusst angestoßen und ersetzen keine Sicherungsstrategie.
+
+## Mengen speichern und Setlisten verwenden
+
+In der Setpflege zeigt eine Mengenänderung „Wird gespeichert …“, „Gespeichert.“
+oder einen bleibenden Fehlerhinweis. Bei Fehlern bleiben Eingaben erhalten und
+„Erneut speichern“ versucht die Speicherung erneut. Ganze Mengen von null bis
+zur benötigten Anzahl sind zulässig; Dezimalwerte werden nicht still gerundet.
+Schnelle Folgeeingaben werden pro Teilezeile nacheinander gespeichert. Enter/Tab
+bleiben nutzbar. „Save Changes“ wartet auf laufende Mengenänderungen; nach Wechsel
+zu einem anderen Set wird kein verspäteter Formularabschluss ausgeführt.
+
+Die Dashboard-Detailansichten verwenden ebenfalls eine Speicherwarteschlange,
+zeigen Fehler mit „Retry save“ und übernehmen die tatsächlich vom Server
+bestätigte Menge. Reguläre Teile und Minifigurenteile werden eindeutig
+unterschieden, auch bei gleicher interner Nummer. Bei einer mehrdeutigen Anfrage
+eines alten Clients wird keine Menge verändert.
+
+Die Setliste berechnet ihre angezeigten Summen ohne vollständige Teilelisten zu
+laden. Ein leerer Themenfilter bleibt leer und beeinflusst nachfolgende Suchen
+oder Seitenwechsel nicht unbemerkt. Die weiterhin vorhandenen Bulk-Schaltflächen
+zum vollständigen Befüllen/Zurücksetzen verändern zunächst Formularwerte; sie
+werden erst mit „Save Changes“ übernommen.

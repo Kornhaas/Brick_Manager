@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ title }}</title>
+    <script src="{{ url_for('static', filename='js/detail_quantities.js') }}" defer></script>
 
 
 
@@ -26,8 +27,9 @@
         <h1 class="mb-4">{{ title }}</h1>
 
         <!-- Feedback Alert -->
-        <div id="feedback" class="alert alert-success d-none" role="alert">
-            Changes saved successfully!
+        <div id="feedback" class="alert alert-info d-none" role="status" aria-live="polite">
+            <span id="quantity-status"></span>
+            <button id="quantity-retry" type="button" class="btn btn-outline-primary" hidden>Retry save</button>
         </div>
 
         <!-- Category Filter -->
@@ -84,6 +86,7 @@
                             type="number"
                             value="{{ item.have_quantity }}"
                             data-id="{{ item.part_id }}"
+                            data-part-type="{{ item.part_type }}"
                             data-original="{{ item.have_quantity }}"
                             max="{{ item.total_quantity }}"
                             min="0"
@@ -125,84 +128,6 @@
                     [5, "asc"]  // Then sort by `color` (5th column, index 5)
                 ],
             });
-
-            // Array to track changes
-            let changes = [];
-
-            // Function to attach change listeners to quantity inputs
-            function attachChangeListeners() {
-                $(".update-quantity").off("input").on("input", function () {
-                    const $input = $(this);
-                    const newQuantity = parseInt($input.val(), 10);
-                    const originalQuantity = parseInt($input.attr("data-original"), 10);
-                    const partId = $input.data("id");
-
-                    console.log("Input changed. Part ID:", partId, "New Quantity:", newQuantity);
-
-                    // Validate the input
-                    if (isNaN(newQuantity) || newQuantity < 0) {
-                        alert("Invalid quantity! Please enter a value greater than or equal to 0.");
-                        $input.val(originalQuantity); // Revert to the original value
-                        return;
-                    }
-
-                    // Check if there's a change
-                    if (newQuantity !== originalQuantity) {
-                        const existingChangeIndex = changes.findIndex(
-                            (change) => change.part_id === partId
-                        );
-
-                        if (existingChangeIndex > -1) {
-                            // Update existing change
-                            changes[existingChangeIndex].new_quantity = newQuantity;
-                        } else {
-                            // Add new change
-                            changes.push({ part_id: partId, new_quantity: newQuantity });
-                        }
-                    } else {
-                        // Remove the change if reverted to the original value
-                        changes = changes.filter((change) => change.part_id !== partId);
-                    }
-
-                    // Save changes automatically
-                    saveChanges();
-                });
-            }
-
-            // Save changes to the server
-            function saveChanges() {
-                if (changes.length === 0) {
-                    console.log("No changes to save.");
-                    return;
-                }
-
-                // Send changes to the server
-                $.ajax({
-                    url: "/update_quantity",
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({ changes }),
-                    success: function () {
-                        const feedback = $("#feedback");
-                        feedback
-                            .removeClass("d-none")
-                            .text("Changes saved successfully!");
-                        setTimeout(() => feedback.addClass("d-none"), 3000);
-
-                        // Update the original data attributes and clear changes
-                        changes.forEach((change) => {
-                            $(`[data-id="${change.part_id}"]`).attr(
-                                "data-original",
-                                change.new_quantity
-                            );
-                        });
-                        changes = [];
-                    },
-                    error: function () {
-                        alert("Failed to save changes. Please try again.");
-                    },
-                });
-            }
 
             // Populate name dropdown based on selected category
             function populateNameDropdown(selectedCategory) {
@@ -253,13 +178,9 @@
                 }
             });
 
-            // Initial attachment of listeners
-            attachChangeListeners();
 
-            // Reattach listeners on table redraw
+            // Refresh image loading after table redraw
             table.on("draw", function () {
-                console.log("Table redrawn. Reattaching listeners...");
-                attachChangeListeners();
                 lazyLoadImages(); // Load visible images after table redraw
             });
 
