@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="warehouse-csrf" content="{{ warehouse_csrf }}">
+    <script src="{{ url_for('static', filename='js/label_marks.js') }}" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Box Maintenance</title>
     {% include "favicon_links.html" %}
@@ -53,6 +55,17 @@
 </head>
 <body>
     {% include 'navbar.html' %}
+<section id="marked-labels" class="container my-4" aria-labelledby="marked-label-title">
+    <h2 id="marked-label-title">Im Lager zum Neudruck vorgemerkt</h2>
+    <p>Diese Vormerkungen bleiben bis zur Bestätigung des erfolgreichen Drucks erhalten. Der PDF-Download allein entfernt kein Häkchen.</p>
+    <p id="marked-label-status" role="status" aria-live="polite">Vormerkungen werden geladen …</p>
+    <ul id="marked-label-list"></ul>
+    <button type="button" id="marked-label-refresh" class="btn btn-outline-secondary">Neu laden</button>
+    <button type="button" id="marked-label-download" class="btn btn-primary" disabled>Alle vorgemerkten drucken · PDF</button>
+    <button type="button" id="marked-label-confirm" class="btn btn-success" disabled>Erfolgreichen Druck bestätigen</button>
+    <p>Startposition und Druckversatz werden aus den Einstellungen des Etikettenbogens unten übernommen.</p>
+</section>
+
 
     <div class="container-fluid my-5">
         <h1 class="mb-4">

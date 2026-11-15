@@ -84,7 +84,7 @@ def test_fresh_database_migrates_and_works_through_sqlalchemy(tmp_path):
     with sqlite3.connect(path) as connection:
         assert (
             connection.execute("SELECT COUNT(*) FROM schema_migrations").fetchone()[0]
-            == 2
+            == 3
         )
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
 
@@ -307,3 +307,46 @@ def test_migration_prepares_actual_sqlite_parent_resolved_by_flask(tmp_path, rel
             instance / "data" / "instance" / "collection.db" if relative else selected
         )
         engine.dispose()
+
+
+def test_inventory_image_index_is_repeatable_and_preserves_existing_rows(tmp_path):
+    path = tmp_path / "image-index.db"
+    _old_database(path)
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "INSERT INTO rebrickable_inventories (id, version, set_num) VALUES (1, 1, 's-1')"
+        )
+        connection.execute(
+            "INSERT INTO rebrickable_inventory_parts (inventory_id, part_num, color_id, quantity, is_spare, img_url) VALUES (1, 'p', 1, 3, 0, 'https://example.test/p.png')"
+        )
+        before = connection.execute(
+            "SELECT * FROM rebrickable_inventory_parts"
+        ).fetchall()
+        storage_before = connection.execute("SELECT * FROM part_storage").fetchall()
+    migrations = tmp_path / "index-migrations"
+    migrations.mkdir()
+    artifact = MIGRATIONS / "20261115_warehouse_image_lookup.sql"
+    (migrations / artifact.name).write_bytes(artifact.read_bytes())
+    apply_sqlite_migrations(path, migrations)
+    apply_sqlite_migrations(path, migrations)
+    with sqlite3.connect(path) as connection:
+        assert (
+            connection.execute("SELECT * FROM rebrickable_inventory_parts").fetchall()
+            == before
+        )
+        assert (
+            connection.execute("SELECT * FROM part_storage").fetchall()
+            == storage_before
+        )
+        plan = connection.execute(
+            "EXPLAIN QUERY PLAN SELECT min(img_url) FROM rebrickable_inventory_parts WHERE part_num='p' AND color_id=1"
+        ).fetchall()
+        assert any(
+            "ix_inventory_part_color_image" in str(row) and "COVERING" in str(row)
+            for row in plan
+        ), plan
+        assert (
+            connection.execute("SELECT COUNT(*) FROM schema_migrations").fetchone()[0]
+            == 1
+        )
+        assert connection.execute("PRAGMA foreign_key_check").fetchall() == []

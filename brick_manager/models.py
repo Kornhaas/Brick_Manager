@@ -506,6 +506,10 @@ class RebrickableInventoryParts(db.Model):
 
     __tablename__ = "rebrickable_inventory_parts"
 
+    __table_args__ = (
+        db.Index("ix_inventory_part_color_image", "part_num", "color_id", "img_url"),
+    )
+
     inventory_id = db.Column(
         db.Integer, db.ForeignKey("rebrickable_inventories.id"), primary_key=True
     )

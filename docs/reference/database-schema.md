@@ -183,3 +183,24 @@ its journal entry in the same transaction. Existing FK gaps are reported and
 preserved; new damage aborts. After deployment an applied artifact is immutable.
 See the [migration procedure](../guides/development.md#lagerdatenbank-migrieren) and
 [warehouse guide](../guides/warehouse.md).
+
+### Gespeicherte Etikettenvormerkungen
+
+Keine neue Tabelle: `config_settings` enthält nicht verschlüsselte JSON-Präferenzen
+mit Präfix `warehouse_label_request:` und SHA-256 des kanonischen Druckziels.
+Wert: `target` (physische `unit_id` oder bestehende `location`/`level`/`box`) und
+zufällige `generation`. Jede Box hat einen eigenen Schlüssel. Vormerkungen sind
+expliziter Benutzerzustand und unabhängig von `PartStorage.label_printed` bzw.
+`StorageUnit.label_printed`. Nur eine bestätigte, unveränderte Druckauswahl setzt
+Druckstatus und entfernt ihre Vormerkung atomar. Katalogaktualisierungen dürfen
+diese Präferenzen ebenso wenig löschen wie andere sammlungseigene Einstellungen.
+Die Speicherung nutzt das vorhandene Schema ohne Migration oder Backfill.
+
+### Index für Inventarbilder
+
+`ix_inventory_part_color_image` deckt die Suche nach `part_num`, `color_id` und
+`img_url` in `rebrickable_inventory_parts` ab. Das aktuelle Modell erzeugt ihn
+für frische Datenbanken; `20261115_warehouse_image_lookup.sql` ergänzt ihn mit
+`CREATE INDEX IF NOT EXISTS` bei bestehenden Datenbanken. Die Migration ändert
+keine Zeilen oder Spalten. Wiederholung, erhaltener Bestand und Nutzung als
+Covering Index sind in `test_storage_migration.py` geprüft.

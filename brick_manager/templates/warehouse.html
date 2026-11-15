@@ -8,7 +8,7 @@
   {% include 'favicon_links.html' %}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/warehouse.css') }}">
-  <script src="{{ url_for('static', filename='js/warehouse.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/warehouse.js', v=warehouse_asset_version) }}" defer></script>
 </head>
 <body>
 {% include 'navbar.html' %}
@@ -19,14 +19,16 @@
   <div id="warehouse-error" role="alert" hidden></div>
   <section class="warehouse-panel" aria-labelledby="overview-title">
     <h2 id="overview-title">Lagerübersicht</h2>
+    <p><a href="{{ url_for('box_maintenance.box_maintenance_page') }}#marked-labels">Vorgemerkte Etiketten gesammelt drucken</a></p>
     <div class="warehouse-toolbar">
-      <label for="warehouse-shelf">Fach</label><select id="warehouse-shelf"><option value="">Alle Fächer</option></select>
+      <label for="warehouse-shelf">Regal / Fach</label><select id="warehouse-shelf" disabled><option value="">Fach wird geladen …</option></select>
       <button type="button" id="warehouse-list" aria-pressed="false">Listenansicht</button>
       <button type="button" id="warehouse-front" aria-pressed="true">Regalfront</button>
+      <label for="warehouse-column-rows">Boxen je Spalte</label><select id="warehouse-column-rows"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select>
       <button type="button" id="warehouse-refresh">Neu laden</button>
       <button type="button" id="warehouse-archive">Fach aufräumen</button>
     </div>
-    <p id="warehouse-scale">Schematische Ansicht – Passung ohne vollständige Messwerte ungeprüft.</p>
+    <p id="warehouse-scale">Schematische Ansicht – Nummerierung unten links nach oben, dann nächste Spalte. Passung ohne vollständige Messwerte ungeprüft.</p>
     <div id="warehouse-layout" class="warehouse-front" aria-label="Fächer und Behälter"></div>
     <div id="warehouse-space" aria-live="polite"></div>
   </section>

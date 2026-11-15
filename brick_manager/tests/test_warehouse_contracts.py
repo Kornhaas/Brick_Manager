@@ -637,3 +637,15 @@ def test_warehouse_enabled_by_default_or_explicit_true(
     response = client.get("/warehouse")
     assert response.status_code == 200
     assert b"warehouse-layout" in response.data
+
+
+def test_initial_shelf_placeholder_and_versioned_script(client):
+    import re
+
+    response = client.get("/warehouse")
+    html = response.get_data(as_text=True)
+    assert (
+        '<select id="warehouse-shelf" disabled><option value="">Fach wird geladen'
+        in html
+    )
+    assert re.search(r"js/warehouse\.js\?v=\d+", html)

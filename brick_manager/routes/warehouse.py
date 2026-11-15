@@ -13,12 +13,18 @@ from flask import (
     jsonify,
     render_template,
     request,
+    send_file,
     send_from_directory,
     session,
 )
 from models import db
-from services import storage_move_service, storage_service, storage_suggestion_service
-from services.label_service import create_box_label_jpg
+from services import (
+    label_queue_service,
+    storage_move_service,
+    storage_service,
+    storage_suggestion_service,
+)
+from services.label_service import create_avery_3474_pdf, create_box_label_jpg
 from services.part_history_service import part_history
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import BadRequest, HTTPException, NotFound
@@ -81,12 +87,28 @@ def warehouse_page():
     if not token:
         token = secrets.token_urlsafe(32)
         session["warehouse_csrf"] = token
-    return render_template("warehouse.html", warehouse_csrf=token)
+    static_folder = current_app.static_folder
+    version = (
+        (Path(static_folder) / "js" / "warehouse.js").stat().st_mtime_ns
+        if static_folder
+        else 0
+    )
+    return render_template(
+        "warehouse.html", warehouse_csrf=token, warehouse_asset_version=version
+    )
 
 
 @warehouse_bp.get("/data")
 def warehouse_data():
-    return jsonify(storage_service.overview())
+    focused = request.args.get("view") == "focused"
+    shelf_id = request.args.get("shelf_id", type=int)
+    return jsonify(
+        storage_service.overview(
+            focused=focused,
+            shelf_id=shelf_id,
+            all_shelves=request.args.get("all") == "1",
+        )
+    )
 
 
 @warehouse_bp.post("/setup")
@@ -263,3 +285,58 @@ def unit_label_printed(unit_id):
     return jsonify(
         storage_service.update_unit(unit_id, {**_payload(), "label_printed": True})
     )
+
+
+@warehouse_bp.get("/label-marks")
+def label_marks():
+    return jsonify({"marks": label_queue_service.marks()})
+
+
+@warehouse_bp.post("/label-marks")
+def set_label_mark():
+    return jsonify(label_queue_service.set_mark(_payload()))
+
+
+@warehouse_bp.post("/label-marks/sheet")
+def marked_label_sheet():
+    data = _payload()
+    start = storage_service.integer(data.get("start_position", 1), "start_position")
+    if start is None or start > 24:
+        raise BadRequest("Startposition höchstens 24.")
+    offsets = []
+    for name in ("horizontal_offset_mm", "vertical_offset_mm"):
+        value = data.get(name, 0)
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not -10 <= value <= 10
+        ):
+            raise BadRequest("Druckversatz zwischen -10 und 10 mm erforderlich.")
+        offsets.append(value)
+    infos = label_queue_service.label_infos(data)
+    return send_file(
+        create_avery_3474_pdf(infos, start, *offsets),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name="marked_brick_labels.pdf",
+    )
+
+
+@warehouse_bp.post("/label-marks/printed")
+def marked_labels_printed():
+    return jsonify(label_queue_service.confirm(_payload()))
+
+
+@warehouse_bp.post("/label-marks/remove")
+def remove_label_mark():
+    return jsonify(label_queue_service.remove(_payload()))
+
+
+@warehouse_bp.get("/contents")
+def content_options():
+    return jsonify({"items": storage_service.content_options()})
+
+
+@warehouse_bp.get("/contents/<int:storage_id>/group")
+def legacy_group_contents(storage_id):
+    return jsonify(storage_service.legacy_group_contents(storage_id))

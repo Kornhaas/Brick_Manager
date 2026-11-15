@@ -121,3 +121,39 @@ korrigiert und durch relative/absolute Pfadtests sowie den echten Flask-CLI-Load
 mit temporärer Datenbank abgesichert. Abschließender vollständiger Lauf:
 **521 bestanden, 0 fehlgeschlagen, 0 übersprungen, 71,34 % Coverage**.
 Details im [Logbuch](../logbook.md) und in der [Entwicklungsanleitung](../guides/development.md#sqlite-pfade-beim-lokalen-start).
+
+## Nachprüfung: Sichtbarkeit vorhandener Lagerzuordnungen
+
+Die Regalübersicht zeigt bestehende Rohzuordnungen jetzt als unbestätigte
+Beschriftungsgruppen; zuvor waren trotz erhaltener Inhalte nur physische
+Einheiten sichtbar. Fehlende/mehrdeutige Adressen bleiben auffindbar.
+`test_warehouse_legacy_overview.py` und der zusätzliche echte Browserlauf
+`tests/browser/warehouse_legacy_smoke.py` prüfen diesen regulären Einstieg samt
+Einzelzuordnung und unbekannter Belegung. Abschließender Gesamtlauf:
+534 bestanden, 0 fehlgeschlagen, 0 übersprungen; 71,58 % Coverage.
+Keine zusätzliche Migration oder automatische Behältererzeugung erforderlich.
+Die Vor-Ort-Grenzen der ursprünglichen Abnahme bleiben bestehen.
+
+## Nachprüfung: Bilder und vorgemerkte Etiketten
+
+Fehlende Stammbilder erhalten eine gebündelte Inventarbildalternative. Explizite
+Neudruckvormerkungen sind dauerhaft und unabhängig vom Druckstatus; Druck und
+Bestätigung nutzen unveränderte Ziel-/Inhaltssnapshots. Bestehende Rohzuordnungen
+und physische Einheiten sind unterstützt, ohne Mengen oder Aufstellungen zu ändern.
+15 zusätzliche Regressionen und `warehouse_labels_smoke.py` prüfen den gesamten
+Ablauf einschließlich Downloadfehler und veralteter Bestätigung. Alle drei
+Browserläufe und der abschließende Gesamtlauf bestanden: **549 Tests**, keine
+Fehler/Skips, **72,06 % Coverage**. Keine Schemaänderung erforderlich. Tatsächlicher
+Druck und Kalibrierung bleiben Vor-Ort-Prüfungen.
+
+## Nachprüfung: Ladezeit der Lagerübersicht
+
+Die Startansicht lädt Altinhalte des ausgewählten Fachs; ungeklärte Gruppen und
+globale Auswahlformulare laden ihre Inhalte bei Bedarf. Die Gesamtansicht bleibt
+explizit verfügbar und der vollständige bisherige Datenvertrag kompatibel.
+Ein neuer journalisierter Covering Index beschleunigt die Inventarbildsuche.
+Frische Datenbank, vorhandenes Schema, Wiederholung, erhaltener Bestand und
+Indexnutzung sind geprüft. Abschließender Gesamtlauf: **553 bestanden**, keine
+Fehler/Skips, **72,24 % Coverage**; alle drei Browserläufe bestanden.
+Lokale Vergleichsmessungen und Grenzen stehen in der
+[Testanleitung](../guides/testing.md#fachweise-datenabfrage-und-inventarbildindex).

@@ -60,3 +60,22 @@ Nicht geheime Einstellungen liegen unter `warehouse.*` in `config_settings`:
 `planning_reviewed` und die zugehörige Plan-/Katalogsignatur. Geprüfte Leerliste
 und ungeprüft unbekannter Bedarf bleiben unterschiedlich. Kategorieziele und
 Präferenzen liegen in relationalen Tabellen, nicht in Tokenfeldern.
+
+## Produktivdatenbank
+
+Der Nutzer hat ausdrücklich bestätigt: `data/instance/brick_manager.db` unter
+`/workspaces/Brick_Manager` ist die echte Produktivsammlung. Der Alias
+`/app/data/instance/brick_manager.db` verweist auf dieselbe Datei. Die aktuelle
+lokale Anwendungskonfiguration verwendet diese Sammlung. Der eigentliche Server
+läuft laut Nutzer anderswo; ein hier gestarteter Flask-Prozess ist davon zu
+unterscheiden. Diese Laufzeittrennung macht die hier verfügbaren Live-Daten
+nicht zu Testdaten. Frühere Bezeichnungen als
+Entwicklungsdatenbank waren falsch; localhost oder ein Flask-Entwicklungsserver
+ändern die Einstufung der Daten nicht.
+
+Keine Migrationen, schreibenden Prüfungen oder Anwendungsstarts/-neustarts gegen
+diese Datei ohne gesonderten ausdrücklichen Auftrag für den Produktionsbetrieb.
+Der Anwendungsstart führt Migrationen aus und kann Hintergrundjobs aktivieren.
+Tests verwenden isolierte temporäre Datenbanken; realistische Messungen und
+Migrationstests verwenden eine wegwerfbare Kopie. Produktionsinspektion erfolgt
+über SQLite `mode=ro` und nach Möglichkeit `PRAGMA query_only=ON`.

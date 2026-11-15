@@ -104,3 +104,109 @@ bei Wiederholung sowie den regulären Flask-CLI-Loader in einem isolierten
 Prozess mit temporärer SQLite-Datei. Scheduler-Ausführung und `.env`-Laden sind
 in diesem Startup-Test deaktiviert; die vorhandene Bestandsdatenbank wird nicht
 geöffnet.
+
+### Unveränderliche Migrationen und Formatter
+
+Nach der Wiederherstellung der Originalmigration und Absicherung der mutierenden
+Hooks bestand der vollständige Lauf vom 15. November 2026 **529 Tests**, ohne
+Fehler oder übersprungene Tests, mit **71,34 % Gesamt-Coverage**. Sechs zusätzliche
+Regressionen prüfen echte explizite Ruff-Aufrufe auf einer angewendeten Migration
+und die Dateiauswahl der vier mutierenden Pre-commit-Hooks. Die gespeicherte
+Prüfsumme wird bei diesem Verfahren nicht verändert; semantische Änderungen an
+einer angewendeten Datei bleiben durch die bestehenden Migrationsprüfungen gesperrt.
+
+### Bestehende Lagerzuordnungen in der Übersicht
+
+Der vollständige Lauf vom 15. November 2026 nach der Sichtbarkeitskorrektur
+bestand **534 Tests**, ohne Fehler oder übersprungene Tests, mit **71,58 %
+Gesamt-Coverage**. Fünf Regressionen in `test_warehouse_legacy_overview.py`
+prüfen lesende Gruppenprojektion ohne erfundene Behälter, mehrdeutige Fachlabels,
+die Zuordnung genau einer bestehenden Zeile und konservative Stellflächen-/
+Passaussagen bei Altbelegung. Alle fünf schlugen vor der Korrektur fehl.
+
+Zusätzlich liefen `tests/browser/warehouse_smoke.py` und
+`tests/browser/warehouse_legacy_smoke.py` erfolgreich auf isolierten Testdaten.
+Der neue Browserlauf prüft vorhandene Inhalte trotz null physischer Einheiten,
+Nummernsortierung, unbekannte Mengen, Notizen, fehlende Fundorte, Textsicherheit,
+die tatsächliche Zuordnung über das Formular und Darstellung bei 1365/390 Pixeln.
+Aufruf mit derselben oben dokumentierten Playwright-Umgebung; keine echten
+Sammlungsdaten werden durch diese Browsertests verändert.
+
+### Teilevorschau und Spaltenrichtung
+
+Nach Ergänzung der Teilevorschau und der Spaltenrichtung bestand der vollständige
+Lauf am 15. November 2026 **534 Tests**, keine Fehler/Skips, **71,59 % Coverage**.
+Der erweiterte `warehouse_legacy_smoke.py` prüft Vorschautexte und die echten
+Kartenkoordinaten: unten nach oben, danach nächste Spalte, Änderung der Zeilenzahl
+und die alternative aufsteigende Listenansicht. Beide Browser-Smokes bestanden.
+Externe Bildrequests werden dabei abgefangen; die Erreichbarkeit des Bildanbieters
+ist damit nicht geprüft. Der Backend-Vertrag prüft die übertragene Katalogbild-URL.
+
+### Inventarbilder und expliziter Etiketten-Neudruck
+
+Abschließender Gesamtlauf am 15. November 2026: **549 bestanden**, keine Fehler
+oder Skips, **72,06 % Coverage**. Die 15 Fälle in
+`test_label_reprint_queue.py` prüfen getrennte Vormerkung/Druckstatus,
+Gruppierung, stabile Behälter-IDs, wiederholte/veraltete Bestätigung,
+gezieltes Entfernen veralteter Vormerkungen, ungültige Eingaben, CSRF und
+Inventarbilder bei fehlendem Teile-Stammbild. Der fokussierte Lauf verwendet
+`--no-cov`; der Gesamtlauf erfüllt die bestehende Coverage-Schwelle.
+
+Alle drei Browserläufe bestanden:
+`warehouse_smoke.py`, `warehouse_legacy_smoke.py` und
+`warehouse_labels_smoke.py`. Der neue Lauf lädt ein echtes Bild aus einer
+lokal abgefangenen Inventarbild-URL, markiert über die echte Checkbox,
+wechselt zur Druckseite, simuliert einen fehlgeschlagenen PDF-Download,
+erzeugt danach ein echtes PDF und bestätigt den Druck über das Formular.
+Neuladen vor der Bestätigung erhält die Vormerkung. Nur externe Bildzugriffe
+der serverseitigen PDF-Erzeugung werden mit einem lokalen Bild ersetzt;
+Bootstrap wird bei abgefangenen externen CDN-Requests ausdrücklich gestubbt.
+Der Test nutzt ausschließlich eine wegwerfbare Testdatenbank mit aktivem CSRF.
+
+### Fachweise Datenabfrage und Inventarbildindex
+
+Abschließender Lauf am 15. November 2026: **553 bestanden**, keine Fehler oder
+Skips, **72,24 % Coverage**. Drei zusätzliche Übersichtstests prüfen die fachweise
+Antwort, weiterhin globale Zähler, zurückgestellte ungeklärte Inhalte,
+Nachladen dieser Inhalte, leeres Fach ohne Bildabfrage und explizite Gesamtansicht.
+Ein zusätzlicher Migrationstest erhält Inventar- und Lagerzeilen, wiederholt den
+Indexschritt und prüft `EXPLAIN QUERY PLAN` auf die Nutzung als Covering Index.
+Die vorhandenen Startup-/Frischdatenbanktests berücksichtigen jetzt drei
+journalisierte Migrationsartefakte.
+
+Alle drei Playwright-Abläufe bestanden mit dem fachweisen Vertrag. Der volle
+Ablauf wurde nach Absicherung des laufenden Fachwechsels erneut erfolgreich
+geprüft: Archivaktionen sind bis zum Abschluss des Fachwechsels deaktiviert.
+Der Legacy-Lauf prüft weiterhin die zuletzt gewählte Fachauswahl und lädt
+ungeklärte Inhalte erst beim Öffnen. Externe Zugriffe bleiben in diesen
+isolierten Tests abgefangen.
+
+Messung auf einer konsistenten Kopie der Entwicklungsdatenbank: ursprüngliche
+vollständige Aufbereitung **14,078 s**, davon **13,532 s** Inventarbild-SQL.
+Mit neuem Index: fachweise Aufbereitung inklusive JSON **0,064 s / 243.129 Byte**,
+187 sichtbare Inhaltszeilen bei insgesamt 2.935; vollständige Ansicht
+**0,292 s / 3.239.918 Byte**. Das sind lokale Messungen derselben Sammlung,
+keine garantierten Antwortzeiten auf anderen Systemen. Gemessen wurde rein
+lesend ohne Bilddownloads; die Kopie erhielt vorher ausschließlich den Index.
+
+Am anschließend neu gestarteten Entwicklungsserver wurden HTTP 200 und
+**222.120 Byte** für die fachweise Antwort gemessen: erster Aufruf **0,635 s**,
+Folgeaufrufe **0,349 s / 0,379 s**. Der globale Zähler blieb bei 2.935. Diese
+Messung schließt HTTP-Übertragung über localhost ein; die kompakte
+Flask-Serialisierung erklärt den Unterschied zur Bytezahl des obigen
+Standalone-JSON-Vergleichs.
+
+Die explizite vollständige HTTP-Antwort benötigte auf dem eingebundenen
+Dateisystem weiterhin **17,361 s / 2.981.187 Byte**. Sie wird beim Start nicht
+mehr angefordert. Die lokale Kopie allein ist deshalb kein Nachweis für die
+Geschwindigkeit der Gesamtansicht auf diesem Dateisystem.
+
+### Prüfung vor lokalem Commit und main-Übernahme
+
+Der vollständige Lauf vom 15. November 2026 einschließlich der Regression für
+Startplatzhalter und versionierte Script-URL bestand **554 Tests**, keine Fehler
+oder Skips, **72,24 % Coverage**. Die Fixture-Konfiguration bindet importierte
+Anwendungsmodule an eine temporäre SQLite-Datei; die vorhandenen Live-Daten
+werden nicht als Testdatenbank verwendet. Alle anwendbaren Pre-commit-Hooks,
+projektweites BasedPyright und JavaScript-Syntaxprüfungen bestanden ebenfalls.
+Browser- und Build-Nachweise der vorherigen Arbeit wurden dabei nicht wiederholt.

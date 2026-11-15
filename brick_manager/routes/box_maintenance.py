@@ -6,6 +6,7 @@ and generating labels for boxes.
 """
 
 import os
+import secrets
 from typing import cast
 
 from config import Config
@@ -17,6 +18,7 @@ from flask import (
     request,
     send_file,
     send_from_directory,
+    session,
 )
 from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
@@ -34,7 +36,8 @@ box_maintenance_bp = Blueprint("box_maintenance", __name__)
 @box_maintenance_bp.route("/box_maintenance", methods=["GET"])
 def box_maintenance_page():
     """Renders the Box Maintenance page."""
-    return render_template("box_maintenance_new.html")
+    token = session.setdefault("warehouse_csrf", secrets.token_urlsafe(32))
+    return render_template("box_maintenance_new.html", warehouse_csrf=token)
 
 
 def _parse_box_references(data):

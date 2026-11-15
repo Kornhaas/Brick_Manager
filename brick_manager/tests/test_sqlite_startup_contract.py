@@ -40,7 +40,7 @@ with patch('apscheduler.schedulers.background.BackgroundScheduler'):
     with sqlite3.connect(selected) as connection:
         assert (
             connection.execute("SELECT COUNT(*) FROM schema_migrations").fetchone()[0]
-            == 2
+            == 3
         )
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
         assert (

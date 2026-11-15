@@ -1,5 +1,22 @@
 # Brick Manager Agent Guide
 
+## Production database: explicit environment boundary
+
+The user confirmed that `/workspaces/Brick_Manager/data/instance/brick_manager.db`
+(alias `/app/data/instance/brick_manager.db`) is the **production collection**.
+The actual server runs elsewhere; this workspace has access to the live collection
+data. Local Flask processes are separate from that server. The current local
+application configuration points to this real collection. A workspace,
+localhost URL, or Flask development server does not make this database a test database.
+Do not run migrations, start/restart the application against it, or write its data
+without a separate explicit production-operation instruction. Application startup
+runs migrations and can schedule jobs; it is not a read-only verification step.
+Use isolated temporary databases for tests and a disposable copy for realistic
+performance/migration verification. Production inspection must use read-only SQLite
+connections. Keep this boundary when continuing earlier tasks; previous mistaken
+references to this database as development do not authorize further operations.
+See [database environment](docs/reference/configuration.md#produktivdatenbank).
+
 Repository-specific skills live under `.codex/skills/`. Load the smallest matching set before acting:
 
 - `brick-manager-development`: ordinary Flask feature, bugfix, refactor, or review work.

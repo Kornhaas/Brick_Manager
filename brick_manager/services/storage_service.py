@@ -8,7 +8,9 @@ helpers commit once and invalidate the legacy projection after that commit.
 
 from __future__ import annotations
 
+import json
 import math
+import re
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -17,6 +19,7 @@ from models import (
     LegacyStorageMapping,
     PartStorage,
     RebrickableColors,
+    RebrickableInventoryParts,
     RebrickableParts,
     StackRule,
     StorageLocation,
@@ -25,6 +28,7 @@ from models import (
     StorageUnit,
     db,
 )
+from sqlalchemy import func, or_
 from werkzeug.exceptions import BadRequest, Conflict, NotFound
 
 
@@ -630,8 +634,57 @@ def unit_address(identifier):
     }
 
 
-def content_dict(content):
+def catalog_images(part_nums):
+    """Batch inventory-image fallback; exact color first, then any known image."""
+    if not part_nums:
+        return {}
+    rows = (
+        db.session.query(
+            RebrickableInventoryParts.part_num,
+            RebrickableInventoryParts.color_id,
+            func.min(RebrickableInventoryParts.img_url),
+        )
+        .filter(
+            RebrickableInventoryParts.part_num.in_(part_nums),
+            RebrickableInventoryParts.img_url.isnot(None),
+            func.trim(RebrickableInventoryParts.img_url).notin_(["", "None"]),
+        )
+        .group_by(
+            RebrickableInventoryParts.part_num, RebrickableInventoryParts.color_id
+        )
+        .order_by(
+            RebrickableInventoryParts.part_num, RebrickableInventoryParts.color_id
+        )
+        .all()
+    )
+    images = {}
+    for part_num, color_id, url in rows:
+        images[(part_num, color_id)] = url
+        images.setdefault(part_num, url)
+    return images
+
+
+def content_dict(content, images=None):
     result = serialize(content)
+    part = content.rebrickable_part
+    color = content.rebrickable_color
+    result["part_name"] = part.name if part else "Katalogdaten fehlen"
+    images = images or {}
+    result["part_img_url"] = (
+        (
+            images.get((content.part_num, content.color_id))
+            if content.color_id is not None
+            else None
+        )
+        or (
+            part.part_img_url
+            if part and part.part_img_url not in {"", "None"}
+            else None
+        )
+        or images.get(content.part_num)
+    )
+    result["color_name"] = color.name if color else None
+    result["color_rgb"] = color.rgb if color else None
     if content.storage_unit_id:
         address = unit_address(content.storage_unit_id)
         by_kind = {p["kind"]: p["label"] for p in address["location_path"]}
@@ -915,6 +968,7 @@ def preview_placement(identifier, data):
     if values["orientation"] == "rotated":
         width, depth = depth, width
     shelf_id = values["shelf_id"]
+    legacy_rows = 0
     x, y = values["x_mm"], values["depth_offset_mm"]
     current = unit
     edge = values
@@ -1037,6 +1091,11 @@ def preview_placement(identifier, data):
         reasons.append("Fachzuordnung ungeklärt.")
     else:
         shelf = get(StorageLocation, shelf_id)
+        legacy_rows = _legacy_rows_for_shelf(shelf)
+        if legacy_rows:
+            reasons.append(
+                "Vorhandene Lagerzuordnungen sind noch nicht als physische Behälter verortet."
+            )
         if (
             shelf.width_mm is None
             or shelf.depth_mm is None
@@ -1096,18 +1155,41 @@ def preview_placement(identifier, data):
                         }
     if values["support_unit_id"]:
         reasons.append("Lastgrenze und Entnahmefreiraum vor Ort prüfen.")
-    return {"status": "unknown" if reasons else "fits", "reasons": sorted(set(reasons))}
+    return {
+        "status": "unknown" if reasons else "fits",
+        "reasons": sorted(set(reasons)),
+        "legacy_rows": legacy_rows,
+    }
+
+
+def _legacy_rows_for_shelf(shelf):
+    """Known legacy occupancy cannot be interpreted as empty floor space."""
+    if shelf.kind != "shelf" or shelf.parent_id is None:
+        return 0
+    rack = db.session.get(StorageLocation, shelf.parent_id)
+    if rack is None or rack.kind != "rack":
+        return 0
+    return PartStorage.query.filter(
+        PartStorage.storage_unit_id.is_(None),
+        PartStorage.location == rack.label,
+        or_(
+            PartStorage.level == shelf.label,
+            PartStorage.level.is_(None),
+            func.trim(PartStorage.level) == "",
+        ),
+    ).count()
 
 
 def space_report(shelf_id):
     shelf = get(StorageLocation, shelf_id)
+    legacy_rows = _legacy_rows_for_shelf(shelf)
     bases = (
         StoragePlacement.query.filter_by(shelf_id=shelf_id)
         .order_by(StoragePlacement.order_left)
         .all()
     )
     intervals = []
-    unknown = False
+    unknown = bool(legacy_rows)
     for placement in bases:
         width, depth, _height, verified = _dimensions(
             get(StorageUnit, placement.unit_id)
@@ -1141,6 +1223,8 @@ def space_report(shelf_id):
     return {
         "shelf_id": shelf_id,
         "base_count": len(bases),
+        "legacy_rows": legacy_rows,
+        "legacy_occupancy_unknown": bool(legacy_rows),
         "free_intervals_mm": free,
         "fit_known": not unknown
         and shelf.width_mm is not None
@@ -1151,28 +1235,170 @@ def space_report(shelf_id):
     }
 
 
-def overview():
+def legacy_storage_groups(locations, contents):
+    """Project original label groups, never create or assert physical identity."""
+    location_by_id = {row["id"]: row for row in locations}
+    shelves_by_label = {}
+    for shelf in locations:
+        if shelf["kind"] != "shelf":
+            continue
+        rack = location_by_id.get(shelf["parent_id"])
+        if rack and rack["kind"] == "rack":
+            shelves_by_label.setdefault((rack["label"], shelf["label"]), []).append(
+                shelf["id"]
+            )
+    groups = {}
+    for row in contents:
+        if row["storage_unit_id"] is not None:
+            continue
+        address = (row["location"], row["level"], row["box"])
+        key = json.dumps(address, ensure_ascii=False, separators=(",", ":"))
+        if key not in groups:
+            candidates = shelves_by_label.get(address[:2], [])
+            groups[key] = {
+                "key": key,
+                "shelf_id": candidates[0] if len(candidates) == 1 else None,
+                "shelf_candidates": list(candidates),
+                "location": address[0],
+                "level": address[1],
+                "box": address[2],
+                "storage_ids": [],
+                "contents": [],
+                "physical_verified": False,
+            }
+        groups[key]["storage_ids"].append(row["id"])
+        groups[key]["contents"].append(row)
+    for group in groups.values():
+        group["row_count"] = len(group["storage_ids"])
+        group["variant_count"] = len(
+            {(row["part_num"], row["color_id"]) for row in group["contents"]}
+        )
+    return list(groups.values())
+
+
+def _overview_locations():
+    return [
+        serialize(row)
+        for row in StorageLocation.query.order_by(
+            StorageLocation.sort_order, StorageLocation.id
+        ).all()
+    ]
+
+
+def _natural_label(value):
+    return [
+        (0, int(piece)) if piece.isdigit() else (1, piece.casefold())
+        for piece in re.split(r"(\d+)", value)
+    ]
+
+
+def legacy_group_contents(storage_id):
+    row = get(PartStorage, storage_id)
+    if row.storage_unit_id is not None:
+        raise Conflict("Inhalt ist bereits einem Behälter zugeordnet.")
+    rows = (
+        PartStorage.query.filter_by(
+            storage_unit_id=None, location=row.location, level=row.level, box=row.box
+        )
+        .order_by(PartStorage.id)
+        .all()
+    )
+    images = catalog_images({item.part_num for item in rows})
+    return legacy_storage_groups(
+        _overview_locations(), [content_dict(item, images) for item in rows]
+    )[0]
+
+
+def content_options():
+    # Explicitly requested by editing forms, never on initial page load.
+    return [
+        content_dict(row) for row in PartStorage.query.order_by(PartStorage.id).all()
+    ]
+
+
+def overview(focused=False, shelf_id=None, all_shelves=False):
+    locations = _overview_locations()
+    selected_shelf = None
+    if focused and not all_shelves:
+        shelves = [row for row in locations if row["kind"] == "shelf"]
+        by_id = {row["id"]: row for row in locations}
+
+        def path(row):
+            labels = [row["label"]]
+            parent = by_id.get(row["parent_id"])
+            while parent:
+                labels.insert(0, parent["label"])
+                parent = by_id.get(parent["parent_id"])
+            return _natural_label(" / ".join(labels))
+
+        shelves.sort(key=path)
+        selected_shelf = next(
+            (row["id"] for row in shelves if row["id"] == shelf_id),
+            shelves[0]["id"] if shelves else None,
+        )
+    # Raw scalar projection avoids loading catalogs for every unselected shelf.
+    raw = [
+        dict(row)
+        for row in db.session.execute(
+            db.select(db.metadata.tables["part_storage"]).order_by(PartStorage.id)
+        ).mappings()
+    ]
+    groups = legacy_storage_groups(locations, raw)
+    summary = {
+        "legacy_rows": sum(group["row_count"] for group in groups),
+        "legacy_groups": len(groups),
+        "unlocated_legacy_rows": sum(
+            group["row_count"] for group in groups if group["shelf_id"] is None
+        ),
+        "content_rows": len(raw),
+    }
+    visible_ids = None
+    if focused and not all_shelves:
+        visible_ids = {
+            identifier
+            for group in groups
+            if group["shelf_id"] == selected_shelf and selected_shelf is not None
+            for identifier in group["storage_ids"]
+        }
+        # Preserve confirmed-unit editing and navigation across shelves.
+        visible_ids.update(
+            row["id"] for row in raw if row["storage_unit_id"] is not None
+        )
+    query = PartStorage.query.order_by(PartStorage.id)
+    if visible_ids is not None:
+        query = query.filter(PartStorage.id.in_(visible_ids))
+    rows = query.all()
+    images = catalog_images({row.part_num for row in rows})
+    contents = [content_dict(row, images) for row in rows]
+    if not focused or all_shelves:
+        visible_groups = legacy_storage_groups(locations, contents)
+    else:
+        visible_groups = legacy_storage_groups(locations, contents)
+        # Unresolved addresses remain discoverable, without their potentially huge contents.
+        for group in groups:
+            if group["shelf_id"] is None:
+                visible_groups.append(
+                    {key: value for key, value in group.items() if key != "contents"}
+                )
     return {
-        "locations": [
-            serialize(e)
-            for e in StorageLocation.query.order_by(
-                StorageLocation.sort_order, StorageLocation.id
-            ).all()
-        ],
+        "locations": locations,
         "types": [
-            serialize(e) for e in ContainerType.query.order_by(ContainerType.id).all()
+            serialize(row)
+            for row in ContainerType.query.order_by(ContainerType.id).all()
         ],
         "units": [
-            unit_details(e.id)
-            for e in StorageUnit.query.filter_by(active=True)
+            unit_details(row.id)
+            for row in StorageUnit.query.filter_by(active=True)
             .order_by(StorageUnit.id)
             .all()
         ],
-        "placements": [serialize(e) for e in StoragePlacement.query.all()],
-        "stack_rules": [serialize(e) for e in StackRule.query.all()],
-        "contents": [
-            content_dict(e) for e in PartStorage.query.order_by(PartStorage.id).all()
-        ],
+        "placements": [serialize(row) for row in StoragePlacement.query.all()],
+        "stack_rules": [serialize(row) for row in StackRule.query.all()],
+        "contents": contents,
+        "legacy_groups": visible_groups,
+        "legacy_summary": summary,
+        "focused": focused,
+        "selected_shelf_id": selected_shelf,
     }
 
 
@@ -1273,11 +1499,13 @@ def unit_label_info(identifier):
     address = unit_address(identifier)
     by_kind = {p["kind"]: p["label"] for p in address["location_path"]}
     items = []
-    for content in (
+    contents = (
         PartStorage.query.filter_by(storage_unit_id=identifier)
         .order_by(PartStorage.part_num)
         .all()
-    ):
+    )
+    images = catalog_images({row.part_num for row in contents})
+    for content in contents:
         part = db.session.get(RebrickableParts, content.part_num)
         items.append(
             {
@@ -1286,7 +1514,7 @@ def unit_label_info(identifier):
                 "category": part.category.name
                 if part and part.category
                 else "Unbekannt",
-                "img_url": part.part_img_url if part else None,
+                "img_url": content_dict(content, images)["part_img_url"],
             }
         )
     return {
