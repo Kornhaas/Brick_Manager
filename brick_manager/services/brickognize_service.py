@@ -156,10 +156,10 @@ def predict_part(image_path):
     return get_predictions(image_path, filename)
 
 
-def identify_lego_part(image_path):
+def identify_Brick_part(image_path):
     """
 
-    Identify LEGO part from image (alias for predict_part).
+    Identify Brick part from image (alias for predict_part).
 
 
     Args:

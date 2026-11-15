@@ -326,7 +326,7 @@ class RebrickableParts(db.Model):
 class RebrickablePartRelationships(db.Model):
     """
 
-    Represents relationships between LEGO parts from Rebrickable.
+    Represents relationships between Brick parts from Rebrickable.
 
 
     This model stores parent-child relationships between parts, such as when
@@ -347,7 +347,7 @@ class RebrickablePartRelationships(db.Model):
 class RebrickableElements(db.Model):
     """
 
-    Represents LEGO elements from Rebrickable.
+    Represents Brick elements from Rebrickable.
 
 
     An element is a specific combination of a part in a particular color.
@@ -369,7 +369,7 @@ class RebrickableElements(db.Model):
 class RebrickableThemes(db.Model):
     """
 
-    Represents LEGO themes from Rebrickable.
+    Represents Brick themes from Rebrickable.
 
 
     This model stores theme information such as 'Star Wars', 'City', 'Technic', etc.
@@ -394,11 +394,11 @@ class RebrickableThemes(db.Model):
 class RebrickableSets(db.Model):
     """
 
-    Represents LEGO sets from the Rebrickable database.
+    Represents Brick sets from the Rebrickable database.
 
 
     This model stores set information including set numbers, names, years,
-    themes, part counts, and image URLs for complete LEGO sets.
+    themes, part counts, and image URLs for complete Brick sets.
     """
 
     __tablename__ = "rebrickable_sets"
@@ -437,7 +437,7 @@ class RebrickableSets(db.Model):
 class RebrickableMinifigs(db.Model):
     """
 
-    Represents LEGO minifigures from the Rebrickable database.
+    Represents Brick minifigures from the Rebrickable database.
 
 
     This model stores minifigure information including figure numbers, names,

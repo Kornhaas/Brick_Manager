@@ -2,7 +2,7 @@
 
 ## Zweck und Umfang
 
-Brick Manager verwaltet eine LEGO-Sammlung mit Sets, Teilen und Lagerorten. Katalogdaten von Rebrickable unterstützen Suche und Zuordnung; Brickognize unterstützt die bildbasierte Teileerkennung. Das Web-UI umfasst unter anderem Bestandsbearbeitung, Lagerverwaltung, fehlende Teile und Etiketten. Eine JSON-Schnittstelle unterstützt Desktop-Clients.
+Brick Manager verwaltet eine Brick-Sammlung mit Sets, Teilen und Lagerorten. Katalogdaten von Rebrickable unterstützen Suche und Zuordnung; Brickognize unterstützt die bildbasierte Teileerkennung. Das Web-UI umfasst unter anderem Bestandsbearbeitung, Lagerverwaltung, fehlende Teile und Etiketten. Eine JSON-Schnittstelle unterstützt Desktop-Clients.
 
 Dieses Dokument beschreibt den bestehenden Systemzuschnitt. Komponenten und Laufzeitdetails stehen in der [Referenzarchitektur](reference-architecture.md), Implementierungsregeln im [Softwaredesign](software-design.md).
 

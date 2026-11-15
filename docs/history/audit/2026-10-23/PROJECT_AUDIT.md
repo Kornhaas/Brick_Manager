@@ -12,7 +12,7 @@ externer API-Verfügbarkeit sind daher bewusst als unbekannt behandelt.
 
 ## Befund
 
-Brick Manager ist eine Flask-Anwendung zur Verwaltung einer LEGO-Sammlung. Die
+Brick Manager ist eine Flask-Anwendung zur Verwaltung einer Brick-Sammlung. Die
 fachlichen Kerndaten liegen in SQLite und werden über SQLAlchemy-Modelle
 verwaltet. Jinja-Templates und Vanilla-JavaScript bilden die Oberfläche;
 Blue­prints organisieren die HTTP-Routen. Rebrickable und Brickognize sind

@@ -67,7 +67,7 @@ If you're working on user sets with internal IDs 200, 204, and 205, enter `200;2
 
 ## Important Note
 
-This filter uses **Internal IDs** (the unique identifier for each user set instance), not the LEGO set numbers. Each user set has its own internal ID which you can see in the "Internal ID" column of the missing parts table.
+This filter uses **Internal IDs** (the unique identifier for each user set instance), not the Brick set numbers. Each user set has its own internal ID which you can see in the "Internal ID" column of the missing parts table.
 
 ## Technical Details
 
