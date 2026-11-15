@@ -40,7 +40,7 @@ flowchart LR
 | Präsentation | `brick_manager/templates/`, `brick_manager/static/` | Jinja-Templates, CSS und Vanilla JavaScript |
 | Tests | `brick_manager/tests/`, `tests/js/` | Flask-/SQLite-Verträge und isolierte JavaScript-Checks |
 
-`app.py` registriert 17 Blueprints. Der Desktop-Client ist auf `/api/v1` beschränkt und verlangt einen Bearer-Key. Die UI-Routen sind nicht automatisch durch diesen Key geschützt; ein öffentliches Deployment braucht eine passende Netzwerk- und Zugriffsabsicherung.
+`app.py` registriert 18 Blueprints. Der Desktop-Client ist auf `/api/v1` beschränkt und verlangt einen Bearer-Key. Die UI-Routen sind nicht automatisch durch diesen Key geschützt; ein öffentliches Deployment braucht eine passende Netzwerk- und Zugriffsabsicherung.
 
 ## Persistenz und Ownership
 
@@ -53,7 +53,7 @@ Die vollständige Tabellenreferenz steht in [Datenbankschema](../reference/datab
 
 ## Start- und Hintergrundverhalten
 
-Beim Import von `app.py` werden Tabellen für neue Installationen angelegt, Lookup-Daten geladen, Blueprints registriert und ein Scheduler gestartet. Der Scheduler legt einen Backup-Job im Sechs-Stunden-Intervall sowie Jobs für fehlende Teile und Benutzer-Sets in Intervallen von sechs Stunden und 30 beziehungsweise 35 Minuten an. Deshalb importieren Routen- und Modelltests nicht die Produktiv-App, sondern verwenden `brick_manager/tests/conftest.py`.
+Beim Import von `app.py` werden vor ORM-Zugriffen die versionierten Migrationen der ausgewählten SQLite-Datenbank ausgeführt und Tabellen für neue Installationen angelegt, Lookup-Daten geladen, Blueprints registriert und ein Scheduler gestartet. Der Scheduler legt einen Backup-Job im Sechs-Stunden-Intervall sowie Jobs für fehlende Teile und Benutzer-Sets in Intervallen von sechs Stunden und 30 beziehungsweise 35 Minuten an. Deshalb importieren Routen- und Modelltests nicht die Produktiv-App, sondern verwenden `brick_manager/tests/conftest.py`.
 
 Das ist Ist-Verhalten, keine Empfehlung für einen ungetesteten App-Factory-Umbau. Eine Änderung daran benötigt Charakterisierungstests und eine explizite Architekturentscheidung.
 
@@ -68,3 +68,20 @@ Das ist Ist-Verhalten, keine Empfehlung für einen ungetesteten App-Factory-Umba
 | Neue Konfiguration | `Config`, `.env.example` und Konfigurationsreferenz |
 
 Öffentliche Routen, JSON-Felder, Statuscodes, Tabellen und Persistenzformate sind Verträge. Sie werden nur mit Kompatibilitätsanalyse, Tests und aktualisierter Dokumentation geändert.
+
+## Lagerverwaltung und Kompatibilität
+
+Der Warehouse-Blueprint stellt physische Lagerstruktur, gezählte Inhalte und
+explizit bestätigte Bewegungen bereit. Storage-, Move-, History- und
+Suggestion-Services trennen physische Änderungen von historischen Empfehlungen
+und setbezogenem Besitz. Details stehen im [Softwaredesign](software-design.md).
+
+Die Browser-Schreiboperationen erfordern ein Sitzungstoken. Der dedizierte
+Desktop-Bearer-Key schützt weiterhin `/api/v1`; die Authentifizierung wird vor
+der Prüfung einer mehrdeutigen Lageränderung ausgeführt. Bestehende eindeutige
+unstrukturierte Legacy-Zuordnungen bleiben nutzbar; strukturierte oder mehrdeutige
+Schreib-/Löschversuche werden mit 409 abgefangen. Das gilt auch bei deaktivierter
+neuer Oberfläche, damit keine unsichere Schreibalternative entsteht.
+
+Die [Lagerabnahme](../plans/storage-acceptance.md) dokumentiert automatisierte
+Nachweise und die getrennten offenen Vor-Ort-Messungen.

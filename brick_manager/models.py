@@ -178,6 +178,10 @@ class PartStorage(db.Model):
     __table_args__ = (
         # Allow same part_num with different colors or notes in different locations
         db.Index("idx_part_location", "part_num", "location", "level", "box"),
+        db.CheckConstraint(
+            "quantity IS NULL OR quantity >= 0", name="ck_storage_quantity"
+        ),
+        db.CheckConstraint("revision >= 1", name="ck_storage_revision"),
     )
 
     id = db.Column(Integer, primary_key=True)
@@ -190,6 +194,19 @@ class PartStorage(db.Model):
     box = db.Column(Text)
     notes = db.Column(Text, nullable=True)  # e.g., "spare parts", "red version", etc.
     label_printed = db.Column(Boolean, default=False, nullable=False)
+
+    storage_unit_id = db.Column(
+        Integer,
+        ForeignKey("storage_units.id", ondelete="RESTRICT"),
+        nullable=True,
+        index=True,
+    )
+    quantity = db.Column(Integer, nullable=True)
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+    migration_status = db.Column(
+        Text, nullable=False, default="unresolved", server_default="unresolved"
+    )
+    storage_unit = db.relationship("StorageUnit", foreign_keys=[storage_unit_id])
 
     # Relationships
     rebrickable_part = db.relationship(
@@ -590,3 +607,360 @@ class ConfigSettings(db.Model):
 # Add aliases for backward compatibility with tests
 Parts = User_Parts
 MissingParts = UserMinifigurePart  # Closest match for missing parts functionality
+
+
+class StorageLocation(db.Model):
+    """Fixed labelled storage hierarchy; dimensions remain unknown until measured."""
+
+    __tablename__ = "storage_locations"
+    __table_args__ = (
+        db.CheckConstraint(
+            "kind IN ('zone', 'rack', 'shelf', 'unresolved')", name="ck_location_kind"
+        ),
+        db.CheckConstraint(
+            "parent_id IS NULL OR parent_id != id", name="ck_location_parent"
+        ),
+        db.CheckConstraint(
+            "width_mm IS NULL OR width_mm > 0", name="ck_location_width"
+        ),
+        db.CheckConstraint(
+            "depth_mm IS NULL OR depth_mm > 0", name="ck_location_depth"
+        ),
+    )
+    id = db.Column(Integer, primary_key=True)
+    parent_id = db.Column(
+        Integer, ForeignKey("storage_locations.id", ondelete="RESTRICT"), index=True
+    )
+    kind = db.Column(Text, nullable=False)
+    label = db.Column(Text, nullable=False)
+    sort_order = db.Column(Integer, nullable=False, default=0, server_default="0")
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+    width_mm = db.Column(db.Float)
+    depth_mm = db.Column(db.Float)
+    height_profile = db.Column(db.JSON, nullable=True)
+    measurement_status = db.Column(
+        Text, nullable=False, default="unknown", server_default="unknown"
+    )
+    measured_at = db.Column(db.DateTime)
+    zone_kind = db.Column(
+        Text, nullable=False, default="active", server_default="active"
+    )
+
+
+class ContainerType(db.Model):
+    """Container dimensions and access properties independent of physical labels."""
+
+    __tablename__ = "container_types"
+    __table_args__ = tuple(
+        db.CheckConstraint(f"{field} IS NULL OR {field} > 0", name=f"ck_type_{field}")
+        for field in ("width_mm", "depth_mm", "height_mm", "drawer_count")
+    )
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(Text, nullable=False, unique=True)
+    kind = db.Column(
+        Text, nullable=False, default="container", server_default="container"
+    )
+    width_mm = db.Column(db.Float)
+    depth_mm = db.Column(db.Float)
+    height_mm = db.Column(db.Float)
+    dimensions_status = db.Column(
+        Text, nullable=False, default="unknown", server_default="unknown"
+    )
+    access_mode = db.Column(
+        Text, nullable=False, default="unknown", server_default="unknown"
+    )
+    drawer_count = db.Column(Integer)
+    properties = db.Column(db.JSON, nullable=False, default=dict, server_default="{}")
+
+
+class StorageUnit(db.Model):
+    """A physical container, magazine, drawer or individually addressable compartment."""
+
+    __tablename__ = "storage_units"
+    __table_args__ = (
+        db.CheckConstraint(
+            "kind IN ('container', 'cabinet', 'drawer', 'compartment')",
+            name="ck_unit_kind",
+        ),
+        db.CheckConstraint(
+            "host_unit_id IS NULL OR host_unit_id != id", name="ck_unit_host"
+        ),
+        db.CheckConstraint("partition_count IN (1, 2, 3)", name="ck_unit_partitions"),
+        db.CheckConstraint(
+            "fill_state IN ('unknown', 'space', 'nearly_full', 'full')",
+            name="ck_unit_fill",
+        ),
+        db.CheckConstraint("revision >= 1", name="ck_unit_revision"),
+    )
+    id = db.Column(Integer, primary_key=True)
+    type_id = db.Column(
+        Integer, ForeignKey("container_types.id", ondelete="RESTRICT"), index=True
+    )
+    kind = db.Column(
+        Text, nullable=False, default="container", server_default="container"
+    )
+    label = db.Column(Text, nullable=False)
+    host_unit_id = db.Column(
+        Integer, ForeignKey("storage_units.id", ondelete="RESTRICT"), index=True
+    )
+    ordinal = db.Column(Integer)
+    partition_count = db.Column(Integer, nullable=False, default=1, server_default="1")
+    fill_state = db.Column(
+        Text, nullable=False, default="unknown", server_default="unknown"
+    )
+    contents_complete = db.Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+    active = db.Column(Boolean, nullable=False, default=True, server_default="1")
+    label_printed = db.Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    properties = db.Column(db.JSON, nullable=False, default=dict, server_default="{}")
+    container_type = db.relationship("ContainerType", foreign_keys=[type_id])
+
+
+class StackRule(db.Model):
+    """Verified directed support compatibility, including distinct loose supports."""
+
+    __tablename__ = "stack_rules"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "lower_type_id", "upper_type_id", "relation_kind", name="uq_stack_pair"
+        ),
+        db.CheckConstraint(
+            "relation_kind IN ('stacked', 'loose_on')", name="ck_stack_relation"
+        ),
+        db.CheckConstraint(
+            "height_increment_mm IS NULL OR height_increment_mm > 0",
+            name="ck_stack_increment",
+        ),
+        db.CheckConstraint("max_count IS NULL OR max_count > 0", name="ck_stack_count"),
+        db.CheckConstraint(
+            "max_height_mm IS NULL OR max_height_mm > 0", name="ck_stack_height"
+        ),
+    )
+    id = db.Column(Integer, primary_key=True)
+    lower_type_id = db.Column(
+        Integer, ForeignKey("container_types.id", ondelete="RESTRICT"), nullable=False
+    )
+    upper_type_id = db.Column(
+        Integer, ForeignKey("container_types.id", ondelete="RESTRICT"), nullable=False
+    )
+    relation_kind = db.Column(Text, nullable=False)
+    verified = db.Column(Boolean, nullable=False, default=False, server_default="0")
+    source = db.Column(Text)
+    verified_at = db.Column(db.DateTime)
+    height_increment_mm = db.Column(db.Float)
+    max_count = db.Column(Integer)
+    max_height_mm = db.Column(db.Float)
+    properties = db.Column(db.JSON, nullable=False, default=dict, server_default="{}")
+
+
+class StoragePlacement(db.Model):
+    """Current physical support edge; a stack is derived from these edges."""
+
+    __tablename__ = "storage_placements"
+    __table_args__ = (
+        db.CheckConstraint(
+            "(shelf_id IS NOT NULL AND support_unit_id IS NULL) OR (shelf_id IS NULL AND support_unit_id IS NOT NULL)",
+            name="ck_placement_support",
+        ),
+        db.CheckConstraint(
+            "support_unit_id IS NULL OR support_unit_id != unit_id",
+            name="ck_placement_cycle",
+        ),
+        db.CheckConstraint(
+            "relation_kind IN ('on_shelf', 'stacked', 'loose_on')",
+            name="ck_placement_relation",
+        ),
+        db.CheckConstraint("x_mm IS NULL OR x_mm >= 0", name="ck_placement_x"),
+        db.CheckConstraint(
+            "depth_offset_mm IS NULL OR depth_offset_mm >= 0", name="ck_placement_depth"
+        ),
+    )
+    unit_id = db.Column(
+        Integer, ForeignKey("storage_units.id", ondelete="RESTRICT"), primary_key=True
+    )
+    shelf_id = db.Column(
+        Integer, ForeignKey("storage_locations.id", ondelete="RESTRICT"), index=True
+    )
+    support_unit_id = db.Column(
+        Integer, ForeignKey("storage_units.id", ondelete="RESTRICT"), index=True
+    )
+    relation_kind = db.Column(
+        Text, nullable=False, default="on_shelf", server_default="on_shelf"
+    )
+    order_left = db.Column(Integer, nullable=False, default=0, server_default="0")
+    x_mm = db.Column(db.Float)
+    depth_offset_mm = db.Column(db.Float)
+    orientation = db.Column(
+        Text, nullable=False, default="normal", server_default="normal"
+    )
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+    rule_id = db.Column(Integer, ForeignKey("stack_rules.id", ondelete="RESTRICT"))
+
+
+class StorageMove(db.Model):
+    """An auditable intent whose physical effects apply only on confirmation."""
+
+    __tablename__ = "storage_moves"
+    __table_args__ = (
+        db.CheckConstraint(
+            "status IN ('draft', 'planned', 'confirmed', 'cancelled')",
+            name="ck_move_status",
+        ),
+        db.CheckConstraint(
+            "kind IN ('unit', 'quantity', 'intake', 'count')", name="ck_move_kind"
+        ),
+    )
+    id = db.Column(Integer, primary_key=True)
+    status = db.Column(
+        Text, nullable=False, default="draft", server_default="draft", index=True
+    )
+    kind = db.Column(Text, nullable=False)
+    idempotency_key = db.Column(Text, nullable=False, unique=True)
+    reason = db.Column(Text)
+    payload = db.Column(db.JSON, nullable=False, default=dict, server_default="{}")
+    snapshot = db.Column(db.JSON, nullable=False, default=dict, server_default="{}")
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.func.current_timestamp()
+    )
+    confirmed_at = db.Column(db.DateTime)
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+
+
+class StorageMoveItem(db.Model):
+    """Ordered physical work item or quantity allocation within an intent."""
+
+    __tablename__ = "storage_move_items"
+    __table_args__ = (
+        db.CheckConstraint(
+            "quantity IS NULL OR quantity > 0", name="ck_move_item_quantity"
+        ),
+    )
+    id = db.Column(Integer, primary_key=True)
+    move_id = db.Column(
+        Integer,
+        ForeignKey("storage_moves.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    unit_id = db.Column(Integer, ForeignKey("storage_units.id", ondelete="RESTRICT"))
+    storage_id = db.Column(Integer, ForeignKey("part_storage.id", ondelete="RESTRICT"))
+    quantity = db.Column(Integer)
+    target_unit_id = db.Column(
+        Integer, ForeignKey("storage_units.id", ondelete="RESTRICT")
+    )
+    target_placement = db.Column(db.JSON, nullable=True)
+    source_revision = db.Column(Integer)
+    source_snapshot = db.Column(
+        db.JSON, nullable=False, default=dict, server_default="{}"
+    )
+    ordinal = db.Column(Integer, nullable=False, default=0, server_default="0")
+    depends_on_id = db.Column(
+        Integer, ForeignKey("storage_move_items.id", ondelete="RESTRICT")
+    )
+    status = db.Column(
+        Text, nullable=False, default="planned", server_default="planned"
+    )
+
+
+class CategoryStorageRule(db.Model):
+    """Primary category location and optional archival destination."""
+
+    __tablename__ = "category_storage_rules"
+    id = db.Column(Integer, primary_key=True)
+    category_id = db.Column(
+        Integer,
+        ForeignKey("rebrickable_part_categories.id"),
+        nullable=False,
+        unique=True,
+    )
+    location_id = db.Column(
+        Integer, ForeignKey("storage_locations.id", ondelete="RESTRICT"), nullable=False
+    )
+    archive_location_id = db.Column(
+        Integer, ForeignKey("storage_locations.id", ondelete="RESTRICT")
+    )
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+
+
+class PartStoragePreference(db.Model):
+    """Optional reversible manual signals for an exact part and colour pair."""
+
+    __tablename__ = "part_storage_preferences"
+    __table_args__ = (
+        db.Index(
+            "uq_preference_colour",
+            "part_num",
+            "color_id",
+            unique=True,
+            sqlite_where=db.text("color_id IS NOT NULL"),
+        ),
+        db.Index(
+            "uq_preference_unknown_colour",
+            "part_num",
+            unique=True,
+            sqlite_where=db.text("color_id IS NULL"),
+        ),
+    )
+    id = db.Column(Integer, primary_key=True)
+    part_num = db.Column(Text, ForeignKey("rebrickable_parts.part_num"), nullable=False)
+    color_id = db.Column(Integer, ForeignKey("rebrickable_colors.id"))
+    replenishment_unlikely = db.Column(Boolean)
+    keep_accessible = db.Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+
+
+class PlannedSet(db.Model):
+    """Independent future set demand, never a fabricated owned set."""
+
+    __tablename__ = "planned_sets"
+    __table_args__ = (
+        db.CheckConstraint("quantity > 0", name="ck_planned_set_quantity"),
+    )
+    id = db.Column(Integer, primary_key=True)
+    set_num = db.Column(Text, ForeignKey("rebrickable_sets.set_num"), nullable=False)
+    quantity = db.Column(Integer, nullable=False, default=1, server_default="1")
+    active = db.Column(Boolean, nullable=False, default=True, server_default="1")
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+
+
+class CatalogGeneration(db.Model):
+    """Persistent provenance for a complete, failed or in-progress catalog import."""
+
+    __tablename__ = "catalog_generations"
+    __table_args__ = (
+        db.CheckConstraint(
+            "status IN ('running', 'completed', 'failed')", name="ck_catalog_status"
+        ),
+    )
+    id = db.Column(Integer, primary_key=True)
+    import_id = db.Column(Text, nullable=False, unique=True)
+    status = db.Column(
+        Text, nullable=False, default="running", server_default="running"
+    )
+    started_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.func.current_timestamp()
+    )
+    completed_at = db.Column(db.DateTime)
+    files = db.Column(db.JSON, nullable=False, default=dict, server_default="{}")
+    errors = db.Column(db.JSON, nullable=False, default=list, server_default="[]")
+    revision = db.Column(Integer, nullable=False, default=1, server_default="1")
+
+
+class LegacyStorageMapping(db.Model):
+    """A reversible grouping candidate, not an assertion of physical box identity."""
+
+    __tablename__ = "legacy_storage_mappings"
+    storage_id = db.Column(
+        Integer, ForeignKey("part_storage.id", ondelete="RESTRICT"), primary_key=True
+    )
+    candidate_key = db.Column(Text, nullable=False, index=True)
+    storage_unit_id = db.Column(
+        Integer, ForeignKey("storage_units.id", ondelete="RESTRICT")
+    )
+    confirmed = db.Column(Boolean, nullable=False, default=False, server_default="0")

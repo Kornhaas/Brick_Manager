@@ -27,7 +27,7 @@ Current resources:
 - `GET /parts/{part_num}/sets` optionally filters integer `color_id` and returns `{ "items": [...] }`.
 - `GET /parts/{part_num}/storage` optionally filters `color_id` and returns ordered storage rows.
 - `PUT /user-parts/{id}/quantity` accepts a non-negative integer `have_quantity`, clamps it to required quantity, and returns derived `missing`.
-- `PUT /parts/{part_num}/storage` validates optional integer `color_id` plus bounded string fields and upserts the first matching part/color row.
+- `PUT /parts/{part_num}/storage` validates optional integer `color_id` plus bounded string fields and updates an unambiguous unstructured part/color row. Structured or multiple matching locations return 409 after authentication; use the physical warehouse workflow for those locations. GET storage fields are additive and include physical IDs, quantities and derived addresses.
 
 Before changing a field, search the repository and the consuming desktop client if it is in scope. Preserve deterministic ordering and distinguish empty collections from missing resources.
 

@@ -40,3 +40,23 @@ Die Flask-CLI lädt `.env` nur mit installiertem `python-dotenv`; andernfalls er
 ```bash
 SQLALCHEMY_DATABASE_URI=sqlite:////app/data/instance/brick_manager.db poetry run flask --app brick_manager/app.py run
 ```
+
+## Lagerverwaltung
+
+Benutzung: [Lageranleitung](../guides/warehouse.md).
+
+`WAREHOUSE_ENABLED` ist standardmäßig `true`, auch wenn die Umgebungsvariable fehlt.
+`false`, `0` oder `no` deaktivieren
+Lageransicht und neue Endpunkte mit 404; bereits strukturierte Bestände bleiben
+auch dann gegen ungeeignete Legacy-Schreibzugriffe geschützt. Dies ist keine
+Datenrückmigration.
+
+Die Browser-Lagerrouten verwenden ein sitzungsgebundenes CSRF-Token und
+`X-CSRF-Token`. `WTF_CSRF_ENABLED=False` ist ausschließlich für isolierte Tests
+vorgesehen. Die bestehende `SECRET_KEY`- und Zugriffsabsicherung bleibt erforderlich.
+
+Nicht geheime Einstellungen liegen unter `warehouse.*` in `config_settings`:
+`max_known_sets=2`, `min_age_years=10`, `catalog_max_age_days=90` sowie
+`planning_reviewed` und die zugehörige Plan-/Katalogsignatur. Geprüfte Leerliste
+und ungeprüft unbekannter Bedarf bleiben unterschiedlich. Kategorieziele und
+Präferenzen liegen in relationalen Tabellen, nicht in Tokenfeldern.

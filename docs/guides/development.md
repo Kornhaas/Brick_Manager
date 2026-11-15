@@ -35,3 +35,41 @@ poetry run python scripts/pre_commit_analysis.py --no-fix
 ## Grenzen
 
 Keine produktive Synchronisierung, Token-Erzeugung, Datenbank-Reset, Wiederherstellung oder Deployment als Teil des normalen Entwicklungsablaufs ausführen. Änderungen an Persistenz, `/api/v1` oder externen Diensten brauchen zusätzlich eine Kompatibilitäts- und Datenfolgenprüfung.
+
+## Lagerdatenbank migrieren
+
+Die Lagerverwaltung verwendet versionierte SQLite-SQL-/Python-Migrationen mit
+Prüfsummenjournal. Vor Änderungen an echten Entwicklungsbeständen eine konsistente
+Sicherung anlegen und zunächst eine Kopie migrieren. Die folgenden Pfade sind
+Beispiele für ausdrücklich ausgewählte Entwicklungsdateien, keine Produktivpfade:
+
+```bash
+PYTHONPATH=brick_manager poetry run python -m services.migration_service /tmp/brick-dev.db --inspect
+PYTHONPATH=brick_manager poetry run python -m services.migration_service /tmp/brick-dev.db --backup /tmp/brick-dev-before-storage.db
+PYTHONPATH=brick_manager poetry run python -m services.migration_service /tmp/brick-dev-copy.db brick_manager/migrations
+```
+
+`--inspect` öffnet nur eine vorhandene Datenbank im Read-only-Modus. Eine Sicherung
+überschreibt keine bestehende Datei. Upgrade und Journal sind je Artefakt atomar;
+Wiederholung verifiziert die unveränderte Prüfsumme. Angewendete Dateien nicht
+nachträglich ändern, sondern eine weitere Migration hinzufügen. Docker und lokaler
+App-Start verwenden denselben Runner vor ORM-Lesezugriffen. Nicht unterstützte
+Datenbanken erhalten keine SQLite-Migration. Ein altes Programm darf nach neuen
+Lagerbuchungen nicht schreibend auf die erweiterte Datenbank zurückgesetzt werden.
+Eine Wiederherstellung bleibt ein eigener Auftrag mit anschließendem physischem
+Abgleich.
+
+### SQLite-Pfade beim lokalen Start
+
+Relative SQLite-Adressen wie `sqlite:///data/instance/brick_manager.db` werden
+von Flask-SQLAlchemy unter dem Flask-Instance-Verzeichnis aufgelöst. Dieses
+Verzeichnis ist nicht automatisch identisch mit `Config.INSTANCE_FOLDER`. Der
+Migrationsrunner verwendet den vom Engine-URL gelieferten Dateipfad und legt
+fehlende Elternverzeichnisse vor dem Öffnen an. Er wechselt bei einem Fehler
+nicht auf eine andere Datenbank und verändert keine vorhandenen Zählwerte.
+
+Flask lädt beim CLI-Start die `.env` auch dann, wenn zuvor eine gleichnamige
+Shell-Variable mit `env -u` entfernt wurde. Einen Datenbank-Override deshalb
+bewusst in `.env` korrigieren oder einen gewünschten absoluten SQLite-Pfad
+explizit in der Umgebung setzen. `FLASK_SKIP_DOTENV=1` überspringt die gesamte
+`.env`, einschließlich anderer dort gespeicherter Einstellungen.

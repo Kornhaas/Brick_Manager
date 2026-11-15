@@ -64,6 +64,11 @@ class Config:  # pylint: disable=R0903
     # Flask settings
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
     TEMPLATES_AUTO_RELOAD = True
+    WAREHOUSE_ENABLED = os.getenv("WAREHOUSE_ENABLED", "true").lower() not in {
+        "0",
+        "false",
+        "no",
+    }
 
     # Ensure all directories exist
     for folder in [

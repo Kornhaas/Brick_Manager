@@ -35,4 +35,6 @@ Read the actual declarations in `brick_manager/models.py` for keys and constrain
 6. Re-run the migration or importer and confirm it is safe or fails with a clear already-applied condition.
 7. Confirm rollback or restoration before considering a destructive transformation ready.
 
-The repository currently ignores `brick_manager/migrations/`; do not create an untracked migration workflow without also addressing how migration artifacts will be versioned and deployed.
+Versioned SQL and Python migrations live in `brick_manager/migrations/`. The runner journals each artifact with its SHA-256 and commits schema/backfill atomically. Never edit an already-applied artifact; add a new forward migration. Inspect the runner and migration tests before changing this contract. Physical-storage backfill preserves raw labels and unknown quantities, creating only unconfirmed mapping candidates.
+
+Physical storage also owns `storage_locations`, `container_types`, `storage_units`, `storage_placements`, `stack_rules`, `storage_moves`, `storage_move_items`, `category_storage_rules`, `part_storage_preferences`, `planned_sets`, `catalog_generations`, and `legacy_storage_mappings`. See `docs/reference/database-schema.md`; never derive physical stock quantities from set-owned quantities.

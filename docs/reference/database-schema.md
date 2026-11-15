@@ -145,3 +145,41 @@ Allowed values are defined by `USER_SET_STATUSES` in `brick_manager/models.py`:
 - A repeated `set_num` in `user_sets` is valid and means the collection contains multiple physical copies.
 - `quantity`, `have_quantity`, `color_id`, and `is_spare` must not be collapsed during imports or reconciliation.
 - Existing databases require an explicit migration when columns or constraints change. Migration files belong under `brick_manager/migrations/` and are intended to be committed.
+
+## Physical storage (15 November 2026)
+
+Physical stock counts do not replace or add to set ownership totals. `part_storage`
+retains its IDs and legacy raw address strings and adds nullable `storage_unit_id`
+and `quantity`, positive `revision`, and `migration_status`. NULL quantity means
+uncounted. Canonical current addresses of mapped rows derive from placements.
+
+| Table | Key / ownership | Purpose and invariants |
+| --- | --- | --- |
+| `storage_locations` | `id`, self `parent_id` | Labelled zone/rack/shelf hierarchy; optional measured width, depth and JSON height profile. |
+| `container_types` | `id`, unique `name` | Dimensions, verification/source status, access mode and magazine drawer count. |
+| `storage_units` | `id`, optional type/host FK | Physical box, cabinet, drawer or compartment; nonunique label, fill state, completeness and optimistic revision. Hosted children retain identity. |
+| `storage_placements` | `unit_id` PK | Exactly one shelf or support unit; relation `on_shelf`, `stacked` or `loose_on`, ordering and optional measured offsets. Stack identity is derived, not a label number. |
+| `stack_rules` | `id`, unique lower/upper type + relation | Directed verified compatibility and nullable measured height/count limits; no implicit mixed-size stacking. |
+| `storage_moves` | `id`, unique required idempotency key | Draft/planned/confirmed/cancelled unit, quantity, intake or audited count operation; JSON payload and immutable confirmation evidence. |
+| `storage_move_items` | `id`, move FK | Ordered unit or quantity work items, targets and source evidence; confirmed state retained. |
+| `category_storage_rules` | `id`, unique category FK | Default fixed location and optional archive location. |
+| `part_storage_preferences` | `id`, part/color | Keep-accessible override and optional unlikely-replenishment marker. Separate partial unique indexes handle known/unknown colours. |
+| `planned_sets` | `id`, catalog set FK | Desired positive quantity and active state, separate from owned sets. |
+| `catalog_generations` | `id`, unique import ID | Running/completed/failed import, per-file JSON manifest, validation errors and generation revision. |
+| `legacy_storage_mappings` | original `storage_id` PK | Reversible raw-triplet grouping candidate and explicit physical confirmation; repeated text is not proof of one physical box. |
+| `schema_migrations` | version PK (runner-owned) | Applied artifact SHA-256 and time; atomically committed with schema/backfill. This is not an ORM model. |
+
+SQLite checks reject negative known stock, invalid placement/support combinations
+and invalid kinds. Services additionally enforce acyclic support/host structures,
+physical compatibility, protected subdivisions, capacity and confirmed movements.
+Relationships use restricted deletion for physical identities and movement evidence.
+Legacy addresses, notes, label flags, unknown colours and user-set quantities are
+preserved by the additive migration `20261115_physical_storage.py`. Backfill creates
+unconfirmed candidates; it never invents stock quantities or physical box identity.
+
+The runner now versions SQL and Python migration artifacts. It locks before each
+artifact, verifies checksums, compares pre/post foreign-key violations and commits
+its journal entry in the same transaction. Existing FK gaps are reported and
+preserved; new damage aborts. After deployment an applied artifact is immutable.
+See the [migration procedure](../guides/development.md#lagerdatenbank-migrieren) and
+[warehouse guide](../guides/warehouse.md).

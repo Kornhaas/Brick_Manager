@@ -77,6 +77,9 @@ def create_test_app():
     )
 
     db.init_app(app)
+    from services.storage_service import guard_legacy_request
+
+    app.before_request(guard_legacy_request)
 
     # Register blueprints for testing
     try:
@@ -97,7 +100,9 @@ def create_test_app():
         from routes.storage import storage_bp
         from routes.token_management import token_management_bp
         from routes.upload import upload_bp
+        from routes.warehouse import warehouse_bp
 
+        app.register_blueprint(warehouse_bp)
         app.register_blueprint(upload_bp)
         app.register_blueprint(main_bp)
         app.register_blueprint(storage_bp)

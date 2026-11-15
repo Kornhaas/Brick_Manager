@@ -175,6 +175,7 @@
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
+        <p><a href="/warehouse">Bricks mit Lagerortvorschlag und bestätigter Mengenaufnahme einlagern</a></p>
         <div class="alert-container">
             {% for category, message in messages %}
             <div class="alert alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'danger' }} alert-dismissible fade show" role="alert">

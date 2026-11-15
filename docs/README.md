@@ -19,6 +19,7 @@ Ist-Verhalten und Vorschläge klar kennzeichnen. Inhalte an genau einer fachlich
 - [Datenbankschema](reference/database-schema.md): Modelle, Tabellen, Ownership und Regeln für Änderungen an persistierten Daten.
 - [Modell-Kurzreferenz](reference/model-reference.md): Einstieg in die SQLAlchemy-Modelle ohne ein zweites Feldinventar zu pflegen.
 - [Konfiguration](reference/configuration.md): Umgebungsvariablen, Pfade und Sicherheitsvorgaben.
+- [Projektsprache](reference/terminology.md): Bricks als allgemeiner Produktbegriff und Umgang mit technischen Bezeichnungen.
 - [Qualitätswerkzeuge](reference/quality-tooling.md): Hooks und lokale Checks.
 
 ## Anleitungen
@@ -26,12 +27,13 @@ Ist-Verhalten und Vorschläge klar kennzeichnen. Inhalte an genau einer fachlich
 - [Entwicklung](guides/development.md)
 - [KI-Zusammenarbeit und Agenten](guides/ai-collaboration.md)
 - [Tests](guides/testing.md)
+- [Lagerverwaltung](guides/warehouse.md): Erfassung, Umlagerung, Archivprüfung und Teileaufnahme.
 - [Docker-Betrieb](guides/docker.md)
 - [Anwendungsfunktionen](guides/user-guide.md)
 
 ## Planungsvorschläge
 
-- [Lageransicht, Archivierung und Einlagerung](plans/storage-archive-intake.md): Ist-Analyse, Zielmodell, Migration, UI-Abläufe, frei wählbares Pilotfach und Akzeptanztests. V1-Archivprüfung und Umsetzungsschwerpunkt bestätigt; Umsetzung steht aus. Regal 1/Fach 5 ist nur ein Dummy-Beispiel.
+- [Lageransicht, Archivierung und Einlagerung](plans/storage-archive-intake.md): Ist-Analyse, Zielmodell, Migration, UI-Abläufe, frei wählbares Pilotfach und Akzeptanztests. Umsetzung einschließlich V1-Archivprüfung vorhanden; [Abnahme und Nachweise](plans/storage-acceptance.md). Regal 1/Fach 5 ist nur ein Dummy-Beispiel.
 
 Diese Pläne sind als Vorschläge gekennzeichnet und beschreiben keine bereits implementierten Funktionen.
 

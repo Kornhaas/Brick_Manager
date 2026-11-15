@@ -9,7 +9,7 @@ It includes:
 """
 
 from flask import Blueprint, flash, render_template, request
-from models import PartStorage, RebrickableInventoryParts, RebrickableParts
+from models import RebrickableInventoryParts, RebrickableParts
 
 part_lookup_bp = Blueprint("part_lookup", __name__)
 
@@ -29,6 +29,7 @@ def lookup_part():
         Response: Renders the lookup_part.html template with part details and storage location.
     """
     part_details = None
+    storage_locations = []
 
     schrank = fach = box = None
 
@@ -72,12 +73,14 @@ def lookup_part():
             }
 
             # Query the PartStorage table for storage location
-            part_storage = PartStorage.query.filter_by(part_num=part_id).first()
+            from services.storage_service import list_part_locations
 
-            if part_storage:
-                schrank = part_storage.location
-                fach = part_storage.level
-                box = part_storage.box
+            storage_locations = list_part_locations(part_id)
+            if storage_locations:
+                if len(storage_locations) == 1:
+                    schrank = storage_locations[0]["location"]
+                    fach = storage_locations[0]["level"]
+                    box = storage_locations[0]["box"]
             else:
                 flash(f"Storage location for Part ID {part_id} not found in database.")
         else:
@@ -86,6 +89,7 @@ def lookup_part():
     return render_template(
         "lookup_part.html",
         part_details=part_details,
+        storage_locations=storage_locations,
         schrank=schrank,
         fach=fach,
         box=box,

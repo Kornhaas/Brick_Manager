@@ -2,7 +2,7 @@
 
 Stand: 2026-11-15. Geprüfter Checkout: `845921b` einschließlich der vorhandenen lokalen Agenten-/Dokumentationsänderungen.
 
-**Status: Implementierungsplan mit bestätigten Produktentscheidungen, nicht implementiert.** Dieser Auftrag endet mit diesem Plan. Anwendungscode, Schema und Sammlungsdaten bleiben unverändert. Die Produktmaße und physischen Eigenschaften stammen aus dem Planungsauftrag; sie wurden weder vor Ort gemessen noch unabhängig als Produktangaben verifiziert. Die Quellcodeanalyse erfolgte ohne Import der Produktiv-App, Datenbankzugriff, Serverstart oder externe Synchronisation. Die Fachperspektiven wurden in einer Sitzung zusammengeführt; es liefen keine unabhängigen Spezialagenten.
+**Status: Umsetzung vorhanden; automatisierte Abnahme und Paketliste siehe [Abnahmeprotokoll](storage-acceptance.md).** Die Abschnitte zur Ist-Analyse dokumentieren den Ausgangsstand vor der Implementierung; Modell-/Ablaufabschnitte bleiben deren Arbeitsgrundlage. Die ursprüngliche Planungsphase endete ohne Codeänderung. Der anschließende Implementierungsauftrag autorisiert alle Pakete einschließlich automatisierter Verifikation an repräsentativen Testfächern. Ein echtes Pilotfach ist dafür keine Voraussetzung. Vor-Ort-Maße und physische Produktaussagen sind weiterhin gesondert zu prüfen. Aktuelle Referenzen beschreiben den implementierten Stand.
 
 ## 1. Ergebnis und Umfang
 
@@ -10,7 +10,7 @@ Die bestehende Anwendung kann Teile mehreren beschrifteten Fundorten zuordnen. F
 
 Empfehlung: die vorhandenen Katalog- und Sammlungsmodelle weiterverwenden, `PartStorage` behutsam zu einer Inhalts-/Fundortzuordnung erweitern und feste Orte, bewegliche Einheiten sowie deren Aufstellung ergänzen. Eine Umlagerung verändert den aktuellen Fundort erst nach physischer Bestätigung. Vorschläge sind nachvollziehbare Regeln mit Unsicherheitsangaben; ein KI-Modell oder ein neuer externer Dienst ist dafür nicht erforderlich.
 
-**Bestätigt am 2026-11-15:** Erstes Umsetzungspaket ist die Lagerstruktur mit Behältern, Stapeln und Mengen je Fundort einschließlich ihrer sicheren Migration und gemeinsamen Schreibgrenze (P0–P2). Darauf bauen Regalansicht, bestätigte Umbuchungen und Archivvorschläge auf. Diese Bestätigung startet noch keine Implementierung.
+**Bestätigt am 2026-11-15:** Erstes Umsetzungspaket ist die Lagerstruktur mit Behältern, Stapeln und Mengen je Fundort einschließlich ihrer sicheren Migration und gemeinsamen Schreibgrenze (P0–P2). Darauf bauen Regalansicht, bestätigte Umbuchungen und Archivvorschläge auf. Die spätere Implementierung ist mit dem vollständigen Umsetzungsauftrag autorisiert.
 
 **Regal 1, Fach 5 ist ausschließlich ein Dummy-Beispiel**, ebenso die illustrierten Boxnummern und Aufstellungen. Das tatsächliche Pilotfach legt der Nutzer später fest. Zunächst funktioniert die Ansicht schematisch mit unbekannten Maßen und manuell bestätigten Beziehungen. Bereits in Version 1 werden alte, seltene Teile bei belastbarer Set-Anzahl und belastbarem letztem Set-Jahr trotz unbekanntem Eigenbedarf zur **manuellen Archivprüfung** angezeigt: **„Eigenbedarf unbekannt · bitte prüfen“**. Der Nutzer entscheidet beim Aufräumen über Archivierung; daraus entsteht keine automatische Archivfreigabe. Bei der Teileaufnahme bleibt bei unbekanntem Eigenbedarf das Kategorieregal der Standard. Physisches Umräumen erfolgt immer durch den Nutzer.
 
@@ -406,8 +406,30 @@ Spätere Verifikation: zuerst betroffene Dateien mit `poetry run pytest -q --no-
 
 Die Priorität des ersten Umsetzungspakets, die manuelle V1-Archivprüfung und der Intake-Standard sind bestätigt; die reale Pilotwahl steht noch aus. Die übrigen Annahmen sind weiterhin reversibel und nicht durch diese Bestätigung pauschal beschlossen. Keiner dieser Punkte blockiert die Fertigstellung dieses Plans. Sie sind Abnahme-/Messpunkte für die spätere Umsetzung. Ein Schritt, der sichere Geometrie, verifizierte Stapelung, gezählte Mengen oder bekannte Bedarfsabdeckung benötigt, bleibt bis dahin entsprechend eingeschränkt.
 
-## 13. Abschluss dieser Planungsphase
+## 13. Historischer Abschluss der Planungsphase
 
 Erstellt wurden ausschließlich Plan und Dokumentationsverweise sowie ein Logbucheintrag. Quellcode-/Test-/Migrationsdateien wurden gelesen, aber nicht geändert. Keine Anwendungstests oder Migrationen ausgeführt und keine Produktivdatenbank geöffnet. Die hier beschriebenen Tests, Modelle und Endpunkte sind zukünftige Arbeit; sie sind keine bereits vorhandenen Fähigkeiten.
 
 Zugehörige aktuelle Referenzen: [Architektur](../architecture/reference-architecture.md), [High-Level-Design](../architecture/high-level-design.md), [Softwaredesign](../architecture/software-design.md), [Schema](../reference/database-schema.md), [Tests](../guides/testing.md). Der Plan ersetzt diese Ist-Dokumente erst mit tatsächlich implementierten und geprüften Änderungen.
+
+## 14. Konkretisierungen aus der Umsetzung
+
+- Sichere Standardfreigabe: `WAREHOUSE_ENABLED` schaltet die neue Oberfläche;
+  Legacy-Schutz gilt unabhängig davon. Kein echtes Pilotfach als technische
+  Freigabevoraussetzung; die Tests verwenden ausdrücklich synthetische Fächer.
+- Reservierung bewusst pro beteiligter Einheit statt einer komplexen parallelen
+  Teilmengenallokation. Abhängige Auflagenumstellungen werden nacheinander
+  physisch bestätigt; überlappende zukünftige Ziele werden abgewiesen.
+- Eine gemessene Fachhöhenkurve beschreibt die konservative Mindestfreihöhe
+  über der gesamten nutzbaren Tiefe. Ohne diesen Nachweis bleibt die Passung offen.
+- Zählkorrekturen und das Auflösen unbekannter Farben sind ausdrücklich
+  protokollierte Erfassungen. Neue Zugänge und Bewegungen bleiben separate
+  bestätigbare Aufträge. Eine bekannte Teil-/Farbidentität wird nicht still geändert.
+- Historische Importläufe ohne persistente Abdeckung gelten nicht nachträglich
+  als vollständig. Teilfehler und überlappende Läufe bleiben ungeeignet, bis
+  ein neuer konsistenter vollständiger Lauf vorliegt.
+- ID-basierte Einzel-Etiketten nutzen den bestehenden Renderer; der sichtbare
+  Text bleibt unverändert, der technische Dateiname enthält zusätzlich die ID.
+
+Paketstatus, Kriterienabgleich, tatsächlich ausgeführte Prüfungen und Vor-Ort-Grenzen
+stehen zentral im [Abnahmeprotokoll](storage-acceptance.md).

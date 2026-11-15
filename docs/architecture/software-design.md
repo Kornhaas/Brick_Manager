@@ -20,7 +20,7 @@ Die Trennung beschreibt die bestehenden Verantwortlichkeiten und die Richtung f�
 
 `brick_manager/routes/part_location.py` lädt Kategorien über `RebrickableService` und lokale Zuordnungen über `load_part_lookup`. Bei einer Kategorieauswahl werden Teileinformationen mit Lookup-Feldern und gecachten Bildern ergänzt und an `part_location.html` übergeben. Fehler beim Laden führen in diesem Ablauf zu einer Fehlerseite mit Status 500.
 
-Der Ablauf verbindet HTTP-Eingaben, externe Daten, lokale Dateien und Darstellung. Änderungen an Lagerfeldern müssen deshalb neben Modellen auch Lookup-Funktionen, Formular-/JSON-Verbraucher und Cache-/Label-Verwendung prüfen. Das vollständige Schema bleibt ausschließlich in der [Datenbankreferenz](../reference/database-schema.md).
+Der Ablauf verbindet HTTP-Eingaben, externe Daten, lokale Dateien und Darstellung. Änderungen an Lagerfeldern müssen deshalb neben Modellen auch die auf `PartStorage` basierenden Lookup-Funktionen, Formular-/JSON-Verbraucher und Cache-/Label-Verwendung prüfen. Das vollständige Schema bleibt ausschließlich in der [Datenbankreferenz](../reference/database-schema.md).
 
 ## Querschnittsregeln
 
@@ -40,6 +40,51 @@ Konkrete Befehle und Messwerte stehen in der [Testanleitung](../guides/testing.m
 
 Bei einer Erweiterung die betroffenen Produzenten und Verbraucher ermitteln, das Verhalten samt Fehlerpfaden implementieren und prüfen sowie passende Referenzen und das [Logbuch](../logbook.md) aktualisieren. Neue dauerhafte Entwurfsentscheidungen zusätzlich mit Grund und Folgen dokumentieren.
 
-## Geplante Erweiterung
+## Implementierte Lagerverwaltung
 
-Der [Implementierungsplan für Lageransicht, Archivierung und Einlagerung](../plans/storage-archive-intake.md) beschreibt die vorgeschlagene Trennung von festen Orten, beweglichen Behältern und Aufstellungen sowie sichere Bewegungen und regelbasierte Vorschläge. Dieser Plan ist noch nicht umgesetzt; die hier beschriebene bestehende Architektur bleibt davon unberührt.
+- `services/storage_service.py`: feste Orte, Behälter, Unterteilungen, initiale
+  Ist-Aufstellung, Adressauflösung, explizite Bestandszählung und dreistufige
+  Passprüfung (`fits`, `unknown`, `no_fit`). Einfache Alt-Schreibwege passieren eine
+  gemeinsame Schutzprüfung; strukturierte bzw. mehrdeutige Zuordnungen erfordern
+  die Lagerverwaltung.
+- `services/storage_move_service.py`: idempotente Entwürfe, reservierte Pläne,
+  Versions-/Geometriesnapshots und atomare Bestätigung. SQLite-Schreiblock vor
+  Reservierungs-/Versionsprüfung verhindert konkurrierende Doppelbuchungen.
+  Konservativ werden ganze beteiligte Einheiten und Zielaufstellungen reserviert.
+  Quelle und Ziel addieren/subtrahieren nur physische Mengen; Setbesitz bleibt gleich.
+- `services/part_history_service.py`: eindeutige echte Setvorkommen je Teil/Farbe
+  über Inventarversionen, Ersatzteile, Figuren und Untersets; explizite unbekannte
+  Jahre/Verknüpfungen und generationsgebundene Katalogabdeckung.
+- `services/storage_suggestion_service.py`: Kategorieziele, eigene Planliste,
+  Bedarfsstatus, Präferenzen und erklärte Archiv-/Aufnahmevorschläge. Historisch
+  belastbare Daten bei unbekanntem Bedarf erlauben manuelle Prüfung, keine
+  unbedingte Archivfreigabe.
+- `routes/warehouse.py`, `templates/warehouse.html`, `static/js/warehouse.js`:
+  CSRF-geschützte Browseroperationen, beschriftete DOM-Regalfront mit Listen- und
+  Tastaturalternative, getrennte Planungs-/Bestätigungsaktionen und ID-basierte Labels.
+
+Zählkorrekturen erhalten Begründung und Vorher-/Nachherwerte im Bewegungsjournal.
+Unbekannte Altfarben können ausdrücklich identifiziert werden; bereits bekannte
+Farbidentitäten werden nicht still überschrieben. Das Auflösen einer ursprünglichen
+Zuordnung bestätigt deren Migrationsmapping und bewahrt die Rohbeschriftung.
+
+Auflagenpositionen sind relativ zur jeweiligen Unterlage. Fachpositionen sind
+relativ zum Fachboden. Die gemessene Freihöhe gilt konservativ über die volle
+Tiefe. Stapelumschichtungen werden in physisch bestätigte Einzelschritte zerlegt;
+das System verspricht keinen simultanen Flächentausch über noch belegte Ziele.
+Eine leere Hülle bleibt eine belegte Basis, bis sie entfernt oder verlagert wird.
+
+Importe veröffentlichen ihre Abdeckung erst nach geprüftem Gesamtabschluss. Ein
+fehlerhafter/überlappender Lauf hinterlässt keine scheinbar gültige alte Abdeckung
+für gemischte aktuelle Tabellen. Die eigene Planungsprüfung ist an Katalog und
+Planliste gebunden und wird bei Änderungen ungültig.
+
+Aktuelle Adressen kommen aus dem Aufstellungsmodell. Die Desktop-Lesefelder
+bleiben erhalten und werden additiv um IDs/Mengen/Adressinformationen ergänzt.
+Ein alter PUT auf strukturierte oder mehrdeutige Fundorte antwortet nach gültiger
+Authentifizierung mit 409. Der Legacy-Lookup liefert alle Orte und nur bei genau
+einem Treffer einen primären Ort. Druckdateien unterscheiden gleich beschriftete
+Einheiten über ihre ID; Druckstatus erfordert eine gesonderte Bestätigung.
+
+Schema und Upgrade: [Datenbankreferenz](../reference/database-schema.md).
+Kriterien und Tests: [Lagerabnahme](../plans/storage-acceptance.md).

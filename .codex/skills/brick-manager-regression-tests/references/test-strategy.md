@@ -6,7 +6,7 @@
 - `conftest.py` creates a temporary SQLite database, registers blueprints, exposes `app`, `client`, and `runner`, and recreates tables around tests.
 - `BRICK_MANAGER_CLIENT_API_KEY` is set to `test-client-api-key` in the test app.
 - Historical generated tests for removed APIs were deleted. The current suite should execute every collected test; narrowly justified platform or integration skips must remain explicit at the test itself.
-- The configured global coverage floor is 16%, which is a release floor, not an adequacy target for changed behavior.
+- The configured global coverage floor is 60%, which is a release floor, not an adequacy target for changed behavior.
 
 ## Useful commands
 
@@ -54,3 +54,5 @@ Frontend changes:
 ## Baseline interpretation
 
 The verified 19 October 2026 run collected 169 items, with 169 passed, 0 skipped, and 30.05% statement coverage. Sync and many write-heavy route modules remain near 10–25%. Re-run before citing numbers; prioritize risk and changed behavior over gaming aggregate coverage.
+
+The verified 15 November 2026 warehouse acceptance ran 518 Python tests successfully with 0 skipped and 71.34% total coverage, plus 8 Node navigation tests and 8 real Chromium workflows. Re-run before citing these measurements in later work. Warehouse migration and concurrency tests use temporary databases; the browser script uses the isolated test application. See `docs/plans/storage-acceptance.md`.

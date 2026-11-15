@@ -1,4 +1,4 @@
-# Docker ignore file for Lego Manager
+# Docker ignore file for Brick Manager
 
 # Git and version control
 .git/

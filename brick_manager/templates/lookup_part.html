@@ -56,6 +56,15 @@
                 <p class="mt-3"><strong>Part Name:</strong> {{ part_details.name }}</p>
             </div>
         </div>
+        <h3>Bestätigte Fundorte</h3>
+        <ul aria-label="Alle Fundorte">
+        {% for storage in storage_locations %}
+            <li><a href="{{ storage.warehouse_url }}">{{ storage.address.display }}</a>
+                · Farbe {{ storage.color_id if storage.color_id is not none else 'unbekannt' }}
+                · {{ storage.quantity if storage.quantity is not none else 'ungezählt' }}
+                {% for move in storage.planned_moves %}<p>Geplant, noch nicht umgeräumt: {{ move.destination }}{% if move.quantity is not none %} · Menge {{ move.quantity }}{% endif %}</p>{% endfor %}</li>
+        {% else %}<li>Fundort ungeklärt</li>{% endfor %}
+        </ul>
         <ul class="list-group">
             <li class="list-group-item"><strong>Schrank:</strong> {{ schrank or 'Not Specified' }}</li>
             <li class="list-group-item"><strong>Fach:</strong> {{ fach or 'Not Specified' }}</li>

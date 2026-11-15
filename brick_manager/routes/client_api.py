@@ -7,8 +7,10 @@ import hmac
 
 from flask import Blueprint, current_app, jsonify, request
 from models import PartStorage, RebrickableParts, User_Parts, User_Set, db
+from services.storage_service import content_dict, legacy_guard
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
+from werkzeug.exceptions import Conflict
 
 client_api_bp = Blueprint("client_api", __name__, url_prefix="/api/v1")
 
@@ -109,9 +111,21 @@ def get_part_storage(part_num: str):
             "id": item.id,
             "part_num": item.part_num,
             "color_id": item.color_id,
-            "location": item.location,
-            "level": item.level,
-            "box": item.box,
+            **{
+                k: v
+                for k, v in content_dict(item).items()
+                if k
+                in {
+                    "location",
+                    "level",
+                    "box",
+                    "storage_unit_id",
+                    "quantity",
+                    "revision",
+                    "warehouse_url",
+                    "address",
+                }
+            },
             "notes": item.notes,
             "label_printed": item.label_printed,
         }
@@ -177,8 +191,10 @@ def update_part_storage(part_num: str):
             )
         values[field] = value.strip() or None
 
-    query = PartStorage.query.filter_by(part_num=part_num, color_id=color_id)
-    storage = query.order_by(PartStorage.id).first()
+    try:
+        storage = legacy_guard(part_num=part_num, color_id=color_id, exact_color=True)
+    except Conflict as error:
+        return jsonify({"error": error.description, "warehouse_url": "/warehouse"}), 409
     if storage is None:
         storage = PartStorage(part_num=part_num, color_id=color_id)
         db.session.add(storage)

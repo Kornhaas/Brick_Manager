@@ -2,7 +2,7 @@
 
 ## Runtime and layout
 
-- Python `^3.11`; Poetry manages dependencies. The current environment may select Python 3.12.
+- Python `^3.12`; Poetry manages dependencies. The current environment may select Python 3.12.
 - Flask app: `brick_manager/app.py`. It constructs a module-level app, registers blueprints, creates tables, starts APScheduler jobs, and loads lookup data during import.
 - Data model: `brick_manager/models.py`, Flask-SQLAlchemy, SQLite, Flask-Migrate dependency present.
 - HTTP layer: `brick_manager/routes/`; reusable logic and external clients: `brick_manager/services/`.
@@ -60,3 +60,5 @@ The verified 19 October 2026 baseline collected 169 tests: 169 passed and 0 were
 ## Known documentation drift
 
 `database_schema.md` and `TESTING.md` were reconciled on 19 October 2026. Keep them current, while continuing to confirm schema and coverage claims against models, migrations, fixtures, and actual test runs.
+
+Physical warehouse entrypoint: `routes/warehouse.py`; storage, move, history and suggestion services own its behavior. Read `docs/guides/warehouse.md` and `docs/plans/storage-acceptance.md`. Current database migrations are versioned SQL/Python artifacts with checksums. Preserve confirmed physical stock separately from owned set quantities.

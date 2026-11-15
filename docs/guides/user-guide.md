@@ -7,6 +7,7 @@ Diese Übersicht beschreibt die dauerhaft vorhandenen Bereiche der Webanwendung.
 | Start und Gesundheit | `/`, `/health` | Übersicht und Betriebsstatus |
 | Set-Suche und -Pflege | `/set_search`, `/set_maintain` | Katalogsets hinzufügen, physische Kopien und Mengen verwalten |
 | Fehlteile | `/missing_parts` | Fehlende reguläre, Ersatz- und Minifigurenteile ermitteln und Mengen erfassen |
+| Physisches Lager | `/warehouse` | Behälter, Stapel, Mengen, bestätigte Bewegungen und manuelle Archivprüfung; [Anleitung](warehouse.md) |
 | Teile und Lagerorte | `/lookup_part`, `/part_location`, `/box_maintenance` | Teile finden, Lagerplätze pflegen und Boxen verwalten |
 | Etiketten | Set- und Boxpflege | Label-PDFs erzeugen und Druckstatus führen |
 | Datenimport und Synchronisierung | `/import_data`, `/admin/sync` | Rebrickable-Katalog importieren und bewusst angestoßene Abgleiche ausführen |

@@ -17,6 +17,7 @@ flask-script = "^2.0.6"
 apscheduler = "^3.10.4"
 pandas = "^2.3.3"
 cryptography = "^50.0.1"
+python-dotenv = "^1.2.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.1.1"
@@ -138,6 +139,7 @@ exclude = [
 ]
 
 [tool.ruff]
+force-exclude = true
 line-length = 88
 target-version = "py312"
 extend-exclude = ["brick_manager/migrations"]

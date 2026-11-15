@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="warehouse-csrf" content="{{ warehouse_csrf }}">
+  <title>Lagerverwaltung · Brick Manager</title>
+  {% include 'favicon_links.html' %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/warehouse.css') }}">
+  <script src="{{ url_for('static', filename='js/warehouse.js') }}" defer></script>
+</head>
+<body>
+{% include 'navbar.html' %}
+<main class="warehouse container-fluid py-4" id="warehouse">
+  <h1>Lagerverwaltung</h1>
+  <p>Bricks finden, Behälter erfassen und physisches Umräumen bestätigen.</p>
+  <p id="warehouse-status" role="status" aria-live="polite">Lager wird geladen …</p>
+  <div id="warehouse-error" role="alert" hidden></div>
+  <section class="warehouse-panel" aria-labelledby="overview-title">
+    <h2 id="overview-title">Lagerübersicht</h2>
+    <div class="warehouse-toolbar">
+      <label for="warehouse-shelf">Fach</label><select id="warehouse-shelf"><option value="">Alle Fächer</option></select>
+      <button type="button" id="warehouse-list" aria-pressed="false">Listenansicht</button>
+      <button type="button" id="warehouse-front" aria-pressed="true">Regalfront</button>
+      <button type="button" id="warehouse-refresh">Neu laden</button>
+      <button type="button" id="warehouse-archive">Fach aufräumen</button>
+    </div>
+    <p id="warehouse-scale">Schematische Ansicht – Passung ohne vollständige Messwerte ungeprüft.</p>
+    <div id="warehouse-layout" class="warehouse-front" aria-label="Fächer und Behälter"></div>
+    <div id="warehouse-space" aria-live="polite"></div>
+  </section>
+  <section class="warehouse-panel" aria-labelledby="detail-title">
+    <h2 id="detail-title" tabindex="-1">Behälterdetails</h2>
+    <div id="warehouse-details">Wähle eine Einheit in der Regalansicht oder Liste.</div>
+    <div id="warehouse-archive-results" aria-live="polite"></div>
+  </section>
+  <section class="warehouse-panel" aria-labelledby="intake-title">
+    <h2 id="intake-title">Bricks suchen und aufnehmen</h2>
+    <form id="warehouse-search-form" class="warehouse-form">
+      <label>Teilenummer<input name="part_num" required autocomplete="off"></label>
+      <label>Farb-ID (leer = unbekannt)<input name="color_id" type="number" step="1"></label>
+      <button>Fundorte und Vorschlag anzeigen</button>
+    </form>
+    <div id="warehouse-search-results" aria-live="polite"></div>
+    <p>Unbekannter Eigenbedarf: Das Kategorieregal bleibt Standard. Eine Aufnahme wird erst durch die physische Bestätigung gebucht.</p>
+  </section>
+  <section class="warehouse-panel" aria-labelledby="move-title">
+    <h2 id="move-title">Umbuchung oder Aufnahme planen</h2>
+    <p>Der tatsächliche Fundort bleibt bis „Physisch umgeräumt – bestätigen“ erhalten. Leere Behälter belegen weiterhin Stellfläche.</p>
+    <form id="warehouse-move-form" class="warehouse-form">
+      <label>Vorgang<select name="kind"><option value="quantity">Teilmenge umbuchen</option><option value="unit">Behälter verschieben</option><option value="intake">Neue Bricks aufnehmen</option></select></label>
+      <label>Quell-Inhaltszeile (Umbuchung)<select name="source_storage_id" data-options="contents" data-empty="Quelle wählen"></select></label>
+      <label>Behälter (Behälterbewegung)<select name="unit_id" data-options="outer-units" data-empty="Behälter wählen"></select></label>
+      <label>Zielbehälter (Menge/Aufnahme)<select name="target_unit_id" data-options="content-units" data-empty="Ziel wählen"></select></label>
+      <label>Teilenummer (Aufnahme)<input name="part_num"></label>
+      <label>Farb-ID (Aufnahme)<input name="color_id" type="number"></label>
+      <label>Menge<input name="quantity" type="number" min="1" step="1"></label>
+      <label>Zielfach (Behälter)<select name="shelf_id" data-options="shelves" data-empty="Fach wählen"></select></label>
+      <label>Untere Zieleinheit (statt Fach)<select name="support_unit_id" data-options="outer-units" data-empty="Keine"></select></label>
+      <label>Auflage<select name="relation_kind"><option value="on_shelf">Auf Fachboden</option><option value="stacked">Gestapelt</option><option value="loose_on">Lose Auflage</option></select></label>
+      <label>Position links nach rechts<input name="order_left" type="number" min="0" value="0"></label>
+      <label>X-Position mm, relativ zur Unterlage (optional)<input name="x_mm" type="number" min="0" step="any"></label>
+      <label>Tiefenposition mm (optional)<input name="depth_offset_mm" type="number" min="0" step="any"></label>
+      <label>Orientierung<select name="orientation"><option value="normal">Normal</option><option value="rotated">Um 90° gedreht</option></select></label>
+      <label>Begründung<input name="reason" maxlength="200"></label>
+      <label class="warehouse-check"><input name="remove" type="checkbox">Leere Einheit aus der Aufstellung nehmen (nur Behälterbewegung)</label>
+      <label class="warehouse-check"><input name="capacity_confirmed" type="checkbox">Aufnahmefähigkeit vor Ort geprüft</label>
+      <button type="button" id="warehouse-move-preview">Zielpassung prüfen</button>
+      <button>Entwurf erstellen</button>
+    </form>
+    <div id="warehouse-move-preview-result" aria-live="polite"></div>
+    <div id="warehouse-moves" aria-live="polite"></div>
+  </section>
+  <details class="warehouse-panel" id="warehouse-capture">
+    <summary>Lagerstruktur und bestehenden Inhalt erfassen</summary>
+    <p>Bestehenden Istzustand erfassen; nachträgliche Bewegungen über Umbuchungen bestätigen. Etiketten dürfen doppelt vorkommen und Lücken behalten.</p>
+    <button type="button" id="warehouse-seed">Behältertypen aus dem Auftrag anlegen</button>
+    <h3>Ort anlegen / Maße eines Fachs ändern</h3>
+    <form id="warehouse-location-form" class="warehouse-form">
+      <label>Vorhandener Ort (leer = neu)<select name="id" data-options="locations" data-empty="Neuer Ort"></select></label>
+      <label>Art<select name="kind"><option value="zone">Zone</option><option value="rack">Regal</option><option value="shelf">Fach</option><option value="unresolved">Ungeklärter Ort</option></select></label>
+      <label>Beschriftung<input name="label" required maxlength="200"></label>
+      <label>Übergeordneter Ort<select name="parent_id" data-options="locations" data-empty="Keiner"></select></label>
+      <label>Zone<select name="zone_kind"><option value="active">Griffbereit</option><option value="archive">Archiv</option></select></label>
+      <label>Nutzbare Breite mm<input name="width_mm" type="number" min="0" step="any"></label>
+      <label>Nutzbare Tiefe mm<input name="depth_mm" type="number" min="0" step="any"></label>
+      <label>Höhenprofil [Position, Höhe] mm<textarea name="height_profile" placeholder="[[0, 300], [600, 180]]"></textarea></label>
+      <label>Messstatus<select name="measurement_status"><option value="unknown">Unbekannt</option><option value="measured">Gemessen</option></select></label>
+      <button>Ort speichern</button>
+    </form>
+    <h3>Behältertyp und Messwerte</h3>
+    <form id="warehouse-type-form" class="warehouse-form">
+      <label>Vorhandener Typ (leer = neu)<select name="id" data-options="types" data-empty="Neuer Typ"></select></label>
+      <label>Name<input name="name" required maxlength="200"></label>
+      <label>Art<select name="kind"><option value="container">Behälter</option><option value="cabinet">Magazin</option></select></label>
+      <label>Breite mm<input name="width_mm" type="number" min="0" step="any"></label>
+      <label>Tiefe mm<input name="depth_mm" type="number" min="0" step="any"></label>
+      <label>Höhe mm<input name="height_mm" type="number" min="0" step="any"></label>
+      <label>Maßquelle<select name="dimensions_status"><option value="unknown">Unbekannt</option><option value="auftrag">Auftrag</option><option value="measured">Gemessen</option></select></label>
+      <label>Zugriff<select name="access_mode"><option value="unknown">Unbekannt</option><option value="front_open">Von vorne offen</option><option value="remove_above">Obere Behälter abnehmen</option><option value="drawer">Schublade ausziehen</option></select></label>
+      <button>Typ speichern</button>
+    </form>
+    <h3>Behälter / Magazin anlegen</h3>
+    <form id="warehouse-unit-form" class="warehouse-form">
+      <label>Typ<select name="type_id" data-options="types" required></select></label>
+      <label>Etikett<input name="label" required maxlength="200"></label>
+      <button>Einheit anlegen</button>
+    </form>
+    <h3>Stapel von unten nach oben erfassen</h3>
+    <p>Erfasse zuerst die Basis auf einem Fach. Wähle danach die nächste bestehende Einheit und die zuletzt erfasste Einheit als Unterlage. Nummern werden nicht automatisch geändert.</p>
+    <form id="warehouse-placement-form" class="warehouse-form">
+      <label>Bereits vorhandene Einheit<select name="unit_id" data-options="unplaced-units" required></select></label>
+      <label>Fach (Basis)<select name="shelf_id" data-options="shelves" data-empty="Stattdessen Unterlage wählen"></select></label>
+      <label>Untere Einheit<select name="support_unit_id" data-options="outer-units" data-empty="Keine"></select></label>
+      <label>Auflage<select name="relation_kind"><option value="on_shelf">Auf Fachboden</option><option value="stacked">Gestapelt</option><option value="loose_on">Lose Auflage</option></select></label>
+      <label>Links-nach-rechts-Position<input name="order_left" type="number" min="0" value="0"></label>
+      <label>X-Position mm, relativ zur Unterlage (optional)<input name="x_mm" type="number" min="0" step="any"></label>
+      <label>Tiefenposition mm (optional)<input name="depth_offset_mm" type="number" min="0" step="any"></label>
+      <label>Orientierung<select name="orientation"><option value="normal">Normal</option><option value="rotated">Um 90° gedreht</option></select></label>
+      <label class="warehouse-check"><input name="observed_unverified" type="checkbox">Bestehende Kombination beobachtet, noch nicht verifiziert</label>
+      <button>Bestehende Aufstellung erfassen</button>
+    </form>
+    <h3>Geprüfte Stapel- oder Auflageregel</h3>
+    <form id="warehouse-rule-form" class="warehouse-form">
+      <label>Unterer Typ<select name="lower_type_id" data-options="types" required></select></label>
+      <label>Oberer Typ<select name="upper_type_id" data-options="types" required></select></label>
+      <label>Beziehung<select name="relation_kind"><option value="stacked">Gestapelt</option><option value="loose_on">Lose Auflage</option></select></label>
+      <label class="warehouse-check"><input name="verified" type="checkbox">Kombination vor Ort verifiziert</label>
+      <label>Höhenzunahme mm<input name="height_increment_mm" type="number" min="0" step="any"></label>
+      <label>Maximale Stapelzahl<input name="max_count" type="number" min="1"></label>
+      <label>Maximale Gesamthöhe mm<input name="max_height_mm" type="number" min="1" step="any"></label>
+      <button>Regel speichern</button>
+    </form>
+    <h3>Einheit prüfen / Schublade unterteilen</h3>
+    <form id="warehouse-unit-update-form" class="warehouse-form">
+      <label>Einheit<select name="id" data-options="units" required></select></label>
+      <label>Füllstand<select name="fill_state"><option value="unknown">Unbekannt</option><option value="space">Platz vorhanden</option><option value="nearly_full">Fast voll</option><option value="full">Voll</option></select></label>
+      <label class="warehouse-check"><input name="contents_complete" type="checkbox">Inhalt vollständig aufgenommen</label>
+      <button>Prüfstatus speichern</button>
+    </form>
+    <form id="warehouse-partition-form" class="warehouse-form">
+      <label>Schublade<select name="id" data-options="drawers" required></select></label>
+      <label>Adressierbare Bereiche<select name="partition_count"><option value="1">Ganze Schublade</option><option value="2">Zwei Unterteilungen</option><option value="3">Drei Unterteilungen</option></select></label>
+      <button>Leere Schublade unterteilen</button>
+    </form>
+    <h3>Bestehenden Inhalt zuordnen / zählen</h3>
+    <form id="warehouse-content-form" class="warehouse-form">
+      <label>Bestehende Zuordnung (leer = neu)<select name="id" data-options="contents" data-empty="Neue Zuordnung"></select></label>
+      <label>Teilnummer<input name="part_num" required></label>
+      <label>Farb-ID (leer = unbekannt)<input name="color_id" type="number"></label>
+      <label>Behälter / Unterteilung<select name="storage_unit_id" data-options="content-units" required></select></label>
+      <label>Gezählte Menge (leer = ungezählt)<input name="quantity" type="number" min="0" step="1"></label>
+      <label>Notiz<input name="notes" maxlength="200"></label>
+      <label>Grund der Zählung<input name="reason" maxlength="200" value="Physische Bestandsaufnahme" required></label>
+      <button>Gezählten Ist-Inhalt bestätigen</button>
+    </form>
+    <div id="warehouse-unresolved"></div>
+  </details>
+  <details class="warehouse-panel">
+    <summary>Kategorieziele, Eigenbedarf und Archivregeln</summary>
+    <form id="warehouse-category-form" class="warehouse-form">
+      <label>Kategorie-ID<input name="category_id" type="number" required></label>
+      <label>Standardregal / Fach<select name="location_id" data-options="locations" required></select></label>
+      <label>Archivziel<select name="archive_location_id" data-options="locations" data-empty="Kein Archivziel"></select></label>
+      <button>Kategorieregel speichern</button>
+    </form>
+    <form id="warehouse-preference-form" class="warehouse-form">
+      <label>Teilenummer<input name="part_num" required></label><label>Farb-ID<input name="color_id" type="number"></label>
+      <label class="warehouse-check"><input name="replenishment_unlikely" type="checkbox">Nachschub unwahrscheinlich</label>
+      <label class="warehouse-check"><input name="keep_accessible" type="checkbox">Griffbereit halten</label>
+      <button>Hinweise speichern</button>
+    </form>
+    <form id="warehouse-planned-set-form" class="warehouse-form">
+      <label>Plan (leer = neu)<select name="id" data-options="planned-sets" data-empty="Neuer Plan"></select></label>
+      <label>Setnummer<input name="set_num" required></label>
+      <label>Anzahl<input name="quantity" type="number" min="1" value="1" required></label>
+      <label class="warehouse-check"><input name="active" type="checkbox" checked>Aktiv geplant</label>
+      <button>Geplantes Set speichern</button>
+    </form>
+    <form id="warehouse-settings-form" class="warehouse-form">
+      <label>Höchstens bekannte Sets<input name="max_known_sets" type="number" min="1" value="2" required></label>
+      <label>Mindestalter in Jahren<input name="min_age_years" type="number" min="0" value="10" required></label>
+      <label>Katalog höchstens Tage alt<input name="catalog_max_age_days" type="number" min="1" value="90" required></label>
+      <label class="warehouse-check"><input name="planning_reviewed" type="checkbox">Planliste vollständig geprüft (auch wenn leer)</label>
+      <button>Regeln speichern</button>
+    </form>
+    <div id="warehouse-settings-summary"></div>
+  </details>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

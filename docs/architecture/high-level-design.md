@@ -36,6 +36,17 @@ Sicherheits- und Betriebsannahmen stehen in der [Konfigurationsreferenz](../refe
 
 Quellen sind `brick_manager/app.py`, `routes/`, `services/`, `models.py`, `templates/` und `static/` sowie die verlinkte Referenzarchitektur. Änderungen an Systemgrenzen, Hauptabläufen oder externen Beteiligten aktualisieren dieses Dokument im selben Arbeitsauftrag. Neue Zielbilder sind als Vorschläge zu kennzeichnen und nach Annahme in den [Architekturentscheidungen](decisions.md) festzuhalten.
 
-## Geplante Erweiterung
+## Lagerverwaltung
 
-Der [Implementierungsplan für Lageransicht, Archivierung und Einlagerung](../plans/storage-archive-intake.md) beschreibt die vorgeschlagene Trennung von festen Orten, beweglichen Behältern und Aufstellungen sowie sichere Bewegungen und regelbasierte Vorschläge. Dieser Plan ist noch nicht umgesetzt; die hier beschriebene bestehende Architektur bleibt davon unberührt.
+`/warehouse` ergänzt die Sammlung um feste Lagerorte, identifizierbare Behälter,
+Magazin-/Schubladenstrukturen, Auflagebeziehungen und gezählte Mengen je Fundort.
+Die Regalfront ist ohne Messwerte schematisch. Physische Bestandsmengen bleiben
+vom setbezogenen Besitz getrennt. Entwurf und reservierter Plan ändern den
+aktuellen Fundort erst nach ausdrücklicher Bestätigung der Bewegung.
+
+Lokale Regeln nutzen historische Katalogvorkommen, bekannte Bedarfe und
+Kategorieziele. Historisch geeignete Varianten mit unbekanntem Eigenbedarf werden
+zur manuellen Archivprüfung angezeigt; bei Teileaufnahme bleibt das
+Kategorieregal Standard. Externe Modelle oder zusätzliche KI-Dienste sind dafür
+nicht erforderlich. Details: [Softwaredesign](software-design.md),
+[Lageranleitung](../guides/warehouse.md), [Umsetzungsabnahme](../plans/storage-acceptance.md).

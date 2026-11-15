@@ -10,6 +10,7 @@ import logging
 import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor
+from contextvars import ContextVar
 from copy import deepcopy
 from threading import Lock
 from uuid import uuid4
@@ -18,6 +19,11 @@ import pandas as pd
 import requests
 from flask import Blueprint, current_app, jsonify, render_template, request
 from models import db
+from services.part_history_service import (
+    finish_catalog_generation,
+    record_catalog_file,
+    start_catalog_generation,
+)
 
 # pylint: disable=C0301
 import_rebrickable_data_bp = Blueprint("import_rebrickable_data", __name__)
@@ -42,6 +48,7 @@ FILES = [
 
 # Lazy import to avoid circular dependency issues
 MODEL_MAP = None
+_CURRENT_GENERATION = ContextVar("catalog_generation", default=None)
 
 _IMPORT_EXECUTOR = ThreadPoolExecutor(
     max_workers=1, thread_name_prefix="catalog-import"
@@ -94,11 +101,15 @@ def _run_import_job(application, job_id):
     global _ACTIVE_IMPORT_JOB_ID  # pylint: disable=global-statement
 
     with application.app_context():
+        generation_id = None
+        generation_token = None
         try:
             _update_import_job(
                 job_id, status="running", message="Checking database tables"
             )
             ensure_table_structure()
+            generation_id = start_catalog_generation(job_id)
+            generation_token = _CURRENT_GENERATION.set(generation_id)
             model_map = _get_model_map()
 
             for index, file_name in enumerate(FILES, start=1):
@@ -114,6 +125,7 @@ def _run_import_job(application, job_id):
                     job_id, message=f"Importing {_display_name(file_name)}"
                 )
                 record_count = import_csv_to_sqlite(csv_path, model_map[file_name])
+                record_catalog_file(generation_id, file_name, record_count)
 
                 _update_import_file(
                     job_id,
@@ -127,6 +139,7 @@ def _run_import_job(application, job_id):
                     percent=round(index / len(FILES) * 100),
                 )
 
+            finish_catalog_generation(generation_id)
             _update_import_job(
                 job_id,
                 status="completed",
@@ -135,6 +148,8 @@ def _run_import_job(application, job_id):
             )
         except Exception:
             db.session.rollback()
+            if generation_id is not None:
+                finish_catalog_generation(generation_id, failed=True)
             logging.exception("Background catalog import failed")
             with _IMPORT_JOBS_LOCK:
                 job = _IMPORT_JOBS[job_id]
@@ -146,6 +161,8 @@ def _run_import_job(application, job_id):
                     message="Import failed. Existing data for the current file was preserved.",
                 )
         finally:
+            if generation_token is not None:
+                _CURRENT_GENERATION.reset(generation_token)
             with _IMPORT_JOBS_LOCK:
                 if job_id == _ACTIVE_IMPORT_JOB_ID:
                     _ACTIVE_IMPORT_JOB_ID = None
@@ -266,14 +283,28 @@ def import_csv_to_sqlite(csv_path, model_class):
     # This will create the table with correct primary keys, foreign keys, etc.
     db.create_all()
 
+    standalone_generation = None
+    if _CURRENT_GENERATION.get() is None:
+        standalone_generation = start_catalog_generation(uuid4().hex)
+
     # Replace one catalog table in a single transaction. If the append fails,
     # the previous reference data remains intact.
-    with db.engine.begin() as connection:
-        connection.execute(model_class.__table__.delete())
-        df.to_sql(
-            model_class.__tablename__, connection, if_exists="append", index=False
-        )
+    try:
+        with db.engine.begin() as connection:
+            connection.execute(model_class.__table__.delete())
+            df.to_sql(
+                model_class.__tablename__, connection, if_exists="append", index=False
+            )
+    except Exception:
+        if standalone_generation is not None:
+            finish_catalog_generation(standalone_generation, failed=True)
+        raise
     db.session.expire_all()
+    if standalone_generation is not None:
+        record_catalog_file(
+            standalone_generation, os.path.basename(csv_path) + ".gz", len(df)
+        )
+        finish_catalog_generation(standalone_generation)
 
     # Clean up the CSV file
     os.remove(csv_path)
@@ -335,14 +366,21 @@ def import_data():
     Handles POST requests to fetch and store categories, parts, colors, and themes in the database.
     """
     if request.method == "POST":
+        generation_id = None
+        generation_token = None
         try:
             # First ensure all tables have proper structure
             ensure_table_structure()
-
+            generation_id = start_catalog_generation(uuid4().hex)
+            generation_token = _CURRENT_GENERATION.set(generation_id)
             model_map = _get_model_map()
             for file in FILES:
                 csv_path = download_and_extract_csv(file)
-                import_csv_to_sqlite(csv_path, model_map[file])
+                records = import_csv_to_sqlite(csv_path, model_map[file])
+                record_catalog_file(
+                    generation_id, file, records if isinstance(records, int) else None
+                )
+            finish_catalog_generation(generation_id)
             return (
                 jsonify(
                     {"status": "success", "message": "CSV data imported into SQLite!"}
@@ -352,6 +390,8 @@ def import_data():
         except Exception as e:
             logging.error("Unexpected error: %s", str(e))
             db.session.rollback()
+            if generation_id is not None:
+                finish_catalog_generation(generation_id, failed=True)
             return (
                 jsonify(
                     {
@@ -361,6 +401,9 @@ def import_data():
                 ),
                 500,
             )
+        finally:
+            if generation_token is not None:
+                _CURRENT_GENERATION.reset(generation_token)
     return render_template("import_data.html")
 
 
@@ -373,10 +416,22 @@ def main():
     """
     logging.basicConfig(level=logging.INFO)
 
-    model_map = _get_model_map()
-    for file in FILES:
-        csv_path = download_and_extract_csv(file)
-        import_csv_to_sqlite(csv_path, model_map[file])
+    ensure_table_structure()
+    generation_id = start_catalog_generation(uuid4().hex)
+    token = _CURRENT_GENERATION.set(generation_id)
+    try:
+        model_map = _get_model_map()
+        for file in FILES:
+            csv_path = download_and_extract_csv(file)
+            records = import_csv_to_sqlite(csv_path, model_map[file])
+            record_catalog_file(generation_id, file, records)
+        finish_catalog_generation(generation_id)
+    except Exception:
+        db.session.rollback()
+        finish_catalog_generation(generation_id, failed=True)
+        raise
+    finally:
+        _CURRENT_GENERATION.reset(token)
     logging.info("All CSV files imported successfully.")
 
 

@@ -52,7 +52,7 @@ else
     echo "Database already exists at $DB_PATH"
 fi
 
-if compgen -G "$MIGRATIONS_PATH/*.sql" > /dev/null; then
+if compgen -G "$MIGRATIONS_PATH/*.sql" > /dev/null || compgen -G "$MIGRATIONS_PATH/*.py" > /dev/null; then
     echo "Applying restart-safe SQLite migrations..."
     python -m services.migration_service "$DB_PATH" "$MIGRATIONS_PATH"
 fi

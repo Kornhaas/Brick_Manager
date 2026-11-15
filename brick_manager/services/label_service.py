@@ -46,6 +46,8 @@ def _label_output_path(box_info, extension):
         secure_filename(str(box_info.get(field, "unknown"))) or "unknown"
         for field in ("location", "level", "box")
     ]
+    if box_info.get("unit_id") is not None:
+        components.append("unit-" + secure_filename(str(box_info["unit_id"])))
     output_path = (upload_dir / f"{'_'.join(components)}_label.{extension}").resolve()
     if output_path.parent != upload_dir:
         raise ValueError("Invalid label output path")
@@ -257,7 +259,9 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
     )
 
 
-def create_avery_3474_cut_lines_pdf(horizontal_offset_mm=0, vertical_offset_mm=0):
+def create_avery_3474_cut_lines_pdf(
+    horizontal_offset_mm: float = 0, vertical_offset_mm: float = 0
+):
     """Create an A4 calibration sheet containing only the label cut lines."""
     if not -10 <= horizontal_offset_mm <= 10 or not -10 <= vertical_offset_mm <= 10:
         raise ValueError("Print offsets must be between -10 and 10 mm")

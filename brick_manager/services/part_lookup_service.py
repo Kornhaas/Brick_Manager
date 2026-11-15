@@ -47,14 +47,21 @@ def load_part_lookup():
     ):
         return _part_lookup_cache
 
-    # Load from database and cache the result
+    # Legacy readers receive a primary address only when it is unambiguous.
+    # New readers consume the complete ID-based list, never a last-row-wins map.
+    from services.storage_service import content_dict
+
+    grouped = {}
+    for entry in PartStorage.query.order_by(PartStorage.id).all():
+        grouped.setdefault(entry.part_num, []).append(content_dict(entry))
     lookup_data = {}
-    lookup_entries = PartStorage.query.all()
-    for entry in lookup_entries:
-        lookup_data[entry.part_num] = {
-            "location": entry.location,
-            "level": entry.level,
-            "box": entry.box,
+    for part_num, entries in grouped.items():
+        primary = entries[0] if len(entries) == 1 else {}
+        lookup_data[part_num] = {
+            "location": primary.get("location"),
+            "level": primary.get("level"),
+            "box": primary.get("box"),
+            "locations": entries,
         }
 
     # Update cache
@@ -75,25 +82,26 @@ def save_part_lookup(master_lookup):
     """
     global _part_lookup_cache, _cache_timestamp
 
+    from services.storage_service import legacy_guard
+
+    updates = []
     for part_num, data in master_lookup.items():
-        # Retrieve or create an entry in PartStorage
-        storage_entry = PartStorage.query.filter_by(part_num=part_num).first()
-
-        if storage_entry:
-            # Update the existing entry
-            storage_entry.location = data.get("location", storage_entry.location)
-            storage_entry.level = data.get("level", storage_entry.level)
-            storage_entry.box = data.get("box", storage_entry.box)
-        else:
-            # Create a new entry
-            new_entry = PartStorage(
-                part_num=part_num,
-                location=data.get("location", ""),
-                level=data.get("level", ""),
-                box=data.get("box", ""),
-            )
-            db.session.add(new_entry)
-
+        # The dictionary may include untouched multi-location projections.
+        if "locations" in data:
+            originals = data["locations"]
+            primary = originals[0] if len(originals) == 1 else {}
+            if all(data.get(f) == primary.get(f) for f in ("location", "level", "box")):
+                continue
+        storage_entry = legacy_guard(part_num=part_num)
+        updates.append((part_num, data, storage_entry))
+    for part_num, data, storage_entry in updates:
+        if storage_entry is None:
+            storage_entry = PartStorage(part_num=part_num)
+            db.session.add(storage_entry)
+        for field in ("location", "level", "box"):
+            if field in data:
+                setattr(storage_entry, field, data[field])
+        storage_entry.revision = (storage_entry.revision or 1) + 1
     db.session.commit()
 
     # Clear cache since data has been updated

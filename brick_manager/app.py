@@ -70,7 +70,9 @@ from routes.set_search import set_search_bp
 from routes.storage import storage_bp
 from routes.token_management import token_management_bp
 from routes.upload import upload_bp
+from routes.warehouse import warehouse_bp
 from services.part_lookup_service import load_part_lookup
+from services.storage_service import guard_legacy_request
 
 # pylint: disable=W0718
 
@@ -92,6 +94,8 @@ else:
 
 # Initialize the db instance with the app
 db.init_app(app)
+
+app.before_request(guard_legacy_request)
 
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
@@ -325,6 +329,13 @@ def scheduled_sync_user_sets():
 
 # Ensure database tables are created
 with app.app_context():
+    # Upgrade the selected SQLite database before any ORM read uses new columns.
+    # The same runner is used by Docker and the documented standalone CLI.
+    sqlite_path = db.engine.url.database if db.engine.dialect.name == "sqlite" else None
+    if sqlite_path and sqlite_path != ":memory:":
+        from services.migration_service import apply_sqlite_migrations
+
+        apply_sqlite_migrations(sqlite_path, os.path.join(basedir, "migrations"))
     db.create_all()  # Ensure tables are created
     try:
         master_lookup = load_part_lookup()
@@ -333,6 +344,7 @@ with app.app_context():
         app.logger.error("Failed to load master lookup data: %s", e)
 
 # Register blueprints
+app.register_blueprint(warehouse_bp)
 app.register_blueprint(upload_bp)
 app.register_blueprint(main_bp)
 app.register_blueprint(storage_bp)

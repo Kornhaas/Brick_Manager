@@ -7,7 +7,7 @@ const source = readFileSync('brick_manager/static/js/set_maintenance.js', 'utf8'
 const listeners = {};
 const timers = [];
 const documentMock = {
-  addEventListener: (name, callback) => { listeners[name] = callback; },
+  addEventListener: (name, callback) => { (listeners[name] ||= []).push(callback); },
   querySelectorAll: () => [],
   activeElement: null,
 };
@@ -33,9 +33,10 @@ function setup(options = [{}, {}, {}]) {
     documentMock.activeElement = inputs[index];
     const event = {
       key: 'Tab', target: inputs[index], prevented: false,
-      preventDefault() { this.prevented = true; }, ...extra,
+      preventDefault() { this.prevented = true; },
+      stopPropagation() {}, ...extra,
     };
-    listeners.keydown(event);
+    for (const callback of listeners.keydown || []) callback(event);
     return { prevented: event.prevented, focused };
   }
   return { inputs, press, runTimers: () => timers.splice(0).forEach(callback => callback()) };
@@ -83,7 +84,7 @@ test('focus is restored if iPad WebKit overrides it after keydown', () => {
 
 test('other keys, shortcuts and unrelated controls are untouched', () => {
   for (const extra of [
-    { key: 'Enter' }, { key: 'Unidentified' }, { ctrlKey: true },
+    { key: 'Unidentified' }, { ctrlKey: true },
     { metaKey: true }, { isComposing: true },
     { target: { matches: () => false } },
     { target: { matches: () => true, closest: () => null } },
@@ -99,4 +100,23 @@ test('Caps Lock WebKit quirk does not block Tab navigation', () => {
     getModifierState: modifier => modifier === 'CapsLock',
   });
   assert.equal(result.focused, inputs[1]);
+});
+
+// Real EventTarget retains both independently registered handlers. An Enter
+// handler must not replace the Tab handler in this test's document substitute.
+test('Enter saves before moving while Tab keeps its own navigation', () => {
+  const original = context.saveAndMoveFromQuantityInput;
+  const saved = [];
+  context.saveAndMoveFromQuantityInput = (input, backwards) => saved.push({ input, backwards });
+  try {
+    const { inputs, press } = setup();
+    assert.equal(press(0, { key: 'Enter', shiftKey: true }).prevented, true);
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].input, inputs[0]);
+    assert.equal(saved[0].backwards, true);
+    assert.equal(press(0).focused, inputs[1]);
+    assert.equal(saved.length, 1);
+  } finally {
+    context.saveAndMoveFromQuantityInput = original;
+  }
 });

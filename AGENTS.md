@@ -35,6 +35,12 @@ Treat `brick_manager/models.py`, versioned migrations, and executable tests as t
 
 Use Poetry commands from the repository root. Preserve unrelated working-tree changes.
 
+## Project terminology
+
+Use **Bricks** as the generic product term in all project-authored UI text, documentation, comments, examples, and generated content. Keep the project name **Brick Manager**. Do not introduce manufacturer branding as a generic name for Bricks or copy it into new marketing text. See `docs/reference/terminology.md`.
+
+Preserve exact external API paths, third-party identifiers, existing technical compatibility references, and original user/catalog data when their spelling is required for correct behavior. Do not apply global replacements to contracts or persisted values. New internal identifiers use conventional lowercase `brick`/`bricks` names. Any migration or breaking rename requires its normal impact analysis and explicit task scope.
+
 ## Documentation is part of completion
 
 Keep all maintained project documentation in `docs/`, indexed by `docs/README.md`. Root entrypoints such as README.md and AGENTS.md and tool-discoverable `.codex/` instructions remain in their required locations and link to the central documentation; do not create competing design documents there.
