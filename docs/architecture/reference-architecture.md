@@ -71,6 +71,13 @@ Das ist Ist-Verhalten, keine Empfehlung für einen ungetesteten App-Factory-Umba
 
 ## Lagerverwaltung und Kompatibilität
 
+Der Warehouse-Blueprint besitzt aufgabenbezogene HTML-Einstiege für Übersicht,
+Einlagern, Umräumen, Boxgrößen, Fächer, Bestandserfassung und Regeln. Gemeinsame
+Navigation und aufgeteilte Jinja-Inhalte bilden die Präsentationsgrenze;
+der Browsercontroller initialisiert nur die auf der jeweiligen Seite vorhandenen
+Formulare. Die fachlichen JSON-Endpunkte und Services bleiben gemeinsam.
+Seitenwechsel übertragen Kontext über IDs statt über duplizierte Fachlogik.
+
 Der Warehouse-Blueprint stellt physische Lagerstruktur, gezählte Inhalte und
 explizit bestätigte Bewegungen bereit. Storage-, Move-, History- und
 Suggestion-Services trennen physische Änderungen von historischen Empfehlungen

@@ -39,7 +39,8 @@
 				"ms-python.pylint",
 				"charliermarsh.ruff",
 				"detachhead.basedpyright",
-				"openai.chatgpt"
+				"openai.chatgpt",
+				"mtxr.sqltools-driver-sqlite"
 			]
 		}
 	},

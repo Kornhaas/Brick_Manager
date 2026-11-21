@@ -25,6 +25,28 @@ Der Desktop-Client verwendet die versionierte API unter `/api/v1`. Sie stellt Te
 - Ein Teil kann mehrere Lagerorte haben; Änderungen müssen den betroffenen Ort eindeutig adressieren.
 - Externe Abgleiche und Katalogimporte können Daten verändern. Sie werden bewusst angestoßen und ersetzen keine Sicherungsstrategie.
 
+## Boxetiketten drucken
+
+Die Lagerverwaltung besitzt getrennte Arbeitsseiten: **Übersicht** für Boxen und
+Inhalte pro Fach, **Einlagern** für neue Zugänge, **Umräumen** für Bewegungen und
+Archivprüfung, **Boxgrößen** für Behältermaße und **Fächer** für Lagerstruktur,
+Fachmaße und Fachbeschriftung. **Bestand erfassen** dient der erstmaligen Aufnahme
+vorhandener Behälter und Inhalte; **Regeln** bündelt Kategorieziele und Archivregeln.
+Die [Lageranleitung](warehouse.md) beschreibt den passenden Einstieg je Aufgabe.
+
+Die Boxpflege bietet zwei A4-Formate: Avery 3474 mit 24 Etiketten zu 70 × 37 mm
+und Avery Zweckform 3657 mit 40 Etiketten zu 48,5 × 25,4 mm. Das Format vor
+dem Herunterladen auswählen; Startposition, freie Plätze, Sammelauswahl und die
+Kalibrierlinien passen sich daran an. Die kompakte Variante zeigt ein Bild des
+ersten Inhalts, dessen Teilenummer, eine Inhaltszusammenfassung und die Boxnummer.
+Bei mehreren Inhalten weist `(+n)` auf weitere Positionen hin. Immer in 100 % /
+tatsächlicher Größe und ohne automatische Seitenskalierung drucken.
+
+Die Boxpflege bündelt den Etikettendruck und vorgemerkte Neudrucke in gleich
+breiten Karten. Die Tabelle bleibt innerhalb der zentrierten Arbeitsfläche
+horizontal scrollbar, statt auf sehr breiten Bildschirmen die gesamte Seite zu
+strecken.
+
 ## Mengen speichern und Setlisten verwenden
 
 In der Setpflege zeigt eine Mengenänderung „Wird gespeichert …“, „Gespeichert.“

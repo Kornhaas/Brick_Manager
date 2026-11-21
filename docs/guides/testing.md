@@ -26,6 +26,25 @@ SQLite-Verbindung wurde ausgegeben, hat den Lauf aber nicht fehlschlagen lassen.
 
 ## Erwartete Nachweise
 
+Die aufgabenbezogenen Lagerseiten werden durch
+`brick_manager/tests/test_warehouse_pages.py` geprüft: getrennte Formularmengen,
+aktive Navigation, eindeutige HTML-IDs, gleichbleibendes Sitzungstoken und
+deaktivierte Einstiege. `tests/browser/warehouse_pages_smoke.py` prüft die
+Seitenübergänge und sichtbaren Formularzustände gegen eine isolierte Testanwendung.
+Ausführung mit Playwright und Chromium:
+
+```powershell
+poetry run python tests/browser/warehouse_pages_smoke.py
+# Alternativ einen installierten Chromium-Browser verwenden:
+$env:BRICK_BROWSER_CHANNEL = 'msedge'
+poetry run python tests/browser/warehouse_pages_smoke.py
+```
+
+`BRICK_BROWSER_SCREENSHOT` kann einen dauerhaften Screenshotpfad vorgeben.
+Ohne diesen Parameter liegen Screenshots im temporären Arbeitsverzeichnis.
+Das ist kein Test der Produktivdatenbank; die Testanwendung startet keine
+Produktivmigrationen und keinen Produktionsscheduler.
+
 - Routen: Status, stabiler HTML-/JSON-Vertrag, ungültige Eingaben, fehlende Ressource und resultierender Datenbankzustand.
 - Services: fachliches Ergebnis und exakter externer Request, inklusive Timeout- und Fehlerverhalten.
 - Modelle und Migrationen: Constraints, Beziehungen, Kaskaden sowie wiederholbare Upgrade-Pfade.

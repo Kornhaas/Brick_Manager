@@ -34,8 +34,37 @@ AVERY_3474_ROWS = 8
 AVERY_3474_LABELS_PER_PAGE = AVERY_3474_COLUMNS * AVERY_3474_ROWS
 AVERY_3474_LABEL_WIDTH = 70 * mm
 AVERY_3474_LABEL_HEIGHT = 37 * mm
+AVERY_3657_COLUMNS = 4
+AVERY_3657_ROWS = 10
+AVERY_3657_LABELS_PER_PAGE = AVERY_3657_COLUMNS * AVERY_3657_ROWS
+AVERY_3657_LABEL_WIDTH = 48.5 * mm
+AVERY_3657_LABEL_HEIGHT = 25.4 * mm
+# The 3657 sheet has an 8 mm horizontal and 21.5 mm vertical outer margin.
+AVERY_3657_LEFT_MARGIN = 8 * mm
+AVERY_3657_TOP_MARGIN = 21.5 * mm
 LABEL_IMAGE_DPI = 300
 PDF_POINTS_PER_INCH = 72
+
+LABEL_FORMATS = {
+    "avery_3474": {
+        "name": "Avery 3474",
+        "columns": AVERY_3474_COLUMNS,
+        "rows": AVERY_3474_ROWS,
+        "width": AVERY_3474_LABEL_WIDTH,
+        "height": AVERY_3474_LABEL_HEIGHT,
+        "left": 0,
+        "top": 0.5 * mm,
+    },
+    "avery_3657": {
+        "name": "Avery Zweckform 3657",
+        "columns": AVERY_3657_COLUMNS,
+        "rows": AVERY_3657_ROWS,
+        "width": AVERY_3657_LABEL_WIDTH,
+        "height": AVERY_3657_LABEL_HEIGHT,
+        "left": AVERY_3657_LEFT_MARGIN,
+        "top": AVERY_3657_TOP_MARGIN,
+    },
+}
 
 
 def _label_output_path(box_info, extension):
@@ -259,25 +288,120 @@ def _draw_avery_3474_label(pdf, box_info, x_position, y_position):
     )
 
 
+def _draw_avery_3657_label(pdf, box_info, x_position, y_position):
+    """Draw the compact 48.5 x 25.4 mm Avery Zweckform 3657 label."""
+    padding = 2.5 * mm
+    items = box_info.get("items", [])
+    circle_radius = 3.5 * mm
+    circle_x = x_position + AVERY_3657_LABEL_WIDTH - padding - circle_radius
+    circle_y = y_position + AVERY_3657_LABEL_HEIGHT / 2
+    text_right = circle_x - circle_radius - 1.5 * mm
+    image_size = 12 * mm
+    image_x = x_position + padding
+    image_y = y_position + (AVERY_3657_LABEL_HEIGHT - image_size) / 2
+    text_left = image_x + image_size + 1.5 * mm
+    text_width = text_right - text_left
+
+    first_item = items[0] if items else {}
+    item_image = download_image(first_item.get("img_url"))
+    if item_image:
+        image, draw_width, draw_height = _prepare_pdf_image(
+            item_image, image_size, image_size
+        )
+        pdf.drawImage(
+            ImageReader(image),
+            image_x + (image_size - draw_width) / 2,
+            image_y + (image_size - draw_height) / 2,
+            width=draw_width,
+            height=draw_height,
+            mask="auto",
+            preserveAspectRatio=True,
+        )
+    name_lines, name_size = _wrap_label_name(
+        first_item.get("name", "Empty box"),
+        text_width,
+        max_lines=1,
+        max_size=7,
+        min_size=5,
+    )
+    if name_lines:
+        pdf.setFont("Helvetica", name_size)
+        pdf.drawString(text_left, y_position + 17.5 * mm, name_lines[0])
+    _draw_fitted_text(
+        pdf,
+        first_item.get("part_num", ""),
+        text_left + text_width / 2,
+        y_position + 11.5 * mm,
+        text_width,
+        max_size=7,
+        min_size=5,
+    )
+    summary = _label_category(items)
+    if len(items) > 1:
+        summary += f" (+{len(items) - 1})"
+    _draw_fitted_text(
+        pdf,
+        summary,
+        text_left + text_width / 2,
+        y_position + 5 * mm,
+        text_width,
+        max_size=6,
+        min_size=4,
+    )
+    pdf.setFillColorRGB(1, 0.85, 0.45)
+    pdf.circle(circle_x, circle_y, circle_radius, fill=1, stroke=1)
+    pdf.setFillColorRGB(0, 0, 0)
+    _draw_fitted_text(
+        pdf,
+        box_info.get("box", "?"),
+        circle_x,
+        circle_y - (getAscent("Helvetica", 10) + getDescent("Helvetica", 10)) / 2,
+        6 * mm,
+        max_size=10,
+        min_size=6,
+    )
+
+
+def _label_format(label_format):
+    try:
+        return LABEL_FORMATS[label_format]
+    except KeyError as error:
+        raise ValueError("Unknown label format") from error
+
+
 def create_avery_3474_cut_lines_pdf(
     horizontal_offset_mm: float = 0, vertical_offset_mm: float = 0
 ):
     """Create an A4 calibration sheet containing only the label cut lines."""
     if not -10 <= horizontal_offset_mm <= 10 or not -10 <= vertical_offset_mm <= 10:
         raise ValueError("Print offsets must be between -10 and 10 mm")
+    return create_label_cut_lines_pdf(
+        "avery_3474", horizontal_offset_mm, vertical_offset_mm
+    )
+
+
+def create_label_cut_lines_pdf(
+    label_format="avery_3474",
+    horizontal_offset_mm: float = 0,
+    vertical_offset_mm: float = 0,
+):
+    """Create a calibration sheet for one of the supported label formats."""
+    if not -10 <= horizontal_offset_mm <= 10 or not -10 <= vertical_offset_mm <= 10:
+        raise ValueError("Print offsets must be between -10 and 10 mm")
+    spec = _label_format(label_format)
     output = BytesIO()
     pdf = canvas.Canvas(output, pagesize=A4, pageCompression=1)
-    pdf.setTitle("Avery 3474 cut lines")
+    pdf.setTitle(f"{spec['name']} cut lines")
     pdf.setLineWidth(0.25)
-    left = horizontal_offset_mm * mm
-    top = A4[1] - 0.5 * mm - vertical_offset_mm * mm
-    right = left + AVERY_3474_COLUMNS * AVERY_3474_LABEL_WIDTH
-    bottom = top - AVERY_3474_ROWS * AVERY_3474_LABEL_HEIGHT
-    for row in range(AVERY_3474_ROWS + 1):
-        y = top - row * AVERY_3474_LABEL_HEIGHT
+    left = spec["left"] + horizontal_offset_mm * mm
+    top = A4[1] - spec["top"] - vertical_offset_mm * mm
+    right = left + spec["columns"] * spec["width"]
+    bottom = top - spec["rows"] * spec["height"]
+    for row in range(spec["rows"] + 1):
+        y = top - row * spec["height"]
         pdf.line(left, y, right, y)
-    for column in range(AVERY_3474_COLUMNS + 1):
-        x = left + column * AVERY_3474_LABEL_WIDTH
+    for column in range(spec["columns"] + 1):
+        x = left + column * spec["width"]
         pdf.line(x, bottom, x, top)
     pdf.save()
     output.seek(0)
@@ -288,8 +412,23 @@ def create_avery_3474_pdf(
     boxes, start_position=1, horizontal_offset_mm=0, vertical_offset_mm=0
 ):
     """Create a print-ready Avery 3474 A4 PDF and return it as a byte stream."""
-    if not 1 <= start_position <= AVERY_3474_LABELS_PER_PAGE:
-        raise ValueError("Start position must be between 1 and 24")
+    return create_label_sheet_pdf(
+        boxes, "avery_3474", start_position, horizontal_offset_mm, vertical_offset_mm
+    )
+
+
+def create_label_sheet_pdf(
+    boxes,
+    label_format="avery_3474",
+    start_position=1,
+    horizontal_offset_mm=0,
+    vertical_offset_mm=0,
+):
+    """Create a print-ready A4 PDF for a supported storage-label format."""
+    spec = _label_format(label_format)
+    capacity = spec["columns"] * spec["rows"]
+    if not 1 <= start_position <= capacity:
+        raise ValueError(f"Start position must be between 1 and {capacity}")
     if not boxes:
         raise ValueError("At least one box is required")
     if not -10 <= horizontal_offset_mm <= 10 or not -10 <= vertical_offset_mm <= 10:
@@ -298,25 +437,25 @@ def create_avery_3474_pdf(
     output = BytesIO()
     pdf = canvas.Canvas(output, pagesize=A4, pageCompression=1)
     pdf.setTitle(
-        f"Avery 3474 box labels (X {horizontal_offset_mm:g} mm, Y {vertical_offset_mm:g} mm)"
+        f"{spec['name']} box labels (X {horizontal_offset_mm:g} mm, Y {vertical_offset_mm:g} mm)"
     )
     slot = start_position - 1
 
     for box_info in boxes:
-        if slot >= AVERY_3474_LABELS_PER_PAGE:
+        if slot >= capacity:
             pdf.showPage()
             slot = 0
 
-        column = slot % AVERY_3474_COLUMNS
-        row = slot // AVERY_3474_COLUMNS
-        x_position = column * AVERY_3474_LABEL_WIDTH + horizontal_offset_mm * mm
+        column = slot % spec["columns"]
+        row = slot // spec["columns"]
+        x_position = spec["left"] + column * spec["width"] + horizontal_offset_mm * mm
         y_position = (
-            A4[1]
-            - 0.5 * mm
-            - (row + 1) * AVERY_3474_LABEL_HEIGHT
-            - vertical_offset_mm * mm
+            A4[1] - spec["top"] - (row + 1) * spec["height"] - vertical_offset_mm * mm
         )
-        _draw_avery_3474_label(pdf, box_info, x_position, y_position)
+        if label_format == "avery_3474":
+            _draw_avery_3474_label(pdf, box_info, x_position, y_position)
+        else:
+            _draw_avery_3657_label(pdf, box_info, x_position, y_position)
         slot += 1
 
     pdf.save()

@@ -2,6 +2,163 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-21 – Integrationsstand für main und Docker freigegeben
+
+**Umfang:** Der Nutzer beauftragt die Übernahme aller vorhandenen Änderungen
+nach `main` und die Überwachung des dadurch ausgelösten Docker-Workflows.
+Der Integrationsstand enthält die Sammlungsstabilisierung, getrennte
+Lagerarbeitsseiten, Kategorienamen und Fehlerzustände, zusätzliche Boxetiketten,
+Browserregressionen sowie die vorhandenen SQLite-Editor-Empfehlungen und den
+aktualisierten Dependency-Lock. Die jeweiligen Fachänderungen sind in den
+vorherigen Einträgen und der [Lageranleitung](guides/warehouse.md) beschrieben.
+
+**Lokale Freigabeprüfung:** Vollständiger Windows-Lauf mit UTF-8: 611 Tests,
+609 bestanden, 2 fehlgeschlagen, 0 übersprungen; Gesamt-Coverage 73,25 %.
+Die beiden Fehler betreffen fehlende Windows-Symlinkrechte und den unter
+Windows unzugänglichen Linux-Interpreter der vorhandenen `.venv`.
+Poetry-Lock-Prüfung und sämtliche anwendbaren Pre-Commit-Prüfungen bestanden.
+Für Python wurde der bereits dokumentierte externe Prüfinterpreter verwendet.
+Eine leere temporäre Git-Konfigurationsvariable musste nur im Prüfprozess
+neutralisiert werden; die Repository-Konfiguration blieb unverändert.
+
+**Veröffentlichungsgrenze:** Der Workflow baut nach bestandenen Linux-Tests
+`kornhaas/bricks_manager` für AMD64 und ARM64, veröffentlicht die Branch-/Latest-Tags
+und prüft den Containerstart samt Health-Endpunkt. Der Job „Deploy“ erzeugt nur
+einen Hinweis; ein automatischer Neustart des Produktivservers ist nicht
+konfiguriert. Der neue Workflowlauf ist bei Erstellung dieses Eintrags noch
+nicht abgeschlossen; sein Ergebnis wird im zugehörigen Chat nachverfolgt.
+Keine Produktivmigration oder Produktivdatenänderung ist Teil dieses Auftrags.
+
+## 2026-11-21 – Alte Serverantwort nicht mehr als leeren Katalog anzeigen
+
+**Ergebnis:** Die Kategorieauswahl unterscheidet eine ausdrücklich leere
+Kategorienliste von einem fehlenden Antwortfeld. Bei älterem Servercode zeigt
+sie einen Lade-/Aktualisierungshinweis, sperrt das Speichern und fordert keinen
+Neuimport. Nach vollständiger Antwort ist die Auswahl wieder nutzbar. Bei
+fehlender Namensinformation behauptet auch die Regelübersicht nicht mehr,
+die Kategorie sei aus dem Katalog entfernt worden.
+
+**Verifikation:** Der isolierte Edge-Browserlauf bestand elf Abläufe ohne
+JavaScript-Fehler. Neu geprüft wurden fehlende und leere Kategorienantworten,
+die jeweils passende Meldung, gesperrtes Speichern und Wiederherstellung nach
+erneutem Laden der vollständigen Antwort. Ruff und JavaScript-Syntax geprüft;
+die Änderungen an [Lageranleitung](guides/warehouse.md) und
+[Softwaredesign](architecture/software-design.md) beschreiben diese Unterscheidung.
+Kein Import, kein Serverneustart und kein Zugriff mit Schreibrechten auf die
+Produktivsammlung. Die laufende Anwendung muss für die Namensauswahl weiterhin
+den bereits implementierten aktuellen Python-Code laden.
+
+## 2026-11-21 – Fehlende Kategorieauswahl im laufenden Server eingegrenzt
+
+**Diagnose:** Die verfügbare Produktivdatenbank enthält 76 Kategorien mit Namen
+(`rebrickable_part_categories`). Die laufende, über den lokalen Port 5000
+erreichbare Anwendung liefert bei `GET /warehouse/settings` dagegen noch kein
+`categories`-Feld. Der aktuelle Quellcode liefert dieses Feld bereits. Damit
+verwendet die neue Oberfläche eine ältere Serverantwort und deutet das fehlende
+Feld irreführend als leeren Katalog. Ein erneuter Katalogimport ist nicht nötig;
+der laufende Server muss den aktualisierten Python-Code laden.
+
+**Nachweis und Grenzen:** SQLite ausschließlich mit `mode=ro` und
+`PRAGMA query_only=ON` gelesen; Anzahl und Namensbeispiele mit einer lesenden
+HTTP-Antwort sowie dem vorhandenen Quellcode verglichen. Kein Import, kein
+Anwendungsneustart und keine Datenänderung ausgeführt. Keine neuen Tests oder
+Referenzänderungen, da dieser Auftrag die Laufzeitabweichung diagnostiziert
+und kein neues Verhalten implementiert.
+
+## 2026-11-21 – Kategorienamen in Lagerregeln statt ID-Eingabe
+
+**Ergebnis und Grund:** Kategorieziele verwenden eine alphabetische Auswahl
+der importierten Kategorienamen statt eines Zahlenfelds. Auch gespeicherte
+Zuordnungen zeigen den Namen, damit keine internen IDs bekannt sein müssen.
+Ohne Kategorien erklärt ein Hinweis den fehlenden Teilekatalog und sperrt
+das Speichern. Der vorhandene numerische Schreibvertrag und gespeicherte
+Zuordnungen bleiben unverändert; die Einstellungen liefern lediglich zusätzliche
+Katalog- und Namensfelder. Details in [Lageranleitung](guides/warehouse.md)
+und [Softwaredesign](architecture/software-design.md).
+
+**Verifikation:** 32 fokussierte Pythonprüfungen bestanden, darunter zwei neue
+Regressionen für Kategorienamen, leeren Katalog, numerisches Speichern und
+unbekannte Kategorien. Der isolierte Edge-Browserlauf bestand zehn Abläufe,
+einschließlich Auswahl nach sichtbarem Namen, Speichern und Anzeige der Regel.
+Ruff-Lint, Python-Format und JavaScript-Syntax geprüft. Keine Produktivdaten
+verwendet. Kein vollständiger Suite-Lauf für diese begrenzte UI-/Antwortergänzung;
+die zuvor dokumentierten Umgebungsgrenzen gelten weiterhin.
+
+## 2026-11-21 – Lagerverwaltung nach Aufgaben aufgeteilt
+
+**Ergebnis:** Die bisherige Sammelseite wurde in Übersicht, Einlagern,
+Aufräumen, Boxgrößen, Regale/Fächer, Bestandserfassung und Regeln aufgeteilt.
+Die Übersicht konzentriert sich auf Fach, Boxen, Inhalte und Etiketten.
+Bestätigte Boxkarten zeigen bis zu drei Inhaltsvarianten direkt als Vorschau.
+Eigene Konfigurationsseiten zeigen vorhandene Größen und Lagerorte mit
+Bearbeitungsaktionen. Fachlabels lassen sich gezielt auswählen und als
+zuschneidbare Papierkarten drucken. Gleichmäßige Fachhöhen erhalten ein einfaches
+Eingabefeld; abweichende Messprofile bleiben als erweiterte Option verfügbar.
+Bewegungen zeigen nur passende Pflichtfelder. Alte Zuordnungen öffnen die
+Bestandserfassung mit Inhalts-ID; Details und Fachkontext bleiben erreichbar.
+
+**Grund und Architektur:** Ein unabhängiger UX-Rollenreview bestätigte die
+Überladung durch gleichzeitig angebotene Aufgaben. Die Umsetzung erhält den
+Warehouse-Blueprint, Services und JSON-Verträge und rendert je URL nur die
+zugehörigen Formulare. Formularbindung und zusätzliche Datenabfragen richten
+sich nach der aktuellen Seite. Ein separater Testagent prüfte die Integration.
+Kein Datenmodell, keine Migration und keine Produktivdaten wurden verändert.
+Dokumentiert in [Lageranleitung](guides/warehouse.md),
+[Benutzeranleitung](guides/user-guide.md), [Softwaredesign](architecture/software-design.md),
+[Referenzarchitektur](architecture/reference-architecture.md),
+[High-Level-Design](architecture/high-level-design.md) und
+[Architekturentscheidungen](architecture/decisions.md).
+
+**Verifikation:** 105 fokussierte Seiten-, Routen-, Altzuordnungs- und
+Etikettenprüfungen sowie 52 Struktur-/Bewegungs-/Vorschlagsprüfungen bestanden.
+16 neue Seitenprüfungen sichern Aufgabentrennung, Navigation, eindeutige IDs,
+Sitzungstoken und deaktivierte Einstiege. Alle 25 bestehenden Node-Tests
+bestanden. Python-Lint und Formatprüfung der geänderten Routen-/Testdateien
+sowie JavaScript-Syntax sind erfolgreich.
+Der volle Lauf sammelte 609 Tests: 606 bestanden, 3 fehlgeschlagen,
+0 übersprungen; Coverage 73,22 %. Die Fehler betreffen fehlende Windows-Rechte
+für Symlinks, das Lesen einer UTF-8-Workflowdatei als cp1252 und einen unter
+Windows unzugänglichen Linux-Interpreter in der vorhandenen `.venv`.
+Der Workflowtest bestand im separaten Nachlauf mit `PYTHONUTF8=1`.
+Poetry lief mit deaktivierter lokaler Venv-Auswahl im vorhandenen Python 3.13;
+die beschädigte lokale `.venv` wurde nicht repariert. BasedPyright ist in
+diesem Prüfinterpreter nicht verfügbar.
+
+**Grenzen:** Automatisierte Browserprüfungen verwenden ausschließlich die
+isolierte Testanwendung und temporäre Daten. Quelltextreview und Browserprüfung
+ersetzen keinen Nutzertest mit der realen Sammlung und keinen Papier-Probedruck.
+Der neue Edge-Browserlauf bestand neun Abläufe, einschließlich echter
+Einlagerung von sieben Test-Bricks über Entwurf, Reservierung und physische
+Bestätigung, Formularrücksetzung, gezieltem Fachlabeldruck und fachübergreifenden
+Boxlinks. Die drei bisherigen Lager-Browserläufe bestanden ebenfalls
+(acht Lagerabläufe, Altzuordnungen und Etiketten einschließlich Fehlerpfaden).
+Desktop und 390-Pixel-Ansicht wurden zusätzlich visuell geprüft.
+Lokale Dateilinks der geänderten Markdown-Dokumente sind geprüft.
+
+## 2026-11-20 – Kompaktes Boxetikettenformat ergänzt
+
+**Ergebnis:** Die Etikettenauswahl unterstützt zusätzlich Avery Zweckform 3657
+mit 40 Etiketten pro A4-Bogen (4 × 10, 48,5 × 25,4 mm). Bogenraster,
+Startposition, freie-Platz-Anzeige, Kalibrierlinien, Dateinamen sowie der Druck
+vorgemerkter Etiketten verwenden das ausgewählte Format. Das kompakte Layout
+zeigt Boxnummer, ein Bild des ersten Inhalts, dessen Teilenummer und eine
+Zusammenfassung weiterer Inhalte. Avery 3474 bleibt unverändert vorausgewählt.
+
+**Grund und Nachweis:** Kleine Behälter benötigen ein zweites, kleineres
+Etikettenformat. Die Herstellerseite für [Avery Zweckform 3657](https://www.avery-zweckform.com/produkt/universal-etiketten-3657)
+bestätigt Maße und 40 Etiketten pro Bogen. Ergänzte Service- und Routentests
+prüfen PDF-Erzeugung, das 4-×-10-Raster, Position 40 und das Bild des ersten
+Inhalts. 76 fokussierte Service-, Routen- und Vormerkungstests bestanden mit dem vorhandenen
+Systeminterpreter; Python-/JavaScript-Syntax, Ruff und Diff-Whitespace sind
+ebenfalls geprüft. Poetry konnte die vorhandene, gesperrte `.venv` nicht
+reparieren. Kein Datenmodell, keine Migration und keine Produktivdaten sind
+betroffen.
+
+**Oberfläche:** Der Bereich für vorgemerkte Neudrucke und der Etikettendruck
+teilen jetzt eine zentrierte Arbeitsfläche und gleichartige Karten. Sichtbare
+Beschriftungen und Rückmeldungen des Etikettendrucks sind auf Deutsch
+vereinheitlicht; die Tabelle bleibt bei Bedarf scrollbar.
+
 ## 2026-11-15 – Erste testgetriebene Architektur-/Usability-Welle
 
 **Auftrag und Review:** Projektweite Sichtung anhand des sauberen Stands `ac40f74` aus Architektur-, Nutzer- und Usability-Perspektive. Zwei unabhängige Rollenreviews lieferten Quellcodebefunde und gezielte Nachweise; der koordinierende Agent integrierte Umsetzung und Dokumentation. Priorisierung und noch offene Altlasten stehen im [Verbesserungsplan](plans/architecture-usability-improvements.md). Die Sichtung ist kein vollständiger Sicherheits-/Nutzertest und keine Behauptung, sämtliche Altlasten beseitigt zu haben.

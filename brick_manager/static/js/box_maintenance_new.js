@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize all location selects
     loadLocations();
 
-    // Avery 3474 batch label queue
+    // Batch label queue
     setupLabelQueue();
 
     // Single Box View handlers
@@ -542,6 +542,8 @@ function setupLabelQueue() {
     const message = document.getElementById('label-queue-message');
     const progress = document.getElementById('label-sheet-progress');
     const startPosition = document.getElementById('label-start-position');
+    const labelFormat = document.getElementById('label-format');
+    const labelFormatDescription = document.getElementById('label-format-description');
     const horizontalOffset = document.getElementById('label-horizontal-offset');
     const verticalOffset = document.getElementById('label-vertical-offset');
     const selectMissingButton = document.getElementById('select-missing-labels');
@@ -556,6 +558,23 @@ function setupLabelQueue() {
     let boxes = [];
     let downloadedBoxes = [];
 
+    const formats = {
+        avery_3474: { capacity: 24, description: 'Avery 3474: 24 Etiketten pro A4-Bogen (70 × 37 mm).' },
+        avery_3657: { capacity: 40, description: 'Avery Zweckform 3657: 40 Etiketten pro A4-Bogen (48,5 × 25,4 mm).' }
+    };
+
+    function currentFormat() {
+        return formats[labelFormat.value] || formats.avery_3474;
+    }
+
+    function applyFormat() {
+        const format = currentFormat();
+        startPosition.max = String(format.capacity);
+        if (Number(startPosition.value) > format.capacity) startPosition.value = String(format.capacity);
+        labelFormatDescription.textContent = format.description;
+        updateProgress();
+    }
+
     function selectedBoxes() {
         return Array.from(queueBody.querySelectorAll('.label-queue-checkbox:checked'))
             .map(checkbox => boxes[Number(checkbox.dataset.index)]);
@@ -567,21 +586,23 @@ function setupLabelQueue() {
 
     function updateProgress() {
         const selected = selectedBoxes().length;
-        const firstSlot = Math.max(1, Math.min(24, Number(startPosition.value) || 1));
+        const capacity = currentFormat().capacity;
+        const firstSlot = Math.max(1, Math.min(capacity, Number(startPosition.value) || 1));
         const occupiedSlots = firstSlot - 1 + selected;
-        const sheets = selected ? Math.ceil(occupiedSlots / 24) : 0;
-        const remaining = selected ? (24 - (occupiedSlots % 24)) % 24 : 25 - firstSlot;
+        const sheets = selected ? Math.ceil(occupiedSlots / capacity) : 0;
+        const remaining = selected ? (capacity - (occupiedSlots % capacity)) % capacity : capacity + 1 - firstSlot;
         progress.textContent = selected
-            ? `${selected} selected · ${sheets} sheet${sheets === 1 ? '' : 's'} · ${remaining} free on last sheet`
-            : `${remaining} free positions on first sheet`;
+            ? `${selected} ausgewählt · ${sheets} Bogen · ${remaining} frei auf dem letzten Bogen`
+            : `${remaining} freie Positionen auf dem ersten Bogen`;
         generateButton.disabled = selected === 0;
         downloadedBoxes = [];
         confirmButton.disabled = true;
     }
 
     function selectNextMissingSheet() {
-        const firstSlot = Math.max(1, Math.min(24, Number(startPosition.value) || 1));
-        let available = 25 - firstSlot;
+        const capacity = currentFormat().capacity;
+        const firstSlot = Math.max(1, Math.min(capacity, Number(startPosition.value) || 1));
+        let available = capacity + 1 - firstSlot;
         queueBody.querySelectorAll('.label-queue-checkbox').forEach(checkbox => {
             const box = boxes[Number(checkbox.dataset.index)];
             const visible = !checkbox.closest('tr').hidden;
@@ -642,7 +663,7 @@ function setupLabelQueue() {
             }
         });
         message.className = `alert ${visibleMissingCount ? 'alert-warning' : 'alert-success'} mt-3 mb-0`;
-        message.textContent = `${visibleCount} of ${boxes.length} boxes shown · ${visibleMissingCount} missing labels.`;
+        message.textContent = `${visibleCount} von ${boxes.length} Boxen angezeigt · ${visibleMissingCount} Etiketten fehlen.`;
         updateProgress();
     }
 
@@ -657,7 +678,7 @@ function setupLabelQueue() {
             checkbox.className = 'form-check-input label-queue-checkbox';
             checkbox.dataset.index = index;
             checkbox.checked = false;
-            checkbox.setAttribute('aria-label', `Print label for box ${box.box}`);
+            checkbox.setAttribute('aria-label', `Etikett für Box ${box.box} drucken`);
             checkbox.addEventListener('change', updateProgress);
             checkboxCell.appendChild(checkbox);
             row.appendChild(checkboxCell);
@@ -670,20 +691,20 @@ function setupLabelQueue() {
             const statusCell = document.createElement('td');
             const badge = document.createElement('span');
             badge.className = box.label_printed ? 'badge text-bg-success' : 'badge text-bg-warning';
-            badge.textContent = box.label_printed ? 'Printed' : 'Missing';
+            badge.textContent = box.label_printed ? 'Gedruckt' : 'Fehlt';
             statusCell.appendChild(badge);
             row.appendChild(statusCell);
             queueBody.appendChild(row);
         });
-        populateFilter(locationFilter, boxes.map(box => box.location), 'All locations');
-        populateFilter(levelFilter, boxes.map(box => box.level), 'All levels');
+        populateFilter(locationFilter, boxes.map(box => box.location), 'Alle Orte');
+        populateFilter(levelFilter, boxes.map(box => box.level), 'Alle Ebenen');
         applyFilters();
     }
 
     function loadQueue() {
         fetch('/box_maintenance/label_queue')
             .then(response => {
-                if (!response.ok) throw new Error('Could not load label queue.');
+                if (!response.ok) throw new Error('Etikettenliste konnte nicht geladen werden.');
                 return response.json();
             })
             .then(data => {
@@ -704,6 +725,7 @@ function setupLabelQueue() {
     selectAllDisplayedButton.addEventListener('click', selectAllDisplayed);
     clearSelectionButton.addEventListener('click', clearSelection);
     startPosition.addEventListener('change', updateProgress);
+    labelFormat.addEventListener('change', applyFormat);
     [locationFilter, levelFilter, statusFilter].forEach(filter =>
         filter.addEventListener('change', applyFilters)
     );
@@ -712,6 +734,7 @@ function setupLabelQueue() {
     document.getElementById('download-cut-lines')?.addEventListener('click', function() {
         if (!horizontalOffset.reportValidity() || !verticalOffset.reportValidity()) return;
         const params = new URLSearchParams({
+            label_format: labelFormat.value,
             horizontal_offset_mm: horizontalOffset.value || '0',
             vertical_offset_mm: verticalOffset.value || '0'
         });
@@ -722,6 +745,7 @@ function setupLabelQueue() {
         const selected = selectedBoxes();
         const payload = {
             boxes: selected.map(boxReference),
+            label_format: labelFormat.value,
             start_position: Number(startPosition.value),
             horizontal_offset_mm: Number(horizontalOffset.value),
             vertical_offset_mm: Number(verticalOffset.value)
@@ -741,7 +765,7 @@ function setupLabelQueue() {
                             throw new Error(data.error);
                         }
                     }
-                    throw new Error('Could not generate label sheet.');
+                    throw new Error('Etikettenbogen konnte nicht erstellt werden.');
                 }
                 return response.blob();
             })
@@ -749,13 +773,13 @@ function setupLabelQueue() {
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `avery_3474_box_labels_x${payload.horizontal_offset_mm}_y${payload.vertical_offset_mm}.pdf`;
+                link.download = `${payload.label_format}_box_labels_x${payload.horizontal_offset_mm}_y${payload.vertical_offset_mm}.pdf`;
                 link.click();
                 URL.revokeObjectURL(url);
                 downloadedBoxes = selected.map(boxReference);
                 confirmButton.disabled = false;
                 message.className = 'alert alert-info mt-3 mb-0';
-                message.textContent = 'PDF downloaded. Confirm only after the sheet printed successfully.';
+                message.textContent = 'PDF geladen. Erst nach erfolgreichem Druck bestätigen.';
             })
             .catch(error => {
                 message.className = 'alert alert-danger mt-3 mb-0';
@@ -767,14 +791,14 @@ function setupLabelQueue() {
     });
 
     confirmButton.addEventListener('click', function() {
-        if (!downloadedBoxes.length || !confirm('Did all selected labels print successfully?')) return;
+        if (!downloadedBoxes.length || !confirm('Wurden alle ausgewählten Etiketten erfolgreich gedruckt?')) return;
         fetch('/box_maintenance/label_sheet/printed', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ boxes: downloadedBoxes })
         })
             .then(response => {
-                if (!response.ok) throw new Error('Could not confirm printed labels.');
+                if (!response.ok) throw new Error('Der erfolgreiche Druck konnte nicht bestätigt werden.');
                 return response.json();
             })
             .then(loadQueue)
@@ -784,5 +808,6 @@ function setupLabelQueue() {
             });
     });
 
+    applyFormat();
     loadQueue();
 }

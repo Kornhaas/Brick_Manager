@@ -4,6 +4,7 @@ Diese Entscheidungen gelten, bis sie durch einen neuen, datierten Eintrag ersetz
 
 | Datum | Entscheidung | Begründung und Folgen |
 | --- | --- | --- |
+| 2026-11-21 | Lageroberfläche nach Aufgaben auf eigenständige Seiten aufteilen. | Übersicht, Einlagern, Umräumen, Boxgrößen und Fächer sind direkte Ziele; Bestandserfassung und Regeln sind ergänzende Arbeitsbereiche. Jinja rendert nur die benötigten Formulare; der gemeinsame Browsercontroller bindet vorhandene Elemente und lädt Zusatzdaten nach Seitenbedarf. Bestehende Warehouse-Services, IDs, JSON-Schreibverträge und Bestätigungsregeln bleiben erhalten. Siehe [Lageranleitung](../guides/warehouse.md). |
 | 2026-10-30 | Flask-Blueprint-/Service-/Modellstruktur beibehalten. | Sie entspricht der vorhandenen Anwendung. Neue Funktionen folgen den bestehenden Grenzen statt eine parallele Schicht einzuführen. |
 | 2026-10-30 | `app.py` ohne explizites Refactoring nicht zur App-Factory umbauen. | Der Import erzeugt Tabellen, lädt Lookups und startet den Scheduler. Eine Änderung beeinflusst Start, CLI und Tests und braucht Charakterisierungstests. |
 | 2026-10-30 | Referenzdokumentation von historischen Berichten trennen. | Nur Dokumente außerhalb von `docs/history/` sind für neue Arbeit normativ; Historie bleibt nachvollziehbar erhalten. |

@@ -102,10 +102,12 @@ def test_warehouse_page_exposes_all_connected_flows(client):
     html = response.get_data(as_text=True)
     for text in [
         "Lagerübersicht",
-        "Stapel von unten nach oben",
-        "Physisch umgeräumt",
-        "Schublade unterteilen",
-        "Kategorieziele",
+        "/warehouse/intake",
+        "/warehouse/reorganize",
+        "/warehouse/box-types",
+        "/warehouse/locations",
+        "/warehouse/capture",
+        "/warehouse/settings-page",
         "warehouse.js",
         "warehouse-csrf",
     ]:

@@ -471,13 +471,22 @@ def archive_suggestions(shelf_id, as_of=None):
 
 
 def get_settings():
+    categories = [
+        {"id": category.id, "name": category.name}
+        for category in RebrickablePartCategories.query.order_by(
+            RebrickablePartCategories.name, RebrickablePartCategories.id
+        ).all()
+    ]
+    category_names = {category["id"]: category["name"] for category in categories}
     return {
         **{key: rule_number(key, value) for key, value in DEFAULTS.items()},
         "planning_reviewed": _reviewed(),
+        "categories": categories,
         "category_rules": [
             {
                 "id": r.id,
                 "category_id": r.category_id,
+                "category_name": category_names.get(r.category_id),
                 "location_id": r.location_id,
                 "archive_location_id": r.archive_location_id,
             }

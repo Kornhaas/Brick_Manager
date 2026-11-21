@@ -9,6 +9,7 @@ No production app import, remote requests or real collection database is used.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -44,7 +45,9 @@ def run():
     errors = []
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
+            browser = playwright.chromium.launch(
+                headless=True, channel=os.environ.get("BRICK_BROWSER_CHANNEL")
+            )
             page = browser.new_page(viewport={"width": 1365, "height": 1000})
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.route(
@@ -59,7 +62,22 @@ def run():
             expect(page.locator("#warehouse-status")).to_contain_text("Einheiten")
 
             def submit(form_id, path, fields, method="POST", status=201):
+                task = {
+                    "warehouse-location-form": "locations",
+                    "warehouse-type-form": "box-types",
+                    "warehouse-rule-form": "box-types",
+                    "warehouse-move-form": "reorganize",
+                    "warehouse-category-form": "settings-page",
+                }.get(form_id, "capture")
+                if not page.url.startswith(origin + "/warehouse/" + task):
+                    page.goto(origin + "/warehouse/" + task)
+                    expect(page.locator("#warehouse-status")).not_to_have_text(
+                        "Lager wird geladen …"
+                    )
                 form = page.locator("#" + form_id)
+                form.evaluate(
+                    "node => {for(let p=node.parentElement;p;p=p.parentElement) if(p.tagName==='DETAILS') p.open=true;}"
+                )
                 for name, value in fields.items():
                     field = form.locator(f'[name="{name}"]')
                     tag = field.evaluate("node => node.tagName")
@@ -88,7 +106,6 @@ def run():
                 expect(page.locator("#warehouse-error")).to_be_hidden()
                 return response.json()
 
-            page.locator("#warehouse-capture").evaluate("node => node.open = true")
             zone = submit(
                 "warehouse-location-form",
                 "/locations",
@@ -122,6 +139,10 @@ def run():
                 },
             )
             checks.append("Zone/rack/shelf forms with no fixed pilot identity")
+            page.goto(origin + "/warehouse/box-types")
+            page.locator("#warehouse-seed").evaluate(
+                "node => node.closest('details').open = true"
+            )
             page.locator("#warehouse-seed").click()
             expect(
                 page.locator('#warehouse-type-form [name="id"] option')
@@ -276,6 +297,7 @@ def run():
                     "relation_kind": "loose_on",
                 },
             )
+            page.goto(origin + "/warehouse")
             expect(
                 page.locator(f'.warehouse-unit[data-unit-id="{cup["id"]}"]').first
             ).to_contain_text("Lose Auflage")
@@ -336,15 +358,12 @@ def run():
                 "Draft / reservation / explicit physical confirmation through actual controls"
             )
 
-            # Open policy details before interacting with their controls.
-            page.get_by_text(
-                "Kategorieziele, Eigenbedarf und Archivregeln", exact=True
-            ).click()
             submit(
                 "warehouse-category-form",
                 "/category-rules",
                 {"category_id": 1, "location_id": rack["id"]},
             )
+            page.goto(origin + "/warehouse")
             search_form = page.locator("#warehouse-search-form")
             search_form.locator('[name="part_num"]').fill("old")
             search_form.locator('[name="color_id"]').fill("1")
@@ -353,6 +372,7 @@ def run():
                 "Representative rack"
             )
             expect(page.locator("#warehouse-search-results")).to_contain_text("Menge 6")
+            page.goto(origin + "/warehouse/reorganize")
             page.locator("#warehouse-shelf").select_option(str(shelf["id"]))
             page.locator("#warehouse-archive").click()
             expect(page.locator("#warehouse-archive-results")).to_contain_text(

@@ -272,11 +272,63 @@ def test_avery_3474_pdf_has_exact_a4_output_and_valid_start_position():
             [{"location": "A", "level": "1", "box": "7", "items": []}],
             start_position=25,
         )
+
+
+def test_avery_3657_pdf_uses_40_positions_and_rejects_position_41():
+    output = label_service.create_label_sheet_pdf(
+        [{"location": "A", "level": "1", "box": "7", "items": []}],
+        label_format="avery_3657",
+        start_position=40,
+    )
+
+    assert output.read(4) == b"%PDF"
+    assert label_service.LABEL_FORMATS["avery_3657"]["columns"] == 4
+    assert label_service.LABEL_FORMATS["avery_3657"]["rows"] == 10
+    with pytest.raises(ValueError, match="between 1 and 40"):
+        label_service.create_label_sheet_pdf(
+            [{"location": "A", "level": "1", "box": "7", "items": []}],
+            label_format="avery_3657",
+            start_position=41,
+        )
+
+
+def test_avery_3657_cut_lines_are_generated():
+    output = label_service.create_label_cut_lines_pdf("avery_3657")
+
+    assert output.read(4) == b"%PDF"
     with pytest.raises(ValueError, match="offsets"):
         label_service.create_avery_3474_pdf(
             [{"location": "A", "level": "1", "box": "7", "items": []}],
             horizontal_offset_mm=10.1,
         )
+
+
+def test_avery_3657_pdf_draws_the_first_part_image():
+    part_image = Image.new("RGB", (20, 20), color="red")
+    with patch(
+        "services.label_service.download_image", return_value=part_image
+    ) as image:
+        output = label_service.create_label_sheet_pdf(
+            [
+                {
+                    "location": "A",
+                    "level": "1",
+                    "box": "7",
+                    "items": [
+                        {
+                            "name": "Brick 2 x 4",
+                            "part_num": "3001",
+                            "category": "Bricks",
+                            "img_url": "https://example.test/3001.png",
+                        }
+                    ],
+                }
+            ],
+            label_format="avery_3657",
+        )
+
+    assert output.read(4) == b"%PDF"
+    image.assert_called_once_with("https://example.test/3001.png")
 
 
 def test_avery_label_images_keep_300_dpi_print_resolution():

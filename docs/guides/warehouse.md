@@ -4,7 +4,52 @@ Die Lagerverwaltung ist unter `/warehouse` erreichbar und in der Navigation verl
 
 ## Start und vorhandene Zuordnungen
 
-1. „Standardtypen anlegen“ erstellt die im Lagerplan genannten Behältertypen ohne vorhandene Typen zu überschreiben. Die übernommenen Produktmaße sind noch keine bestätigten Vor-Ort-Messungen.
+### Die passende Arbeitsseite wählen
+
+Die Lagerverwaltung trennt tägliche Arbeit und Einrichtung. Alle Bereiche haben
+eigene URLs und eine gemeinsame Navigation; ein Seitenwechsel setzt keine
+Lageränderung in Gang.
+
+| Arbeitsseite | Aufgabe |
+| --- | --- |
+| **Übersicht** (`/warehouse`) | Fach auswählen, Boxen und deren Inhalte öffnen, Boxetiketten vormerken und den Sammeldruck aufrufen |
+| **Einlagern** (`/warehouse/intake`) | Teil und Farbe suchen, Zielbox und Menge festlegen, neue Zugänge planen und anschließend physisch bestätigen |
+| **Aufräumen** (`/warehouse/reorganize`) | Fach auf Archivkandidaten prüfen, Teilmengen oder ganze Boxen verschieben und Aufträge bestätigen |
+| **Boxgrößen** (`/warehouse/box-types`) | Behältertypen und ihre Maße anlegen oder ändern; zusätzliche Stapelregeln bei Bedarf öffnen |
+| **Regale & Fächer** (`/warehouse/locations`) | Zonen, Regale und Fächer pflegen, Fachmaße ändern und Fachbeschriftung drucken |
+| **Bestand erfassen** (`/warehouse/capture`) | Vorhandene Boxen, Aufstellungen und Inhalte erstmalig erfassen beziehungsweise zählen |
+| **Regeln** (`/warehouse/settings-page`) | Kategorieziele, geplante Sets und Archivkriterien verwalten |
+
+Die Übersicht enthält keine Einrichtungs- oder Bewegungsformulare.
+Mess- und Stellflächenhinweise lassen sich bei Bedarf unter „Platz und
+Messstatus prüfen“ öffnen. Bestätigte Boxkarten zeigen bis zu drei
+Inhaltsvarianten als Vorschau; die vollständige Liste steht in den Boxdetails.
+Die Bewegungsseiten zeigen nur die zur gewählten Aufgabe passenden Felder. Einlagern
+verwendet direkt den Zugangsvorgang; Quelle und Stapelposition sind dafür nicht nötig.
+„Behälter zuordnen“ an einer bisherigen Beschriftungsgruppe öffnet die
+Bestandserfassung mit der ausgewählten Inhaltszeile.
+
+Für den ersten Aufbau: zunächst **Boxgrößen**, dann **Fächer**, danach
+**Bestand erfassen** verwenden. Neue physische Zugänge anschließend über
+**Einlagern** buchen. Vorhandenen Bestand nicht als neuen Zugang doppelt erfassen.
+Die Standardtypen werden erst durch den ausdrücklichen Einrichtungsbutton angelegt.
+
+Unter **Regeln → Kategorieziele** die Kategorie nach ihrem Katalognamen auswählen.
+Die Auswahl ist alphabetisch sortiert und beginnt mit „Kategorie wählen“.
+Auch gespeicherte Kategoriezuordnungen zeigen den Namen. Kategorie-IDs müssen
+nicht nachgeschlagen oder eingegeben werden. Ohne importierte Kategorien bleibt
+das Speichern deaktiviert und ein Hinweis nennt den leeren Teilekatalog.
+Liefert der laufende Server die Kategorienliste noch nicht, erscheint stattdessen
+ein Ladefehler mit Hinweis auf die Aktualisierung der Anwendung. Ein Neuimport
+ist dafür nicht erforderlich. Nach Laden des aktuellen Servercodes die Seite
+neu laden; die vorhandenen Namen werden wieder angeboten.
+
+Fachlabels enthalten die lesbare Lageradresse. In **Fächer** die gewünschten
+Fächer auswählen und die Druckansicht öffnen. Sie ist für normales Papier und
+anschließendes Zuschneiden gedacht; die Avery-Bögen für Boxetiketten bleiben
+auf der bestehenden Etikettendruckseite verfügbar.
+
+1. Unter **Boxgrößen → Mit Standardgrößen starten → Standardtypen ergänzen** die im Lagerplan genannten Behältertypen anlegen, ohne vorhandene Typen zu überschreiben. Die übernommenen Produktmaße sind noch keine bestätigten Vor-Ort-Messungen.
 2. Zone (Aktiv oder Archiv), Regal und Fach mit den vorhandenen Beschriftungen anlegen. Das reale Pilotfach ist frei wählbar; Regal 1/Fach 5 ist nur ein Beispiel.
 3. Boxen/Becher oder Magazine mit ihren echten Etiketten erfassen. Etiketten sind nicht eindeutig; interne IDs unterscheiden gleich beschriftete Einheiten. Nummernlücken bleiben erhalten.
 4. Bestehende Zuordnungen erscheinen im passenden Fach als gestrichelte Beschriftungsgruppen mit ihren bisherigen Boxetiketten. Gleiche Rohbeschriftungen werden gemeinsam angezeigt; dies bestätigt noch keinen einzelnen physischen Behälter. Fehlende oder mehrdeutige Fundorte stehen separat unter „Fundort noch zuordnen“. Vorhandene Rohtexte und Nummernlücken bleiben erhalten. Keine Menge wird aus Setbeständen geschätzt.

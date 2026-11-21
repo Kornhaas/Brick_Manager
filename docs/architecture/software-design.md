@@ -154,6 +154,36 @@ Bildsuche ab und vermeidet den Scan der gesamten Inventartabelle. Die neue
 Migration `20261115_warehouse_image_lookup.sql` erzeugt ausschließlich diesen
 Index; angewendete frühere Migrationsartefakte bleiben unverändert.
 
+## Aufgabenbezogene Lageroberfläche
+
+`routes/warehouse.py` rendert die Lagerseiten mit gemeinsamem Sitzungstoken,
+Seitenschlüssel und Navigation. `/warehouse` enthält Übersicht und ausgewählte
+Boxdetails. `/warehouse/intake`, `/warehouse/reorganize`, `/warehouse/box-types`,
+`/warehouse/locations`, `/warehouse/capture` und `/warehouse/settings-page` rendern
+nur ihre jeweiligen Arbeitsformulare. `static/js/warehouse.js` bleibt der gemeinsame
+Controller für Optionen, sichere Textdarstellung, Fehler und API-Aufrufe; Bindungen
+und zusätzliche Abfragen richten sich nach vorhandenen Seitenelementen.
+
+Die Bestandserfassung ist von neuen Zugängen und bestätigten Bewegungen getrennt.
+Ein Legacy-Inhalt wird über `/warehouse/capture?storage_id=<id>` zur Zuordnung
+übergeben; stabile Einheitenlinks bleiben `/warehouse?unit_id=<id>`.
+Bewegungsformulare zeigen nur die Felder ihrer Vorgangsart. Ausgeblendete Eingaben
+sind deaktiviert und werden nicht als versteckte Altwerte übertragen.
+Fachbeschriftung verwendet die bestehende Ortshierarchie und eine separate
+Druckansicht im Browser; Boxetiketten verwenden weiterhin die bestehende
+Etikettenerzeugung und Vormerkung. Es werden keine neuen Persistenzformate benötigt.
+
+Die Regelansicht verwendet für Kategorien eine Namensauswahl. `GET /warehouse/settings`
+liefert dafür additiv `categories` mit `id` und `name`; `category_rules` enthält
+zusätzlich `category_name`. Auswahl und Übersicht zeigen Katalognamen, während
+der bestehende Schreibvertrag weiterhin die numerische `category_id` verwendet.
+Leere Kataloge sperren die Kategorieauswahl und das Speichern mit einem erklärenden
+Hinweis. Fehlt die Kategorienliste in einer älteren Serverantwort, zeigt die
+Oberfläche dagegen einen Lade-/Aktualisierungsfehler statt eines leeren Katalogs
+oder einer Aufforderung zum Neuimport. Eine vollständige Antwort nach erneutem
+Laden gibt die Auswahl wieder frei. Namen werden im Browser als Text behandelt;
+fehlende Namensinformationen gelten nicht als Nachweis gelöschter Kategorien.
+
 ## Sammlungsstabilität und skalare Übersichten
 
 `collection_quantity_service.py` behandelt die Identität einer Mengenzeile als

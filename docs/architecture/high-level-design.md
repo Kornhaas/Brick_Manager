@@ -38,6 +38,12 @@ Quellen sind `brick_manager/app.py`, `routes/`, `services/`, `models.py`, `templ
 
 ## Lagerverwaltung
 
+Die Oberfläche trennt tägliche Aufgaben von Einrichtung: Die Hauptseite zeigt
+Boxen und Inhalte pro Fach; Einlagern und Umräumen haben eigene Arbeitsseiten.
+Boxgrößen und Fächer mit Beschriftung werden separat konfiguriert. Die Erfassung
+des vorhandenen Istbestands und Vorschlagsregeln sind ergänzende Bereiche.
+Diese Navigation bildet Aufgaben ab, während die gemeinsame Lagerdomäne erhalten bleibt.
+
 `/warehouse` ergänzt die Sammlung um feste Lagerorte, identifizierbare Behälter,
 Magazin-/Schubladenstrukturen, Auflagebeziehungen und gezählte Mengen je Fundort.
 Die Regalfront ist ohne Messwerte schematisch. Physische Bestandsmengen bleiben

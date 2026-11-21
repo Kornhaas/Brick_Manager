@@ -6,6 +6,8 @@
     const relationLabels = { on_shelf: 'Auf Fachboden', stacked: 'Gestapelt', loose_on: 'Lose Auflage' };
     const state = { locations: [], types: [], units: [], placements: [], contents: [], stack_rules: [], moves: [], settings: {}, selectedUnit: null, selectedLegacyKey: null, legacy_groups: [] };
     const byId = id => document.getElementById(id);
+    const page = byId('warehouse').dataset.page || 'overview';
+    const on = (id, event, callback) => byId(id)?.addEventListener(event, callback);
     const getUnit = id => state.units.find(item => item.id === Number(id));
     const getLocation = id => state.locations.find(item => item.id === Number(id));
     const getPlacement = id => state.placements.find(item => item.unit_id === Number(id));
@@ -67,6 +69,7 @@
     function rowsForOptions(kind) {
         const active = state.units.filter(unit => unit.active !== false);
         switch (kind) {
+            case 'categories': return (state.settings.categories || []).map(item => [item.id, item.name]).sort((a, b) => natural(a[1], b[1]));
             case 'locations': return state.locations.map(item => [item.id, locationLabel(item)]).sort((a, b) => natural(a[1], b[1]));
             case 'shelves': return state.locations.filter(item => item.kind === 'shelf').map(item => [item.id, locationLabel(item)]).sort((a, b) => natural(a[1], b[1]));
             case 'types': return state.types.map(item => [item.id, item.name]);
@@ -90,21 +93,34 @@
     const lastShelfKey = 'brick-manager.warehouse.last-shelf';
     let shelfSelectionInitialized = false;
     function rememberShelf() {
-        const value = byId('warehouse-shelf').value;
+        const value = byId('warehouse-shelf')?.value;
         if (value) {
             try { localStorage.setItem(lastShelfKey, value); } catch (_) { /* Browser storage may be disabled. */ }
         }
     }
     function refreshOptions() {
         const shelf = byId('warehouse-shelf');
-        const previous = shelf.value;
+        const previous = shelf?.value;
         document.querySelectorAll('[data-options]').forEach(select => fillSelect(select, rowsForOptions(select.dataset.options), select.dataset.empty));
+        const category = byId('warehouse-category');
+        if (category) {
+            const loaded = Array.isArray(state.settings.categories);
+            const available = loaded && rowsForOptions('categories').length > 0;
+            category.disabled = !available;
+            byId('warehouse-category-form').querySelector('button').disabled = !available;
+            const hint = byId('warehouse-category-hint');
+            hint.textContent = !loaded
+                ? 'Die Kategorieauswahl konnte nicht geladen werden. Bitte die Anwendung aktualisieren und diese Seite neu laden.'
+                : available ? 'Kategorie nach Namen auswählen.' : 'Im Teilekatalog sind keine Kategorien hinterlegt.';
+            if (!loaded) error(hint.textContent);
+        }
+        if (!shelf) return;
         const shelves = rowsForOptions('shelves');
         fillSelect(shelf, shelves, shelves.length ? 'Alle Fächer' : 'Noch kein Fach erfasst');
         shelf.disabled = !shelves.length;
         if (!shelfSelectionInitialized || previous && ![...shelf.options].some(option => option.value === previous)) {
             let saved;
-            try { saved = localStorage.getItem(lastShelfKey); } catch (_) { /* Use the first shelf without browser storage. */ }
+            try { saved = new URLSearchParams(location.search).get('shelf_id') || localStorage.getItem(lastShelfKey); } catch (_) { /* Use the first shelf without browser storage. */ }
             shelf.value = [...shelf.options].some(option => option.value && option.value === saved) ? saved : shelf.options[1]?.value || '';
             shelfSelectionInitialized = shelf.options.length > 1;
             rememberShelf();
@@ -138,6 +154,17 @@
         if (type && type.height_mm) button.style.minBlockSize = `${Math.max(75, Math.min(type.height_mm * 0.7, 150))}px`;
         button.append(element('strong', unitLabel(unit)));
         button.append(element('small', fillLabels[unit.fill_state] || fillLabels.unknown));
+        const variants = [...new Map(state.contents.filter(item => item.storage_unit_id === unit.id).map(item => [`${item.part_num}:${item.color_id}`, item])).values()];
+        if (variants.length) {
+            const previews = element('span', null, 'warehouse-part-previews');
+            for (const item of variants.slice(0, 3)) {
+                const preview = element('span', null, 'warehouse-part-preview');
+                preview.append(partIcon(item), element('span', item.part_name || item.part_num));
+                previews.append(preview);
+            }
+            if (variants.length > 3) previews.append(element('small', `+ ${variants.length - 3} weitere Varianten`));
+            button.append(previews);
+        }
         if (placement) {
             button.append(element('small', relationLabels[placement.relation_kind]));
             if (placement.support_unit_id) {
@@ -239,9 +266,9 @@
     }
     function editLegacyContent(item) {
         const form = byId('warehouse-content-form');
+        if (!form) { location.href = `/warehouse/capture?storage_id=${encodeURIComponent(item.id)}`; return; }
         for (const name of ['part_num', 'color_id', 'quantity', 'notes']) form.elements[name].value = item[name] ?? '';
         form.elements.id.value = item.id; form.elements.storage_unit_id.value = '';
-        byId('warehouse-capture').open = true;
         form.scrollIntoView({ block: 'center' }); form.elements.storage_unit_id.focus();
         status(`Bestehende Inhaltszuordnung #${item.id} ausgewählt. Erst nach physischer Prüfung einen Behälter wählen und speichern.`);
     }
@@ -278,10 +305,15 @@
         renderLayout(); if (focus) byId('detail-title').focus();
     }
     function renderLayout() {
-        const layout = byId('warehouse-layout'); empty(layout);
+        const layout = byId('warehouse-layout'); if (!layout) return; empty(layout);
         const selected = Number(byId('warehouse-shelf').value) || null;
         const shelves = state.locations.filter(item => item.kind === 'shelf' && (!selected || selected === item.id)).sort((a, b) => natural(locationLabel(a), locationLabel(b)));
-        if (!shelves.length) layout.append(element('p', 'Noch kein Fach erfasst. Lege unter „Lagerstruktur“ eine Zone, ein Regal und ein Fach an.'));
+        if (!shelves.length) {
+            layout.append(element('p', 'Dein Lager ist noch nicht eingerichtet. Beginne mit den Boxgrößen und Fächern.'));
+            for (const [href, text] of [['/warehouse/box-types', 'Boxgrößen konfigurieren'], ['/warehouse/locations', 'Regale und Fächer anlegen'], ['/warehouse/capture', 'Vorhandene Boxen erfassen']]) {
+                const link = element('a', text, 'warehouse-action'); link.href = href; layout.append(link);
+            }
+        }
         for (const shelf of shelves) {
             const section = element('section', null, 'warehouse-shelf');
             section.append(element('h3', locationLabel(shelf)));
@@ -313,7 +345,7 @@
             section.append(element('p', 'Fehlende oder mehrdeutige Beschriftungen werden keinem Fach zugeschrieben. Suche über die erhaltenen Angaben und öffne die Inhalte.'));
             legacyCards(section, unlocated); layout.append(section);
         }
-        const box = byId('warehouse-unresolved'); empty(box);
+        const box = byId('warehouse-unresolved'); if (!box) return; empty(box);
         box.append(element('p', `${state.legacy_groups.length} bestehende Beschriftungsgruppen sind oben in der Lagerübersicht sichtbar. Öffne dort eine Gruppe und wähle eine Inhaltszuordnung zur physischen Bestätigung.`));
     }
 
@@ -329,9 +361,18 @@
         rows.forEach(values => { const row = element('tr'); values.forEach(value => { const cell = element('td'); cell.append(value instanceof Node ? value : document.createTextNode(String(value ?? 'unbekannt'))); row.append(cell); }); body.append(row); });
         table.append(body); parent.append(table);
     }
-    async function selectUnit(id) {
+    async function selectUnit(id, focus = true) {
         try {
-            error(''); const details = await api(`/units/${id}`); state.selectedLegacyKey = null; state.selectedUnit = Number(id);
+            error(''); const details = await api(`/units/${id}`); state.selectedLegacyKey = null;
+            const shelf = byId('warehouse-shelf');
+            const shelfId = details.address?.shelf_id;
+            if (shelf && shelfId && shelf.value !== String(shelfId)) {
+                state.selectedUnit = null;
+                shelf.value = String(shelfId);
+                rememberShelf();
+                await load();
+            }
+            state.selectedUnit = Number(id);
             const unit = details.unit || details; const known = getUnit(id) || unit;
             const container = byId('warehouse-details'); empty(container);
             container.append(element('h3', unitLabel(known)));
@@ -348,17 +389,21 @@
                 container.append(element('h4', known.kind === 'cabinet' ? 'Schubladen' : 'Unterteilungen'));
                 children.sort((a, b) => a.ordinal - b.ordinal).forEach(child => container.append(unitButton(child)));
             }
-            const contents = state.contents.filter(item => item.storage_unit_id === known.id);
+            const contents = details.contents || state.contents.filter(item => item.storage_unit_id === known.id);
             if (contents.length) renderTable(container, ['Bild', 'Teil', 'Farbe', 'Gezählte Menge', 'Zuordnung'], contents.map(item => [partIcon(item), item.part_name ? `${item.part_num} · ${item.part_name}` : item.part_num, item.color_name || (item.color_id ?? 'unbekannt'), item.quantity === null ? 'ungezählt' : item.quantity, `#${item.id}`]));
             else container.append(element('p', known.contents_complete ? 'Kein Inhalt erfasst. Eine leere Einheit belegt weiterhin ihre Stellfläche.' : 'Kein Inhalt erfasst; das beweist noch nicht, dass die Einheit leer ist.'));
             appendList(container, 'Zugriff / Hinweise', details.warnings || details.blockers || []);
             const labelLink = element('a', 'Etikett für diese Einheit herunterladen'); labelLink.href = `/warehouse/units/${id}/label`; container.append(labelLink);
             const printed = element('button', 'Erfolgreichen Etikettdruck bestätigen'); printed.type = 'button';
             printed.addEventListener('click', () => act(printed, async () => { await api(`/units/${id}/printed`, 'POST', { revision: known.revision }); await load(); status('Etikettdruck bestätigt.'); })); container.append(printed);
-            const moveForm = byId('warehouse-move-form'); moveForm.elements.unit_id.value = String(id);
-            const checkForm = byId('warehouse-unit-update-form'); checkForm.elements.id.value = String(id); checkForm.elements.fill_state.value = known.fill_state || 'unknown'; checkForm.elements.contents_complete.checked = !!known.contents_complete;
-            const params = new URLSearchParams(location.search); params.set('unit_id', id); history.replaceState(null, '', `${location.pathname}?${params}`);
-            renderLayout(); byId('detail-title').focus();
+            const moveForm = byId('warehouse-move-form'); if (moveForm) moveForm.elements.unit_id.value = String(id);
+            const checkForm = byId('warehouse-unit-update-form'); if (checkForm) { checkForm.elements.id.value = String(id); checkForm.elements.fill_state.value = known.fill_state || 'unknown'; checkForm.elements.contents_complete.checked = !!known.contents_complete; }
+            const moveLink = element('a', 'Diese Box umräumen', 'warehouse-action'); moveLink.href = `/warehouse/reorganize?unit_id=${id}&kind=unit`; container.append(moveLink);
+            const params = new URLSearchParams(location.search); params.set('unit_id', id);
+            params.delete('storage_id');
+            if (shelfId) params.set('shelf_id', shelfId);
+            history.replaceState(null, '', `${location.pathname}?${params}`);
+            renderLayout(); if (focus) byId('detail-title').focus();
         } catch (problem) { error(problem.message); }
     }
     function moveDescription(move) {
@@ -367,9 +412,11 @@
         return `#${move.id}: ${names[move.kind] || move.kind} · ${statusNames[move.status] || move.status}${move.reason ? ` · ${move.reason}` : ''}${payload.quantity ? ` · Menge ${payload.quantity}` : ''}`;
     }
     function renderMoves() {
-        const parent = byId('warehouse-moves'); empty(parent);
-        if (!state.moves.length) { parent.append(element('p', 'Noch keine Umräumaufträge.')); return; }
-        for (const move of state.moves) {
+        const parent = byId('warehouse-moves'); if (!parent) return; empty(parent);
+        const moves = state.moves.filter(move => page === 'intake' ? move.kind === 'intake' : move.kind !== 'intake');
+        parent.append(element('h3', page === 'intake' ? '3. Einlagerungen planen und bestätigen' : 'Bewegungen planen und bestätigen'));
+        if (!moves.length) { parent.append(element('p', 'Noch keine Vorgänge. Bereite oben den ersten Vorgang vor.')); return; }
+        for (const move of moves) {
             const row = element('article', null, 'warehouse-move'); row.append(element('h3', moveDescription(move)));
             const payload = move.payload || {};
             for (const item of payload.items || [payload]) {
@@ -425,7 +472,7 @@
     function values(form) {
         const data = {};
         for (const input of form.elements) {
-            if (!input.name) continue;
+            if (!input.name || input.disabled) continue;
             if (input.type === 'checkbox') data[input.name] = input.checked;
             else if (input.type === 'number' || input.tagName === 'SELECT' && (input.dataset.options || input.name === 'partition_count')) data[input.name] = input.value === '' ? null : Number(input.value);
             else data[input.name] = input.value.trim();
@@ -434,12 +481,19 @@
     }
     function bindForm(id, callback) {
         const form = byId(id);
+        if (!form) return;
         form.addEventListener('submit', event => {
-            event.preventDefault(); const button = form.querySelector('button');
-            act(button, async () => { await callback(values(form), form); await load(); status('Gespeichert.'); });
+            event.preventDefault(); const button = event.submitter || form.querySelector('button[type="submit"], button:not([type="button"])');
+            act(button, async () => {
+                await callback(values(form), form);
+                if (id === 'warehouse-search-form') { status('Fundorte und Vorschläge aktualisiert.'); return; }
+                await load();
+                status(id === 'warehouse-move-form' ? 'Vorgang vorbereitet. Jetzt den Plan übernehmen, physisch ausführen und anschließend bestätigen.' : 'Änderungen gespeichert.');
+            });
         });
     }
     async function loadSpace() {
+        if (!byId('warehouse-shelf') || !byId('warehouse-space')) return;
         const id = byId('warehouse-shelf').value; const box = byId('warehouse-space'); empty(box);
         if (!id) return;
         try {
@@ -458,27 +512,35 @@
     let loadGeneration = 0;
     async function load() {
         const generation = ++loadGeneration;
-        byId('warehouse-archive').disabled = true;
+        if (byId('warehouse-archive')) byId('warehouse-archive').disabled = true;
         try {
             const params = new URLSearchParams({ view: 'focused' });
-            let shelf = byId('warehouse-shelf').value;
+            let shelf = byId('warehouse-shelf')?.value || '';
             if (!shelfSelectionInitialized) {
-                try { shelf = localStorage.getItem(lastShelfKey) || ''; } catch (_) { /* First shelf on server. */ }
+                try { shelf = new URLSearchParams(location.search).get('shelf_id') || localStorage.getItem(lastShelfKey) || ''; } catch (_) { /* First shelf on server. */ }
             } else if (!shelf) params.set('all', '1');
             if (shelf) params.set('shelf_id', shelf);
-            const [snapshot, moves, settings, marks] = await Promise.all([api(`/data?${params}`), api('/moves'), api('/settings'), api('/label-marks')]);
+            const [snapshot, moves, settings, marks] = await Promise.all([
+                api(`/data?${params}`),
+                byId('warehouse-moves') ? api('/moves') : Promise.resolve({ items: [] }),
+                page === 'settings' ? api('/settings') : Promise.resolve({}),
+                byId('warehouse-layout') ? api('/label-marks') : Promise.resolve({ marks: [] })
+            ]);
             if (generation !== loadGeneration) return;
-            state.allContents = null;
+            const hadAllContents = !!state.allContents;
             state.labelMarks = marks.marks || [];
             for (const key of ['locations', 'types', 'units', 'placements', 'contents', 'stack_rules', 'legacy_groups']) state[key] = snapshot[key] || [];
+            if (hadAllContents) state.allContents = (await api('/contents')).items || [];
             state.moves = moves.items || []; state.settings = settings;
             refreshOptions();
-            if (snapshot.selected_shelf_id !== null && snapshot.selected_shelf_id !== undefined) {
+            if (byId('warehouse-shelf') && snapshot.selected_shelf_id !== null && snapshot.selected_shelf_id !== undefined) {
                 byId('warehouse-shelf').value = String(snapshot.selected_shelf_id); rememberShelf();
             }
             renderLayout(); renderMoves();
-            const summary = byId('warehouse-settings-summary'); empty(summary);
-            appendList(summary, 'Kategoriezuordnungen', (settings.category_rules || []).map(rule => `Kategorie #${rule.category_id} → ${getLocation(rule.location_id) ? locationLabel(getLocation(rule.location_id)) : `Ort #${rule.location_id}`}${rule.archive_location_id ? ` · Archiv: ${getLocation(rule.archive_location_id) ? locationLabel(getLocation(rule.archive_location_id)) : rule.archive_location_id}` : ''}`));
+            const summary = byId('warehouse-settings-summary');
+            if (summary) {
+            empty(summary);
+            appendList(summary, 'Kategoriezuordnungen', (settings.category_rules || []).map(rule => `${rule.category_name || (settings.categories || []).find(category => category.id === rule.category_id)?.name || 'Kategoriename derzeit nicht verfügbar'} → ${getLocation(rule.location_id) ? locationLabel(getLocation(rule.location_id)) : 'Lagerort nicht mehr vorhanden'}${rule.archive_location_id ? ` · Archiv: ${getLocation(rule.archive_location_id) ? locationLabel(getLocation(rule.archive_location_id)) : 'Lagerort nicht mehr vorhanden'}` : ''}`));
             appendList(summary, 'Geplante Sets', (settings.planned_sets || []).map(plan => `${plan.set_num} × ${plan.quantity} · ${plan.active ? 'aktiv geplant' : 'inaktiv'}`));
             appendList(summary, 'Manuelle Hinweise', (settings.preferences || []).map(preference => `${preference.part_num} · Farbe ${preference.color_id ?? 'unbekannt'}${preference.keep_accessible ? ' · griffbereit halten' : ''}${preference.replenishment_unlikely ? ' · Nachschub unwahrscheinlich' : ''}`));
             const ruleForm = byId('warehouse-settings-form');
@@ -486,13 +548,16 @@
                 if (settings[name] !== undefined) ruleForm.elements[name].value = settings[name];
             }
             ruleForm.elements.planning_reviewed.checked = !!settings.planning_reviewed;
-            status(`${snapshot.legacy_summary?.content_rows ?? state.contents.length} Inhaltszuordnungen · ${snapshot.legacy_summary?.legacy_groups ?? state.legacy_groups.length} bestehende Beschriftungsgruppen · ${state.units.length} physisch erfasste Einheiten. Beschriftungen bleiben erhalten; Behälter und Maße vor Ort bestätigen.`);
+            }
+            renderConfiguration(); updateContextLinks();
+            status(page === 'box-types' ? `${state.types.length} Boxgrößen konfiguriert.` : page === 'locations' ? `${state.locations.filter(item => item.kind === 'shelf').length} Fächer erfasst.` : `${state.units.length} erfasste Boxen und Einheiten · ${snapshot.legacy_summary?.legacy_groups ?? state.legacy_groups.length} bestehende Beschriftungsgruppen.`);
             if (state.selectedLegacyKey) {
                 if (state.legacy_groups.some(group => group.key === state.selectedLegacyKey)) selectLegacyGroup(state.selectedLegacyKey, false);
                 else { state.selectedLegacyKey = null; byId('warehouse-details').textContent = 'Alle Inhaltszuordnungen dieser Beschriftungsgruppe sind jetzt einem Behälter zugeordnet.'; }
             }
+            if (state.selectedUnit && byId('warehouse-details')) await selectUnit(state.selectedUnit, false);
             await loadSpace();
-        } finally { if (generation === loadGeneration) byId('warehouse-archive').disabled = false; }
+        } finally { if (generation === loadGeneration && byId('warehouse-archive')) byId('warehouse-archive').disabled = false; }
     }
     async function showSearch(data) {
         const query = data.color_id === null ? '' : `?color_id=${encodeURIComponent(data.color_id)}`;
@@ -502,11 +567,11 @@
         for (const place of places.items || []) {
             const row = element('p'); const unitId = place.storage_unit_id || place.unit_id;
             const link = element('a', unitId && getUnit(unitId) ? address(getUnit(unitId)) : `${place.location ?? '?'} / ${place.level ?? '?'} / ${place.box ?? '?'}`);
-            if (unitId) { link.href = `/warehouse?unit_id=${encodeURIComponent(unitId)}`; link.addEventListener('click', event => { event.preventDefault(); selectUnit(unitId); }); }
+            if (unitId) { link.href = `/warehouse?unit_id=${encodeURIComponent(unitId)}`; if (byId('warehouse-details')) link.addEventListener('click', event => { event.preventDefault(); selectUnit(unitId); }); }
             else {
                 const group = state.legacy_groups.find(item => item.storage_ids.includes(place.id));
-                link.href = '#detail-title';
-                link.addEventListener('click', async event => {
+                link.href = `/warehouse?storage_id=${encodeURIComponent(place.id)}`;
+                if (byId('warehouse-details')) link.addEventListener('click', async event => {
                     event.preventDefault();
                     try {
                         const target = group || await api(`/contents/${place.id}/group`);
@@ -527,7 +592,9 @@
         appendList(box, 'Fehlende Angaben', suggestion.missing || []);
         const historyData = suggestion.history || {};
         if (historyData.known_set_count !== undefined) box.append(element('p', `${historyData.known_set_count} bekannte unterschiedliche Sets · erstes Jahr ${historyData.first_year ?? 'unbekannt'} · letztes Jahr ${historyData.last_year ?? 'unbekannt'}`));
-        const form = byId('warehouse-move-form'); form.elements.kind.value = 'intake'; form.elements.part_num.value = data.part_num; form.elements.color_id.value = data.color_id ?? '';
+        const form = byId('warehouse-move-form');
+        if (!form) { const link = element('a', 'Diese Bricks einlagern', 'warehouse-action'); link.href = `/warehouse/intake?${new URLSearchParams({part_num: data.part_num, color_id: data.color_id ?? ''})}`; box.append(link); return; }
+        form.elements.kind.value = 'intake'; syncMoveFields(); form.elements.part_num.value = data.part_num; form.elements.color_id.value = data.color_id ?? '';
         form.elements.target_unit_id.value = suggestion.target_unit_id ? String(suggestion.target_unit_id) : '';
         form.elements.quantity.value = '';
     }
@@ -553,16 +620,21 @@
                     const transfer = element('button', 'Teilumbuchung vorbereiten'); transfer.type = 'button';
                     transfer.addEventListener('click', () => {
                         const form = byId('warehouse-move-form'); form.elements.kind.value = 'quantity'; form.elements.source_storage_id.value = String(content.storage_id);
+                        syncMoveFields();
                         form.scrollIntoView({ block: 'center' }); form.elements.target_unit_id.focus();
                     }); article.append(transfer);
                 }
             }
-            const choose = element('button', item.whole_box ? 'Ganze Box prüfen und Bewegung vorbereiten' : 'Einheit anzeigen'); choose.type = 'button'; choose.addEventListener('click', () => { byId('warehouse-move-form').elements.kind.value = 'unit'; selectUnit(item.unit_id); }); article.append(choose); box.append(article);
+            const choose = element('button', item.whole_box ? 'Ganze Box prüfen und Bewegung vorbereiten' : 'Einheit anzeigen'); choose.type = 'button'; choose.addEventListener('click', () => { byId('warehouse-move-form').elements.kind.value = 'unit'; syncMoveFields(); selectUnit(item.unit_id); }); article.append(choose); box.append(article);
         }
         if (!(report.units || []).length) box.append(element('p', 'Keine belastbaren Prüfkandidaten. Unvollständige Katalog- oder Inhaltsdaten zunächst ergänzen.'));
         appendList(box, 'Offene Angaben', report.missing || []);
     }
     function populateForm(form, record) {
+        const selected = form.elements.id?.value;
+        form.reset();
+        if (form.elements.id) form.elements.id.value = selected || '';
+        for (const name of form.id === 'warehouse-location-form' ? ['kind', 'parent_id'] : form.id === 'warehouse-type-form' ? ['kind'] : []) form.elements[name].disabled = !!record;
         if (!record) return;
         for (const input of form.elements) {
             if (!input.name || input.name === 'id' || record[input.name] === undefined) continue;
@@ -570,6 +642,84 @@
             else if (input.name === 'height_profile') input.value = record[input.name] ? JSON.stringify(record[input.name]) : '';
             else input.value = record[input.name] ?? '';
         }
+        if (form.id === 'warehouse-location-form' && record.height_profile?.length >= 2) {
+            const height = record.height_profile[0][1];
+            if (record.height_profile.every(point => point[1] === height)) {
+                form.elements.uniform_height_mm.value = height;
+                form.elements.height_profile.value = '';
+            }
+        }
+    }
+    function syncMoveFields() {
+        const form = byId('warehouse-move-form'); if (!form) return;
+        const kind = form.elements.kind.value;
+        const modes = {
+            source_storage_id: ['quantity'], unit_id: ['unit'], target_unit_id: ['quantity', 'intake'],
+            part_num: ['intake'], color_id: ['intake'], quantity: ['quantity', 'intake'],
+            shelf_id: ['unit'], support_unit_id: ['unit'], relation_kind: ['unit'], order_left: ['unit'],
+            x_mm: ['unit'], depth_offset_mm: ['unit'], orientation: ['unit'], remove: ['unit']
+        };
+        for (const [name, kinds] of Object.entries(modes)) {
+            const input = form.elements[name]; const visible = kinds.includes(kind);
+            input.disabled = !visible; input.closest('label').hidden = !visible;
+            input.required = visible && ['source_storage_id', 'unit_id', 'target_unit_id', 'part_num', 'quantity'].includes(name);
+        }
+        byId('warehouse-move-preview').hidden = kind !== 'unit';
+        byId('warehouse-move-preview-result').replaceChildren();
+    }
+    function updateContextLinks() {
+        const shelf = byId('warehouse-shelf')?.value || new URLSearchParams(location.search).get('shelf_id');
+        document.querySelectorAll('.warehouse-nav a, [data-keep-shelf]').forEach(link => {
+            const url = new URL(link.href, location.origin);
+            if (shelf) url.searchParams.set('shelf_id', shelf); else url.searchParams.delete('shelf_id');
+            link.href = url.href;
+        });
+    }
+    function editConfiguration(formId, record) {
+        const form = byId(formId); form.elements.id.value = String(record.id); populateForm(form, record);
+        form.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        (form.elements.name || form.elements.label).focus();
+    }
+    function renderConfiguration() {
+        const types = byId('warehouse-type-list');
+        if (types) {
+            empty(types);
+            if (!state.types.length) types.append(element('p', 'Noch keine Boxgrößen. Lege unten deine erste Größe an oder ergänze Standardtypen.'));
+            for (const type of state.types) {
+                const card = element('article', null, 'warehouse-config-card');
+                card.append(element('h3', type.name), element('p', `${type.width_mm ?? '?'} × ${type.depth_mm ?? '?'} × ${type.height_mm ?? '?'} mm · Breite × Tiefe × Höhe`));
+                card.append(element('p', type.dimensions_status === 'measured' ? 'Vor Ort gemessen' : 'Maße vor Ort prüfen'));
+                const edit = element('button', 'Bearbeiten'); edit.type = 'button'; edit.addEventListener('click', () => editConfiguration('warehouse-type-form', type)); card.append(edit); types.append(card);
+            }
+        }
+        const locations = byId('warehouse-location-list');
+        if (locations) {
+            const checked = new Set([...locations.querySelectorAll('input:checked')].map(input => input.value)); empty(locations);
+            if (!state.locations.length) locations.append(element('p', 'Noch keine Lagerorte. Lege zuerst eine Zone, darunter ein Regal und anschließend die Fächer an.'));
+            const ordered = [...state.locations].sort((a, b) => natural(locationLabel(a), locationLabel(b)));
+            for (const item of ordered) {
+                const card = element('article', null, 'warehouse-location-row');
+                if (item.kind === 'shelf') {
+                    const label = element('label', null, 'warehouse-check'); const check = element('input'); check.type = 'checkbox'; check.value = String(item.id); check.checked = checked.has(check.value);
+                    check.addEventListener('change', refreshLocationLabels); label.append(check, document.createTextNode(' Fachlabel auswählen')); card.append(label);
+                }
+                const text = element('div'); text.append(element('strong', locationLabel(item)));
+                if (item.kind === 'shelf') text.append(element('p', `${item.width_mm ?? '?'} mm breit · ${item.depth_mm ?? '?'} mm tief · ${item.measurement_status === 'measured' ? 'Gemessen' : 'Maße ungeprüft'}`));
+                const edit = element('button', 'Bearbeiten'); edit.type = 'button'; edit.addEventListener('click', () => editConfiguration('warehouse-location-form', item));
+                card.append(text, edit); locations.append(card);
+            }
+            refreshLocationLabels();
+        }
+    }
+    function refreshLocationLabels() {
+        const parent = byId('warehouse-location-labels'); if (!parent) return; empty(parent);
+        const selected = [...byId('warehouse-location-list').querySelectorAll('input:checked')];
+        for (const input of selected) {
+            const item = getLocation(input.value); const label = element('article', null, 'warehouse-location-label');
+            label.append(element('small', 'Brick Manager · Lagerfach'), element('strong', locationLabel(item))); parent.append(label);
+        }
+        byId('warehouse-print-locations').disabled = !selected.length;
+        byId('warehouse-print-locations').textContent = selected.length ? `${selected.length} Fachlabel${selected.length === 1 ? '' : 's'} drucken` : 'Ausgewählte Fachlabels drucken';
     }
     let contentOptionsPending = null;
     async function loadContentOptions() {
@@ -588,9 +738,20 @@
             ['warehouse-planned-set-form', () => state.settings.planned_sets || []]
         ]) {
             const form = byId(formId);
+            if (!form) continue;
             form.elements.id.addEventListener('change', () => populateForm(form, records().find(item => item.id === Number(form.elements.id.value))));
         }
-        bindForm('warehouse-location-form', async data => { const id = data.id; delete data.id; data.height_profile = data.height_profile ? JSON.parse(data.height_profile) : null; await api(id ? `/locations/${id}` : '/locations', id ? 'PATCH' : 'POST', data); });
+        bindForm('warehouse-location-form', async data => {
+            const id = data.id; delete data.id;
+            const height = data.uniform_height_mm; delete data.uniform_height_mm;
+            if (data.height_profile) {
+                try { data.height_profile = JSON.parse(data.height_profile); } catch (_) { throw new Error('Höhenprofil bitte als Messpunkte eingeben, zum Beispiel [[0, 300], [600, 180]].'); }
+            } else if (height !== null) {
+                if (!data.width_mm || height <= 0) throw new Error('Für eine gleichmäßige Höhe bitte Breite und Höhe größer als 0 angeben.');
+                data.height_profile = [[0, height], [data.width_mm, height]];
+            } else data.height_profile = null;
+            await api(id ? `/locations/${id}` : '/locations', id ? 'PATCH' : 'POST', data);
+        });
         bindForm('warehouse-type-form', async data => { const id = data.id; delete data.id; await api(id ? `/types/${id}` : '/types', id ? 'PATCH' : 'POST', data); });
         bindForm('warehouse-unit-form', async data => { await api('/units', 'POST', data); });
         bindForm('warehouse-placement-form', async data => { const id = data.unit_id; delete data.unit_id; if (data.support_unit_id) data.shelf_id = null; await api(`/units/${id}/placement`, 'POST', data); byId('warehouse-placement-form').elements.support_unit_id.value = String(id); byId('warehouse-placement-form').elements.shelf_id.value = ''; byId('warehouse-placement-form').elements.relation_kind.value = 'stacked';
@@ -630,12 +791,13 @@
         });
         for (const formId of ['warehouse-placement-form', 'warehouse-move-form']) {
             const form = byId(formId);
+            if (!form) continue;
             form.elements.support_unit_id.addEventListener('change', () => {
                 form.elements.x_mm.value = ''; form.elements.depth_offset_mm.value = '';
                 if (form.elements.support_unit_id.value) { form.elements.shelf_id.value = ''; form.elements.relation_kind.value = 'stacked'; }
             });
         }
-        byId('warehouse-move-preview').addEventListener('click', event => act(event.currentTarget, async () => {
+        on('warehouse-move-preview', 'click', event => act(event.currentTarget, async () => {
             const data = values(byId('warehouse-move-form'));
             if (data.kind !== 'unit' || !data.unit_id || data.remove) throw new Error('Für die Zielpassung eine Behälterbewegung mit Einheit und Ziel wählen.');
             const result = await api(`/units/${data.unit_id}/preview`, 'POST', { shelf_id: data.support_unit_id ? null : data.shelf_id, support_unit_id: data.support_unit_id, relation_kind: data.relation_kind, order_left: data.order_left, x_mm: data.x_mm, depth_offset_mm: data.depth_offset_mm, orientation: data.orientation });
@@ -643,21 +805,37 @@
             box.append(element('p', result.status === 'fits' || result.status === 'fit' ? 'Gemessene Zielpassung bestätigt.' : result.status === 'no_fit' ? 'Ziel passt nicht.' : 'Passung ungeprüft – Angaben ergänzen oder vor Ort prüfen.', 'warehouse-note'));
             appendList(box, 'Passprüfung', result.reasons || []);
         }));
-        byId('warehouse-seed').addEventListener('click', event => act(event.currentTarget, async () => { await api('/setup', 'POST', {}); await load(); }));
-        byId('warehouse-column-rows').addEventListener('change', renderLayout);
-        byId('warehouse-refresh').addEventListener('click', event => act(event.currentTarget, load));
-        byId('warehouse-archive').addEventListener('click', event => act(event.currentTarget, showArchive));
-        byId('warehouse-shelf').addEventListener('change', () => { rememberShelf(); state.selectedLegacyKey = null; state.selectedUnit = null; byId('warehouse-details').replaceChildren(element('p', 'Wähle eine Box aus der Lagerübersicht.')); load().catch(problem => error(problem.message)); });
+        on('warehouse-seed', 'click', event => act(event.currentTarget, async () => { await api('/setup', 'POST', {}); await load(); }));
+        on('warehouse-column-rows', 'change', renderLayout);
+        on('warehouse-refresh', 'click', event => act(event.currentTarget, load));
+        on('warehouse-archive', 'click', event => act(event.currentTarget, showArchive));
+        on('warehouse-shelf', 'change', () => { rememberShelf(); updateContextLinks(); state.selectedLegacyKey = null; state.selectedUnit = null; byId('warehouse-details').replaceChildren(element('p', 'Wähle eine Box aus der Lagerübersicht.')); load().catch(problem => error(problem.message)); });
         document.querySelectorAll('[data-options="contents"]').forEach(select => select.addEventListener('focus', loadContentOptions));
-        byId('warehouse-capture').addEventListener('toggle', () => { if (byId('warehouse-capture').open) loadContentOptions(); });
-        byId('warehouse-list').addEventListener('click', () => { byId('warehouse-layout').className = 'warehouse-list'; byId('warehouse-list').setAttribute('aria-pressed', 'true'); byId('warehouse-front').setAttribute('aria-pressed', 'false'); });
-        byId('warehouse-front').addEventListener('click', () => { byId('warehouse-layout').className = 'warehouse-front'; byId('warehouse-list').setAttribute('aria-pressed', 'false'); byId('warehouse-front').setAttribute('aria-pressed', 'true'); });
-        load().then(() => {
+        on('warehouse-list', 'click', () => { byId('warehouse-layout').className = 'warehouse-list'; byId('warehouse-list').setAttribute('aria-pressed', 'true'); byId('warehouse-front').setAttribute('aria-pressed', 'false'); });
+        on('warehouse-front', 'click', () => { byId('warehouse-layout').className = 'warehouse-front'; byId('warehouse-list').setAttribute('aria-pressed', 'false'); byId('warehouse-front').setAttribute('aria-pressed', 'true'); });
+        on('warehouse-print-locations', 'click', () => window.print());
+        byId('warehouse-move-form')?.elements.kind.addEventListener('change', syncMoveFields);
+        syncMoveFields();
+        load().then(async () => {
             const params = new URLSearchParams(location.search);
             const selected = params.get('unit_id');
-            if (selected) selectUnit(selected);
+            if (selected && byId('warehouse-details')) {
+                if (page === 'reorganize') { byId('warehouse-move-form').elements.kind.value = 'unit'; syncMoveFields(); }
+                await selectUnit(selected);
+            }
+            const storageId = params.get('storage_id');
+            if (storageId) {
+                if (page === 'capture') {
+                    await loadContentOptions(); const item = state.allContents?.find(item => item.id === Number(storageId));
+                    if (item) editLegacyContent(item); else error('Die gewählte Inhaltszuordnung ist nicht mehr vorhanden.');
+                } else if (byId('warehouse-details')) {
+                    const group = await api(`/contents/${encodeURIComponent(storageId)}/group`);
+                    if (!state.legacy_groups.some(item => item.key === group.key)) state.legacy_groups.push(group);
+                    await selectLegacyGroup(group.key);
+                }
+            }
             const part = params.get('part_num');
-            if (part) {
+            if (part && byId('warehouse-search-form')) {
                 const rawColor = params.get('color_id');
                 const color = rawColor !== null && rawColor !== '' && Number.isInteger(Number(rawColor)) ? Number(rawColor) : null;
                 const form = byId('warehouse-search-form'); form.elements.part_num.value = part; form.elements.color_id.value = color ?? '';

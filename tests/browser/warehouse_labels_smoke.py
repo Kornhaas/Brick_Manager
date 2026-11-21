@@ -1,5 +1,6 @@
 """Warehouse image fallback and durable batch reprinting on disposable SQLite."""
 
+import os
 import sys
 from io import BytesIO
 from pathlib import Path
@@ -49,7 +50,9 @@ def run():
             patch("services.label_service.download_image", return_value=image),
             sync_playwright() as p,
         ):
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(
+                headless=True, channel=os.environ.get("BRICK_BROWSER_CHANNEL")
+            )
             page = browser.new_page(viewport={"width": 1365, "height": 1000})
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
@@ -90,9 +93,7 @@ def run():
             expect(
                 page.locator(".warehouse-card-slot input[type=checkbox]").first
             ).to_be_checked()
-            page.get_by_role(
-                "link", name="Vorgemerkte Etiketten gesammelt drucken"
-            ).click()
+            page.get_by_role("link", name="Boxetiketten drucken").click()
             expect(page.locator("#marked-label-list")).to_contain_text(
                 "Schrank 7 / Fach 3 / Box 2"
             )

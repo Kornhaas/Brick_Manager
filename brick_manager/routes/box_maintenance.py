@@ -23,9 +23,11 @@ from flask import (
 from models import PartStorage, RebrickableInventoryParts, RebrickableParts, db
 from services.cache_service import cache_image
 from services.label_service import (
-    create_avery_3474_cut_lines_pdf,
+    LABEL_FORMATS,
     create_avery_3474_pdf,
     create_box_label_jpg,
+    create_label_cut_lines_pdf,
+    create_label_sheet_pdf,
 )
 from werkzeug.exceptions import BadRequest, NotFound
 
@@ -157,14 +159,21 @@ def download_label_cut_lines():
     try:
         horizontal_offset = float(request.args.get("horizontal_offset_mm", "0"))
         vertical_offset = float(request.args.get("vertical_offset_mm", "0"))
-        pdf = create_avery_3474_cut_lines_pdf(horizontal_offset, vertical_offset)
+        label_format = request.args.get("label_format", "avery_3474")
+        if label_format not in LABEL_FORMATS:
+            raise BadRequest("Unknown label format.")
+        pdf = create_label_cut_lines_pdf(
+            label_format, horizontal_offset, vertical_offset
+        )
+    except BadRequest as error:
+        return jsonify({"error": error.description}), 400
     except ValueError:
         return jsonify({"error": "Print offsets must be between -10 and 10 mm."}), 400
     return send_file(
         pdf,
         as_attachment=True,
         download_name=(
-            f"avery_3474_cut_lines_x{horizontal_offset:g}_y{vertical_offset:g}.pdf"
+            f"{label_format}_cut_lines_x{horizontal_offset:g}_y{vertical_offset:g}.pdf"
         ),
         mimetype="application/pdf",
     )
@@ -172,17 +181,23 @@ def download_label_cut_lines():
 
 @box_maintenance_bp.route("/box_maintenance/label_sheet", methods=["POST"])
 def generate_label_sheet():
-    """Generate a print-ready Avery 3474 PDF for selected storage boxes."""
+    """Generate a print-ready PDF for selected storage boxes."""
     try:
         data = request.get_json(silent=True)
         if not isinstance(data, dict):
             raise BadRequest("Invalid JSON payload.")
         references = _parse_box_references(data)
         start_position = data.get("start_position", 1)
+        label_format = data.get("label_format", "avery_3474")
+        if label_format not in LABEL_FORMATS:
+            raise BadRequest("Unknown label format.")
+        capacity = (
+            LABEL_FORMATS[label_format]["columns"] * LABEL_FORMATS[label_format]["rows"]
+        )
         if (
             isinstance(start_position, bool)
             or not isinstance(start_position, int)
-            or not 1 <= start_position <= 24
+            or not 1 <= start_position <= capacity
         ):
             raise BadRequest("Invalid start position.")
         horizontal_offset = data.get("horizontal_offset_mm", 0)
@@ -195,17 +210,26 @@ def generate_label_sheet():
         ):
             raise BadRequest("Print offsets must be between -10 and 10 mm.")
         boxes = [_box_label_info(*reference) for reference in references]
-        pdf = create_avery_3474_pdf(
-            boxes,
-            start_position=start_position,
-            horizontal_offset_mm=horizontal_offset,
-            vertical_offset_mm=vertical_offset,
-        )
+        if label_format == "avery_3474":
+            pdf = create_avery_3474_pdf(
+                boxes,
+                start_position=start_position,
+                horizontal_offset_mm=horizontal_offset,
+                vertical_offset_mm=vertical_offset,
+            )
+        else:
+            pdf = create_label_sheet_pdf(
+                boxes,
+                label_format=label_format,
+                start_position=start_position,
+                horizontal_offset_mm=horizontal_offset,
+                vertical_offset_mm=vertical_offset,
+            )
         return send_file(
             pdf,
             as_attachment=True,
             download_name=(
-                f"avery_3474_box_labels_x{horizontal_offset:g}_y{vertical_offset:g}.pdf"
+                f"{label_format}_box_labels_x{horizontal_offset:g}_y{vertical_offset:g}.pdf"
             ),
             mimetype="application/pdf",
         )

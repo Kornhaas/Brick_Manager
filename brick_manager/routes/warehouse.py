@@ -24,7 +24,12 @@ from services import (
     storage_service,
     storage_suggestion_service,
 )
-from services.label_service import create_avery_3474_pdf, create_box_label_jpg
+from services.label_service import (
+    LABEL_FORMATS,
+    create_avery_3474_pdf,
+    create_box_label_jpg,
+    create_label_sheet_pdf,
+)
 from services.part_history_service import part_history
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import BadRequest, HTTPException, NotFound
@@ -82,19 +87,31 @@ def warehouse_database_error(error):
 
 @warehouse_bp.get("")
 @warehouse_bp.get("/")
-def warehouse_page():
+@warehouse_bp.get("/intake", defaults={"page": "intake"})
+@warehouse_bp.get("/reorganize", defaults={"page": "reorganize"})
+@warehouse_bp.get("/box-types", defaults={"page": "box-types"})
+@warehouse_bp.get("/locations", defaults={"page": "locations"})
+@warehouse_bp.get("/capture", defaults={"page": "capture"})
+@warehouse_bp.get("/settings-page", defaults={"page": "settings"})
+def warehouse_page(page="overview"):
     token = session.get("warehouse_csrf")
     if not token:
         token = secrets.token_urlsafe(32)
         session["warehouse_csrf"] = token
     static_folder = current_app.static_folder
     version = (
-        (Path(static_folder) / "js" / "warehouse.js").stat().st_mtime_ns
+        max(
+            (Path(static_folder) / "js" / "warehouse.js").stat().st_mtime_ns,
+            (Path(static_folder) / "css" / "warehouse.css").stat().st_mtime_ns,
+        )
         if static_folder
         else 0
     )
     return render_template(
-        "warehouse.html", warehouse_csrf=token, warehouse_asset_version=version
+        "warehouse.html",
+        warehouse_csrf=token,
+        warehouse_asset_version=version,
+        warehouse_page=page,
     )
 
 
@@ -300,9 +317,15 @@ def set_label_mark():
 @warehouse_bp.post("/label-marks/sheet")
 def marked_label_sheet():
     data = _payload()
+    label_format = data.get("label_format", "avery_3474")
+    if label_format not in LABEL_FORMATS:
+        raise BadRequest("Unbekanntes Etikettenformat.")
     start = storage_service.integer(data.get("start_position", 1), "start_position")
-    if start is None or start > 24:
-        raise BadRequest("Startposition höchstens 24.")
+    capacity = (
+        LABEL_FORMATS[label_format]["columns"] * LABEL_FORMATS[label_format]["rows"]
+    )
+    if start is None or start > capacity:
+        raise BadRequest(f"Startposition höchstens {capacity}.")
     offsets = []
     for name in ("horizontal_offset_mm", "vertical_offset_mm"):
         value = data.get(name, 0)
@@ -315,7 +338,11 @@ def marked_label_sheet():
         offsets.append(value)
     infos = label_queue_service.label_infos(data)
     return send_file(
-        create_avery_3474_pdf(infos, start, *offsets),
+        (
+            create_avery_3474_pdf(infos, start, *offsets)
+            if label_format == "avery_3474"
+            else create_label_sheet_pdf(infos, label_format, start, *offsets)
+        ),
         mimetype="application/pdf",
         as_attachment=True,
         download_name="marked_brick_labels.pdf",

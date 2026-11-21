@@ -38,12 +38,13 @@ class TestBoxMaintenanceContracts:
         script = Path("brick_manager/static/js/box_maintenance_new.js").read_text()
 
         assert response.status_code == 200
-        assert b"Avery 3474 Label Queue" in response.data
-        assert b"100% / Actual size" in response.data
-        assert b"without Fit to page" in response.data
+        assert b"Etikettendruck" in response.data
+        assert b'id="label-format"' in response.data
+        assert b"Avery Zweckform 3657" in response.data
+        assert b"tats\xc3\xa4chlicher Gr\xc3\xb6\xc3\x9fe" in response.data
         assert b'id="label-start-position"' in response.data
         assert b'id="confirm-label-sheet"' in response.data
-        assert b"Select next filtered sheet" in response.data
+        assert b"N\xc3\xa4chsten gefilterten Bogen ausw\xc3\xa4hlen" in response.data
         assert b'id="select-all-displayed"' in response.data
         assert b'id="clear-label-selection"' in response.data
         assert b'id="label-location-filter"' in response.data
@@ -52,11 +53,36 @@ class TestBoxMaintenanceContracts:
         assert b'id="label-status-filter"' in response.data
         assert b'id="label-horizontal-offset"' in response.data
         assert b'id="label-vertical-offset"' in response.data
-        assert "let available = 25 - firstSlot;" in script
+        assert "let available = capacity + 1 - firstSlot;" in script
         assert "box[field].trim() !== ''" in script
         assert "function applyFilters()" in script
         assert "checkbox.checked = false;" in script
-        assert "avery_3474_box_labels_x${payload.horizontal_offset_mm}" in script
+        assert (
+            "${payload.label_format}_box_labels_x${payload.horizontal_offset_mm}"
+            in script
+        )
+
+    def test_label_sheet_generates_3657_pdf_for_selected_box(self, client, stored_part):
+        with patch(
+            "routes.box_maintenance.create_label_sheet_pdf",
+            return_value=BytesIO(b"%PDF-3657"),
+        ) as create_pdf:
+            response = client.post(
+                "/box_maintenance/label_sheet",
+                json={
+                    "boxes": [{"location": "A", "level": "1", "box": "2"}],
+                    "label_format": "avery_3657",
+                    "start_position": 40,
+                },
+            )
+
+        assert response.status_code == 200
+        assert response.data == b"%PDF-3657"
+        assert (
+            "avery_3657_box_labels_x0_y0.pdf" in response.headers["Content-Disposition"]
+        )
+        assert create_pdf.call_args.kwargs["label_format"] == "avery_3657"
+        assert create_pdf.call_args.kwargs["start_position"] == 40
 
     def test_filter_endpoints_return_distinct_location_hierarchy(
         self, client, stored_part

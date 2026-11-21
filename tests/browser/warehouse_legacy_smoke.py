@@ -3,6 +3,7 @@
 Run with the same Playwright environment as warehouse_smoke.py.
 """
 
+import os
 import sys
 from pathlib import Path
 from threading import Thread
@@ -64,7 +65,9 @@ def run():
     errors = []
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
+            browser = playwright.chromium.launch(
+                headless=True, channel=os.environ.get("BRICK_BROWSER_CHANNEL")
+            )
             page = browser.new_page(viewport={"width": 1365, "height": 1000})
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.route(
@@ -92,10 +95,7 @@ def run():
             for route in held_requests:
                 route.continue_()
             expect(page.locator("#warehouse-status")).to_contain_text(
-                "4 Inhaltszuordnungen"
-            )
-            expect(page.locator("#warehouse-status")).to_contain_text(
-                "0 physisch erfasste Einheiten"
+                "4 bestehende Beschriftungsgruppen"
             )
             expect(page.locator("#warehouse-shelf")).to_have_value(str(shelf_id))
             expect(page.locator(".warehouse-shelf")).to_have_count(1)
@@ -163,6 +163,7 @@ def run():
             expect(
                 page.locator('#warehouse-content-form [name="storage_unit_id"]')
             ).to_be_focused()
+            page.goto(origin + "/warehouse")
             page.locator(".warehouse-unlocated summary").click()
             page.get_by_role(
                 "button", name="Box ohne Beschriftung", exact=False

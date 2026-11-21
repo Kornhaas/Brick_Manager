@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         marks = (await (await api('')).json()).marks;
         list.replaceChildren();
         for (const mark of marks) {
-            const item = document.createElement('li'); item.textContent = mark.label + (mark.error ? ` · ${mark.error}` : ''); const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Vormerkung entfernen'; remove.className = 'btn btn-sm btn-outline-secondary ms-2';
+            const item = document.createElement('li'); item.className = 'list-group-item d-flex flex-wrap align-items-center gap-2 px-0'; item.textContent = mark.label + (mark.error ? ` · ${mark.error}` : ''); const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Vormerkung entfernen'; remove.className = 'btn btn-sm btn-outline-secondary';
             remove.addEventListener('click', async () => {
                 remove.disabled = true;
                 try { await api('/remove', { key: mark.key, generation: mark.generation }); await load(); }
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selected = marks.map(mark => ({ key: mark.key, generation: mark.generation, fingerprint: mark.fingerprint }));
         try {
             const value = id => Number(document.getElementById(id)?.value || 0);
-            const response = await api('/sheet', { marks: selected, start_position: value('label-start-position') || 1, horizontal_offset_mm: value('label-horizontal-offset'), vertical_offset_mm: value('label-vertical-offset') });
+            const response = await api('/sheet', { marks: selected, label_format: document.getElementById('label-format')?.value || 'avery_3474', start_position: value('label-start-position') || 1, horizontal_offset_mm: value('label-horizontal-offset'), vertical_offset_mm: value('label-vertical-offset') });
             const url = URL.createObjectURL(await response.blob()); const link = document.createElement('a'); link.href = url; link.download = 'marked_brick_labels.pdf'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
             downloaded = selected; confirm.disabled = false;
             status.textContent = 'PDF erstellt. Erst nach erfolgreichem Druck bestätigen; Vormerkungen bleiben bis dahin erhalten.';
