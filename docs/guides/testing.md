@@ -20,9 +20,11 @@ node --test tests/js/quantity_navigation.cjs
 
 Die globale Coverage-Schwelle beträgt derzeit 60 Prozent. Sie ist ein Release-Gate, nicht der Nachweis ausreichender Testtiefe für jede risikoreiche Funktion. Messwerte werden nur nach einem erfolgreichen vollständigen Lauf dokumentiert; historische Messungen stehen unter `docs/history/`.
 
-Letzter vollständiger Lauf: 30. Oktober 2026, 397 bestanden, 0 fehlgeschlagen,
-0 übersprungen, 62,92 % Gesamt-Coverage. Ein `ResourceWarning` aus einer
-SQLite-Verbindung wurde ausgegeben, hat den Lauf aber nicht fehlschlagen lassen.
+Letzter erfolgreicher vollständiger Lauf: 21. November 2026, Linux/Python 3.12.16
+mit den gelockten Abhängigkeiten: 611 bestanden, 0 fehlgeschlagen,
+0 übersprungen, 73,22 % Gesamt-Coverage. Der Windows-Lauf desselben Stands
+bestand 609 Tests und scheiterte zweimal an fehlenden Symlinkrechten sowie dem
+unter Windows unzugänglichen Linux-Interpreter der Workspace-Umgebung.
 
 ## Erwartete Nachweise
 

@@ -2,6 +2,25 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-21 – Filter der Setpflege auf dem laufenden Server überprüft
+
+**Ergebnis:** Ein unabhängiger Testagent reproduzierte das Verhalten des
+GET-Filterformulars in einem isolierten Edge-Lauf und auf dem vom Nutzer
+genannten laufenden Server. Dreamzzz ergab 38 Treffer; Auswahl von „Sealed“
+allein änderte weder URL noch Tabelle. Nach „Apply filters“ blieben 8 versiegelte
+Sets, mit einer passenden Box-ID und erneutem Absenden genau 1. Nicht vorhandene
+Boxen lieferten 0 Treffer. Status und Boxnummer werden mit dem Thema kombiniert.
+Die Übersichtskarten bleiben bewusst sammlungsweit und sind kein Filterzähler.
+
+**Ursache und Nachweis:** `set_maintenance.js` überspringt beim aktuellen
+Filterformular die alte Sofortfilterung; Änderungen werden erst mit dem
+GET-Formular abgeschickt. 24 isolierte Browsernavigationen prüften Suchtext,
+Boxnummer, Thema, alle sieben Statuswerte, Inventar, Etiketten und Gruppierung.
+Zusätzlich bestanden 9 fokussierte UI-Vertragstests, 18 wurden abgewählt.
+Die Live-Browserprüfung verwendete ausschließlich lesende GET-Anfragen.
+Keine Filterlogik verändert, da dieser Auftrag eine genaue Überprüfung verlangt.
+Keine weitere Referenzänderung: Das bestehende Absendeverhalten bleibt erhalten.
+
 ## 2026-11-21 – Integrationsstand für main und Docker freigegeben
 
 **Umfang:** Der Nutzer beauftragt die Übernahme aller vorhandenen Änderungen
@@ -20,6 +39,12 @@ Poetry-Lock-Prüfung und sämtliche anwendbaren Pre-Commit-Prüfungen bestanden.
 Für Python wurde der bereits dokumentierte externe Prüfinterpreter verwendet.
 Eine leere temporäre Git-Konfigurationsvariable musste nur im Prüfprozess
 neutralisiert werden; die Repository-Konfiguration blieb unverändert.
+
+**Linux-Nachweis:** Anschließend dieselbe vollständige Suite mit Python 3.12.16
+und den exakt gelockten Abhängigkeiten in einer separaten virtuellen Umgebung
+im Linux-Container ausgeführt: 611 bestanden, 0 fehlgeschlagen, 0 übersprungen,
+73,22 % Gesamt-Coverage. Die beiden Windowsfehler sind dort nicht vorhanden.
+Die Testdatenbanken bleiben durch die gemeinsamen Fixtures temporär isoliert.
 
 **Veröffentlichungsgrenze:** Der Workflow baut nach bestandenen Linux-Tests
 `kornhaas/bricks_manager` für AMD64 und ARM64, veröffentlicht die Branch-/Latest-Tags
