@@ -1,24 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Import Brick Data</title>
-
-
-    <!-- Favicon -->
-    {% include "favicon_links.html" %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-
-<body>
-    {% include 'navbar.html' %}
-    <div class="container mt-5">
-        <h1>Import Brick Data</h1>
-        <p class="text-muted">Refresh the local Rebrickable catalog. Progress remains visible while you stay on this page.</p>
-        <form id="importDataForm" action="{{ url_for('import_rebrickable_data.start_import') }}">
+{% extends "base.html" %}
+{% from "ui_macros.html" import page_header, empty_state, icon %}
+{% block language %}en{% endblock %}
+{% block title %}Import Brick Data{% endblock %}
+{% block content %}
+<div class="bm-workspace">
+        {{ page_header('Import Brick Data', 'Administration', 'Refresh your local catalog and follow the import progress.', 'intake') }}
+        <form id="importDataForm" class="bm-panel" action="{{ url_for('import_rebrickable_data.start_import') }}">
+            <h2>Local parts catalog</h2>
+            <p class="text-muted">Import the latest catalog data from Rebrickable. Your progress and the result appear below.</p>
             <button id="submitButton" type="submit" class="btn btn-primary">Import Data</button>
         </form>
 
@@ -37,8 +26,9 @@
             </div>
         </section>
     </div>
-
-    <script>
+{% endblock %}
+{% block page_scripts %}
+<script>
         const form = document.getElementById('importDataForm');
         const submitButton = document.getElementById('submitButton');
         const progressPanel = document.getElementById('progressPanel');
@@ -125,6 +115,4 @@
             pollStatus(existingJob).catch(showPollingError);
         }
     </script>
-</body>
-
-</html>
+{% endblock %}

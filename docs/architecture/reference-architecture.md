@@ -30,6 +30,9 @@ flowchart LR
 
 ## Komponenten und Verantwortlichkeiten
 
+Alle erreichbaren HTML-Arbeitsbereiche teilen sich Navigation, Hauptbereich,
+Ressourcen und Komponenten gemäß [UI-Konzept](ui-design-system.md).
+
 | Bereich | Ort | Verantwortung |
 | --- | --- | --- |
 | App-Komposition | `brick_manager/app.py` | Flask-Erweiterungen, Logging, Blueprints, Startlogik und Scheduler |
@@ -37,7 +40,7 @@ flowchart LR
 | HTTP/UI | `brick_manager/routes/` | Blueprints, Eingabegrenzen, HTTP/JSON/Template-Verträge |
 | Domäne/Integration | `brick_manager/services/` | Rebrickable, Brickognize, Labels, Caches, Imports und Backups |
 | Persistenz | `brick_manager/models.py` | Tabellen, Beziehungen, Constraints und Serialisierung |
-| Präsentation | `brick_manager/templates/`, `brick_manager/static/` | Jinja-Templates, CSS und Vanilla JavaScript |
+| Präsentation | `brick_manager/templates/`, `brick_manager/static/` | Gemeinsamer Jinja-Rahmen `base.html`, UI-Makros und zentrale Design-Komponenten; Fachansichten mit CSS und Vanilla JavaScript |
 | Tests | `brick_manager/tests/`, `tests/js/` | Flask-/SQLite-Verträge und isolierte JavaScript-Checks |
 
 `app.py` registriert 18 Blueprints. Der Desktop-Client ist auf `/api/v1` beschränkt und verlangt einen Bearer-Key. Die UI-Routen sind nicht automatisch durch diesen Key geschützt; ein öffentliches Deployment braucht eine passende Netzwerk- und Zugriffsabsicherung.

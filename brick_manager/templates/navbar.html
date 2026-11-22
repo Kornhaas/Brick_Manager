@@ -1,5 +1,4 @@
 {% from 'ui_macros.html' import icon %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css', v='1') }}">
 <nav class="navbar navbar-expand-lg navbar-dark bm-navbar" aria-label="Main navigation">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for('main.index') }}">
@@ -27,14 +26,14 @@
 
           <!-- Dashboard Link -->
           <li class="nav-item {% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}">
-            <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}"{% if request.endpoint == 'dashboard.dashboard' %} aria-current="page"{% endif %}>
+            <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}"{% if request.blueprint == 'dashboard' %} aria-current="page"{% endif %}>
               {{ icon('dashboard') }} Dashboard
             </a>
           </li>
 
           <!-- Parts Dropdown -->
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle{% if request.blueprint in ['part_lookup', 'manual_entry', 'part_location', 'missing_parts', 'box_maintenance'] %} active{% endif %}" href="#" id="partsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle{% if request.blueprint in ['part_lookup', 'manual_entry', 'part_location', 'missing_parts', 'box_maintenance', 'storage', 'upload'] or request.endpoint == 'main.ai_detection' %} active{% endif %}" href="#" id="partsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               {{ icon('bricks') }} Parts
             </a>
             <ul class="dropdown-menu" aria-labelledby="partsDropdown">
@@ -97,7 +96,7 @@
 
           <!-- Administration Dropdown -->
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="AdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle{% if request.blueprint in ['import_rebrickable_data', 'token_management', 'admin_sync'] %} active{% endif %}" href="#" id="AdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               {{ icon('settings') }} Admin
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="AdminDropdown">

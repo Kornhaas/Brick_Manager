@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+{% from "ui_macros.html" import page_header, empty_state, icon %}
 {% set drafts = draft_values | default({}) %}
 {% set errors = field_errors | default({}) %}
 {% set catalog = user_set.template_set %}
@@ -62,22 +64,15 @@
 <p class="empty-section">Keine Teile erfasst.</p>
 {% endif %}
 {% endmacro %}
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ set_name }} · Box {{ user_set.id }} · Brick Manager</title>
-    {% include 'favicon_links.html' %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/set_detail.css', v='colors-2') }}">
-</head>
-<body>
-    {% include 'navbar.html' %}
-    <main id="set-detail" class="container" data-box-id="{{ user_set.id }}">
+{% block language %}de{% endblock %}
+{% block title %}{{ set_name }} · Box {{ user_set.id }}{% endblock %}
+{% block page_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/set_detail.css', v='colors-2') }}">
+{% endblock %}
+{% block content %}
+<div id="set-detail" data-box-id="{{ user_set.id }}">
         <a href="{{ list_url }}" id="set-back-link">← Zur Trefferliste</a>
-        <header class="detail-header">
+        <header class="bm-page-header detail-header">
             {{ preview_image(detail_data.set_img_url, set_name ~ ' · ' ~ user_set.set_num, 112, 84) }}
             <div>
                 <p class="box-identity">Box {{ user_set.id }} · Set {{ user_set.set_num }}</p>
@@ -177,8 +172,8 @@
                 <button type="button" id="save-and-back" class="btn btn-primary">Speichern und zurück</button>
             </div>
         </dialog>
-    </main>
-    <script defer src="{{ url_for('static', filename='js/set_detail.js', v='quantity-tab-3') }}"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    </div>
+{% endblock %}
+{% block page_scripts %}
+<script defer src="{{ url_for('static', filename='js/set_detail.js', v='quantity-tab-3') }}"></script>
+{% endblock %}

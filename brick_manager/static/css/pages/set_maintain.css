@@ -1,0 +1,28 @@
+/* Page-specific layout and interaction states. Shared components: design-system.css. */
+#sets-table .table-responsive { max-width: 100%; overflow-x: auto; }
+        #set-filters input, #set-filters select { box-sizing: border-box; max-width: 100%; }
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-loading-text {
+            font-size: 1.1rem;
+            color: #6c757d;
+            text-align: center;
+        }

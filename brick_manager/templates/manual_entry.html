@@ -1,176 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manual Entry - Add Part to Storage</title>
+{% extends "base.html" %}
+{% from "ui_macros.html" import page_header, empty_state, icon %}
+{% block language %}en{% endblock %}
+{% block title %}Manual Entry - Add Part to Storage{% endblock %}
+{% block page_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/manual_entry.css', v='2') }}">
+{% endblock %}
+{% block content %}
 
-    <!-- Favicon -->
-    {% include "favicon_links.html" %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-
-    <style>
-        .part-preview-card {
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            display: none;
-        }
-
-        .part-preview-card.show {
-            display: block;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .part-image-container {
-            text-align: center;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .part-image-container img {
-            max-width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-        }
-
-        .validation-spinner {
-            display: none;
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .validation-icon {
-            display: none;
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-        }
-
-        .form-control-with-validation {
-            position: relative;
-        }
-
-        .storage-exists-warning {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border-left: 4px solid #ffc107;
-        }
-
-        .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 0;
-            margin-bottom: 30px;
-            border-radius: 10px;
-        }
-
-        .info-badge {
-            display: inline-block;
-            padding: 8px 15px;
-            background: white;
-            color: #667eea;
-            border-radius: 20px;
-            font-weight: 600;
-            margin: 5px;
-        }
-
-        .parts-list-scroll {
-            max-height: 500px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            background: white;
-        }
-
-        .part-list-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
-            transition: background 0.2s;
-        }
-
-        .part-list-item:last-child {
-            border-bottom: none;
-        }
-
-        .part-list-item:hover {
-            background: #f8f9fa;
-        }
-
-        .part-list-item.invalid {
-            background: #ffe6e6;
-            opacity: 0.7;
-        }
-
-        .part-list-img {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            margin-right: 15px;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 5px;
-            background: white;
-        }
-
-        .part-list-info {
-            flex: 1;
-        }
-
-        .part-list-info h6 {
-            margin: 0 0 5px 0;
-            font-size: 0.95rem;
-            color: #495057;
-        }
-
-        .part-list-info p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-
-        .part-list-badge {
-            padding: 3px 8px;
-            font-size: 0.75rem;
-            border-radius: 3px;
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Include the navigation bar -->
-    {% include 'navbar.html' %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <div class="container mt-5">
+    <div class="bm-workspace">
         <!-- Hero Section -->
-        <div class="hero-section">
-            <div class="text-center">
-                <h1><i class="bi bi-box-seam"></i> Manual Part Entry</h1>
-                <p class="lead mb-0">Add Brick parts to your storage system</p>
-            </div>
-        </div>
+        {{ page_header('Manual Part Entry', 'Parts', 'Identify Bricks, choose a location and add them to your storage.', 'intake') }}
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -179,7 +18,7 @@
         <div class="alert-container">
             {% for category, message in messages %}
             <div class="alert alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'danger' }} alert-dismissible fade show" role="alert">
-                <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'x-circle' }}"></i>
+                <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'x-circle' }}" aria-hidden="true"></i>
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -192,15 +31,15 @@
             <!-- Form Section -->
             <div class="col-md-6">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Part Information</h5>
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-pencil-square" aria-hidden="true"></i> Part Information</h5>
                     </div>
                     <div class="card-body">
                         <form method="post" id="manual-entry-form">
                             <!-- Part Number(s) -->
                             <div class="mb-4 form-control-with-validation">
                                 <label for="part_num" class="form-label">
-                                    <i class="bi bi-hash"></i> Part Number(s) <span class="text-danger">*</span>
+                                    <i class="bi bi-hash" aria-hidden="true"></i> Part Number(s) <span class="text-danger">*</span>
                                 </label>
                                 <div class="position-relative">
                                     <input type="text"
@@ -216,8 +55,8 @@
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
                                     </div>
-                                    <i class="validation-icon text-success bi bi-check-circle-fill" id="validIcon"></i>
-                                    <i class="validation-icon text-danger bi bi-x-circle-fill" id="invalidIcon"></i>
+                                    <i class="validation-icon text-success bi bi-check-circle-fill" aria-hidden="true" id="validIcon"></i>
+                                    <i class="validation-icon text-danger bi bi-x-circle-fill" aria-hidden="true" id="invalidIcon"></i>
                                 </div>
                                 <small class="form-text text-muted">Enter one or multiple part numbers separated by commas</small>
                             </div>
@@ -225,7 +64,7 @@
                             <hr>
 
                             <!-- Storage Location -->
-                            <h6 class="mb-3"><i class="bi bi-geo-alt-fill"></i> Storage Location</h6>
+                            <h6 class="mb-3"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> Storage Location</h6>
 
                             <div class="row">
                                 <div class="col-md-4 mb-3">
@@ -274,7 +113,7 @@
                             <!-- Optional: Color ID (for tracking specific color variants) -->
                             <div class="mb-3">
                                 <label for="color_id" class="form-label">
-                                    <i class="bi bi-palette"></i> Color ID <small class="text-muted">(Optional)</small>
+                                    <i class="bi bi-palette" aria-hidden="true"></i> Color ID <small class="text-muted">(Optional)</small>
                                 </label>
                                 <input type="number"
                                        id="color_id"
@@ -288,7 +127,7 @@
                             <!-- Optional: Notes -->
                             <div class="mb-3">
                                 <label for="notes" class="form-label">
-                                    <i class="bi bi-sticky"></i> Notes <small class="text-muted">(Optional)</small>
+                                    <i class="bi bi-sticky" aria-hidden="true"></i> Notes <small class="text-muted">(Optional)</small>
                                 </label>
                                 <input type="text"
                                        id="notes"
@@ -305,7 +144,7 @@
                             <!-- Submit Button -->
                             <div class="d-grid gap-2 mt-4">
                                 <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
-                                    <i class="bi bi-save" id="saveIcon"></i>
+                                    <i class="bi bi-save" aria-hidden="true" id="saveIcon"></i>
                                     <span class="spinner-border spinner-border-sm d-none" id="saveSpinner" role="status">
                                         <span class="visually-hidden">Saving...</span>
                                     </span>
@@ -320,7 +159,7 @@
             <!-- Part Preview Section -->
             <div class="col-md-6">
                 <div class="part-preview-card" id="partPreview">
-                    <h5 class="text-center mb-4"><i class="bi bi-eye"></i> Part Preview</h5>
+                    <h5 class="text-center mb-4"><i class="bi bi-eye" aria-hidden="true"></i> Part Preview</h5>
 
                     <!-- Single Part View -->
                     <div id="singlePartView">
@@ -328,7 +167,7 @@
                         <div class="part-image-container mb-4">
                             <img id="partImage" src="" alt="Part Image" style="display: none;">
                             <div id="noImagePlaceholder">
-                                <i class="bi bi-image" style="font-size: 4rem; color: #ccc;"></i>
+                                <i class="bi bi-image" aria-hidden="true" style="font-size: 4rem; color: #ccc;"></i>
                                 <p class="text-muted mt-2">No image available</p>
                             </div>
                         </div>
@@ -336,7 +175,7 @@
                         <!-- Part Details -->
                         <div class="card">
                             <div class="card-body">
-                                <h6 class="card-title"><i class="bi bi-info-circle"></i> Part Details</h6>
+                                <h6 class="card-title"><i class="bi bi-info-circle" aria-hidden="true"></i> Part Details</h6>
                                 <hr>
                                 <p class="mb-2"><strong>Name:</strong> <span id="partName">-</span></p>
                                 <p class="mb-2"><strong>Category:</strong> <span id="partCategory">-</span></p>
@@ -346,19 +185,19 @@
 
                         <!-- Storage Warning -->
                         <div class="alert storage-exists-warning mt-3" id="storageWarning" style="display: none;">
-                            <h6><i class="bi bi-exclamation-triangle"></i> <span id="storageWarningTitle">Existing Storage Location(s)</span></h6>
+                            <h6><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> <span id="storageWarningTitle">Existing Storage Location(s)</span></h6>
                             <p class="mb-2" id="storageWarningText">This part is already stored at:</p>
                             <div id="existingStorageList">
                                 <!-- Will be populated dynamically -->
                             </div>
-                            <p class="mb-0 mt-3"><small class="text-info"><i class="bi bi-info-circle"></i> You can add this part to a different location. Use Color ID or Notes to distinguish variants.</small></p>
+                            <p class="mb-0 mt-3"><small class="text-info"><i class="bi bi-info-circle" aria-hidden="true"></i> You can add this part to a different location. Use Color ID or Notes to distinguish variants.</small></p>
                         </div>
                     </div>
 
                     <!-- Multiple Parts List View -->
                     <div id="multiplePartsView" style="display: none;">
                         <div class="alert alert-info mb-3">
-                            <i class="bi bi-info-circle"></i> <strong><span id="validPartsCount">0</span> parts</strong> will be added to the same location
+                            <i class="bi bi-info-circle" aria-hidden="true"></i> <strong><span id="validPartsCount">0</span> parts</strong> will be added to the same location
                         </div>
                         <div id="partsListContainer" class="parts-list-scroll">
                             <!-- Parts will be dynamically added here -->
@@ -369,7 +208,7 @@
                 <!-- Instructions Card (shown when no part is entered) -->
                 <div class="card shadow-sm" id="instructionsCard">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-lightbulb"></i> How to Use</h5>
+                        <h5 class="card-title"><i class="bi bi-lightbulb" aria-hidden="true"></i> How to Use</h5>
                         <hr>
                         <ol>
                             <li class="mb-2">Enter <strong>one or multiple Part Numbers</strong> (e.g., 3001 or 3001,3002,3003)</li>
@@ -378,18 +217,19 @@
                             <li class="mb-2">Click <strong>Add to Storage</strong> to save all parts</li>
                         </ol>
                         <div class="alert alert-info mt-3">
-                            <i class="bi bi-info-circle"></i> <strong>Tip:</strong> You can add multiple parts to the same location by separating part numbers with commas!
+                            <i class="bi bi-info-circle" aria-hidden="true"></i> <strong>Tip:</strong> You can add multiple parts to the same location by separating part numbers with commas!
                         </div>
                         <div class="alert alert-success mt-2">
-                            <i class="bi bi-check-circle"></i> After saving, the box number will automatically increment for the next entry.
+                            <i class="bi bi-check-circle" aria-hidden="true"></i> After saving, the box number will automatically increment for the next entry.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
+{% endblock %}
+{% block page_scripts %}
+<script>
         let validationTimeout = null;
         let partValidated = false;
 
@@ -748,5 +588,4 @@
             }
         });
     </script>
-</body>
-</html>
+{% endblock %}

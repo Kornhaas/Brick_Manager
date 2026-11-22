@@ -1,27 +1,14 @@
-<!doctype html>
-<html lang="en">
+{% extends "base.html" %}
+{% from "ui_macros.html" import page_header, empty_state, icon %}
+{% block language %}en{% endblock %}
+{% block title %}Part Lookup{% endblock %}
+{% block content %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Part Lookup</title>
-
-
-    <!-- Favicon -->
-    {% include "favicon_links.html" %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-
-<body>
-    <!-- Include the navigation bar -->
-    {% include 'navbar.html' %}
-
-    <div class="container mt-5">
-        <h1 class="text-center">Lookup Part</h1>
+    <div class="bm-workspace">
+        {{ page_header('Lookup Part', 'Parts', 'Find a part and see its confirmed storage locations.', 'search') }}
 
         <!-- Part Lookup Form -->
-        <form id="part-lookup-form" method="post" class="mb-4">
+        <form id="part-lookup-form" method="post" class="bm-panel">
             <div class="mb-3">
                 <label for="part_id" class="form-label">Enter Part ID:</label>
                 <input
@@ -71,7 +58,11 @@
             <li class="list-group-item"><strong>Box:</strong> {{ box or 'Not Specified' }}</li>
         </ul>
         {% else %}
-        <p class="text-muted mt-5">No details available for the given part ID.</p>
+        {% if request.method == 'POST' %}
+        {{ empty_state('No matching part found', 'Check the part number and try again.', 'bricks') }}
+        {% else %}
+        {{ empty_state('Find your Bricks', 'Enter a part number to see its picture and confirmed storage locations.', 'bricks') }}
+        {% endif %}
         {% endif %}
 
         <!-- Flash Messages -->
@@ -90,9 +81,9 @@
     </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
+{% endblock %}
+{% block page_scripts %}
+<script>
         // Add input validation and spinner functionality
         document.getElementById('part-lookup-form').addEventListener('submit', function (event) {
             const partInput = document.getElementById('part_id');
@@ -127,6 +118,4 @@
             }, 5000);
         });
     </script>
-</body>
-
-</html>
+{% endblock %}

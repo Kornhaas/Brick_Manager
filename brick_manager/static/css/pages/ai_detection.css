@@ -1,0 +1,41 @@
+/* Page-specific layout and interaction states. Shared components: design-system.css. */
+.camera-container {
+            text-align: center;
+            padding: 20px;
+        }
+        .quick-scan-btn {
+            width: 100%;
+            max-width: 400px;
+            height: 80px;
+            font-size: 1.5rem;
+            margin: 20px auto;
+            display: block;
+        }
+        .results-panel {
+            margin-top: 20px;
+            display: none;
+        }
+        .results-panel.show {
+            display: block;
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading-spinner.show {
+            display: block;
+        }
+        @media (min-width: 768px) {
+            .split-view {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+        }
+        .hidden-file-input {
+            display: none;
+        }
+        .result-card {
+            margin-bottom: 15px;
+        }

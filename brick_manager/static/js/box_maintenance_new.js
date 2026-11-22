@@ -235,7 +235,7 @@ function displaySingleBoxContents(contents, location, level, box) {
     const card = document.createElement('div');
     card.className = 'card shadow-sm';
     const header = document.createElement('div');
-    header.className = 'card-header bg-primary text-white';
+    header.className = 'card-header';
     const heading = document.createElement('h5');
     heading.className = 'mb-0';
     heading.textContent = `Box Contents: ${location} - ${level} - ${box}`;
@@ -303,7 +303,7 @@ function displayLocationOverview(boxes) {
 
     let html = `
         <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
+            <div class="card-header">
                 <h5 class="mb-0">Boxes in Location: ${boxes[0].location}</h5>
             </div>
             <div class="card-body">
@@ -381,7 +381,7 @@ function displayLevelOverview(boxes) {
 
     let html = `
         <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">
+            <div class="card-header">
                 <h5 class="mb-0">Boxes in ${boxes[0].location} - Level ${boxes[0].level}</h5>
             </div>
             <div class="card-body">

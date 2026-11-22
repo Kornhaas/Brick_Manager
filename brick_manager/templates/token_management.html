@@ -1,23 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Management - Brick Manager</title>
-
-
-    <!-- Favicon -->
-    {% include "favicon_links.html" %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-
-<body>
-    {% include 'navbar.html' %}
-    <div class="container mt-5">
-        <h1>Rebrickable API Token Management</h1>
-        <p class="text-muted">Manage your Rebrickable user token for API access.</p>
+{% extends "base.html" %}
+{% from "ui_macros.html" import page_header, empty_state, icon %}
+{% block language %}en{% endblock %}
+{% block title %}Token Management{% endblock %}
+{% block content %}
+<div class="bm-workspace">
+        {{ page_header('Rebrickable API Token Management', 'Administration', 'Manage the connection to your Rebrickable account.', 'key') }}
 
         <!-- Token Status Card -->
         <div class="card mb-4">
@@ -28,14 +15,14 @@
                 <div id="tokenStatus">
                     {% if token_exists %}
                         <div class="alert alert-success" role="alert">
-                            <i class="bi bi-check-circle"></i> Token is configured
+                            <i class="bi bi-check-circle" aria-hidden="true"></i> Token is configured
                             {% if username %}
                                 for user: <strong>{{ username }}</strong>
                             {% endif %}
                         </div>
                     {% else %}
                         <div class="alert alert-warning" role="alert">
-                            <i class="bi bi-exclamation-triangle"></i> No token configured
+                            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> No token configured
                         </div>
                     {% endif %}
                 </div>
@@ -43,10 +30,10 @@
                 {% if token_exists %}
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-primary" onclick="testToken()">
-                            <i class="bi bi-check-circle"></i> Test Token
+                            <i class="bi bi-check-circle" aria-hidden="true"></i> Test Token
                         </button>
                         <button type="button" class="btn btn-danger" onclick="deleteToken()">
-                            <i class="bi bi-trash"></i> Delete Token
+                            <i class="bi bi-trash" aria-hidden="true"></i> Delete Token
                         </button>
                     </div>
                 {% endif %}
@@ -77,8 +64,8 @@
                                placeholder="Enter your Rebrickable password" required>
                     </div>
 
-                    <button type="submit" class="btn btn-success" id="generateBtn">
-                        <i class="bi bi-key"></i> Generate Token
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        <i class="bi bi-key" aria-hidden="true"></i> Generate Token
                     </button>
                     <div class="spinner-border spinner-border-sm text-primary d-none" id="loadingSpinner" role="status">
                         <span class="visually-hidden">Loading...</span>
@@ -122,9 +109,9 @@
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+{% endblock %}
+{% block page_scripts %}
+<script>
         // Form submission handler
         document.getElementById('tokenForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -237,6 +224,4 @@
             modal.show();
         }
     </script>
-</body>
-
-</html>
+{% endblock %}

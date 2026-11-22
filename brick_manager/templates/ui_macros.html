@@ -1,3 +1,27 @@
 {% macro icon(name, size=22) -%}
 <svg class="bm-icon" width="{{ size }}" height="{{ size }}" aria-hidden="true" focusable="false"><use href="{{ url_for('static', filename='brand/icons.svg') }}#{{ name }}"></use></svg>
 {%- endmacro %}
+
+{% macro page_header(title, section, description='', symbol='bricks', illustration=false) -%}
+<header class="bm-page-header workspace-hero">
+    <div class="bm-page-heading">
+        <span class="bm-heading-symbol">{{ icon(symbol, 26) }}</span>
+        <div>
+            <span class="workspace-kicker">{{ section }}</span>
+            <h1>{{ title }}</h1>
+            {% if description %}<p>{{ description }}</p>{% endif %}
+        </div>
+    </div>
+    {% if caller is defined %}<div class="bm-page-actions">{{ caller() }}</div>
+    {% elif illustration %}<img class="workspace-art" src="{{ url_for('static', filename='brand/collection-art.svg') }}" alt="" width="190" height="131">{% endif %}
+</header>
+{%- endmacro %}
+
+{% macro empty_state(title, description='', symbol='bricks') -%}
+<div class="bm-empty-state">
+    <span class="bm-empty-symbol">{{ icon(symbol, 30) }}</span>
+    <h2>{{ title }}</h2>
+    {% if description %}<p>{{ description }}</p>{% endif %}
+    {% if caller is defined %}<div class="bm-actions">{{ caller() }}</div>{% endif %}
+</div>
+{%- endmacro %}

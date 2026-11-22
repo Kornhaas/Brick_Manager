@@ -1,0 +1,23 @@
+/* Page-specific layout and interaction states. Shared components: design-system.css. */
+.table img {
+            border-radius: 4px;
+        }
+        .box-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .box-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .box-card .card-img-top {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .box-card .position-relative {
+            overflow: hidden;
+        }
+        .box-card .badge.position-absolute {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }

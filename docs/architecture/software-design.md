@@ -16,6 +16,24 @@ Dieses Dokument beschreibt Implementierungsgrenzen und Änderungsverträge des b
 
 Die Trennung beschreibt die bestehenden Verantwortlichkeiten und die Richtung für Erweiterungen. Sie behauptet nicht, dass bestehende Routen ausschließlich Services verwenden: direkte Modellzugriffe und umfangreichere Routenlogik sind vorhanden.
 
+## Gemeinsame UI-Komponenten
+
+Alle 20 von Routen verwendeten Seitenvorlagen erben `base.html`. Dieser Rahmen
+bindet Navigation, Sprunglink, Hauptbereich und gemeinsame Ressourcen genau
+einmal ein. `page_head` und `page_scripts` erlauben Fachressourcen; Bootstrap
+wird vor den Seitenscripts geladen. Seitenkopf und Leerzustand stammen aus
+`ui_macros.html`. Dashboard und Setdetail nutzen bewusst fachliche Kopfvarianten.
+Farben, Abstände, Karten, Formulare, Tabellen und Rückmeldungen werden zentral
+über `design-system.css` definiert. Einzelheiten und Erweiterungsregeln stehen
+im [UI-Konzept](ui-design-system.md).
+
+Die Umstellung verändert keine Formularnamen, JSON-Verträge oder Datenmodelle.
+Tabellenregionen begrenzen horizontales Scrollen; vorhandene Mengenfarben,
+Speicherindikatoren, Filterrückkehr und direkte Mengennavigation bleiben
+fachliche Verträge. Leere Teilekategorien besitzen keinen Speichern-Knopf;
+der Controller bindet ihn deshalb nur, wenn er vorhanden ist. Mehrere
+Scanergebnisse haben je Teil eindeutig beschriftete Lagerfelder und Tabellen.
+
 ## Beispiel: Teile und Lagerorte
 
 `brick_manager/routes/part_location.py` lädt Kategorien über `RebrickableService` und lokale Zuordnungen über `load_part_lookup`. Bei einer Kategorieauswahl werden Teileinformationen mit Lookup-Feldern und gecachten Bildern ergänzt und an `part_location.html` übergeben. Fehler beim Laden führen in diesem Ablauf zu einer Fehlerseite mit Status 500.

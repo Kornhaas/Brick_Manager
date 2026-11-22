@@ -8,4 +8,8 @@
   <symbol id="intake" viewBox="0 0 24 24"><path d="M12 3v11m-4-4 4 4 4-4M4 13v7h16v-7"/></symbol>
   <symbol id="reorganize" viewBox="0 0 24 24"><path d="M3 7h17m-4-4 4 4-4 4M21 17H4m4-4-4 4 4 4"/></symbol>
   <symbol id="label" viewBox="0 0 24 24"><path d="m3 4 9-1 9 9-9 9-9-9Z"/><circle cx="8" cy="8" r="1"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></symbol>
+  <symbol id="camera" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="book" viewBox="0 0 24 24"><path d="M5 3h15v18H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 14h15M7 7h9M7 11h6"/></symbol>
+  <symbol id="key" viewBox="0 0 24 24"><circle cx="8" cy="8" r="5"/><path d="m12 12 9 9m-4-4 3-3m-6 0 3-3"/></symbol>
 </svg>

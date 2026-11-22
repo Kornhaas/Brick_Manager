@@ -1,0 +1,136 @@
+/* Page-specific layout and interaction states. Shared components: design-system.css. */
+.part-preview-card {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: none;
+        }
+
+        .part-preview-card.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .part-image-container {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .part-image-container img {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+
+        .validation-spinner {
+            display: none;
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .validation-icon {
+            display: none;
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+        }
+
+        .form-control-with-validation {
+            position: relative;
+        }
+
+        .storage-exists-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left: 4px solid #ffc107;
+        }
+
+        .info-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            background: white;
+            color: var(--bm-primary);
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .parts-list-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .part-list-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.2s;
+        }
+
+        .part-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .part-list-item:hover {
+            background: #f8f9fa;
+        }
+
+        .part-list-item.invalid {
+            background: #ffe6e6;
+            opacity: 0.7;
+        }
+
+        .part-list-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-right: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 5px;
+            background: white;
+        }
+
+        .part-list-info {
+            flex: 1;
+        }
+
+        .part-list-info h6 {
+            margin: 0 0 5px 0;
+            font-size: 0.95rem;
+            color: #495057;
+        }
+
+        .part-list-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .part-list-badge {
+            padding: 3px 8px;
+            font-size: 0.75rem;
+            border-radius: 3px;
+        }

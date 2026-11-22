@@ -28,6 +28,11 @@ Der Anwendungsprozess nutzt Flask und APScheduler. Die bestehende Systemgrafik u
 
 ## Qualitätsziele und Grenzen
 
+Das Web-UI verwendet einen gemeinsamen Seitenrahmen für Suche, Sets, Lager und
+Verwaltung. Orientierung, Aktionen und Rückmeldungen folgen dem
+[UI-Konzept](ui-design-system.md); Aufgaben behalten ihre fachlich passende
+Darstellung innerhalb dieses Rahmens.
+
 Sammlungsdaten erhalten, externe Fehler kontrolliert behandeln und die vorhandene Flask-/Jinja-Struktur verständlich erweitern. Änderungen müssen öffentliche Verträge und Bedienabläufe berücksichtigen. Die bestehende Startlogik hat Datenbank- und Scheduler-Seiteneffekte; Details und Testfolgen stehen in der Referenzarchitektur.
 
 Sicherheits- und Betriebsannahmen stehen in der [Konfigurationsreferenz](../reference/configuration.md) und der [Docker-Anleitung](../guides/docker.md). Dieses Dokument erklärt keine öffentliche Bereitstellung für automatisch abgesichert.

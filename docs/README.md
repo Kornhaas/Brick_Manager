@@ -16,6 +16,7 @@ Ist-Verhalten und Vorschläge klar kennzeichnen. Inhalte an genau einer fachlich
 
 - [Referenzarchitektur](architecture/reference-architecture.md): Komponenten, Verantwortlichkeiten, Daten- und Kontrollflüsse sowie Erweiterungsregeln.
 - [Architekturentscheidungen](architecture/decisions.md): dauerhaft geltende technische Entscheidungen und ihr Kontext.
+- [Einheitliches UI-Konzept](architecture/ui-design-system.md): gemeinsamer Seitenrahmen, Komponenten, Farben, mobile Ansichten und Erweiterungsregeln.
 - [Datenbankschema](reference/database-schema.md): Modelle, Tabellen, Ownership und Regeln für Änderungen an persistierten Daten.
 - [Modell-Kurzreferenz](reference/model-reference.md): Einstieg in die SQLAlchemy-Modelle ohne ein zweites Feldinventar zu pflegen.
 - [Konfiguration](reference/configuration.md): Umgebungsvariablen, Pfade und Sicherheitsvorgaben.

@@ -1,26 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collection Intelligence · Brick Manager</title>
-    {% include "favicon_links.html" %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-</head>
-<body class="intelligence-page">
-    {% include 'navbar.html' %}
-    <main class="dashboard-shell">
-        <section class="dashboard-hero">
+{% extends "base.html" %}
+{% from "ui_macros.html" import page_header, empty_state, icon %}
+{% block language %}en{% endblock %}
+{% block title %}Collection Intelligence{% endblock %}
+{% block body_class %}intelligence-page{% endblock %}
+{% block page_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+{% block content %}
+<div class="dashboard-shell">
+        <section class="bm-page-header dashboard-hero">
             <div>
-                <span class="hero-kicker"><i class="bi bi-stars"></i> Collection intelligence</span>
+                <span class="hero-kicker"><i class="bi bi-stars" aria-hidden="true"></i> Collection intelligence</span>
                 <h1>Your bricks.<br><span>The bigger picture.</span></h1>
                 <p>See how the collection grows, where pieces are still missing, and which themes define it.</p>
                 <div class="hero-actions">
-                    <a class="btn btn-light" href="{{ url_for('set_maintain.set_maintain') }}"><i class="bi bi-grid-3x3-gap"></i> Explore sets</a>
-                    <a class="btn btn-ghost" href="{{ url_for('dashboard.details', category='missing_parts') }}"><i class="bi bi-puzzle"></i> Work on missing parts</a>
+                    <a class="btn btn-light" href="{{ url_for('set_maintain.set_maintain') }}"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i> Explore sets</a>
+                    <a class="btn btn-outline-light" href="{{ url_for('dashboard.details', category='missing_parts') }}"><i class="bi bi-puzzle" aria-hidden="true"></i> Work on missing parts</a>
                 </div>
             </div>
             <div class="hero-orbit" aria-hidden="true">
@@ -33,18 +28,18 @@
         </section>
 
         <section class="metric-grid" aria-label="Collection highlights">
-            <article class="metric-card metric-primary"><div class="metric-icon"><i class="bi bi-collection-fill"></i></div><div class="metric-label">Sets in collection</div><div class="metric-value">{{ metrics.total_sets }}</div><div class="metric-foot">{{ metrics.complete_sets }} without missing inventory</div></article>
-            <article class="metric-card metric-violet"><div class="metric-icon"><i class="bi bi-bricks"></i></div><div class="metric-label">Parts owned</div><div class="metric-value">{{ '{:,}'.format(metrics.owned_parts) }}</div><div class="metric-foot">{{ '{:,}'.format(metrics.required_parts) }} catalogued in total</div></article>
-            <a class="metric-card metric-coral" href="{{ url_for('dashboard.details', category='missing_parts') }}"><div class="metric-icon"><i class="bi bi-exclamation-diamond-fill"></i></div><div class="metric-label">Parts still missing</div><div class="metric-value">{{ '{:,}'.format(metrics.missing_parts) }}</div><div class="metric-foot">across {{ metrics.incomplete_sets }} sets</div></a>
-            <article class="metric-card metric-mint"><div class="metric-icon"><i class="bi bi-graph-up-arrow"></i></div><div class="metric-label">Inventory completion</div><div class="metric-value">{{ completion_rate }}%</div><div class="metric-foot">regular and minifigure parts</div></article>
+            <article class="metric-card metric-primary"><div class="metric-icon"><i class="bi bi-collection-fill" aria-hidden="true"></i></div><div class="metric-label">Sets in collection</div><div class="metric-value">{{ metrics.total_sets }}</div><div class="metric-foot">{{ metrics.complete_sets }} without missing inventory</div></article>
+            <article class="metric-card metric-violet"><div class="metric-icon"><i class="bi bi-bricks" aria-hidden="true"></i></div><div class="metric-label">Parts owned</div><div class="metric-value">{{ '{:,}'.format(metrics.owned_parts) }}</div><div class="metric-foot">{{ '{:,}'.format(metrics.required_parts) }} catalogued in total</div></article>
+            <a class="metric-card metric-coral" href="{{ url_for('dashboard.details', category='missing_parts') }}"><div class="metric-icon"><i class="bi bi-exclamation-diamond-fill" aria-hidden="true"></i></div><div class="metric-label">Parts still missing</div><div class="metric-value">{{ '{:,}'.format(metrics.missing_parts) }}</div><div class="metric-foot">across {{ metrics.incomplete_sets }} sets</div></a>
+            <article class="metric-card metric-mint"><div class="metric-icon"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></div><div class="metric-label">Inventory completion</div><div class="metric-value">{{ completion_rate }}%</div><div class="metric-foot">regular and minifigure parts</div></article>
         </section>
 
         <section class="dashboard-grid">
             <article class="panel trend-panel">
-                <div class="panel-heading"><div><span class="section-kicker">90 day pulse</span><h2>Collection momentum</h2></div><div class="chart-legend"><span><i class="legend-dot owned"></i>Parts owned</span><span><i class="legend-dot missing"></i>Missing</span><span><i class="legend-dot sets"></i>Sets</span></div></div>
+                <div class="panel-heading"><div><span class="section-kicker">90 day pulse</span><h2>Collection momentum</h2></div><div class="chart-legend"><span><i class="legend-dot owned" aria-hidden="true"></i>Parts owned</span><span><i class="legend-dot missing" aria-hidden="true"></i>Missing</span><span><i class="legend-dot sets" aria-hidden="true"></i>Sets</span></div></div>
                 <div class="trend-chart-wrap">
                     <svg id="collectionTrend" class="trend-chart" viewBox="0 0 900 300" role="img" aria-label="Collection development over time"></svg>
-                    {% if history | length < 2 %}<div class="chart-first-day"><i class="bi bi-calendar2-heart"></i><strong>Tracking starts today</strong><span>Come back after collection changes to see momentum.</span></div>{% endif %}
+                    {% if history | length < 2 %}<div class="chart-first-day"><i class="bi bi-calendar2-heart" aria-hidden="true"></i><strong>Tracking starts today</strong><span>Come back after collection changes to see momentum.</span></div>{% endif %}
                 </div>
             </article>
             <article class="panel completion-panel">
@@ -55,7 +50,7 @@
                 </div>
             </article>
             <article class="panel themes-panel">
-                <div class="panel-heading"><div><span class="section-kicker">Collection DNA</span><h2>Top themes</h2></div><a href="{{ url_for('set_maintain.set_maintain', group='theme') }}">All themes <i class="bi bi-arrow-right"></i></a></div>
+                <div class="panel-heading"><div><span class="section-kicker">Collection DNA</span><h2>Top themes</h2></div><a href="{{ url_for('set_maintain.set_maintain', group='theme') }}">All themes <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
                 <div class="ranking-list">
                     {% set top_theme_count = metrics.theme_distribution[0].value if metrics.theme_distribution else 1 %}
                     {% for theme in metrics.theme_distribution %}<a href="{{ url_for('set_maintain.set_maintain', q=theme.label, group='theme') }}" class="ranking-row"><span class="ranking-number">{{ '%02d' | format(loop.index) }}</span><span class="ranking-main"><strong>{{ theme.label }}</strong><span class="ranking-track"><i style="width: {{ (theme.value / top_theme_count * 100) | round }}%"></i></span></span><span class="ranking-value">{{ theme.value }}</span></a>{% else %}<p class="empty-copy">Themes appear after sets have been imported.</p>{% endfor %}
@@ -64,32 +59,32 @@
             <article class="panel status-panel">
                 <div class="panel-heading"><div><span class="section-kicker">At a glance</span><h2>Set status</h2></div></div>
                 <div id="statusBars" class="status-bars"></div>
-                <a class="panel-action" href="{{ url_for('set_maintain.set_maintain') }}">Maintain collection <i class="bi bi-arrow-up-right"></i></a>
+                <a class="panel-action" href="{{ url_for('set_maintain.set_maintain') }}">Maintain collection <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
             </article>
         </section>
 
         <section class="showcase-section">
             <div class="section-title-row"><div><span class="section-kicker">Heavy hitters</span><h2>Largest sets in your collection</h2></div></div>
             <div class="set-showcase">
-                {% for item in metrics.largest_sets %}<a class="showcase-card" href="{{ url_for('set_maintain.set_maintain', box_id=item.box_id) }}"><div class="showcase-image"><img src="{{ item.image or url_for('static', filename='default_image.png') }}" loading="lazy" decoding="async" alt=""></div><div class="showcase-copy"><small>{{ item.set_num }} · Box {{ item.box_id }}</small><strong>{{ item.name }}</strong><span><i class="bi bi-bricks"></i> {{ '{:,}'.format(item.parts) }} parts</span></div></a>{% else %}<p class="empty-copy">Add sets to unlock collection highlights.</p>{% endfor %}
+                {% for item in metrics.largest_sets %}<a class="showcase-card" href="{{ url_for('set_maintain.set_maintain', box_id=item.box_id) }}"><div class="showcase-image"><img src="{{ item.image or url_for('static', filename='default_image.png') }}" loading="lazy" decoding="async" alt=""></div><div class="showcase-copy"><small>{{ item.set_num }} · Box {{ item.box_id }}</small><strong>{{ item.name }}</strong><span><i class="bi bi-bricks" aria-hidden="true"></i> {{ '{:,}'.format(item.parts) }} parts</span></div></a>{% else %}<p class="empty-copy">Add sets to unlock collection highlights.</p>{% endfor %}
             </div>
         </section>
 
         <section class="insight-strip">
-            <div class="value-lock"><i class="bi bi-currency-euro"></i></div>
+            <div class="value-lock"><i class="bi bi-currency-euro" aria-hidden="true"></i></div>
             <div><span class="section-kicker">Collection value</span><h2>Ready for a verified price source</h2><p>Rebrickable does not expose pricing through its API. A BrickLink price provider can unlock total value, value history, and the most valuable set without guessing.</p></div>
-            <a class="source-badge" href="{{ url_for('token_management.token_management_page') }}"><i class="bi bi-plug"></i> Prepare integration</a>
+            <a class="source-badge" href="{{ url_for('token_management.token_management_page') }}"><i class="bi bi-plug" aria-hidden="true"></i> Prepare integration</a>
         </section>
 
         <section class="secondary-metrics">
-            <a href="{{ url_for('dashboard.details', category='missing_minifigure_parts') }}"><i class="bi bi-person-standing"></i><span>Missing minifigure parts</span><strong>{{ metrics.missing_minifigure_parts }}</strong></a>
-            <a href="{{ url_for('dashboard.details', category='konvolut_parts') }}"><i class="bi bi-boxes"></i><span>Konvolut parts owned</span><strong>{{ metrics.konvolut_parts }}</strong></a>
-            <a href="{{ url_for('dashboard.details', category='konvolut_parts') }}"><i class="bi bi-search-heart"></i><span>Missing Konvolut parts</span><strong>{{ metrics.missing_konvolut_parts }}</strong></a>
+            <a href="{{ url_for('dashboard.details', category='missing_minifigure_parts') }}"><i class="bi bi-person-standing" aria-hidden="true"></i><span>Missing minifigure parts</span><strong>{{ metrics.missing_minifigure_parts }}</strong></a>
+            <a href="{{ url_for('dashboard.details', category='konvolut_parts') }}"><i class="bi bi-boxes" aria-hidden="true"></i><span>Konvolut parts owned</span><strong>{{ metrics.konvolut_parts }}</strong></a>
+            <a href="{{ url_for('dashboard.details', category='konvolut_parts') }}"><i class="bi bi-search-heart" aria-hidden="true"></i><span>Missing Konvolut parts</span><strong>{{ metrics.missing_konvolut_parts }}</strong></a>
         </section>
-    </main>
-    <script id="historyData" type="application/json">{{ history | tojson }}</script>
-    <script id="statusData" type="application/json">{{ metrics.status_distribution | tojson }}</script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-</body>
-</html>
+    </div>
+{% endblock %}
+{% block page_scripts %}
+<script id="historyData" type="application/json">{{ history | tojson }}</script>
+<script id="statusData" type="application/json">{{ metrics.status_distribution | tojson }}</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

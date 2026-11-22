@@ -2,6 +2,76 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-22 – UI-Paket zur Integration auf main freigegeben
+
+**Umfang:** Der Nutzer beauftragt die Veröffentlichung des einheitlichen
+UI-Rahmens einschließlich aller aktiven Vorlagen, Fachstyles, Icons,
+Regressionen und Dokumentation auf `main`. Vor der Integration zeigen
+`main`, `origin/main` und die Basis von `codex/unified-ui-concept` auf denselben
+Commit `954d796`; es gibt keine zwischenzeitlichen Remote-Änderungen und keine
+fremden lokalen Änderungen im Integrationspaket.
+
+**Nachweise und Ablauf:** Die geprüften 745 Python-Tests, 25 JavaScript-Tests,
+58 Desktop-/Mobilansichten sowie die gesonderten Speicher-/Lager-/PDF-Abläufe
+sind im folgenden Eintrag dokumentiert. Die Git-Hooks bleiben für Commit und
+Push aktiv; der Pre-Push-Hook führt die vollständige isolierte Suite erneut
+aus. Der zu diesem main-Commit gehörende Docker-Lauf wird bis zum Endergebnis
+verfolgt, einschließlich Multiarch-Push, Healthcheck und Security-Scan. Der
+Abschlussbericht nennt den tatsächlich veröffentlichten Commit und den
+zugehörigen Workflow-Link; dieser Freigabeeintrag behauptet kein vorab
+erfolgreiches Remote-Ergebnis. Keine weitere Design-/Bedienänderung nötig;
+das [UI-Konzept](architecture/ui-design-system.md) bleibt die Referenz.
+Kein Produktionsserver-Neustart oder Live-Datenbankzugriff Teil der Integration.
+
+## 2026-11-22 – Einheitlicher UI-Rahmen für alle Arbeitsseiten
+
+**Ergebnis und Grund:** Die bisherige Farbangleichung ließ unterschiedliche
+Seitenaufbauten bestehen. Alle 20 aktiv gerenderten HTML-Seitenvorlagen erben
+jetzt `base.html`: gemeinsame Navigation, Ressourcen, Sprunglink und Hauptbereich.
+Zentrale Makros und Design-Tokens vereinheitlichen Seitenköpfe, Inhaltskanten,
+Icons, Karten, Formulare, Tabellen, Nebenaktionen und Rückmeldungen. Dashboard
+und Setdetail behalten fachliche Kopfvarianten. Verstreute Inline-CSS-Blöcke
+sind als Fach-CSS ausgelagert, konkurrierende globale Regeln aus `styles.css`
+entfernt. Boxpflege zeigt ihren Titel vor der Druckwarteschlange; Suche,
+Verwaltung und leere/gefüllte Ergebnisse verwenden denselben Komponentenrahmen.
+
+**Mitbehobene Zustände:** Ein leerer Lagerortdialog bindet keinen fehlenden
+Speichern-Knopf mehr. Scanergebnisse besitzen korrekt geschlossenes Editor-Markup,
+beschriftete Lagerfelder und eindeutige Tabellennamen pro Teil. Leere Scanlisten
+zeigen eine hilfreiche Rückmeldung. Tabellen scrollen lokal; Knopftexte bleiben
+auch als Links und beim Hover lesbar. Der mobile Setdetail-Überlauf ohne externe
+Bootstrap-Ressourcen wurde im bestehenden Browserlauf gefunden und durch
+eigenständiges Border-Box-Sizing im gemeinsamen Rahmen behoben.
+
+**Verifikation:** 26 anfänglich rote Rahmenfälle wurden grün; mit dem
+Mehrfach-Scanfall sind es 27 neue Regressionen. Vollständige isolierte Linux-Suite:
+**745 bestanden, 0 fehlgeschlagen, 0 übersprungen; 76,16 % Coverage** in 144,22 s.
+Nach den letzten Leerzustands-/Markup-Anpassungen zusätzlich alle 54 Rahmen-
+und bisherigen UI-Verträge bestanden. Alle 25 JavaScript-Tests bestanden.
+Der neue Browserlauf prüft 58 Desktop-/Mobilansichten mit echten Vendor-Styles,
+synthetischen Daten, Formularübermittlung, Navigation, Fokus und Druckansicht.
+Screenshots wurden stichprobenartig visuell geprüft. Bestehende Setdetail-
+(einschließlich Tab, Save/Retry und Listenrückkehr), drei Set-PDF-Formate,
+Lagerseiten- und Lageretiketten-Browserläufe bestanden. Ruff/Format,
+JavaScript-Syntax und Whitespace-Prüfung bestanden; lokale Dokumentationslinks
+wurden einschließlich ihrer Zielanker geprüft.
+
+**Dokumentation und Grenzen:** [UI-Konzept](architecture/ui-design-system.md),
+Architekturübersichten, Design, Entscheidung, Benutzer- und Testanleitung
+beschreiben Komponenten und Erweiterungsregeln; der Index führt das Konzept.
+Keine Nutzungsstudie, kein vollständiger WCAG-Audit, kein physisches iPad und
+kein physischer Drucktest. Sprachmischung und nicht geroutete historische
+Vorlagen sind explizit abgegrenzt. Das UI-Paket liegt auf
+`codex/unified-ui-concept`; kein Produktionsstart, Datenbankeingriff oder
+Produktionsdeployment für die Prüfung.
+
+**Vorheriger Integrationsauftrag abgeschlossen:** Farbkorrektur und Tab-Navigation
+sind als `954d79683016e6fb71047bd23d5b36e863d3bd11` auf `main` veröffentlicht.
+Der zugehörige [Docker-Lauf](https://github.com/Kornhaas/Brick_Manager/actions/runs/45056728562)
+ist vollständig erfolgreich: Tests, Multiarch-Build/Push, Container-Healthcheck,
+Security-Scan und abschließender Deploy-Mitteilungsjob. Das ist ein Image-Release,
+kein Update des externen Produktionsservers.
+
 ## 2026-11-22 – Farb- und Tab-Korrekturen für main freigegeben
 
 **Umfang:** Die beiden zuvor lokal geprüften Korrekturen werden gemeinsam mit

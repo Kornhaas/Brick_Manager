@@ -81,7 +81,7 @@ def test_landing_page_exposes_core_collection_workflows(client):
     response = client.get("/")
 
     assert response.status_code == 200
-    assert b"Welcome to Brick Manager" in response.data
+    assert b"<h1>Brick Manager</h1>" in response.data
     assert b"Start Scanning" in response.data
     assert b'href="/set_maintain"' in response.data
     assert b'href="/missing_parts"' in response.data

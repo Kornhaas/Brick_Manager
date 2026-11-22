@@ -25,6 +25,15 @@ lokale Bricks-Symbole und gut erkennbare Hauptaktionen. Das Dashboard bleibt der
 visuelle Ausgangspunkt. Aktive Bereiche sind hervorgehoben, Tastaturfokus bleibt
 sichtbar; die Einstellung „Bewegung reduzieren“ des Systems wird berücksichtigt.
 
+Alle Arbeitsseiten verwenden denselben Seitenkopf, dieselben Inhaltskanten und
+weiße Aufgabenkarten. Indigo kennzeichnet die Hauptaktion, Konturknöpfe die
+Nebenaktionen und Rot das Löschen. Abschnittsköpfe bleiben neutral; Status und
+Mengen haben zusätzliche verständliche Texte. Breite Tabellen lassen sich in
+ihrem eigenen Bereich seitlich scrollen, während die Seite auf Mobilgeräten
+in der Bildschirmbreite bleibt. Der erste Tastatursprung führt direkt zum
+Hauptinhalt. Das verbindliche [UI-Konzept](../architecture/ui-design-system.md)
+beschreibt auch neue Seiten und die bewussten Dashboard-/Detailvarianten.
+
 - Mehrere `user_sets` mit derselben Setnummer sind zulässig und repräsentieren physische Kopien.
 - Ersatzteile bleiben bei Mengen- und Fehlteilberechnungen von regulären Teilen getrennt.
 - Ein Teil kann mehrere Lagerorte haben; Änderungen müssen den betroffenen Ort eindeutig adressieren.

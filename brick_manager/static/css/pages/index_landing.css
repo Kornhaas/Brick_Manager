@@ -1,0 +1,4 @@
+/* Page-specific layout and interaction states. Shared components: design-system.css. */
+.feature-card{transition:transform .3s,box-shadow .3s;height:100%;cursor:pointer}
+        .feature-card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,0,0,.2)}
+        .feature-icon{font-size:3rem;margin-bottom:1rem;color:var(--bm-primary)}

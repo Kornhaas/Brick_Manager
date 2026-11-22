@@ -1,33 +1,25 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="warehouse-csrf" content="{{ warehouse_csrf }}">
-  {% set titles = {'overview': 'Lagerübersicht', 'intake': 'Bricks einlagern', 'reorganize': 'Lager aufräumen', 'box-types': 'Boxgrößen', 'locations': 'Regale & Fächer', 'capture': 'Bestand erfassen', 'settings': 'Lagerregeln'} %}
-  <title>{{ titles[warehouse_page] }} · Brick Manager</title>
-  {% include 'favicon_links.html' %}
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends "base.html" %}
+{% from "ui_macros.html" import page_header, empty_state, icon %}
+{% set titles = {'overview': 'Lagerübersicht', 'intake': 'Bricks einlagern', 'reorganize': 'Lager aufräumen', 'box-types': 'Boxgrößen', 'locations': 'Regale & Fächer', 'capture': 'Bestand erfassen', 'settings': 'Lagerregeln'} %}
+{% set descriptions = {'overview': 'Fach auswählen, Box öffnen und Inhalt ansehen. Etiketten direkt an der Box zum Druck vormerken.', 'intake': 'Erst Fundorte prüfen, dann eine Zielbox wählen. Der Bestand ändert sich nach der physischen Bestätigung.', 'reorganize': 'Bestehende Bricks und Boxen gezielt umräumen. Archivvorschläge helfen bei der Entscheidung.', 'box-types': 'Eine Größe pro Boxmodell anlegen. Die Maße gelten für alle Boxen dieses Typs.', 'locations': 'Lagerorte strukturieren, nutzbare Fachmaße pflegen und Fachbeschriftungen drucken.', 'capture': 'Vorhandene Boxen und gezählten Istbestand erstmalig erfassen. Neue Zugänge gehören zu „Einlagern“.', 'settings': 'Kategorieziele, geplanten Bedarf und die Regeln für Archivvorschläge pflegen.'} %}
+{% block language %}de{% endblock %}
+{% block title %}{{ titles[warehouse_page] }}{% endblock %}
+{% block page_head %}
+<meta name="warehouse-csrf" content="{{ warehouse_csrf }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/warehouse.css', v=warehouse_asset_version) }}">
-  <script src="{{ url_for('static', filename='js/warehouse.js', v=warehouse_asset_version) }}" defer></script>
-</head>
-<body>
-{% include 'navbar.html' %}
-{% from 'ui_macros.html' import icon %}
-<a class="warehouse-skip" href="#warehouse">Zum Seiteninhalt</a>
-<main class="warehouse container-fluid py-4" id="warehouse" data-page="{{ warehouse_page }}">
-  <header class="warehouse-heading">
-    <div><p class="warehouse-eyebrow">Lagerverwaltung</p><h1>{{ titles[warehouse_page] }}</h1></div>
-    <a class="warehouse-action" href="{{ url_for('box_maintenance.box_maintenance_page') }}#marked-labels">Boxetiketten drucken</a>
-  </header>
-  <nav class="warehouse-nav" aria-label="Lagerverwaltung">
+{% endblock %}
+{% block content %}
+<div class="warehouse" id="warehouse" data-page="{{ warehouse_page }}">
+  {% call page_header(titles[warehouse_page], 'Lagerverwaltung', descriptions[warehouse_page], 'warehouse') %}
+    <a class="btn btn-outline-light" href="{{ url_for('box_maintenance.box_maintenance_page') }}#marked-labels">{{ icon('label', 18) }} Boxetiketten drucken</a>
+  {% endcall %}
+  <nav class="warehouse-nav bm-subnav" aria-label="Lagerverwaltung">
     {% set page_icons = {'overview': 'warehouse', 'intake': 'intake', 'reorganize': 'reorganize', 'box-types': 'sets', 'locations': 'warehouse', 'capture': 'bricks', 'settings': 'settings'} %}
     {% for page, label in [('overview', 'Übersicht'), ('intake', 'Einlagern'), ('reorganize', 'Aufräumen'), ('box-types', 'Boxgrößen'), ('locations', 'Regale & Fächer'), ('capture', 'Bestand erfassen'), ('settings', 'Regeln')] %}
     <a href="{{ '/warehouse' if page == 'overview' else '/warehouse/settings-page' if page == 'settings' else '/warehouse/' ~ page }}"{% if warehouse_page == page %} aria-current="page"{% endif %}>{{ icon(page_icons[page], 18) }} {{ label }}</a>
     {% endfor %}
   </nav>
-  {% set descriptions = {'overview': 'Fach auswählen, Box öffnen und Inhalt ansehen. Etiketten direkt an der Box zum Druck vormerken.', 'intake': 'Erst Fundorte prüfen, dann eine Zielbox wählen. Der Bestand ändert sich nach der physischen Bestätigung.', 'reorganize': 'Bestehende Bricks und Boxen gezielt umräumen. Archivvorschläge helfen bei der Entscheidung.', 'box-types': 'Eine Größe pro Boxmodell anlegen. Die Maße gelten für alle Boxen dieses Typs.', 'locations': 'Lagerorte strukturieren, nutzbare Fachmaße pflegen und Fachbeschriftungen drucken.', 'capture': 'Vorhandene Boxen und gezählten Istbestand erstmalig erfassen. Neue Zugänge gehören zu „Einlagern“.', 'settings': 'Kategorieziele, geplanten Bedarf und die Regeln für Archivvorschläge pflegen.'} %}
-  <p class="warehouse-intro">{{ descriptions[warehouse_page] }}</p>
+
   <div class="warehouse-feedback">
   <p id="warehouse-status" role="status" aria-live="polite">Lager wird geladen …</p>
   <div id="warehouse-error" role="alert" hidden></div>
@@ -265,7 +257,8 @@
     <div id="warehouse-settings-summary"></div>
   </section>
   {% endif %}
-</main>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/warehouse.js', v=warehouse_asset_version) }}" defer></script>
+{% endblock %}

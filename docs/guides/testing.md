@@ -2,6 +2,37 @@
 
 Die Suite nutzt pytest, eine temporäre SQLite-Datenbank, Flask-Testclients und gemockte externe HTTP-Grenzen. Die Konfiguration steht in `pytest.ini`, gemeinsame Fixtures in `brick_manager/tests/conftest.py`.
 
+## Gemeinsamer Seitenrahmen
+
+`test_app_shell.py` prüft 24 reale HTML-Wege sowie Ergebnis-/Fehleransichten:
+genau einen Hauptbereich, eine Hauptüberschrift, einen gemeinsamen Seitenkopf,
+Sprunglink, eindeutige IDs und jeweils eine Einbindung der gemeinsamen
+Styles/Bootstrap-Ressourcen. Die anfänglichen 26 Fälle wurden am alten Stand
+rot nachgewiesen. Ein weiterer Fall sichert unabhängige Lagereditoren und
+Tabellen für mehrere Scanergebnisse ab.
+
+`tests/browser/app_shell_smoke.py` prüft 58 Seiten-/Viewport-Kombinationen
+(1440/390 Pixel), darunter gefüllte Such-, Scan- und Lagerorttabellen, Fehler-
+und Leeransichten. Es prüft die echte HTML-/CSS-/Bootstrap-Ausgabe, mobile
+Navigation, sichtbare Knopftexte, DOM-IDs, Formularübermittlung mit gültiger
+und unbekannter Teilenummer, Sprunglink/Fokus und Druckansicht. Die Datenbank
+ist temporär im Speicher; Anleitungen und Bilder sind synthetisch/lokal.
+Externe Integrationsrequests werden blockiert. Optional kann
+`BRICK_VISUAL_CDN_CACHE` unveränderte Vendor-Dateien bereitstellen (Dateiname:
+SHA-256 der vollständigen URL); sonst lädt Playwright die vorhandenen CDN-Dateien.
+`BRICK_VISUAL_ARTIFACTS` bewahrt die Screenshots im gewünschten Ordner auf.
+
+```powershell
+poetry run pytest brick_manager/tests/test_app_shell.py -q
+poetry run python tests/browser/app_shell_smoke.py
+node --test tests/js/*.cjs
+```
+
+Playwright und ein Chromium-/Edge-Browser werden wie für die bestehenden
+Browserläufe benötigt. Die Setdetail-, Set-PDF-, Lagerseiten- und
+Lageretikettenläufe bleiben eigenständige Funktionsnachweise. Die Prüfung ist
+kein vollständiger WCAG-Audit, keine Nutzungsstudie und kein physischer Drucktest.
+
 ## Farbgruppen und visuelle Identität
 
 Der Setdetail-Browserlauf verwendet nun auch tatsächliche lokale Teilebilder
