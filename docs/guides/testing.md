@@ -2,6 +2,29 @@
 
 Die Suite nutzt pytest, eine temporäre SQLite-Datenbank, Flask-Testclients und gemockte externe HTTP-Grenzen. Die Konfiguration steht in `pytest.ini`, gemeinsame Fixtures in `brick_manager/tests/conftest.py`.
 
+## Farbgruppen und visuelle Identität
+
+`test_set_detail_colors.py` prüft gruppierte Zugehörigkeit regulärer, Ersatz-
+und Minifigurenteile, vollständige/abweichende Zeilen, transparente und ungültige
+RGB-Werte sowie fehlerhafte Formularentwürfe ohne Mengenänderung. Die neuen
+Verhaltensfälle wurden zunächst ohne Gruppen, Zustände und Farbmuster rot
+nachgewiesen. Ein anfänglicher `NULL`-RGB-Test wurde an die tatsächliche
+NOT-NULL-Spalte angepasst (leere Zeichenkette als ungültiger Katalogwert).
+
+`tests/browser/visual_identity_smoke.py` prüft mit synthetischer Sammlung und
+isolierter Test-App sechs Seiten bei 1440/390 Pixeln, mobile Navigation,
+sichtbaren Tastaturfokus und lokale Assets. Ein zusätzlicher echter Browserablauf
+kontrolliert Farbmuster, sofortige Zeilen-/Gruppenzustände, Einklappen, Suche,
+Wiederöffnen fehlerhafter Eingaben sowie Speichern/Neuladen. PNG-Nachweise und
+Banner-/Icon-Exporte liegen unter `BRICK_VISUAL_ARTIFACTS`. Optional liefert
+`BRICK_VISUAL_CDN_CACHE` nach SHA-256 der URL benannte unveränderte CDN-Dateien,
+damit wiederholte Viewportwechsel nicht an externen CSS-/Font-Timeouts hängen.
+Ohne Cache werden diese Abhängigkeiten regulär abgerufen.
+
+Das ist keine vollständige WCAG-Abnahme, kein Nutzertest mit Personen und kein
+Test des Produktionsservers. Die bestehenden Setdetail-/PDF-Browserläufe
+prüfen zusätzlich Filter-/Positionsrückkehr, Retry, Minifiguren und Downloads.
+
 ## Container-Sicherheitsregressionen
 
 `test_release_gate.py` prüft drei Verträge: echte Pytest-Ausführung vor dem

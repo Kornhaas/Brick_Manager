@@ -25,7 +25,7 @@
             </div>
             <div class="hero-orbit" aria-hidden="true">
                 <div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div>
-                <div class="hero-brick"><i class="bi bi-box-fill"></i></div>
+                <div class="hero-brick"><img src="{{ url_for('static', filename='brick-icon.svg', v='2') }}" width="140" height="140" alt=""></div>
                 <span class="orbit-chip chip-one">{{ metrics.total_sets }} sets</span>
                 <span class="orbit-chip chip-two">{{ '{:,}'.format(metrics.owned_parts) }} parts</span>
                 <span class="orbit-chip chip-three">{{ completion_rate }}%</span>

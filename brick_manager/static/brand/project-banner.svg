@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" fill="none">
+  <defs><linearGradient id="background" x1="0" y1="0" x2="1280" y2="640" gradientUnits="userSpaceOnUse"><stop stop-color="#192b50"/><stop offset=".6" stop-color="#353873"/><stop offset="1" stop-color="#315f93"/></linearGradient></defs>
+  <rect width="1280" height="640" rx="28" fill="url(#background)"/>
+  <circle cx="1050" cy="275" r="235" stroke="#ffffff" stroke-opacity=".1"/>
+  <circle cx="1050" cy="275" r="175" stroke="#ffffff" stroke-opacity=".1"/>
+  <g transform="translate(80 72)">
+    <rect width="88" height="88" rx="23" fill="#1b2b4b"/>
+    <path d="m16 45 28-14 28 14-28 15Z" fill="#95e9dd"/>
+    <path d="m16 45 28 15v16L16 62Z" fill="#36b3b5"/>
+    <path d="m44 60 28-15v17L44 76Z" fill="#167387"/>
+    <path d="m22 27 22-11 22 11-22 12Z" fill="#c0b3ff"/>
+    <path d="m22 27 22 12v15L22 42Z" fill="#8b77de"/>
+    <path d="m44 39 22-12v15L44 54Z" fill="#6352b3"/>
+    <ellipse cx="35" cy="25" rx="6" ry="3" fill="#e4dcff"/>
+    <ellipse cx="51" cy="32" rx="6" ry="3" fill="#e4dcff"/>
+  </g>
+  <g font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+    <text x="80" y="232" fill="#8eeee0" font-size="18" font-weight="700" letter-spacing="4">FIND. BUILD. ORGANISE.</text>
+    <text x="76" y="329" fill="white" font-size="80" font-weight="750" letter-spacing="-3">Brick Manager</text>
+    <text x="80" y="390" fill="#d8e2f5" font-size="28">A home for your Bricks.</text>
+    <text x="80" y="433" fill="#d8e2f5" font-size="24">Your collection. Your space. Your next build.</text>
+    <text x="80" y="560" fill="#b9c9e4" font-size="19">Sets · Parts · Storage · Labels</text>
+  </g>
+  <g transform="translate(850 150)">
+    <path d="m0 155 125-65 140 71-127 67Z" fill="#95e9dd"/>
+    <path d="m0 155 138 73v72L0 226Z" fill="#36b3b5"/>
+    <path d="m138 228 127-67v71l-127 68Z" fill="#167387"/>
+    <path d="m16 48 99-49 106 54-101 52Z" fill="#c0b3ff"/>
+    <path d="m16 48 104 57v65L16 115Z" fill="#8b77de"/>
+    <path d="m120 105 101-52v64l-101 53Z" fill="#6352b3"/>
+    <ellipse cx="80" cy="41" rx="24" ry="13" fill="#e4dcff"/>
+    <ellipse cx="149" cy="74" rx="24" ry="13" fill="#e4dcff"/>
+    <path d="m28 189 64 34" stroke="#c0fff2" stroke-width="9" stroke-linecap="round"/>
+  </g>
+</svg>

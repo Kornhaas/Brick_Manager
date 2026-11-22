@@ -1,5 +1,6 @@
 """Read and edit the inventory belonging to one physical set copy."""
 
+import re
 from collections import defaultdict
 
 from models import (
@@ -65,10 +66,10 @@ def _inventory_images(set_numbers):
     return images
 
 
-def _display_part(part, storage, image):
+def _display_part(part, storage, image, *, include_visuals=False):
     catalog = part.rebrickable_part
     color = part.rebrickable_color
-    return {
+    result = {
         "id": part.id,
         "part_num": part.part_num,
         "name": catalog.name if catalog else "Unknown",
@@ -86,6 +87,15 @@ def _display_part(part, storage, image):
         "status": "Available" if storage else "Not Available",
         "is_spare": part.is_spare,
     }
+    if include_visuals:
+        rgb = color.rgb if color else None
+        result["color_hex"] = (
+            "#" + rgb.upper()
+            if isinstance(rgb, str) and re.fullmatch(r"[0-9a-fA-F]{6}", rgb)
+            else None
+        )
+        result["color_transparent"] = bool(color and color.is_trans)
+    return result
 
 
 def _sort_parts(parts):
@@ -99,7 +109,7 @@ def completeness_percentage(owned, required):
     return round((owned / required) * 100, 2) if required else 0
 
 
-def inventory_details(user_set, *, include_unassigned=False):
+def inventory_details(user_set, *, include_unassigned=False, include_visuals=False):
     """Build the shared HTML/JSON read model with collection-wide lookups per copy."""
     figures = user_set.minifigures_in_set
     images = _inventory_images({user_set.set_num, *(fig.fig_num for fig in figures)})
@@ -128,7 +138,14 @@ def inventory_details(user_set, *, include_unassigned=False):
             else:
                 image = images[user_set.set_num].get(key) or image
                 target = parts
-            target.append(_display_part(row, storage.get(row.part_num), image))
+            target.append(
+                _display_part(
+                    row,
+                    storage.get(row.part_num),
+                    image,
+                    include_visuals=include_visuals,
+                )
+            )
 
     details = {
         "parts": _sort_parts(parts),

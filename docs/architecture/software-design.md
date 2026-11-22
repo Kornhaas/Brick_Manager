@@ -236,6 +236,34 @@ Teil einer ausdrücklich bestätigten Sammelaktion. HTML-Tabellen scrollen auf
 schmalen Bildschirmen innerhalb ihres Bereichs; beschriftete Mengenfelder,
 Fehlertexte und normale Tab-Navigation erhalten den Tastaturzugriff.
 
+### Farbgruppen und gemeinsames Erscheinungsbild
+
+`navbar.html` lädt nach den Seitenstilen `static/css/design-system.css` als
+gemeinsame Token-/Komponentenebene. Navigation, Bootstrap-Aktionsflächen,
+Lagerpanels, Setdetail und Dashboard bleiben in ihren bestehenden Templates;
+es gibt keine neue Frontend-Laufzeit oder Layout-Frameworkmigration.
+`ui_macros.html` bindet dekorative lokale Symbole aus `brand/icons.svg` ein;
+Signet und Illustrationen liegen als native SVG vor. PNG/ICO sind Exporte des
+SVG-Signets. Die Systempräferenz für reduzierte Bewegung wird berücksichtigt.
+
+Die HTML-Detailroute aktiviert `inventory_details(..., include_visuals=True)`.
+Nur dieser Modus ergänzt validiertes `color_hex` (exakt sechs Hexstellen) und
+`color_transparent`; der bestehende JSON-Lesevertrag bleibt unverändert.
+Unbrauchbares RGB wird als unbekanntes Muster dargestellt und nicht in CSS
+übernommen. Native verschachtelte `details` gruppieren innerhalb regulärer,
+Ersatz- und jeder Minifigurensektion alphabetisch nach Farbnamen. Alle Mengen
+bleiben im selben Formular, auch bei zugeklappten Gruppen.
+
+`set_detail.js` berechnet Zustände und Gruppenzähler aus den aktuellen
+Eingaben, getrennt vom bestätigten Speicherstand. Status `complete` verlangt
+eine gültige ganze Menge gleich Soll; andere gültige Mengen sind `missing`,
+ungültige `invalid`. Hintergrund und Text kennzeichnen den Zustand gemeinsam.
+Suche/Abweichungsfilter verstecken leere Gruppen und öffnen Treffer; Validierung
+öffnet alle `details`-Vorfahren des fehlerhaften Feldes. Ein Save ersetzt kein DOM
+und öffnet manuell geschlossene Gruppen nicht erneut. Vollständiges Neuladen
+setzt die standardmäßig offenen Farbgruppen zurück. Enter überspringt weiterhin
+Mengen ohne sichtbare Clientrechtecke. Es gibt keinen zusätzlichen Schreibvertrag.
+
 ### PDF-Setetiketten
 
 `POST /set_maintain/generate_label` akzeptiert eine positive ganzzahlige `set_id`

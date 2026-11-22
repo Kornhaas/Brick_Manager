@@ -354,7 +354,9 @@ def set_details(user_set_id):
         "set_detail.html",
         user_set=user_set,
         detail_data={
-            **inventory_details(user_set, include_unassigned=True),
+            **inventory_details(
+                user_set, include_unassigned=True, include_visuals=True
+            ),
             "user_set_id": user_set.id,
             "set_num": user_set.set_num,
         },

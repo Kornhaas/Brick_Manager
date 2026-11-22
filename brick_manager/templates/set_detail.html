@@ -7,26 +7,38 @@
     <img src="{{ url }}" alt="" width="{{ width }}" height="{{ height }}" loading="lazy" decoding="async">
 </button>
 {% endmacro %}
-{% macro part_table(parts, kind, group_name) %}
+{% macro swatch(part) -%}
+<span class="color-swatch{% if part.color_transparent %} color-translucent{% endif %}{% if not part.color_hex %} color-unknown{% endif %}" data-color-name="{{ part.color }}"{% if part.color_hex %} style="--swatch-color: {{ part.color_hex }}"{% endif %} aria-hidden="true"></span>
+{%- endmacro %}
+{% macro part_table(parts, kind, group_name, scope) %}
 {% if parts %}
-<div class="parts-scroll" role="region" tabindex="0" aria-label="{{ group_name }}">
+{% for color_name, color_parts in parts | groupby('color', case_sensitive=True) %}
+{% set progress = namespace(complete=0) %}
+{% for part in color_parts %}{% if part.have_quantity == part.quantity %}{% set progress.complete = progress.complete + 1 %}{% endif %}{% endfor %}
+<details class="color-group" data-color-group="{{ kind }}:{{ scope }}:{{ color_name }}" data-color-name="{{ color_name }}" open>
+<summary>{{ swatch(color_parts[0]) }} <span class="color-group-name">{{ color_name }}</span>{% if color_parts[0].color_transparent %}<span class="color-property">transparent</span>{% endif %}
+    <span class="color-group-progress" data-color-progress>{{ progress.complete }} von {{ color_parts | length }} vollständig</span>
+</summary>
+<div class="parts-scroll" role="region" tabindex="0" aria-label="{{ group_name }} · {{ color_name }}">
     <table class="detail-table">
         <thead><tr><th scope="col">Teil</th><th scope="col">Farbe</th><th scope="col">Soll</th><th scope="col">Vorhanden</th><th scope="col">Lagerort</th></tr></thead>
         <tbody>
-        {% for part in parts %}
+        {% for part in color_parts %}
         {% set key = ('minifig_part_id_' if kind == 'minifig' else 'part_id_') ~ part.id %}
-        <tr data-part-row data-kind="{{ kind }}" data-search="{{ group_name }} {{ part.name }} {{ part.part_num }} {{ part.category }} {{ part.color }}">
+        {% set amount = drafts.get(key, part.have_quantity) %}
+        <tr data-part-row data-kind="{{ kind }}" data-quantity-state="{{ 'invalid' if key in errors else 'complete' if amount | string == part.quantity | string else 'missing' }}" data-search="{{ group_name }} {{ part.name }} {{ part.part_num }} {{ part.category }} {{ part.color }}">
             <th scope="row"><div class="part-identity">
                 {% if part.part_img_url %}{{ preview_image(part.part_img_url, part.name ~ ' · ' ~ part.part_num, 48, 48) }}{% endif %}
                 <div>{{ part.name }} <small>{{ part.part_num }} · {{ part.category }}</small></div>
             </div></th>
-            <td>{{ part.color }}</td><td>{{ part.quantity }}</td>
+            <td><span class="part-color">{{ swatch(part) }} {{ part.color }}{% if part.color_transparent %}<small>transparent</small>{% endif %}</span></td><td>{{ part.quantity }}</td>
             <td>
                 <input name="{{ key }}" type="number" required min="0" max="{{ part.quantity }}" step="1" inputmode="numeric" enterkeyhint="next"
                        value="{{ drafts.get(key, part.have_quantity) }}" data-required="{{ part.quantity }}" data-saved="{{ part.have_quantity }}"
                        aria-label="{{ part.name }} ({{ part.part_num }}), {{ part.color }}, Soll {{ part.quantity }} – vorhanden"
                        aria-describedby="error-{{ key }}" {% if key in errors %}aria-invalid="true"{% endif %}>
                 <small id="error-{{ key }}" class="field-error">{{ errors.get(key, '') }}{% if key in errors %} (Eingabe „{{ drafts.get(key, '') }}“){% endif %}</small>
+                <small class="quantity-label" data-quantity-label>{{ 'Eingabe prüfen' if key in errors else '✓ Vollständig' if part.have_quantity == part.quantity else (part.quantity - part.have_quantity) | string ~ ' fehlen' }}</small>
             </td>
             <td>{{ part.location }}</td>
         </tr>
@@ -34,6 +46,8 @@
         </tbody>
     </table>
 </div>
+</details>
+{% endfor %}
 {% else %}
 <p class="empty-section">Keine Teile erfasst.</p>
 {% endif %}
@@ -47,7 +61,7 @@
     {% include 'favicon_links.html' %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/set_detail.css', v='1') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/set_detail.css', v='colors-2') }}">
 </head>
 <body>
     {% include 'navbar.html' %}
@@ -88,17 +102,22 @@
                 <div class="part-tools">
                     <label>Teile suchen <input type="search" id="part-search" placeholder="Name, Nummer, Farbe"></label>
                     <label><input type="checkbox" id="filter-mismatched-parts"> Nur abweichende Mengen</label>
+                    <div class="color-group-actions" id="color-group-actions" hidden>
+                        <button type="button" id="collapse-colors" class="btn btn-outline-secondary">Farben einklappen</button>
+                        <button type="button" id="expand-colors" class="btn btn-outline-secondary">Farben ausklappen</button>
+                    </div>
                 </div>
+                <p class="inventory-legend"><span class="legend-complete">✓ Soll erreicht</span> <span class="legend-missing">Menge weicht ab</span> · Farben einzeln auf- und zuklappen.</p>
                 <p id="part-filter-result" role="status" aria-live="polite"></p>
                 {% set regular = detail_data.parts | rejectattr('is_spare') | list %}
                 {% set spares = detail_data.parts | selectattr('is_spare') | list %}
                 <details id="regular-parts" class="part-section" open>
                     <summary>Reguläre Teile ({{ regular | length }})</summary>
-                    {{ part_table(regular, 'regular', 'Reguläre Teile') }}
+                    {{ part_table(regular, 'regular', 'Reguläre Teile', 'regular') }}
                 </details>
                 <details id="spare-parts" class="part-section" open>
                     <summary>Ersatzteile ({{ spares | length }})</summary>
-                    {{ part_table(spares, 'spare', 'Ersatzteile') }}
+                    {{ part_table(spares, 'spare', 'Ersatzteile', 'spare') }}
                 </details>
                 <details id="minifigure-parts" class="part-section" open>
                     <summary>Minifiguren ({{ detail_data.minifigs | length }})</summary>
@@ -106,7 +125,7 @@
                     <div class="figure-group">
                         <h3>{% if fig.img_url %}{{ preview_image(fig.img_url, fig.name ~ ' · ' ~ fig.fig_num, 40, 40) }}{% endif %}
                             {{ fig.name }} · {{ fig.fig_num }} · {{ fig.quantity }}×</h3>
-                        {{ part_table(fig.parts, 'minifig', fig.name ~ ' ' ~ fig.fig_num) }}
+                        {{ part_table(fig.parts, 'minifig', fig.name ~ ' ' ~ fig.fig_num, fig.id) }}
                     </div>
                     {% else %}
                         {% if not detail_data.unassigned_minifig_parts %}<p class="empty-section">Keine Minifiguren erfasst.</p>{% endif %}
@@ -114,7 +133,7 @@
                     {% if detail_data.unassigned_minifig_parts %}
                     <div class="figure-group">
                         <h3>Teile ohne zugeordnete Minifigur</h3>
-                        {{ part_table(detail_data.unassigned_minifig_parts, 'minifig', 'Teile ohne zugeordnete Minifigur') }}
+                        {{ part_table(detail_data.unassigned_minifig_parts, 'minifig', 'Teile ohne zugeordnete Minifigur', 'unassigned') }}
                     </div>
                     {% endif %}
                 </details>
@@ -149,7 +168,7 @@
             </div>
         </dialog>
     </main>
-    <script defer src="{{ url_for('static', filename='js/set_detail.js', v='1') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/set_detail.js', v='colors-2') }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

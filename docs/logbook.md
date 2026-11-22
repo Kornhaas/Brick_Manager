@@ -2,6 +2,46 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-22 – Gemeinsames Erscheinungsbild und Farbgruppen in der Setpflege
+
+**Ergebnis:** Das Dashboard liefert die gestalterische Grundlage für ein
+gemeinsames Indigo-/Türkis-/Violett-System. Lokale SVG-Symbole, ein neues
+Bricks-Signet (SVG/PNG/ICO), Illustrationen, Arbeitsbereichsköpfe und ein
+README-Banner ersetzen den bisherigen uneinheitlichen Auftritt. Die Navigation
+kennzeichnet aktive Bereiche; Formulare, Karten, Fokus und reduzierte Bewegung
+nutzen gemeinsame Regeln. Die vorhandenen Seiten-/Servicegrenzen bleiben erhalten.
+
+**Setpflege:** Reguläre, Ersatz- und Minifigurenteile besitzen aufklappbare
+Untergruppen nach Farbe mit Farbmuster und Positionszähler. Gleiche Soll-/Istmenge
+wird grün, Abweichung rot mit Text dargestellt; ungültige Eingaben bleiben klar
+gekennzeichnet. Zähler und Zeilen folgen dem Entwurf, die Speicherbestätigung
+bleibt separat. Suche öffnet Treffer, leere Gruppen verschwinden, Validierung
+öffnet alle Vorfahren des fehlerhaften Feldes. Speichern erhält geschlossene
+Gruppen. RGB wird vor CSS-Ausgabe auf sechs Hexstellen begrenzt; Transparenz ist
+zusätzlich lesbar. Kein Datenmodell- oder bestehender JSON-Lesevertragswechsel.
+
+**Verifikation:** Acht neue Pythonfälle, zunächst fehlende Gruppierung/Zustände/
+Farbmuster nachgewiesen; ein anfänglich unzulässiger NULL-Testwert wurde anhand
+des Modells korrigiert. 66 fokussierte Prüfungen bestanden. Vollständige
+Linux-Suite: **710 bestanden, 0 fehlgeschlagen, 0 übersprungen; 75,47 % Coverage**.
+Ruff und BasedPyright für betroffene Pythondateien bestanden; 25 Node-Prüfungen
+bestanden auf Windows (Node liegt nicht im Devcontainer-PATH). Der isolierte
+Edge-Smoke prüfte sechs Seiten bei 1440/390 Pixeln, mobile Menüs, Fokus, Assets
+und den vollständigen Farbgruppen-/Mengen-/Validierungsablauf. Die bisherigen
+Setdetail- und PDF-Browserläufe bestanden einschließlich Filter-/Scrollrückkehr,
+503-Retry, Enter/Tab, Minifiguren und drei PDF-Formaten. Desktop-/Mobil-PNGs wurden
+visuell geprüft; SVG/XML, PNG/ICO-Größen und lokale Markdown-Dateilinks geprüft.
+
+**Dokumentation und Grenzen:**
+[Softwaredesign](architecture/software-design.md#farbgruppen-und-gemeinsames-erscheinungsbild),
+[Bedienung](guides/user-guide.md#mengen-speichern-und-setlisten-verwenden) und
+[Prüfablauf](guides/testing.md#farbgruppen-und-visuelle-identität) aktualisiert.
+Die [GitHub-Empfehlung](plans/github-quality-and-identity.md) trennt überprüfte
+Einstellungen von Vorschlägen; keine Repository-Schutzregeln oder Kontobilder
+umgestellt. Neue Social-Preview-PNG liegt bereit, das vorhandene GitHub-Bild wurde
+nicht ersetzt. Keine vollständige WCAG-Abnahme oder Nutzerstudie; vorhandene
+CDN-Abhängigkeiten bleiben. Keine Produktivdaten/-server verändert.
+
 ## 2026-11-22 – Docker-Paketbefunde korrigiert und PR #26 geprüft
 
 **Ergebnis:** Alle 32 gemeldeten Code-Scanning-Befunde stammen aus Trivy und
@@ -17,7 +57,10 @@ Mit Trivy 0.76.2: Ausgangsimage 32 tatsächliche Befunde, Kandidat 0, Exitcode 0
 Beide Originalberichte sind im Security-Artefaktspeicher erhalten. Zwei neue
 Konfigurationsregressionen scheiterten zunächst und bestanden nach Korrektur
 zusammen mit dem vorhandenen Release-Test. Keine Alerts manuell geschlossen
-oder ausgeblendet. Remote-SARIF-Abgleich erfolgt nach dem Push.
+oder ausgeblendet. Nach dem Push bestätigt die GitHub-API alle ursprünglichen
+Alerts 7311–7342 als `fixed`, insgesamt 0 offene Code-Scanning- und
+0 offene Dependabot-Meldungen. Der Ergebnisabgleich wurde im Security-Speicher
+aufbewahrt. Die Suite mit dem Dependency-Update bestand zuvor 702 Tests.
 
 **PR #26:** Pylint 4.0.9/Astroid 4.0.4 wurden als reine Entwicklungsabhängigkeiten
 lokal zusammengeführt. Pylint startet mit gültiger Konfiguration ohne Fehler
@@ -27,7 +70,12 @@ nicht veröffentlichte eigene Paket. Paket-/Test- und Docker-Verträge sind in
 [Qualitätswerkzeugen](reference/quality-tooling.md),
 [Tests](guides/testing.md#container-sicherheitsregressionen) und
 [Docker-Betrieb](guides/docker.md#sicherheitsupdates-des-images) beschrieben.
-Keine Produktivoperation. Remote-Build und Alertstatus stehen noch aus.
+Keine Produktivoperation. PR #26 wurde von GitHub als gemergt bestätigt
+(`f46261f`). Sicherheitskorrektur und schnittoptimierte Etiketten sind mit
+`c45b445` auf main. Der vollständige
+[Docker-Lauf 45047805744](https://github.com/Kornhaas/Brick_Manager/actions/runs/45047805744)
+bestand Tests, Multiarch-Build/Push, Healthcheck, Trivy/SARIF und
+Bereitstellungsmitteilung. Die UI-Erweiterung oben folgt in einem eigenen Commit.
 
 ## 2026-11-22 – Seitenetiketten für den Papierschneider angeordnet
 

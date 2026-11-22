@@ -13,6 +13,9 @@
   const retry = byId('retry-detail');
   const search = byId('part-search');
   const mismatch = byId('filter-mismatched-parts');
+  const colorGroups = Array.from(form.querySelectorAll('[data-color-group]')).map(group => ({
+    group, rows: rows.filter(({ row }) => row.closest('[data-color-group]') === group)
+  }));
   const leave = byId('leave-dialog');
   const bulk = byId('bulk-dialog');
   const back = byId('set-back-link');
@@ -59,33 +62,72 @@
     else field.removeAttribute('aria-invalid');
   }
 
-  function filterRows(keep = null) {
+  function quantityState(input) {
+    if (!/^\d+$/.test(input.value) || !input.validity.valid) return 'invalid';
+    return Number(input.value) === Number(input.dataset.required) ? 'complete' : 'missing';
+  }
+  function updateQuantityVisuals() {
+    for (const { input, row } of rows) {
+      const value = quantityState(input);
+      row.dataset.quantityState = value;
+      row.querySelector('[data-quantity-label]').textContent = value === 'complete' ? '✓ Vollständig'
+        : value === 'invalid' ? 'Eingabe prüfen'
+        : Number(input.dataset.required) - Number(input.value) + ' fehlen';
+    }
+    for (const { group, rows: items } of colorGroups) {
+      const complete = items.filter(({ input }) => quantityState(input) === 'complete').length;
+      group.querySelector('[data-color-progress]').textContent = complete + ' von ' + items.length + ' vollständig';
+    }
+  }
+  function filterRows(keep = null, revealMatches = false) {
     const needle = search.value.trim().toLocaleLowerCase();
     let matches = 0;
     pinnedInput = null;
     for (const { input, row, search: terms } of rows) {
-      const match = terms.includes(needle) && (!mismatch.checked || input.value !== input.dataset.required);
+      const match = terms.includes(needle) && (!mismatch.checked || quantityState(input) !== 'complete');
       if (match) matches++;
       if (!match && input === keep) pinnedInput = input;
       row.hidden = !match && input !== keep;
+    }
+    for (const { group, rows: items } of colorGroups) {
+      group.hidden = items.every(({ row }) => row.hidden);
+      if (revealMatches && !group.hidden) {
+        for (let parent = group; parent && parent !== form; parent = parent.parentElement) {
+          if (parent.tagName === 'DETAILS') parent.open = true;
+        }
+      }
     }
     byId('part-filter-result').textContent = (needle || mismatch.checked)
       ? matches + ' von ' + rows.length + ' Teilezeilen passen.' + (pinnedInput ? ' Die aktuelle Zeile bleibt bis zum Feldwechsel sichtbar.' : '')
       : '';
   }
-  search.addEventListener('input', () => filterRows());
+  search.addEventListener('input', () => filterRows(null, true));
   for (const type of ['keydown', 'keypress']) {
     search.addEventListener(type, event => {
       if (event.key === 'Enter' && !event.isComposing) event.preventDefault();
     });
   }
-  mismatch.addEventListener('change', () => filterRows());
+  mismatch.addEventListener('change', () => filterRows(null, true));
+  byId('color-group-actions').hidden = false;
+  for (const [id, open] of [['collapse-colors', false], ['expand-colors', true]]) {
+    byId(id).addEventListener('click', () => {
+      for (const { group } of colorGroups) {
+        group.open = open;
+        if (open) {
+          for (let parent = group.parentElement; parent && parent !== form; parent = parent.parentElement) {
+            if (parent.tagName === 'DETAILS') parent.open = true;
+          }
+        }
+      }
+    });
+  }
   form.addEventListener('focusin', event => {
     if (pinnedInput && event.target !== pinnedInput && !event.target.closest('.save-bar')) filterRows();
   });
   function editField(event) {
     if (!event.target.hasAttribute('data-saved')) return;
     fieldError(event.target);
+    updateQuantityVisuals();
     indicateDraft();
   }
   form.addEventListener('input', editField);
@@ -94,7 +136,9 @@
   function revealError(field) {
     const row = field.closest('[data-part-row]');
     if (row) {
-      row.closest('details').open = true;
+      for (let parent = row.parentElement; parent && parent !== form; parent = parent.parentElement) {
+        if (parent.tagName === 'DETAILS') parent.open = true;
+      }
       filterRows(field);
     }
     field.focus();
@@ -157,6 +201,7 @@
       const anchor = active?.hasAttribute('data-required') ? active : null;
       const before = anchor?.getBoundingClientRect().top;
       refreshProgress(data.completeness_percentage);
+      updateQuantityVisuals();
       filterRows(anchor);
       if (anchor) window.scrollBy(0, anchor.getBoundingClientRect().top - before);
       if (fields.some(changed)) {
@@ -246,6 +291,7 @@
       fieldError(input);
     }
     bulk.close();
+    updateQuantityVisuals();
     filterRows();
     indicateDraft();
   });
@@ -263,6 +309,7 @@
       field.value = field.dataset.saved;
       fieldError(field);
     }
+    updateQuantityVisuals();
     uncertain.clear();
     indicateDraft();
     filterRows();
@@ -287,5 +334,6 @@
   });
   if (state.dataset.state === 'error') indicate('error', state.textContent);
   else if (fields.some(changed)) indicateDraft();
+  updateQuantityVisuals();
   byId('set-title').focus({ preventScroll: true });
 })();

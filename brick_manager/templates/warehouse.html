@@ -13,6 +13,7 @@
 </head>
 <body>
 {% include 'navbar.html' %}
+{% from 'ui_macros.html' import icon %}
 <a class="warehouse-skip" href="#warehouse">Zum Seiteninhalt</a>
 <main class="warehouse container-fluid py-4" id="warehouse" data-page="{{ warehouse_page }}">
   <header class="warehouse-heading">
@@ -20,8 +21,9 @@
     <a class="warehouse-action" href="{{ url_for('box_maintenance.box_maintenance_page') }}#marked-labels">Boxetiketten drucken</a>
   </header>
   <nav class="warehouse-nav" aria-label="Lagerverwaltung">
+    {% set page_icons = {'overview': 'warehouse', 'intake': 'intake', 'reorganize': 'reorganize', 'box-types': 'sets', 'locations': 'warehouse', 'capture': 'bricks', 'settings': 'settings'} %}
     {% for page, label in [('overview', 'Übersicht'), ('intake', 'Einlagern'), ('reorganize', 'Aufräumen'), ('box-types', 'Boxgrößen'), ('locations', 'Regale & Fächer'), ('capture', 'Bestand erfassen'), ('settings', 'Regeln')] %}
-    <a href="{{ '/warehouse' if page == 'overview' else '/warehouse/settings-page' if page == 'settings' else '/warehouse/' ~ page }}"{% if warehouse_page == page %} aria-current="page"{% endif %}>{{ label }}</a>
+    <a href="{{ '/warehouse' if page == 'overview' else '/warehouse/settings-page' if page == 'settings' else '/warehouse/' ~ page }}"{% if warehouse_page == page %} aria-current="page"{% endif %}>{{ icon(page_icons[page], 18) }} {{ label }}</a>
     {% endfor %}
   </nav>
   {% set descriptions = {'overview': 'Fach auswählen, Box öffnen und Inhalt ansehen. Etiketten direkt an der Box zum Druck vormerken.', 'intake': 'Erst Fundorte prüfen, dann eine Zielbox wählen. Der Bestand ändert sich nach der physischen Bestätigung.', 'reorganize': 'Bestehende Bricks und Boxen gezielt umräumen. Archivvorschläge helfen bei der Entscheidung.', 'box-types': 'Eine Größe pro Boxmodell anlegen. Die Maße gelten für alle Boxen dieses Typs.', 'locations': 'Lagerorte strukturieren, nutzbare Fachmaße pflegen und Fachbeschriftungen drucken.', 'capture': 'Vorhandene Boxen und gezählten Istbestand erstmalig erfassen. Neue Zugänge gehören zu „Einlagern“.', 'settings': 'Kategorieziele, geplanten Bedarf und die Regeln für Archivvorschläge pflegen.'} %}

@@ -65,3 +65,30 @@
 #set-detail dialog { box-sizing: border-box; max-width: min(34rem, 94vw); border: 1px solid #97a3b1; border-radius: .5rem; padding: 1.25rem; }
 #set-detail dialog::backdrop { background: #18223080; }
 #set-detail [hidden] { display: none !important; }
+
+.color-group { margin: .65rem; border: 1px solid #d3ddec; border-radius: .65rem; overflow: hidden; }
+.color-group > summary { display: list-item; background: #f1f4fa; padding: .7rem .8rem; }
+.color-group-name { margin-inline-start: .3rem; }
+.color-group-progress { float: right; font-size: .85rem; font-weight: 500; color: #43526b; }
+.color-property { font-size: .8rem; font-weight: 500; margin-inline-start: .5rem; }
+.color-swatch { display: inline-block; width: 1.2rem; height: 1.2rem; flex-shrink: 0; vertical-align: -.2em; background: var(--swatch-color); border: 1px solid #5c6980; border-radius: .3rem; box-shadow: inset 0 0 0 1px #ffffff50; }
+.color-translucent { background: linear-gradient(135deg, #ffffffb3, #ffffff00 70%), var(--swatch-color); border-style: dashed; }
+.color-unknown { background: repeating-linear-gradient(135deg, #fff 0 4px, #bbc5d4 4px 6px); }
+.part-color { display: inline-flex; align-items: center; flex-wrap: wrap; gap: .35rem; }
+.part-color small { flex-basis: 100%; color: #53627b; }
+.detail-table tr[data-quantity-state="complete"] > * { background: #edf8f1; }
+.detail-table tr[data-quantity-state="missing"] > *,
+.detail-table tr[data-quantity-state="invalid"] > * { background: #fff0f1; }
+.detail-table tr[data-quantity-state="complete"] .quantity-label { color: #21603c; }
+.detail-table tr[data-quantity-state="missing"] .quantity-label,
+.detail-table tr[data-quantity-state="invalid"] .quantity-label { color: #972d40; }
+.quantity-label { display: block; font-size: .75rem; margin-top: .2rem; font-weight: 600; }
+.inventory-legend { font-size: .85rem; color: #53627b; margin-block: .5rem; }
+.legend-complete, .legend-missing { display: inline-block; padding: .15rem .4rem; border-radius: .3rem; }
+.legend-complete { background: #edf8f1; color: #21603c; }
+.legend-missing { background: #fff0f1; color: #972d40; }
+.color-group-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+@media (max-width: 600px) {
+  .color-group { margin: .4rem; }
+  .color-group-progress { float: none; display: block; margin-inline-start: 1.5rem; }
+}

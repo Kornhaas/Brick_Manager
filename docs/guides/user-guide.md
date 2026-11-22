@@ -20,6 +20,11 @@ Der Desktop-Client verwendet die versionierte API unter `/api/v1`. Sie stellt Te
 
 ## Bedienungsgrundsätze
 
+Navigation und Arbeitsseiten nutzen ein gemeinsames Indigo-/Türkis-Farbschema,
+lokale Bricks-Symbole und gut erkennbare Hauptaktionen. Das Dashboard bleibt der
+visuelle Ausgangspunkt. Aktive Bereiche sind hervorgehoben, Tastaturfokus bleibt
+sichtbar; die Einstellung „Bewegung reduzieren“ des Systems wird berücksichtigt.
+
 - Mehrere `user_sets` mit derselben Setnummer sind zulässig und repräsentieren physische Kopien.
 - Ersatzteile bleiben bei Mengen- und Fehlteilberechnungen von regulären Teilen getrennt.
 - Ein Teil kann mehrere Lagerorte haben; Änderungen müssen den betroffenen Ort eindeutig adressieren.
@@ -93,6 +98,21 @@ das Kontrollkästchen erlaubt die manuelle Korrektur.
 Setkopie. Setname, Katalognummer und Box-ID stehen über dem Teilebestand. Derselbe
 Katalogeintrag kann mehrfach vorhanden sein; die Box-ID unterscheidet die Kopien.
 Die Detailadresse kann direkt geöffnet oder als Lesezeichen gespeichert werden.
+
+Reguläre Teile, Ersatzteile und die Teile jeder Minifigur sind nach Farbnamen
+gruppiert. Neben dem Namen steht ein Farbmuster; transparente Farben sind
+zusätzlich gekennzeichnet. Die Farbüberschrift klappt ihre Zeilen einzeln auf
+und zu. „Farben einklappen/ausklappen“ bedient alle Gruppen. So lässt sich Schwarz
+abschließen und Rot gezielt öffnen. Jede Gruppe zeigt, wie viele Positionen ihre
+Sollmenge erreicht haben. Die Zähler zählen Teilezeilen, nicht einzelne Bricks.
+
+Zeilen mit gleicher Soll-/Istmenge sind grün mit „Vollständig“ markiert;
+abweichende Mengen rot mit Fehlmenge. Ungültige Werte zeigen „Eingabe prüfen“.
+Diese Anzeigen folgen sofort dem aktuellen Entwurf; erst der Speicherstatus
+bestätigt die dauerhafte Übernahme. Suche und Mengenfilter blenden leere
+Farbgruppen aus und öffnen passende Treffer. Eine fehlerhafte Eingabe wird auch
+in zuvor zugeklappten Gruppen wieder zugänglich. Speichern erhält die gewählte
+Gruppenansicht; ein vollständiges Neuladen öffnet die Farbgruppen wieder.
 
 Auf dieser neuen Arbeitsseite werden Mengen, Sammeländerungen und Setstatus
 **erst mit „Speichern“ übernommen**. Der Speicherstatus zeigt offene Änderungen,

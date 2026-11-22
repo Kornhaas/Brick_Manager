@@ -160,7 +160,7 @@ def verify_save_and_list_history(page, origin, first, second):
 
     page.locator("#part-search").fill("Red")
     page.locator("#filter-mismatched-parts").check()
-    page.locator("#spare-parts summary").click()
+    page.locator("#spare-parts > summary").click()
     expect(field(page, COMPLETE_MINIFIG_PART_ID, "minifig_part_id")).to_be_hidden()
     expect(field(page, first.minifig, "minifig_part_id")).to_be_visible()
     active = page.locator("#regular-parts input").last
