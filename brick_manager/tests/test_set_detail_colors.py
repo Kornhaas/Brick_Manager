@@ -1,6 +1,7 @@
 """Color grouping and inventory status must describe the owning copy's rows."""
 
 from html.parser import HTMLParser
+from unittest.mock import patch
 
 import pytest
 from models import RebrickableColors, User_Parts, db
@@ -137,3 +138,43 @@ def test_invalid_form_draft_is_not_marked_complete(client, colored_copy):
     row = ColorMarkup(response.get_data(as_text=True)).rows["part_id_90"]["row"]
     assert row["data-quantity-state"] == "invalid"
     assert db.session.get(User_Parts, 90).have_quantity == 2
+
+
+@pytest.mark.parametrize(
+    "rgb, expected",
+    [
+        ("05131D", "#05131D"),
+        ("4B9F4A", "#4B9F4A"),
+        ("6C6E68", "#6C6E68"),
+        ("abcdef", "#ABCDEF"),
+        ("00;red", None),
+        ('FFFFFF" onclick="alert(1)', None),
+        ("fff;display:none", None),
+        ("", None),
+    ],
+)
+def test_swatch_accepts_valid_colors_from_older_read_model(
+    client, colored_copy, rgb, expected
+):
+    first, _ = colored_copy
+    # A running Python process can still provide the previous read model while
+    # Jinja reloads the updated template. Its RGB values are already available.
+    legacy = client.get(f"/set_maintain/{first.id}").get_json()
+    for part in legacy["parts"]:
+        part["color_rgb"] = rgb
+        assert "color_hex" not in part
+    with patch("routes.set_maintain.inventory_details", return_value=legacy):
+        response = client.get(first.path)
+    assert response.status_code == 200
+    regular = [
+        item
+        for item in ColorMarkup(response.get_data(as_text=True)).swatches
+        if item.get("data-color-name") == "Black"
+    ]
+    assert len(regular) == 3  # group header and its two rows
+    if expected:
+        assert all(item["style"] == f"--swatch-color: {expected}" for item in regular)
+        assert all("color-unknown" not in item["class"] for item in regular)
+    else:
+        assert all("style" not in item for item in regular)
+        assert all("color-unknown" in item["class"] for item in regular)

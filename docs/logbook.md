@@ -2,6 +2,93 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-22 – Farb- und Tab-Korrekturen für main freigegeben
+
+**Umfang:** Die beiden zuvor lokal geprüften Korrekturen werden gemeinsam mit
+ihren Regressionen und den betroffenen Anleitungen auf `main` versioniert:
+sichere Farbmuster aus dem älteren Lesemodell sowie direkte Tab-/Umschalt+Tab-
+Navigation zwischen bearbeitbaren Mengenfeldern. Der Abgleich mit `origin/main`
+ergab vor der Integration denselben Ausgangsstand `2fa6579`, ohne Konflikte oder
+weitere lokale Änderungen außerhalb dieses Pakets.
+
+**Verifikation vor Veröffentlichung:** Vollständige isolierte Linux-Suite:
+**718 bestanden, 0 fehlgeschlagen, 0 übersprungen; 75,47 % Coverage** in 88,73 s.
+Ruff/Formatprüfung beider betroffenen Testdateien, JavaScript-Syntaxprüfung
+und Whitespace-Prüfung bestanden. Die vorherigen Einträge beschreiben die
+bereits ausgeführten Regressionen und Desktop-/Mobil-Browsernachweise.
+Design, Bedienung und Testanleitung werden mit demselben Commit gepflegt.
+
+**Veröffentlichungsgrenze:** Git-Hooks bleiben aktiv. Der Remote-Nachweis bezieht
+sich auf den tatsächlich veröffentlichten main-Commit und den vollständig
+abgeschlossenen [Docker-Workflow](../.github/workflows/docker-image.yml),
+einschließlich Healthcheck und Trivy; siehe [Betriebsanleitung](guides/docker.md#build-und-veröffentlichung-auf-github).
+Der dortige Deploy-Job ist weiterhin eine Mitteilung, kein Produktionsupdate.
+Keine Live-Datenbankmigration oder Serverneustart Teil dieser Integration.
+
+## 2026-11-22 – Direkte Tab-Navigation in der Setdetailseite
+
+**Ergebnis:** Tab und Umschalt+Tab wechseln aus einem Mengenfeld direkt zum
+nächsten bzw. vorherigen sichtbaren, bearbeitbaren Mengenfeld. Bildvorschauen,
+eingeklappte Farbgruppen und versteckte, deaktivierte oder schreibgeschützte
+Felder werden übersprungen. Tab speichert nicht; Enter behält seinen
+Speicherablauf. An den Rändern bleibt die normale Tastaturnavigation erhalten,
+einschließlich erreichbarer Bildvergrößerung. Tab-Tastaturvarianten werden
+erkannt, Browser-Shortcuts und IME-Eingaben nicht abgefangen. Die Scriptversion
+in der Vorlage wurde aktualisiert, damit Browser die Änderung laden.
+
+**Verifikation:** Das Browserfixture besitzt jetzt wirkliche Bild-Schaltflächen.
+Vor der Korrektur scheiterte der neue Test am Fokus auf einem Bild statt dem
+nächsten Mengenfeld. Ein weiterer Fehler bei geschlossenen `details` wurde
+durch deren ausdrücklichen Ausschluss korrigiert; Clientrechtecke allein
+genügten im getesteten Browser nicht. Danach bestand der isolierte Edge-Lauf
+bei 1365 und 390 Pixeln: vor/zurück, verborgene/geschlossene/deaktivierte/
+schreibgeschützte Ziele, geänderter Entwurf ohne POST, Tastaturvarianten,
+Shortcuts, erreichbare Bildvorschau und reguläres Verlassen der Mengenfolge.
+Auch bestehende Save-/Retry-/Minifiguren-/Listenrückkehrfälle bestanden.
+74 fokussierte Pythonprüfungen bestanden, 0 fehlgeschlagen/übersprungen.
+Ruff/Formatprüfung des Browserlaufs und `node --check` des Controllers bestanden.
+
+**Dokumentation und Grenzen:**
+[Benutzeranleitung](guides/user-guide.md#mengen-speichern-und-setlisten-verwenden),
+[Softwaredesign](architecture/software-design.md) und
+[Testanleitung](guides/testing.md#farbgruppen-und-visuelle-identität) aktualisiert.
+Keine physische iPad-/Safari-Prüfung und kein neuer vollständiger Suite-Lauf.
+Die vorhandene Farbmusterkorrektur bleibt erhalten. Änderungen liegen lokal vor;
+kein Serverneustart, Datenbankschreibzugriff oder Remote-Build.
+
+## 2026-11-22 – Farbmuster bei aktualisierten Templates korrigiert
+
+**Ergebnis und Ursache:** Das schraffierte Ersatzmuster aus dem Screenshot ließ
+sich mit der aktuellen Vorlage und dem älteren Lesemodell ohne `color_hex`
+reproduzieren. Die vorhandenen Katalogwerte für Schwarz, Bright Green und Dark
+Bluish Gray wurden über eine ausschließlich lesende SQLite-Verbindung geprüft
+und sind gültig. Ein neuer Template-Stand bei einem weiterhin alten Python-
+Lesemodell ist daher eine passende Erklärung; der laufende Serverprozess wurde
+nicht verändert oder inspiziert.
+
+Das Farbmuster-Makro verwendet bei vollständig fehlendem `color_hex` jetzt das
+bereits vorhandene `color_rgb`, nach eigener Prüfung auf exakt sechs
+Hexzeichen. Gruppenüberschriften und Teilezeilen zeigen damit bekannte Farben
+auch über diese Versionsgrenze. Explizit ungültige normalisierte Farben und
+unzulässige Rohwerte bleiben beim Ersatzmuster. Kein Daten-/API-Vertragswechsel.
+
+**Verifikation:** Vier gültige RGB-Fälle scheiterten vor der Korrektur an
+fehlenden Farbstilen. Acht neue Fälle decken Schwarz, Grün, Grau,
+Kleinbuchstaben und ungültige Werte einschließlich sechs Nicht-Hexzeichen ab.
+Mit den bestehenden Detail-/UI-Prüfungen: **74 bestanden, 0 fehlgeschlagen,
+0 übersprungen**. Ruff und Formatprüfung bestanden. Der isolierte Edge-Smoke
+wurde zusätzlich mit dem älteren Lesemodell ausgeführt: 12 Seiten-/Viewportfälle,
+berechnete Farbfeldfarbe, Gruppen-/Mengenanzeige, Einklappen, Suche,
+Fehlervalidierung und Speichern/Neuladen bestanden ohne Skriptfehler.
+
+**Dokumentation und Grenzen:** Darstellungsvertrag im
+[Softwaredesign](architecture/software-design.md#farbgruppen-und-gemeinsames-erscheinungsbild)
+und Regression in der [Testanleitung](guides/testing.md#farbgruppen-und-visuelle-identität)
+ergänzt. Die Benutzeranleitung bleibt gültig, da sich die Bedienung nicht ändert.
+Kein Produktionsneustart, keine Datenbankänderung und kein neuer Remote-Build.
+Die Korrektur liegt im Arbeitsbaum vor; eine Seitenaktualisierung lädt die
+geänderte Vorlage gemäß `TEMPLATES_AUTO_RELOAD`.
+
 ## 2026-11-22 – Gemeinsames Erscheinungsbild und Farbgruppen in der Setpflege
 
 **Ergebnis:** Das Dashboard liefert die gestalterische Grundlage für ein

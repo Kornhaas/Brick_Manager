@@ -234,7 +234,14 @@ fachliche Sollmenge des jeweiligen Eingabefelds statt Tabellenspaltennummern.
 Das gilt auch für den kompatiblen alten Renderer. Ausgeblendete Mengen bleiben
 Teil einer ausdrücklich bestätigten Sammelaktion. HTML-Tabellen scrollen auf
 schmalen Bildschirmen innerhalb ihres Bereichs; beschriftete Mengenfelder,
-Fehlertexte und normale Tab-Navigation erhalten den Tastaturzugriff.
+Fehlertexte und eine direkte Tab-Navigation zwischen Mengenfeldern erhalten den
+Tastaturzugriff. `adjacentQuantity` im Detailcontroller überspringt deaktivierte,
+schreibgeschützte und ausgeblendete Felder sowie alle Nachfahren geschlossener
+`details` explizit. Clientrechtecke allein reichen für diese native
+Einklappfunktion nicht zuverlässig aus. Tab/Umschalt+Tab verschieben nur den
+Fokus; Enter/Umschalt+Enter speichern weiterhin zuerst. An den beiden Enden
+wird Tab nicht abgefangen, damit der Arbeitsbereich verlassen werden kann.
+Bild-Schaltflächen bleiben in der normalen Tastaturreihenfolge erhalten.
 
 ### Farbgruppen und gemeinsames Erscheinungsbild
 
@@ -250,7 +257,13 @@ Die HTML-Detailroute aktiviert `inventory_details(..., include_visuals=True)`.
 Nur dieser Modus ergänzt validiertes `color_hex` (exakt sechs Hexstellen) und
 `color_transparent`; der bestehende JSON-Lesevertrag bleibt unverändert.
 Unbrauchbares RGB wird als unbekanntes Muster dargestellt und nicht in CSS
-übernommen. Native verschachtelte `details` gruppieren innerhalb regulärer,
+übernommen. Fehlt `color_hex` vollständig (etwa wenn Jinja neue Templates lädt,
+während der laufende Python-Prozess noch das vorherige Lesemodell liefert),
+validiert das Farbmuster-Makro das bestehende `color_rgb` selbst: genau sechs
+Hexzeichen, Ausgabe als `#RRGGBB`. Ein ausdrücklich ungültiges `color_hex=None`
+wird nicht durch Rohdaten ersetzt. So bleiben bekannte Farben auch über diese
+Versionsgrenze sichtbar, ohne Datenbankänderung oder neuen JSON-Vertrag.
+Native verschachtelte `details` gruppieren innerhalb regulärer,
 Ersatz- und jeder Minifigurensektion alphabetisch nach Farbnamen. Alle Mengen
 bleiben im selben Formular, auch bei zugeklappten Gruppen.
 
@@ -262,7 +275,8 @@ Suche/Abweichungsfilter verstecken leere Gruppen und öffnen Treffer; Validierun
 öffnet alle `details`-Vorfahren des fehlerhaften Feldes. Ein Save ersetzt kein DOM
 und öffnet manuell geschlossene Gruppen nicht erneut. Vollständiges Neuladen
 setzt die standardmäßig offenen Farbgruppen zurück. Enter überspringt weiterhin
-Mengen ohne sichtbare Clientrechtecke. Es gibt keinen zusätzlichen Schreibvertrag.
+Mengen ohne sichtbare Clientrechtecke und in geschlossenen Gruppen. Es gibt
+keinen zusätzlichen Schreibvertrag.
 
 ### PDF-Setetiketten
 

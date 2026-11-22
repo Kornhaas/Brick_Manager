@@ -126,8 +126,12 @@ Bestätigung gehört zu einer Box und wird zusammen validiert und gespeichert.
 
 Enter in einem Mengenfeld speichert den aktuellen Entwurf und geht nach
 erfolgreicher Bestätigung zum nächsten sichtbaren Mengenfeld, Umschalt+Enter zum
-vorherigen. Tab bleibt für die normale Bedienung aller Felder und Aktionen
-verfügbar. Enter in der Teilesuche filtert nur und speichert keine anderen
+vorherigen. Tab wechselt innerhalb des Bestands direkt zum nächsten sichtbaren,
+bearbeitbaren Mengenfeld, Umschalt+Tab zum vorherigen. Bilder, zugeklappte
+Farbgruppen und ausgeblendete Zeilen werden dabei übersprungen. Tab speichert
+keine Mengen. Am Anfang/Ende bleibt der normale Fokuswechsel zu anderen
+Bedienelementen möglich; Bildvorschauen bleiben per Tastatur erreichbar.
+Enter in der Teilesuche filtert nur und speichert keine anderen
 Entwürfe. „Nur abweichende Mengen“ arbeitet auch bei Minifigurenteilen korrekt;
 die gerade bearbeitete Zeile bleibt nach einer Bestätigung gegebenenfalls bis
 zum Feldwechsel sichtbar.

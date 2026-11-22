@@ -4,12 +4,29 @@ Die Suite nutzt pytest, eine temporäre SQLite-Datenbank, Flask-Testclients und 
 
 ## Farbgruppen und visuelle Identität
 
+Der Setdetail-Browserlauf verwendet nun auch tatsächliche lokale Teilebilder
+als Vorschau-Schaltflächen. Ohne diese Bilder blieb die zusätzliche Tab-Station
+im bisherigen Fixture unbemerkt. Neue Desktop-/390-Pixel-Prüfungen reproduzieren
+zunächst den Fokus auf dem Bild und prüfen danach Tab/Umschalt+Tab direkt zwischen
+Mengen, übersprungene versteckte/geschlossene/deaktivierte/schreibgeschützte
+Felder, unveränderten Speicherstand bei bearbeitetem Entwurf, Tab-Tastaturvarianten
+sowie unveränderte Browser-Shortcuts/IME-Eingaben. Die beiden Randfälle verlassen
+die Mengenfolge regulär; Bildvergrößerung per Tastatur bleibt nutzbar. Die
+bisherigen Save-/Retry-/Listenrückkehr-Prüfungen laufen im selben Browserlauf.
+
 `test_set_detail_colors.py` prüft gruppierte Zugehörigkeit regulärer, Ersatz-
 und Minifigurenteile, vollständige/abweichende Zeilen, transparente und ungültige
 RGB-Werte sowie fehlerhafte Formularentwürfe ohne Mengenänderung. Die neuen
 Verhaltensfälle wurden zunächst ohne Gruppen, Zustände und Farbmuster rot
 nachgewiesen. Ein anfänglicher `NULL`-RGB-Test wurde an die tatsächliche
 NOT-NULL-Spalte angepasst (leere Zeichenkette als ungültiger Katalogwert).
+
+Weitere Fälle rendern die aktuelle Detailvorlage mit dem älteren
+JSON-Lesemodell ohne `color_hex`: Schwarz, Bright Green, Dark Bluish Gray,
+Kleinbuchstaben sowie ungültige RGB-Werte (auch genau sechs Zeichen mit
+Nicht-Hexzeichen). Vor der Korrektur fehlten bei
+allen vier gültigen Werten die Farbstile; danach sind Gruppenüberschrift und
+Zeilen korrekt eingefärbt, während ungültige Werte beim Ersatzmuster bleiben.
 
 `tests/browser/visual_identity_smoke.py` prüft mit synthetischer Sammlung und
 isolierter Test-App sechs Seiten bei 1440/390 Pixeln, mobile Navigation,

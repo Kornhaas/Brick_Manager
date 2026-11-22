@@ -247,12 +247,31 @@
     save();
   });
 
+  function adjacentQuantity(input, backwards) {
+    const index = quantities.indexOf(input);
+    if (index < 0) return null;
+    const candidates = backwards ? quantities.slice(0, index).reverse() : quantities.slice(index + 1);
+    return candidates.find(field => !field.disabled && !field.readOnly
+      && !field.closest('details:not([open])') && field.getClientRects().length);
+  }
+  form.addEventListener('keydown', event => {
+    const isTab = event.key === 'Tab' || event.key === 'UIKeyInputTab' || event.code === 'Tab'
+      || event.keyCode === 9 || event.which === 9 || event.keyIdentifier === 'U+0009';
+    if (!isTab || event.metaKey || event.isComposing ||
+        (event.ctrlKey && !event.getModifierState?.('CapsLock'))) return;
+    const input = event.target;
+    if (!input.hasAttribute('data-required') || input.disabled || input.readOnly) return;
+    const next = adjacentQuantity(input, event.shiftKey);
+    // Leave native focus navigation available at both ends of the inventory.
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
+    next.select();
+  });
   async function advanceQuantity(input, backwards) {
     if (pending) return;
-    const index = quantities.indexOf(input);
-    const candidates = backwards ? quantities.slice(0, index).reverse() : quantities.slice(index + 1);
     if (await save() && document.activeElement === input) {
-      const next = candidates.find(field => field.getClientRects().length);
+      const next = adjacentQuantity(input, backwards);
       if (next) { next.focus(); next.select(); }
     }
   }

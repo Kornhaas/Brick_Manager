@@ -62,6 +62,8 @@ def seed_browser_collection():
         db.session.add(User_Set(set_num="1000-1", status=status))
 
     regular = db.session.get(User_Parts, first.regular)
+    regular.rebrickable_part.part_img_url = "/static/brick-icon.svg"
+    db.session.get(RebrickableParts, "970c00").part_img_url = "/static/brick-icon.svg"
     category = regular.rebrickable_part.part_cat_id
     figure_piece = RebrickableParts(
         part_num="figure-complete",
@@ -94,6 +96,82 @@ def seed_browser_collection():
     )
     db.session.commit()
     return first, second
+
+
+def verify_quantity_tab_navigation(page, origin, first):
+    writes = []
+    page.on(
+        "request",
+        lambda request: (
+            writes.append(request.url) if request.method == "POST" else None
+        ),
+    )
+    page.goto(origin + first.path)
+    quantities = page.locator("[data-required]")
+    first_input = quantities.nth(0)
+    next_input = quantities.nth(1)
+    saved_value = first_input.input_value()
+    first_input.fill("0" if saved_value != "0" else "1")
+    first_input.focus()
+    first_input.press("Tab")
+    expect(next_input).to_be_focused()
+    next_input.press("Shift+Tab")
+    expect(first_input).to_be_focused()
+    expect(first_input).to_have_attribute("data-saved", saved_value)
+    assert writes == [], "Changing focus must not save an edited quantity"
+    first_input.fill(saved_value)
+    for key in ({"key": "UIKeyInputTab"}, {"code": "Tab"}, {"keyCode": 9}):
+        first_input.focus()
+        assert not first_input.evaluate(
+            "(input, key) => input.dispatchEvent(new KeyboardEvent('keydown', {...key, bubbles: true, cancelable: true}))",
+            key,
+        )
+        expect(next_input).to_be_focused()
+    for shortcut in ({"ctrlKey": True}, {"metaKey": True}, {"isComposing": True}):
+        first_input.focus()
+        assert first_input.evaluate(
+            "(input, key) => input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Tab', ...key, bubbles: true, cancelable: true}))",
+            shortcut,
+        )
+        expect(first_input).to_be_focused()
+    next_input.evaluate("input => input.disabled = true")
+    quantities.nth(2).evaluate("input => input.readOnly = true")
+    first_input.press("Tab")
+    expect(quantities.nth(3)).to_be_focused()
+    next_input.evaluate("input => input.disabled = false")
+    quantities.nth(2).evaluate("input => input.readOnly = false")
+    next_input.evaluate("input => input.closest('[data-part-row]').hidden = true")
+    first_input.focus()
+    first_input.press("Tab")
+    expect(quantities.nth(2)).to_be_focused()
+    next_input.evaluate("input => input.closest('[data-part-row]').hidden = false")
+
+    page.locator("#spare-parts .color-group > summary").click()
+    assert not page.locator("#spare-parts .color-group").evaluate("group => group.open")
+    regular_last = page.locator("#regular-parts input").last
+    regular_last.focus()
+    regular_last.press("Tab")
+    first_figure = page.locator("#minifigure-parts input").first
+    expect(first_figure).to_be_focused()
+    first_figure.press("Shift+Tab")
+    expect(regular_last).to_be_focused()
+    page.locator("#spare-parts .color-group > summary").click()
+
+    first_input.focus()
+    first_input.press("Shift+Tab")
+    preview = page.locator("#regular-parts .image-preview").first
+    expect(preview).to_be_focused()
+    preview.press("Enter")
+    expect(page.locator("#image-dialog")).to_be_visible()
+    page.locator("#close-image").press("Enter")
+    expect(page.locator("#image-dialog")).to_be_hidden()
+    quantities.last.focus()
+    quantities.last.press("Tab")
+    expect(page.locator("#more-actions > summary")).to_be_focused()
+    assert writes == [], "Tab navigation must not save the draft"
+    print(
+        "PASS: Tab/Shift+Tab skip images, hidden/closed/disabled/read-only fields; exits and preview remain accessible"
+    )
 
 
 def detail_link(page, copy):
@@ -414,9 +492,11 @@ def run():
             legacy.close()
             desktop = browser.new_page(viewport={"width": 1365, "height": 900})
             desktop.on("pageerror", lambda error: errors.append(str(error)))
+            verify_quantity_tab_navigation(desktop, origin, first)
             verify_save_and_list_history(desktop, origin, first, second)
             mobile = browser.new_page(viewport={"width": 390, "height": 844})
             mobile.on("pageerror", lambda error: errors.append(str(error)))
+            verify_quantity_tab_navigation(mobile, origin, first)
             verify_retry_bulk_and_mobile(mobile, origin, first)
             verify_dirty_leave(desktop, origin, first)
             assert not errors, errors
