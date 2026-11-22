@@ -2,6 +2,33 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-22 – Docker-Paketbefunde korrigiert und PR #26 geprüft
+
+**Ergebnis:** Alle 32 gemeldeten Code-Scanning-Befunde stammen aus Trivy und
+betreffen vier Alpine-Pakete im veröffentlichten Image: krb5-libs (21),
+libcrypto3 (5), libssl3 (5), zlib (1). Beide Docker-Stufen aktualisieren geerbte
+Pakete; CI zieht das Basisimage neu und baut die Runtime-Stufe ohne Layer-Cache.
+Trivy lässt bei allen Schweregraden den Workflow fehlschlagen, SARIF wird auch
+dann hochgeladen. Der Scan bleibt nach der Veröffentlichung angeordnet.
+
+**Verifikation:** Ein frisch gebauter, isolierter Kandidat enthält
+krb5-libs 1.22.3-r0, libcrypto3/libssl3 3.5.9-r1 und zlib 1.4-r0.
+Mit Trivy 0.76.2: Ausgangsimage 32 tatsächliche Befunde, Kandidat 0, Exitcode 0.
+Beide Originalberichte sind im Security-Artefaktspeicher erhalten. Zwei neue
+Konfigurationsregressionen scheiterten zunächst und bestanden nach Korrektur
+zusammen mit dem vorhandenen Release-Test. Keine Alerts manuell geschlossen
+oder ausgeblendet. Remote-SARIF-Abgleich erfolgt nach dem Push.
+
+**PR #26:** Pylint 4.0.9/Astroid 4.0.4 wurden als reine Entwicklungsabhängigkeiten
+lokal zusammengeführt. Pylint startet mit gültiger Konfiguration ohne Fehler
+oder fatale Meldungen; bestehende Konventions-/Warnhinweise bleiben sichtbar.
+`poetry check --lock` und `make audit` bestanden; der Audit überspringt das
+nicht veröffentlichte eigene Paket. Paket-/Test- und Docker-Verträge sind in
+[Qualitätswerkzeugen](reference/quality-tooling.md),
+[Tests](guides/testing.md#container-sicherheitsregressionen) und
+[Docker-Betrieb](guides/docker.md#sicherheitsupdates-des-images) beschrieben.
+Keine Produktivoperation. Remote-Build und Alertstatus stehen noch aus.
+
 ## 2026-11-22 – Seitenetiketten für den Papierschneider angeordnet
 
 **Ergebnis:** MB-4 und Big Box verwenden keine 5-mm-Stege mehr zwischen den

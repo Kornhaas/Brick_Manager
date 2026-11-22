@@ -95,6 +95,8 @@ jobs:
       with:
         context: .
         platforms: linux/amd64,linux/arm64
+        pull: true
+        no-cache-filters: runtime
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
@@ -158,8 +160,12 @@ jobs:
         image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
         format: 'sarif'
         output: 'trivy-results.sarif'
+        exit-code: '1'
+        severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+        ignore-unfixed: 'false'
 
     - name: 📤 Upload Trivy scan results to GitHub Security tab
+      if: always()
       uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: 'trivy-results.sarif'

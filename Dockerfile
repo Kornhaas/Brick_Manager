@@ -5,7 +5,8 @@ FROM python:3.12-alpine AS builder
 WORKDIR /app
 
 # Install build dependencies (only needed if a dependency has no musllinux wheel)
-RUN apk add --no-cache \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
     build-base \
     libffi-dev \
     openssl-dev
@@ -23,13 +24,15 @@ RUN /opt/poetry/bin/poetry export --only main --without-hashes --format requirem
     && pip install --no-cache-dir -r requirements.txt
 
 # Production stage
-FROM python:3.12-alpine
+FROM python:3.12-alpine AS runtime
 
 # Create app user for security
 RUN addgroup -S appuser && adduser -S -G appuser -h /app -s /bin/sh appuser
 
-# Install runtime dependencies including su-exec for user switching
-RUN apk add --no-cache \
+# Refresh inherited OS packages as well as installing runtime dependencies.
+# CI bypasses this stage's cache so repository security fixes are not frozen.
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
     bash \
     curl \
     su-exec

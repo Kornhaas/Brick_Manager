@@ -47,6 +47,25 @@ Der Job „Deploy“ erzeugt derzeit ausschließlich eine Bereitstellungsmitteil
 Er aktualisiert keinen laufenden Produktionsserver. Ein echtes Serverupdate
 bleibt ein gesonderter Auftrag; der App-Start kann Migrationen und Jobs auslösen.
 
+## Sicherheitsupdates des Images
+
+Beide Docker-Stufen aktualisieren geerbte Alpine-Pakete mit `apk upgrade`.
+CI zieht das Basisimage neu (`pull: true`) und verwendet für die benannte
+`runtime`-Stufe keinen Layer-Cache. Dadurch bleiben verfügbare Paketkorrekturen
+nicht in einem alten Installationslayer hängen. Für denselben lokalen Ablauf:
+
+```powershell
+docker build --pull --no-cache-filter runtime -t brick-manager:review .
+```
+
+Trivy behandelt alle Schweregrade einschließlich noch nicht behebbarer Befunde
+als Workflowfehler. Der SARIF-Bericht wird auch im Fehlerfall hochgeladen.
+Der Scan findet derzeit **nach** dem Registry-Push statt: Er verhindert eine
+erfolgreiche Pipeline/Bereitstellungsmitteilung, aber nicht die vorangehende
+Image-Veröffentlichung. Ein Scan vor der Veröffentlichung ist ein weiterer
+Planungspunkt. Für den Befundstand vom 22. November 2026 wurden krb5-libs,
+libcrypto3, libssl3 und zlib aktualisiert; neue Advisories erfordern neue Builds.
+
 ## Weitere Betriebshinweise
 
 - Der optionale Nginx-Dienst läuft nur mit dem Profil `production`; seine referenzierte Nginx-Konfiguration muss vor Aktivierung bereitgestellt werden.

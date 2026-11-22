@@ -2,6 +2,17 @@
 
 Die Suite nutzt pytest, eine temporäre SQLite-Datenbank, Flask-Testclients und gemockte externe HTTP-Grenzen. Die Konfiguration steht in `pytest.ini`, gemeinsame Fixtures in `brick_manager/tests/conftest.py`.
 
+## Container-Sicherheitsregressionen
+
+`test_release_gate.py` prüft drei Verträge: echte Pytest-Ausführung vor dem
+Veröffentlichungsjob, Aktualisierung geerbter Laufzeitpakete ohne CI-Layer-Cache
+und fehlschlagende Trivy-Prüfung mit weiter hochgeladenem SARIF-Bericht.
+Die letzten beiden Fälle scheiterten vor der Korrektur an fehlender Runtime-Stufe
+bzw. fehlendem Fehler-Exitcode. Diese Konfigurationstests ersetzen keinen
+tatsächlichen Image-Scan. Am 22. November 2026 ergab derselbe lokale Trivy-Scanner
+0.76.2 für das alte Image 32 Paketbefunde und für den frisch gebauten Kandidaten
+0; die originalen JSON-Berichte wurden als Security-Nachweise aufbewahrt.
+
 ## Befehle
 
 ```powershell

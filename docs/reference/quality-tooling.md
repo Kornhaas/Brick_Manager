@@ -15,6 +15,12 @@ Die Befehle werden im Repository-Root mit Poetry ausgeführt.
 
 Der Commit-Message-Hook verlangt Conventional Commits im Format `<type>[scope]: <beschreibung>`, zum Beispiel `fix(api): validate storage payload`.
 
+Pylint 4.0.9 und Astroid 4.0.4 gehören ausschließlich zur Entwicklungsgruppe.
+Das Update aus PR #26 ersetzt insbesondere Pylints unsicheren Pickle-Cache
+durch JSON. Der vorhandene CI-Pylint-Lauf meldet weiterhin auch ältere Hinweise;
+er ist kein Versprechen einer warnungsfreien Codebasis. Containerprüfungen und
+ihre Grenzen beschreibt die [Docker-Anleitung](../guides/docker.md#sicherheitsupdates-des-images).
+
 ## Unveränderliche Migrationen
 
 Bereits angewendete Dateien unter `brick_manager/migrations/` bleiben bytegenau
