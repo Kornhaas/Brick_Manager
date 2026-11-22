@@ -7,83 +7,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const setDetails = document.getElementById("set-details");
   const backToSetsButton = document.getElementById("back-to-sets");
 
-  // Table Sorting Functionality
-  let sortDirection = {}; // Track sort direction for each column
-
-  function initTableSorting() {
-    const table = document.getElementById('sets-table-main');
-    if (!table) return;
-
-    const headers = table.querySelectorAll('thead th[data-sort]');
-
-    headers.forEach(header => {
-      header.addEventListener('click', () => {
-        const sortKey = header.getAttribute('data-sort');
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr.set-row'));
-
-        // Toggle sort direction
-        sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
-
-        // Update visual indicators
-        headers.forEach(h => {
-          const icon = h.querySelector('.sort-icon');
-          icon.className = 'bi bi-arrow-down-up sort-icon';
-        });
-
-        const currentIcon = header.querySelector('.sort-icon');
-        currentIcon.className = sortDirection[sortKey] === 'asc'
-          ? 'bi bi-arrow-up sort-icon'
-          : 'bi bi-arrow-down sort-icon';
-
-        // Sort rows
-        rows.sort((a, b) => {
-          let aVal = '', bVal = '';
-
-          switch(sortKey) {
-            case 'set_num':
-              aVal = a.cells[1].textContent.trim();
-              bVal = b.cells[1].textContent.trim();
-              break;
-            case 'set_name':
-              aVal = a.cells[2].textContent.trim();
-              bVal = b.cells[2].textContent.trim();
-              break;
-            case 'theme':
-              aVal = a.cells[3].textContent.trim();
-              bVal = b.cells[3].textContent.trim();
-              break;
-            case 'box_id':
-              aVal = parseInt(a.cells[4].textContent.trim()) || 0;
-              bVal = parseInt(b.cells[4].textContent.trim()) || 0;
-              return sortDirection[sortKey] === 'asc' ? aVal - bVal : bVal - aVal;
-            case 'parts':
-              aVal = parseInt(a.cells[5].textContent.split('/')[1]) || 0;
-              bVal = parseInt(b.cells[5].textContent.split('/')[1]) || 0;
-              return sortDirection[sortKey] === 'asc' ? aVal - bVal : bVal - aVal;
-            case 'status':
-              aVal = a.cells[6].querySelector('.status-badge').textContent.trim();
-              bVal = b.cells[6].querySelector('.status-badge').textContent.trim();
-              break;
-            case 'label_printed':
-              aVal = a.cells[7].querySelector('input[type="checkbox"]').checked ? 1 : 0;
-              bVal = b.cells[7].querySelector('input[type="checkbox"]').checked ? 1 : 0;
-              return sortDirection[sortKey] === 'asc' ? aVal - bVal : bVal - aVal;
-          }
-
-          // String comparison
-          if (sortDirection[sortKey] === 'asc') {
-            return aVal.localeCompare(bVal, undefined, {numeric: true});
-          } else {
-            return bVal.localeCompare(aVal, undefined, {numeric: true});
-          }
-        });
-
-        // Reappend sorted rows
-        rows.forEach(row => tbody.appendChild(row));
-      });
-    });
-  }
 
   // Enhanced Search and Filter Functionality
   function initSearchAndFilter() {
@@ -256,137 +179,26 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Initialize sorting and filtering
-  initTableSorting();
   initSearchAndFilter();
 
-  // Mark all parts as existing
-  const markAllExistingButton =
-    document.getElementById("mark-all-existing");
-
-  markAllExistingButton.addEventListener("click", () => {
-    // Get all input fields in the Non-Spare Parts, Spare Parts, and Minifigs tables
-    const partsTables = [
-      document.getElementById("non-spare-parts-table-body"),
-      document.getElementById("spare-parts-table-body"),
-      document.getElementById("minifigs-table-body"),
-    ];
-
-    partsTables.forEach((tableBody) => {
-      if (tableBody) {
-        const rows = tableBody.querySelectorAll("tr");
-        rows.forEach((row) => {
-          const quantityCell = row.querySelector("td:nth-child(6)"); // Quantity Required cell (6th column)
-          const ownedInput = row.querySelector("input[type='number']"); // Owned input field
-
-          if (quantityCell && ownedInput) {
-            const quantity = parseInt(
-              quantityCell.textContent.trim(),
-              10
-            );
-            if (!isNaN(quantity)) {
-              ownedInput.value = quantity; // Set Owned to Quantity
-            }
-          }
-        });
-      }
+  // Older open list pages can still use the inline editor with this asset.
+  const filterCheckbox = document.getElementById("filter-mismatched-parts");
+  function filterLegacyParts() {
+    setDetails.querySelectorAll('.auto-save-quantity').forEach(input => {
+      input.closest('tr').hidden = filterCheckbox.checked && input.value === input.dataset.required;
     });
-
-    alert("All parts marked as existing!");
-  });
-
-  // Reset all parts to 0
-  const resetAllToZeroButton = document.getElementById("reset-all-to-zero");
-
-  resetAllToZeroButton.addEventListener("click", () => {
-    // Get all input fields in the Non-Spare Parts, Spare Parts, and Minifigs tables
-    const partsTables = [
-      document.getElementById("non-spare-parts-table-body"),
-      document.getElementById("spare-parts-table-body"),
-      document.getElementById("minifigs-table-body"),
-    ];
-
-    partsTables.forEach((tableBody) => {
-      if (tableBody) {
-        const rows = tableBody.querySelectorAll("tr");
-        rows.forEach((row) => {
-          const ownedInput = row.querySelector("input[type='number']"); // Owned input field
-
-          if (ownedInput) {
-            ownedInput.value = 0; // Set Owned to 0
-          }
-        });
-      }
+  }
+  filterCheckbox?.addEventListener('change', filterLegacyParts);
+  function setLegacyQuantities(complete) {
+    setDetails.querySelectorAll('.auto-save-quantity').forEach(input => {
+      input.value = complete ? input.dataset.required : '0';
+      quantitySaveFeedback(input, 'unsaved', 'Änderung noch nicht gespeichert.');
     });
-
-    alert("All parts reset to 0!");
-  });
-
-  // Add event listener for mismatched parts filter
-  const filterCheckbox = document.getElementById(
-    "filter-mismatched-parts"
-  );
-
-  filterCheckbox.addEventListener("change", () => {
-    const filterRows = (rows) => {
-      rows.forEach((row) => {
-        const quantityCell = row.querySelector("td:nth-child(6)"); // Quantity Required cell (6th column)
-        const ownedInput = row.querySelector("input[type='number']");
-        if (quantityCell && ownedInput) {
-          const quantity = parseInt(quantityCell.textContent.trim(), 10);
-          const owned = parseInt(ownedInput.value.trim(), 10);
-          if (filterCheckbox.checked && quantity === owned) {
-            row.style.display = "none"; // Hide rows with matching quantities
-          } else {
-            row.style.display = ""; // Show all rows
-          }
-        }
-      });
-    };
-
-    const nonSparePartsRows = document.querySelectorAll(
-      "#non-spare-parts-table-body tr"
-    );
-    const sparePartsRows = document.querySelectorAll(
-      "#spare-parts-table-body tr"
-    );
-    const minifigsRows = document.querySelectorAll(
-      "#minifigs-table-body tr"
-    );
-
-    filterRows(nonSparePartsRows);
-    filterRows(sparePartsRows);
-    filterRows(minifigsRows);
-  });
-
-  // Handle back to sets button
-  backToSetsButton.addEventListener("click", () => {
-    // Hide the set details and show the master table
-    setDetails.classList.add("hidden");
-    setsTable.classList.remove("hidden");
-
-    // Reset the mismatched filter checkbox to unchecked
-    filterCheckbox.checked = false;
-
-    // Show all rows (reset filtering)
-    const resetFilter = (rows) => {
-      rows.forEach((row) => {
-        row.style.display = ""; // Show all rows
-      });
-    };
-
-    const nonSparePartsRows = document.querySelectorAll(
-      "#non-spare-parts-table-body tr"
-    );
-    const sparePartsRows = document.querySelectorAll(
-      "#spare-parts-table-body tr"
-    );
-    const minifigsRows = document.querySelectorAll(
-      "#minifigs-table-body tr"
-    );
-
-    resetFilter(nonSparePartsRows);
-    resetFilter(sparePartsRows);
-    resetFilter(minifigsRows);
+    filterLegacyParts();
+  }
+  document.getElementById('mark-all-existing')?.addEventListener('click', () => setLegacyQuantities(true));
+  document.getElementById('reset-all-to-zero')?.addEventListener('click', () => {
+    if (window.confirm('Alle Mengen einschließlich ausgeblendeter Zeilen auf 0 setzen?')) setLegacyQuantities(false);
   });
 
   // Handle view details
@@ -433,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td>
                             <input type="number" name="part_id_${part.id
               }" value="${part.have_quantity}" min="0" max="${part.quantity
-              }" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="regular" enterkeyhint="next">
+              }" class="form-control auto-save-quantity" data-required="${part.quantity}" data-part-id="${part.id}" data-part-type="regular" enterkeyhint="next">
                         </td>
                         <td>${escapeHtml(part.location || "Not Specified")}</td>
                     </tr>`;
@@ -477,7 +289,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td style="background-color: #${colorRgb}; color: ${textColor};">${escapeHtml(part.color || "Not Specified")}</td>
                         <td>${part.quantity}</td>
                         <td>
-                            <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control auto-save-quantity" data-part-id="${part.id}" data-part-type="minifig" enterkeyhint="next">
+                            <input type="number" name="minifig_part_id_${part.id}" value="${part.have_quantity}" min="0" max="${part.quantity}" class="form-control auto-save-quantity" data-required="${part.quantity}" data-part-id="${part.id}" data-part-type="minifig" enterkeyhint="next">
                         </td>
                         <td>${escapeHtml(part.location || "Not Specified")}</td>
                     </tr>`;
@@ -520,9 +332,10 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Handle back to sets button
-  backToSetsButton.addEventListener("click", () => {
+  backToSetsButton?.addEventListener("click", () => {
     setDetails.classList.add("hidden");
     setsTable.classList.remove("hidden");
+    filterCheckbox.checked = false;
   });
 
   // Confirmation dialog for delete
@@ -581,36 +394,52 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Handle Generate Label
   document.querySelectorAll(".generate-label").forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       const User_SetId = button.getAttribute("data-user-set-id");
       const boxSize = button.getAttribute("data-box-size");
-
-      fetch("/set_maintain/generate_label", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ set_id: User_SetId, box_size: boxSize }),
-      })
-        .then((response) => {
-          if (response.ok) {
-            return response.blob();
-          }
-          throw new Error("Failed to generate label");
-        })
-        .then((blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.style.display = "none";
-          a.href = url;
-          a.download = `${User_SetId}_${boxSize}.drawio`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-        })
-        .catch((error) =>
-          console.error("Error generating label:", error)
-        );
+      const row = button.closest("tr");
+      const buttons = row.querySelectorAll(".generate-label");
+      const feedback = row.querySelector(".set-label-feedback");
+      buttons.forEach(item => { item.disabled = true; });
+      feedback.classList.remove("text-danger", "text-success", "text-warning");
+      feedback.textContent = "Creating PDF…";
+      try {
+        const response = await fetch("/set_maintain/generate_label", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ set_id: User_SetId, box_size: boxSize }),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || "Could not create label. Please try again.");
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.style.display = "none";
+        link.href = url;
+        link.download = `${User_SetId}_${boxSize}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        const status = row.querySelector(".set-label-status");
+        status.querySelector(".set-label-printed-checkbox").checked = true;
+        const icon = status.querySelector("i");
+        icon.className = "bi bi-check-circle-fill text-success";
+        icon.title = "Label Printed";
+        const description = status.querySelector("small");
+        description.className = "text-success";
+        description.textContent = "Printed";
+        const warning = response.headers.get("X-Label-Warning");
+        feedback.classList.add(warning ? "text-warning" : "text-success");
+        feedback.textContent = "PDF ready. Print at 100% / actual size." + (warning ? ` ${warning}` : "");
+      } catch (error) {
+        feedback.classList.add("text-danger");
+        feedback.textContent = error.message || "Could not create label. Please try again.";
+      } finally {
+        buttons.forEach(item => { item.disabled = false; });
+      }
     });
   });
 });

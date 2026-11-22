@@ -59,6 +59,20 @@ nicht erforderlich. Details: [Softwaredesign](software-design.md),
 
 ## Zuverlässige Sammlungsbearbeitung
 
+Die Setliste dient zum Finden, Filtern und Sortieren; die eigene Detailseite
+einer physischen Setkopie zum Bearbeiten. Speichern bestätigt Mengen und Status
+gemeinsam und hält den Arbeitsbereich offen. Erst eine ausdrückliche Rückkehr
+zeigt die aktualisierte Liste mit dem bisherigen Filter-/Positionskontext.
+Offene Entwürfe und fehlgeschlagene Bestätigungen bleiben sichtbar und
+korrigierbar. Verschiedene eigene Kopien derselben Katalognummer bleiben getrennt.
+
+Die Schachteletiketten für MB-1, MB-4 und Big Box werden direkt als druckfertige PDFs
+erzeugt. Setbilder, Titel und Boxnummern sind enthalten; ein externer Editor
+oder manueller Export ist nicht mehr nötig. Feste Schnittmaße und getrennte
+Deckel-/Seitenlayouts halten die Ausgabe maßhaltig. Fehlende Bilder werden
+erklärt, Erzeugungsfehler können ohne Verlust des Listenkontexts erneut versucht
+werden. Druck bei 100 % und ein Probeausdruck bleiben für die physische Passung nötig.
+
 Sammlungszeilen werden nach Datensatztyp und interner ID unterschieden, damit
 reguläre und Minifigurenteile mit gleicher Nummer nicht verwechselt werden.
 Mengenänderungen bestätigen die tatsächlich gespeicherten Werte; fehlende oder

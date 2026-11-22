@@ -1,0 +1,155 @@
+{% set drafts = draft_values | default({}) %}
+{% set errors = field_errors | default({}) %}
+{% set catalog = user_set.template_set %}
+{% set set_name = catalog.name if catalog else user_set.set_num %}
+{% macro preview_image(url, name, width, height) %}
+<button type="button" class="image-preview" data-image-name="{{ name }}" aria-label="Bild vergrößern: {{ name }}">
+    <img src="{{ url }}" alt="" width="{{ width }}" height="{{ height }}" loading="lazy" decoding="async">
+</button>
+{% endmacro %}
+{% macro part_table(parts, kind, group_name) %}
+{% if parts %}
+<div class="parts-scroll" role="region" tabindex="0" aria-label="{{ group_name }}">
+    <table class="detail-table">
+        <thead><tr><th scope="col">Teil</th><th scope="col">Farbe</th><th scope="col">Soll</th><th scope="col">Vorhanden</th><th scope="col">Lagerort</th></tr></thead>
+        <tbody>
+        {% for part in parts %}
+        {% set key = ('minifig_part_id_' if kind == 'minifig' else 'part_id_') ~ part.id %}
+        <tr data-part-row data-kind="{{ kind }}" data-search="{{ group_name }} {{ part.name }} {{ part.part_num }} {{ part.category }} {{ part.color }}">
+            <th scope="row"><div class="part-identity">
+                {% if part.part_img_url %}{{ preview_image(part.part_img_url, part.name ~ ' · ' ~ part.part_num, 48, 48) }}{% endif %}
+                <div>{{ part.name }} <small>{{ part.part_num }} · {{ part.category }}</small></div>
+            </div></th>
+            <td>{{ part.color }}</td><td>{{ part.quantity }}</td>
+            <td>
+                <input name="{{ key }}" type="number" required min="0" max="{{ part.quantity }}" step="1" inputmode="numeric" enterkeyhint="next"
+                       value="{{ drafts.get(key, part.have_quantity) }}" data-required="{{ part.quantity }}" data-saved="{{ part.have_quantity }}"
+                       aria-label="{{ part.name }} ({{ part.part_num }}), {{ part.color }}, Soll {{ part.quantity }} – vorhanden"
+                       aria-describedby="error-{{ key }}" {% if key in errors %}aria-invalid="true"{% endif %}>
+                <small id="error-{{ key }}" class="field-error">{{ errors.get(key, '') }}{% if key in errors %} (Eingabe „{{ drafts.get(key, '') }}“){% endif %}</small>
+            </td>
+            <td>{{ part.location }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="empty-section">Keine Teile erfasst.</p>
+{% endif %}
+{% endmacro %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ set_name }} · Box {{ user_set.id }} · Brick Manager</title>
+    {% include 'favicon_links.html' %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/set_detail.css', v='1') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <main id="set-detail" class="container" data-box-id="{{ user_set.id }}">
+        <a href="{{ list_url }}" id="set-back-link">← Zur Trefferliste</a>
+        <header class="detail-header">
+            {{ preview_image(detail_data.set_img_url, set_name ~ ' · ' ~ user_set.set_num, 112, 84) }}
+            <div>
+                <p class="box-identity">Box {{ user_set.id }} · Set {{ user_set.set_num }}</p>
+                <h1 id="set-title" tabindex="-1">{{ set_name }}</h1>
+                <p>{% if catalog and catalog.year %}{{ catalog.year }} · {% endif %}Etikett {{ 'gedruckt' if user_set.label_printed else 'offen' }}</p>
+            </div>
+        </header>
+        {% for message in get_flashed_messages() %}
+        <p role="status" class="alert alert-info">{{ message }}</p>
+        {% endfor %}
+        <form method="post" action="{{ detail_url }}" id="set-detail-form">
+            <div class="save-bar">
+                <span id="detail-save-state" role="status" aria-live="polite" data-state="{{ 'error' if save_error else 'clean' }}">{{ save_error or 'Keine offenen Änderungen.' }}</span>
+                <button id="retry-detail" class="btn btn-outline-primary" type="button" {% if not save_error %}hidden{% endif %}>Erneut speichern</button>
+                <button id="save-detail" class="btn btn-primary" type="submit">Speichern</button>
+            </div>
+            <div class="detail-metadata">
+                <div>
+                    <label for="detail-status">Setstatus</label>
+                    <select id="detail-status" name="status" data-saved="{{ detail_data.status }}" aria-describedby="error-status" {% if 'status' in errors %}aria-invalid="true"{% endif %}>
+                    {% for value, label in [('unknown','Unbekannt'), ('konvolut','Konvolut'), ('assembled','Aufgebaut'), ('sealed','Versiegelt'), ('complete','Vollständig'), ('completenospareparts','Vollständig ohne Ersatzteile'), ('missingparts','Teile fehlen')] %}
+                        <option value="{{ value }}" {% if drafts.get('status', detail_data.status) == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                    </select>
+                    <small id="error-status" class="field-error">{{ errors.get('status', '') }}</small>
+                </div>
+                <div><strong>Gespeicherter Teilefortschritt</strong><p id="detail-progress">{{ detail_data.completeness_percentage }} %</p></div>
+            </div>
+            <section aria-labelledby="inventory-heading">
+                <h2 id="inventory-heading">Teilebestand</h2>
+                <p>Mengen und Setstatus mit „Speichern“ übernehmen. Enter speichert und führt zum nächsten Mengenfeld.</p>
+                <div class="part-tools">
+                    <label>Teile suchen <input type="search" id="part-search" placeholder="Name, Nummer, Farbe"></label>
+                    <label><input type="checkbox" id="filter-mismatched-parts"> Nur abweichende Mengen</label>
+                </div>
+                <p id="part-filter-result" role="status" aria-live="polite"></p>
+                {% set regular = detail_data.parts | rejectattr('is_spare') | list %}
+                {% set spares = detail_data.parts | selectattr('is_spare') | list %}
+                <details id="regular-parts" class="part-section" open>
+                    <summary>Reguläre Teile ({{ regular | length }})</summary>
+                    {{ part_table(regular, 'regular', 'Reguläre Teile') }}
+                </details>
+                <details id="spare-parts" class="part-section" open>
+                    <summary>Ersatzteile ({{ spares | length }})</summary>
+                    {{ part_table(spares, 'spare', 'Ersatzteile') }}
+                </details>
+                <details id="minifigure-parts" class="part-section" open>
+                    <summary>Minifiguren ({{ detail_data.minifigs | length }})</summary>
+                    {% for fig in detail_data.minifigs %}
+                    <div class="figure-group">
+                        <h3>{% if fig.img_url %}{{ preview_image(fig.img_url, fig.name ~ ' · ' ~ fig.fig_num, 40, 40) }}{% endif %}
+                            {{ fig.name }} · {{ fig.fig_num }} · {{ fig.quantity }}×</h3>
+                        {{ part_table(fig.parts, 'minifig', fig.name ~ ' ' ~ fig.fig_num) }}
+                    </div>
+                    {% else %}
+                        {% if not detail_data.unassigned_minifig_parts %}<p class="empty-section">Keine Minifiguren erfasst.</p>{% endif %}
+                    {% endfor %}
+                    {% if detail_data.unassigned_minifig_parts %}
+                    <div class="figure-group">
+                        <h3>Teile ohne zugeordnete Minifigur</h3>
+                        {{ part_table(detail_data.unassigned_minifig_parts, 'minifig', 'Teile ohne zugeordnete Minifigur') }}
+                    </div>
+                    {% endif %}
+                </details>
+                <details id="more-actions" class="part-section">
+                    <summary>Weitere Aktionen</summary>
+                    <div class="bulk-controls">
+                        <button type="button" id="mark-all-existing" class="btn btn-outline-primary">Alle als vorhanden markieren</button>
+                        <button type="button" id="reset-all-to-zero" class="btn btn-outline-danger">Alle auf 0 setzen</button>
+                        <a href="/warehouse">Zur Lagerverwaltung</a>
+                    </div>
+                </details>
+            </section>
+        </form>
+        <dialog id="image-dialog" aria-labelledby="preview-title">
+            <h2 id="preview-title"></h2><img id="preview-image" alt="">
+            <button type="button" id="close-image" class="btn btn-secondary" autofocus>Schließen</button>
+        </dialog>
+        <dialog id="bulk-dialog" aria-labelledby="bulk-title" aria-describedby="bulk-scope">
+            <h2 id="bulk-title"></h2><p id="bulk-scope"></p>
+            <div class="dialog-actions">
+                <button type="button" id="cancel-bulk" class="btn btn-outline-secondary" autofocus>Abbrechen</button>
+                <button type="button" id="apply-bulk" class="btn btn-primary">Entwurf übernehmen</button>
+            </div>
+        </dialog>
+        <dialog id="leave-dialog" aria-labelledby="leave-title">
+            <h2 id="leave-title">Box {{ user_set.id }} verlassen?</h2>
+            <p id="leave-message">Es gibt ungespeicherte Änderungen.</p>
+            <div class="dialog-actions">
+                <button type="button" id="stay-on-detail" class="btn btn-outline-secondary" autofocus>Hier bleiben</button>
+                <button type="button" id="discard-and-back" class="btn btn-outline-danger">Verwerfen und zurück</button>
+                <button type="button" id="save-and-back" class="btn btn-primary">Speichern und zurück</button>
+            </div>
+        </dialog>
+    </main>
+    <script defer src="{{ url_for('static', filename='js/set_detail.js', v='1') }}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

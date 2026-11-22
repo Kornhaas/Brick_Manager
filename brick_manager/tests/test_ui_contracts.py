@@ -247,11 +247,13 @@ def test_set_maintenance_deduplicates_theme_names_and_filters_all_matching_ids(
     assert "Second Space Set" in html
 
 
-def test_set_maintenance_exposes_status_dialog_and_scrolls_details_to_top(
+def test_set_maintenance_exposes_status_dialog_and_direct_detail_link(
     client, collection_records
 ):
     response = client.get("/set_maintain")
-    script = Path("brick_manager/static/js/set_maintenance.js").read_text()
+    script = Path("brick_manager/static/js/set_maintenance.js").read_text(
+        encoding="utf-8"
+    )
 
     assert response.status_code == 200
     assert b'id="statusModal"' in response.data
@@ -260,28 +262,26 @@ def test_set_maintenance_exposes_status_dialog_and_scrolls_details_to_top(
         in response.data
     )
     assert (
-        'window.scrollTo({ top: setDetails.offsetTop, behavior: "smooth" });' in script
+        f'href="/set_maintain/{collection_records.id}/details?'.encode()
+        in response.data
     )
+    assert b'aria-label="View Explorer &amp; Research, Box ' in response.data
+    assert b'id="set-details"' not in response.data
     assert 'fetch("/set_maintain/update", {' in script
     assert '"Content-Type": "application/x-www-form-urlencoded"' in script
 
 
-def test_set_maintenance_enter_saves_one_quantity_then_focuses_next(
+def test_set_detail_has_labeled_quantity_fields_and_form_action(
     client, collection_records
 ):
-    response = client.get("/set_maintain")
-    html = response.get_data(as_text=True)
-    script = Path("brick_manager/static/js/set_maintenance.js").read_text()
+    detail_path = f"/set_maintain/{collection_records.id}/details"
+    response = client.get(detail_path)
 
     assert response.status_code == 200
-    assert "set_maintenance.js?v=ipad-enter-next-2" in html
-    assert 'enterkeyhint="next"' in script
-    assert "document.addEventListener('keydown', handleQuantityEnter, true);" in script
-    assert "document.addEventListener('keypress', handleQuantityEnter, true);" in script
-    assert "document.addEventListener('submit', event => {" in script
-    assert "saveAndMoveFromQuantityInput(input, event.shiftKey);" in script
-    assert "saveAndMoveFromQuantityInput(input);" in script
-    assert "fetch('/set_maintain/update_part_quantity', {" in script
+    assert f'<form method="post" action="{detail_path}"'.encode() in response.data
+    assert b'enterkeyhint="next"' in response.data
+    assert b'aria-label="Brick 2 x 4 (3001), Red, Soll 10' in response.data
+    assert b'aria-describedby="error-part_id_' in response.data
 
 
 def test_set_maintenance_paginates_large_collections(client, collection_records):

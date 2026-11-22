@@ -2,6 +2,208 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-22 – PDF-Schachteletiketten für MB-1, MB-4 und Big Box umgesetzt
+
+**Ergebnis:** Die Setliste lädt native ReportLab-PDFs für alle drei Formate.
+Die vom Nutzer genannten Schachtelmaße 160 × 110 × 50, 320 × 225 × 50 und
+305 × 229 × 102 mm bestimmen die Etiketten mit mindestens 5 mm Kantenabstand
+und maximal 277 × 190 mm auf A4 quer. MB-1 benötigt eine Kreuzseite, MB-4 zwei
+Seiten, Big Box drei. Lange und kurze Seiten erhalten unterschiedliche Breiten;
+das höhere neue Format erhält 92 mm hohe Seitenetiketten. Schnittlinien,
+eingebettete Schriften/Bilder und ein 100-%-Druckhinweis unterstützen den Ausdruck.
+Lange Namen werden eingepasst; fehlende Bilder durch Platzhalter und Warnung erklärt.
+Filter, sichtbare Fehler mit Retry und der bestehende automatische Druckstatus
+nach erfolgreicher Dateierzeugung bleiben erhalten.
+
+**Bereinigung und Architektur:** Auf ausdrücklichen Auftrag sind beide
+DrawIO-Vorlagen und die XML-/Platzhalter-Ersetzung vollständig entfernt.
+Der bisherige Endpunkt liefert jetzt ausschließlich `application/pdf`; Route,
+Browser und Artefakttests verwenden den neuen Vertrag. Es gibt keinen
+Konvertierungsprozess oder Kompatibilitätsexport. Der Setetikettendienst bleibt
+HTTP-/ORM-unabhängig; Bilder werden über HTTPS zu begrenzten Kataloghosts ohne
+Weiterleitungen geladen, mit Zeit-/Byte-/Pixellimits validiert und optional per
+URL-Hash gecacht. PDFs werden atomar geschrieben; Schreib-/Commitfehler erhalten
+den bisherigen Druckstatus durch Rollback. `pypdf` wurde nur für Entwicklungstests
+gelockt; vorhandene fremde Lockfile-Aktualisierungen blieben erhalten. Generierte
+Beispiel-PDFs und Renderdateien sind von Git ausgeschlossen.
+
+**Verifikation:** Zwei PDF-Vertragstests scheiterten vor der Umstellung an
+`application/xml` statt PDF und bestanden anschließend. Aktuell 56 gezielte
+PDF-/HTTP-/Bild-/Dateiregressionen bestanden auf Windows und Linux. Vollständige
+Linux-Suite: 698 bestanden, 0 fehlgeschlagen, 0 übersprungen, 75,45 % Coverage;
+Setetikettendienst 99 % einschließlich Branches. Alle 25 Node-Tests bestanden.
+Edge prüfte drei echte PDF-Downloads, Seitenzahlen 1/2/3, Bildwarnung, Fehler/Retry,
+Filter und Druckstatus; die vier vorhandenen Detail-/Minifigurenabläufe bestanden
+erneut. Die sechs Beispielseiten für Box 187 mit echtem Katalogbild sowie ein
+Platzhalter-/Langtitelbeispiel wurden mit Poppler gerendert und visuell geprüft.
+Ruff, Formatprüfung, JavaScript-Syntax und BasedPyright für die Backenddateien
+bestanden. Dokumentationslinks und `git diff --check` mit CRLF-Berücksichtigung
+geprüft; keine Vorlagendatei oder DrawIO-Erzeugungslogik im Laufzeitpfad verblieben.
+
+**Dokumentation und Grenzen:** Bedienung und Maße in der
+[Benutzeranleitung](guides/user-guide.md#setetiketten-herunterladen), Vertrag und
+Bildgrenzen im [Softwaredesign](architecture/software-design.md#pdf-setetiketten),
+außerdem Architektur, Entscheidung, Konfiguration, Testanleitung und
+[Umsetzungsplan](plans/architecture-usability-improvements.md#vorschlag-schachteletiketten-direkt-als-pdf-22-november-2026)
+aktualisiert. Schachtelmaße stammen aus den Nutzerangaben, nicht aus einer
+physischen Messung; ein realer Probeausdruck bei 100 % steht aus. Ein PDF-Download
+bestätigt keinen physischen Druck. Tests verwendeten ausschließlich isolierte
+Datenbanken und temporäre Ausgaben; Beispiele wurden ohne Datenbank erzeugt.
+Keine Produktionsdaten verändert, kein App-Neustart und kein Deployment.
+
+## 2026-11-22 – Direkte PDF-Ausgabe für Schachteletiketten empfohlen
+
+**Analyseergebnis:** Die bereitgestellte MB-4-DrawIO-Datei und die vorhandene
+Etikettenerzeugung wurden lesend verglichen. Automatischer DrawIO-PDF-Export ist
+per offizieller CLI möglich; für dieses Projekt wird direkte PDF-Erzeugung mit
+dem bereits eingesetzten ReportLab empfohlen. Das erfordert einmaliges
+Nachbilden der beiden Schachtellayouts, vermeidet danach einen zusätzlichen
+Exportprozess und erlaubt explizite Druckmaße und gezielte Artefakttests.
+Ein großes Deckelmotiv und vier Seitenstreifen wurden in der MB-4-XML erkannt;
+reale Maße und Seitenaufteilung müssen bei Umsetzung abgeglichen werden.
+
+**Dokumentation und Nachweise:** Abwägung, vorgeschlagener Bedienablauf,
+Komponentengrenzen, additive Einführung und Prüfplan im
+[Vorschlag für PDF-Schachteletiketten](plans/architecture-usability-improvements.md#vorschlag-schachteletiketten-direkt-als-pdf-22-november-2026)
+festgehalten. Geprüft wurden XML, `pyproject.toml`, vorhandene ReportLab-Ausgabe,
+Setetikettenroute/-dienst und die offiziellen DrawIO-/ReportLab-Dokumentationen.
+Lokale Dokumentationslinks und Whitespace geprüft. Keine neuen Laufzeittests:
+keine Implementierung geändert. Kein PDF erzeugt, kein visueller/physischer
+Drucknachweis und kein DrawIO-Headless-Export getestet. Keine Produktionsoperation.
+Vorschlag noch nicht angenommen; aktuelle Bedien-/Architekturverträge bleiben
+unverändert, deshalb keine Aktualisierung ihrer Ist-Beschreibungen.
+
+## 2026-11-22 – Erneute Etikettenfehlermeldung auf alten Laufzeitstand eingegrenzt
+
+**Nachprüfung:** Im zugänglichen Container begann der laufende Flask-Prozess um
+12:40 UTC; Route und Template der Etikettenkorrektur wurden erst um 13:03 UTC
+geändert. Der Prozess verwendet daher noch den vorher importierten Python-Code.
+Die gemeldete Skriptadresse `set-detail-1` gehört ebenfalls zum älteren Stand;
+das aktuelle Template verwendet `set-label-2`. HTTP 304 bedeutet Browsercache,
+nicht erfolgreiche Übernahme einer Backendänderung. Alle 22 isolierten
+Etikettenregressionen bestanden erneut unter Linux (0 fehlgeschlagen/übersprungen).
+
+**Betriebsgrenze:** Kein Neustart, keine Produktionsschreibprüfung und kein
+Deployment vorgenommen. Der erforderliche Neustart mit der aktuellen
+Produktivkonfiguration benötigt gemäß AGENTS.md einen separaten ausdrücklichen
+Produktionsauftrag, weil der Start Migrationen und Jobs auslösen kann; siehe
+[Produktivdatenbank](reference/configuration.md#produktivdatenbank). Keine weitere
+Design-/Referenzänderung erforderlich: Diagnose des Laufzeitstands, keine neue
+Implementierungsänderung. Die bereits dokumentierte und getestete Korrektur
+bleibt unverändert; ihre Aktivierung im laufenden Prozess steht aus.
+
+## 2026-11-22 – HTTP-400-Fehler bei Setetiketten behoben und abgesichert
+
+**Ursache und Ergebnis:** Der gemeldete MB-4-Download für Box 187 suchte die
+DrawIO-Vorlage relativ zum Prozessarbeitsverzeichnis statt wie Flask relativ
+zum Anwendungsverzeichnis. Zwei neue Regressionen reproduzierten HTTP 400 vor
+dem Fix für MB-1 und MB-4. Der neue `set_label_service.py` löst Vorlagen korrekt
+auf, erzeugt gültiges XML auch bei Katalogsonderzeichen und schreibt atomar.
+Die Route validiert Anfragen und rollt bei Erzeugungs-/Commitfehlern zurück.
+Der bestehende automatische Druckstatus nach erfolgreicher Erzeugung bleibt
+erhalten; fehlgeschlagene Ersetzungen beschädigen keine vorherige Datei.
+Der Browser meldet Fortschritt, Erfolg und Fehler an der Box, erlaubt Retry
+ohne Filterverlust und aktualisiert den Druckstatus ohne Neuladen.
+
+**Verifikation:** 22 neue Regressionstests bestanden auf Windows und Linux;
+vollständiger Linux-Lauf: 664 bestanden, 0 fehlgeschlagen, 0 übersprungen,
+74,87 % Gesamt-Coverage. Alle 25 Node-Tests bestanden. Der neue isolierte
+Edge-Browserlauf prüfte echte Downloads beider Formate, Sonderzeichen,
+sichtbaren Fehler mit anschließend erfolgreichem Retry, Filter und Druckstatus.
+Die vier vorhandenen Setdetail-Browserabläufe bestanden erneut einschließlich
+beobachteter BFCache-Rückkehr und Minifigurenregression. Ruff, Formatprüfung,
+JavaScript-Syntax und BasedPyright für Route/Etikettendienst bestanden.
+Lokale Links der geänderten Dokumentation geprüft; `git diff --check` für
+`brick_manager`, `tests` und `docs` ohne Fehler. Die bereits fremd geänderte
+`poetry.lock` wurde nicht bearbeitet; ihr Gesamt-Diff meldet CRLF-Whitespace.
+
+**Dokumentation und Grenzen:** [Benutzeranleitung](guides/user-guide.md),
+[Softwaredesign](architecture/software-design.md#pdf-setetiketten),
+[Referenzarchitektur](architecture/reference-architecture.md) und
+[Testanleitung](guides/testing.md#pdf-setetiketten) aktualisiert. Ausschließlich
+isolierte Testdatenbanken und temporäre Ausgaben; keine Produktivoperation und
+kein Deployment. XML und Downloads wurden geprüft, kein physischer Druck oder
+Öffnen in DrawIO. Nach einer erfolgreichen Dateierzeugung mit anschließendem
+Commitfehler kann die Datei bestehen bleiben, der Druckstatus wird zurückgerollt.
+
+## 2026-11-22 – Eigene Setdetailseite mit verlässlichem Speichern umgesetzt
+
+**Ergebnis:** „View“ öffnet einen eigenen Arbeitsbereich für die physische
+Setkopie mit Namen, Katalognummer und Box-ID. „Speichern“ bestätigt Mengen und
+Status gemeinsam, erhält die Seite und Arbeitsposition und zeigt offene,
+laufende, bestätigte oder fehlgeschlagene Änderungen. Beim Verlassen stehen
+Speichern, Verwerfen und Weiterarbeiten zur Wahl. Neue Eingaben und Entwürfe
+überstehen Speicherfehler; eine ältere Antwort überschreibt keine neueren Werte.
+
+**Kontext und Minifiguren:** Die Rückkehr erhält Filter, Gruppierung, globale
+Sortierung, Ergebnisseite, Seitengröße sowie Browserposition und Zeilenfokus.
+Browser-Zurück lädt veraltete Ergebnisse neu; entfallene Treffer und Seiten
+werden erklärt beziehungsweise korrigiert. Minifiguren-Mengenfilter und
+Sammelaktionen verwenden Sollmengen statt falscher Spaltennummern. Verdeckte
+Zeilen werden in der Sammelbestätigung genannt, kopieneigene nicht zugeordnete
+Minifigurenteile bleiben bearbeitbar. Die neue Seite verwendet einheitlich
+explizites Speichern; vorhandene JSON-, Einzelmengen- und Legacy-Schreibverträge
+bleiben erhalten. Keine Schema- oder Figurenzuordnungsänderung.
+
+**Architektur und Dokumentation:** Der Blueprint bleibt HTTP-/Transaktionsgrenze;
+Inventarlesemodell und Validierung liegen in `set_maintenance_service.py`, erlaubter
+Listenkontext und SQL-Sortierung in `set_navigation_service.py`. Der neue Browser-
+Controller hält den Entwurf bis zur bestätigten Transaktion. Aktuelle Bedienung,
+Komponenten und Grenzen sind in [Benutzeranleitung](guides/user-guide.md),
+[Softwaredesign](architecture/software-design.md),
+[Referenzarchitektur](architecture/reference-architecture.md),
+[High-Level-Design](architecture/high-level-design.md),
+[Architekturentscheidungen](architecture/decisions.md) und dem
+[Analyse-/Umsetzungsplan](plans/architecture-usability-improvements.md) gepflegt.
+
+**Verifikation:** Zwei neue Routenregressionen scheiterten zunächst auf dem
+archivierten Ausgangsstand (GET/POST 404) und bestanden nach der Umsetzung.
+31 neue Detailprüfungen; vollständige Linux-Suite 642 bestanden, 0 fehlgeschlagen,
+0 übersprungen, 74,46 % Coverage. Alle 25 Node-Prüfungen bestanden. Vier
+umfangreiche Edge-Abläufe bestanden einschließlich echter beobachteter BFCache-
+Rückkehr, Filter-/Seite-2-Kontext, wiederholtem Save, falschen Eingaben,
+Netzwerkfehler mit Tastatur-Retry, Suche-Enter ohne Speichern, Sammelvorschau und
+Entwurfsentscheidungen. Zusätzlicher Check verlorener Bestätigungsantworten
+bestanden. Der Ladecheck für 3 versus 203 Inventarzeilen verwendete jeweils
+6 SELECTs. Ruff/Format und BasedPyright für die Backenddateien bestanden.
+Desktop-/390-Pixel-Ansicht geprüft; kein Dokumentüberlauf bei 390 Pixeln auch mit
+der tatsächlichen Bootstrap-CSS.
+
+**Grenzen:** Keine Produktivdaten für Schreibprüfungen verwendet, keine
+Produktiv-App gestartet und kein Rollout. Keine echte Safari-/iPad- oder
+Screenreader-Abnahme. Paralleländerungen unabhängiger Browser bleiben beim
+bisherigen Last-Writer-Verhalten. Der alte Lagerort-Textdialog wird auf der
+neuen Seite nicht angeboten; die Lagerverwaltung ist dafür der Einstieg.
+
+## 2026-11-22 – Usability- und UX-Analyse der Setpflege
+
+**Ergebnis:** Die Analyse bestätigt den gemeldeten Verlust von Filter- und
+Arbeitskontext nach „Save Changes“. Zwei unabhängige Rollenreviews und ein
+isolierter Edge-Ablauf verglichen Inline-Ansicht, eigene Detailseite,
+Master-Detail und Modal. Empfohlen ist eine eigene Arbeitsseite pro physischer
+Setkopie mit getrennten Aktionen für Speichern und Rückkehr, sichtbarer
+Boxidentität und einer gemeinsamen verlässlichen Speicheranzeige.
+Weitere Befunde betreffen Minifiguren-Sammelaktionen/Fehlteilefilter,
+Fehler-/Entwurfserhalt, veraltete Listenwerte, globale Sortierung,
+Lagerortvorbelegung, Tastatur und schmale Bildschirme. Prioritäten,
+Kontraktgrenzen und Abnahmeszenarien stehen im
+[Setpflege-Vorschlag](plans/architecture-usability-improvements.md#vorschlag-setpflege-als-eigener-arbeitsbereich-22-november-2026),
+der im Dokumentationsindex verlinkt ist.
+
+**Nachweis:** 24 bestehende Node-Prüfungen bestanden. Der temporäre Browserlauf
+nutzte die gemeinsame Test-App, In-memory-SQLite und 26 synthetische Kopien.
+Er reproduzierte den nackten Listenredirect bei Erfolg und Validierungsfehler,
+bestätigte gespeicherte Mengen/Status, den unterschiedlichen internen Rückweg,
+die fehlende Detailadresse und Minifigurenprobleme. Bei 390 Pixel Bildschirmbreite
+wurden 650 Pixel Dokumentbreite gemessen. Der erfolgreiche Lauf hatte keine
+JavaScript-Fehler. Keine Produktivdaten verändert oder Produktiv-App gestartet.
+
+**Grenzen:** Vorschlag, keine Implementierung und kein Deployment. Keine echten
+Nutzertests, Screenreader-/iPad-Abnahme oder Live-Leistungsmessung. Aktuelle
+Benutzeranleitung, Softwaredesign und Architekturentscheidungen bleiben beim
+umgesetzten Iststand; ein angenommener Entwurf wird erst mit dessen Umsetzung
+in diese Referenzen übernommen.
+
 ## 2026-11-21 – Filter der Setpflege auf dem laufenden Server überprüft
 
 **Ergebnis:** Ein unabhängiger Testagent reproduzierte das Verhalten des

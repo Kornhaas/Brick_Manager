@@ -14,6 +14,8 @@
 
     <!-- Page Loading Spinner CSS -->
     <style>
+        #sets-table .table-responsive { max-width: 100%; overflow-x: auto; }
+        #set-filters input, #set-filters select { box-sizing: border-box; max-width: 100%; }
         .page-loading-overlay {
             position: fixed;
             top: 0;
@@ -40,6 +42,7 @@
             text-align: center;
         }
     </style>
+    <noscript><style>#pageLoadingOverlay { display: none; }</style></noscript>
 </head>
 <body>
     {# Keep template auto-reload compatible with an older route still in memory. #}
@@ -50,6 +53,11 @@
     {% set themes = themes | default([]) %}
     {% set pagination = pagination | default({'total': sets_with_completeness | length, 'pages': 0}) %}
     {% set filters = filters | default({'q': '', 'box_id': none, 'status': '', 'theme': none, 'label': '', 'completion': '', 'group': '', 'per_page': 50}) %}
+    {% set sort = filters.sort | default('box_id') %}
+    {% set direction = filters.direction | default('desc') %}
+    {% macro results_url(page, column, order) -%}
+        {{ url_for('set_maintain.set_maintain', q=filters.q, box_id=filters.box_id, theme=filters.theme, status=filters.status, completion=filters.completion, label=filters.label, group=filters.group, per_page=filters.per_page, sort=column, direction=order, page=page, _anchor='set-results-heading') }}
+    {%- endmacro %}
 
     <!-- Include the navigation bar -->
     {% include 'navbar.html' %}
@@ -66,11 +74,8 @@
     <div class="container mt-5">
         <h1 class="text-center">Set Maintenance</h1>
 
-        <section class="mb-4" aria-labelledby="collection-overview-title">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h4 mb-0" id="collection-overview-title">Collection overview</h2>
-                <a href="#set-filters" class="btn btn-sm btn-outline-primary">Open complete list</a>
-            </div>
+        <details class="mb-4" id="collection-overview">
+            <summary class="h4">Collection overview · all sets</summary>
             <div class="row g-3 mb-4">
                 <div class="col-sm-6 col-lg-3">
                     <a class="card h-100 text-decoration-none text-body shadow-sm" href="{{ url_for('set_maintain.set_maintain') }}">
@@ -112,7 +117,7 @@
                 {% endfor %}
             </div>
             {% endif %}
-        </section>
+        </details>
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -129,10 +134,12 @@
         {% endwith %}
 
         <!-- Sets Table -->
-        <div id="sets-table">
+        <div id="sets-table" data-list-url="{{ list_context_url | default(url_for('set_maintain.set_maintain')) }}" data-return-box="{{ return_box_id | default('') or '' }}">
             <h2 class="mt-4">Your User Sets</h2>
 
             <form method="get" class="card card-body mb-3 bg-light" id="set-filters">
+                <input type="hidden" name="sort" value="{{ sort }}">
+                <input type="hidden" name="direction" value="{{ direction }}">
                 <div class="row g-3">
                     <div class="col-lg-4">
                         <label for="search-input" class="form-label">Search</label>
@@ -185,7 +192,7 @@
                     <div class="col-lg-3">
                         <label for="group-filter" class="form-label">Organisation</label>
                         <select class="form-select" id="group-filter" name="group">
-                            <option value="">Newest boxes first</option>
+                            <option value="">No grouping</option>
                             <option value="theme" {% if filters.group == 'theme' %}selected{% endif %}>Group by theme</option>
                         </select>
                     </div>
@@ -202,44 +209,31 @@
                         <a class="btn btn-outline-secondary" id="clear-filters" href="{{ url_for('set_maintain.set_maintain') }}">Reset</a>
                     </div>
                 </div>
+                <p class="mb-0 mt-2" id="filter-draft" role="status" hidden>Filters changed. Apply filters to update the results.</p>
             </form>
 
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="text-muted">{{ pagination.total }} matching set{% if pagination.total != 1 %}s{% endif %}</span>
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
+                <h3 class="h5 mb-0" id="set-results-heading" tabindex="-1" {% if return_notice %}aria-describedby="return-notice"{% endif %}>{{ pagination.total }} matching set{% if pagination.total != 1 %}s{% endif %}</h3>
+                {% if filters.q or filters.box_id or filters.status or filters.theme or filters.label or filters.completion %}
+                <span>Filters applied</span>
+                {% endif %}
                 {% if filters.completion == 'incomplete' %}
                 <span class="badge bg-danger">Only sets with missing parts</span>
                 {% endif %}
             </div>
+            {% if return_notice %}<p class="alert alert-info" id="return-notice" role="status">{{ return_notice }}</p>{% endif %}
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped" id="sets-table-main">
                     <thead class="table-secondary">
-                        <tr style="background-color: #6c757d !important; color: white !important; font-weight: 600;">
-                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="image">
-                                Image <i class="bi bi-arrow-down-up sort-icon"></i>
+                        <tr>
+                            <th scope="col">Image</th>
+                            {% for column, caption in [('set_num','Set Number'), ('set_name','Set Name'), ('theme','Theme'), ('box_id','Box ID'), ('parts','Parts'), ('status','Status & Progress'), ('label_printed','Label')] %}
+                            <th scope="col" {% if sort == column %}aria-sort="{{ 'ascending' if direction == 'asc' else 'descending' }}"{% endif %}>
+                                <a data-sort="{{ column }}" href="{{ results_url(1, column, 'desc' if sort == column and direction == 'asc' else 'asc') }}">{{ caption }} <span aria-hidden="true">{{ ('↑' if direction == 'asc' else '↓') if sort == column else '↕' }}</span></a>
                             </th>
-                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="set_num">
-                                Set Number <i class="bi bi-arrow-down-up sort-icon"></i>
-                            </th>
-                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="set_name">
-                                Set Name <i class="bi bi-arrow-down-up sort-icon"></i>
-                            </th>
-                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="theme">
-                                Theme <i class="bi bi-arrow-down-up sort-icon"></i>
-                            </th>
-                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="box_id">
-                                Box ID <i class="bi bi-arrow-down-up sort-icon"></i>
-                            </th>
-                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="parts">
-                                Parts <i class="bi bi-arrow-down-up sort-icon"></i>
-                            </th>
-                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="status">
-                                Status & Progress <i class="bi bi-arrow-down-up sort-icon"></i>
-                            </th>
-                            <th style="cursor: pointer; background-color: #6c757d !important; color: white !important;" data-sort="label_printed">
-                                Label <i class="bi bi-arrow-down-up sort-icon"></i>
-                            </th>
-                            <th style="background-color: #6c757d !important; color: white !important;">Actions</th>
+                            {% endfor %}
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -251,16 +245,16 @@
                             <th colspan="9"><i class="bi bi-collection"></i> {{ entry.theme_name }}</th>
                         </tr>
                         {% endif %}
-                        <tr class="set-row">
+                        <tr class="set-row" id="set-box-{{ entry.user_set.id }}">
                             <td>
                                 <img
                                     src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
                                     alt="{{ entry.set_num }}"
-                                    width="150"
+                                    width="150" height="110"
                                     loading="lazy"
                                     decoding="async"
                                     class="img-thumbnail set-image-clickable"
-                                    style="cursor: pointer;"
+                                    style="cursor: pointer; object-fit: contain; height: 110px;"
                                     data-image-src="{{ entry.user_set.template_set.img_url if entry.user_set.template_set and entry.user_set.template_set.img_url else url_for('static', filename='default_image.png') }}"
                                     data-image-name="{{ entry.set_name }} ({{ entry.set_num }})"
                                     onerror="this.src='{{ url_for('static', filename='default_image.png') }}'"
@@ -320,7 +314,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center set-label-status">
                                 {% if entry.user_set.label_printed %}
                                     <i class="bi bi-check-circle-fill text-success" title="Label Printed"></i>
                                     <br><small class="text-success">Printed</small>
@@ -331,34 +325,45 @@
                                 <div class="form-check mt-1">
                                     <input class="form-check-input set-label-printed-checkbox" type="checkbox"
                                            id="set-label-{{ entry.user_set.id }}" data-user-set-id="{{ entry.user_set.id }}"
+                                           aria-label="Label printed for box {{ entry.user_set.id }}"
                                            {{ 'checked' if entry.user_set.label_printed else '' }}>
                                 </div>
                             </td>
                             <td>
                                 <div class="btn-group-vertical d-grid gap-1">
-                                    <button
-                                        class="btn btn-info btn-sm view-details"
+                                    <a
+                                        class="btn btn-info btn-sm set-detail-link"
+                                        href="{{ url_for('set_maintain.set_details', user_set_id=entry.user_set.id, return_to=list_context_url | default(request.full_path)) }}"
                                         data-user-set-id="{{ entry.user_set.id }}"
-                                        title="View Set Details"
+                                        aria-label="View {{ entry.set_name }}, Box {{ entry.user_set.id }}"
                                     >
                                         <i class="bi bi-eye"></i> View
-                                    </button>
+                                    </a>
                                     <button
                                         class="btn btn-success btn-sm generate-label"
                                         data-user-set-id="{{ entry.user_set.id }}"
                                         data-box-size="MB-1"
-                                        title="Generate Small Box Label"
+                                        title="Download MB-1 PDF - print at 100% / actual size"
                                     >
-                                        <i class="bi bi-box"></i> Small Box
+                                        <i class="bi bi-box"></i> MB-1 PDF
                                     </button>
                                     <button
                                         class="btn btn-primary btn-sm generate-label"
                                         data-user-set-id="{{ entry.user_set.id }}"
                                         data-box-size="MB-4"
-                                        title="Generate Big Box Label"
+                                        title="Download MB-4 PDF - print at 100% / actual size"
                                     >
-                                        <i class="bi bi-box-fill"></i> Big Box
+                                        <i class="bi bi-box-fill"></i> MB-4 PDF
                                     </button>
+                                    <button
+                                        class="btn btn-secondary btn-sm generate-label"
+                                        data-user-set-id="{{ entry.user_set.id }}"
+                                        data-box-size="BIG-BOX"
+                                        title="Download Big Box PDF - print at 100% / actual size"
+                                    >
+                                        <i class="bi bi-box-seam"></i> Big Box PDF
+                                    </button>
+                                    <small class="set-label-feedback" role="status" aria-live="polite"></small>
                                     <form
                                         class="delete-form"
                                         method="post"
@@ -386,7 +391,7 @@
                     {% for page_number in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
                         {% if page_number %}
                         <li class="page-item {% if page_number == pagination.page %}active{% endif %}">
-                            <a class="page-link" href="{{ url_for('set_maintain.set_maintain', page=page_number, q=filters.q, box_id=filters.box_id, status=filters.status, theme=filters.theme, label=filters.label, completion=filters.completion, group=filters.group, per_page=filters.per_page) }}">{{ page_number }}</a>
+                            <a class="page-link" href="{{ results_url(page_number, sort, direction) }}">{{ page_number }}</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -397,111 +402,7 @@
             {% endif %}
         </div>
 
-      <!-- Set Details -->
-      <div id="set-details" class="hidden">
-        <button class="btn btn-secondary mb-3" id="back-to-sets">
-          Back to Sets
-        </button>
-        <button id="mark-all-existing" class="btn btn-success mb-3">
-          Mark All Parts as Existing
-        </button>
-        <button id="reset-all-to-zero" class="btn btn-warning mb-3 ms-2">
-          Reset All to 0
-        </button>
-        <h3>Set Details</h3>
-        <form
-          method="post"
-          action="{{ url_for('set_maintain.update_user_set') }}"
-        >
-          <input type="hidden" name="user_set_id" id="user-set-id" />
-
-          <h5>Parts</h5>
-
-          <!-- Checkbox to filter mismatched parts -->
-          <div class="form-check mb-3">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="filter-mismatched-parts"
-            />
-            <label class="form-check-label" for="filter-mismatched-parts">
-              Show only mismatched parts
-            </label>
-          </div>
-
-          <!-- Non-Spare Parts Table -->
-          <h6>Non-Spare Parts</h6>
-          <table class="table table-bordered" id="non-spare-parts-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Part Number</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Color</th>
-                <th>Quantity Required</th>
-                <th>Owned</th>
-                <th>Location</th>
-              </tr>
-            </thead>
-            <tbody id="non-spare-parts-table-body">
-              <!-- Non-spare parts will be populated here -->
-            </tbody>
-          </table>
-
-          <!-- Spare Parts Table -->
-          <h6>Spare Parts</h6>
-          <table class="table table-bordered" id="spare-parts-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Part Number</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Color</th>
-                <th>Quantity Required</th>
-                <th>Owned</th>
-                <th>Location</th>
-              </tr>
-            </thead>
-            <tbody id="spare-parts-table-body">
-              <!-- Spare parts will be populated here -->
-            </tbody>
-          </table>
-
-          <h5>Minifigures</h5>
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Figure Number</th>
-                <th>Name</th>
-                <th>Quantity Required</th>
-              </tr>
-            </thead>
-            <tbody id="minifigs-table-body"></tbody>
-          </table>
-
-          <div class="form-group">
-            <label for="status">Set Status</label>
-            <select name="status" id="status" class="form-control">
-              <option value="unknown">Unknown</option>
-              <option value="assembled">Assembled</option>
-              <option value="sealed">Sealed</option>
-              <option value="konvolut">Konvolut</option>
-              <option value="missingparts">Missing Parts</option>
-              <option value="complete">Complete</option>
-              <option value="completenospareparts">
-                Complete (missing spare parts)
-              </option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary mt-3">
-            Save Changes
-          </button>
-        </form>
-      </div>
-          </div>
+    </div>
 
     <!-- Image Modal -->
     <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
@@ -548,43 +449,10 @@
       </div>
     </div>
 
-    <!-- Location Edit Modal -->
-    <div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="locationModalLabel">Edit Part Location</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p class="text-muted mb-3">
-              <strong>Part:</strong> <span id="modalPartName"></span><br>
-              <strong>Part Number:</strong> <span id="modalPartNum"></span>
-            </p>
-            <div class="mb-3">
-              <label for="modalLocation" class="form-label">Location</label>
-              <input type="text" class="form-control" id="modalLocation" placeholder="e.g., Shelf A">
-            </div>
-            <div class="mb-3">
-              <label for="modalLevel" class="form-label">Level</label>
-              <input type="text" class="form-control" id="modalLevel" placeholder="e.g., 2">
-            </div>
-            <div class="mb-3">
-              <label for="modalBox" class="form-label">Box</label>
-              <input type="text" class="form-control" id="modalBox" placeholder="e.g., Box 5">
-            </div>
-            <div class="alert alert-info d-none" id="locationUpdateStatus"></div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" id="saveLocationBtn">Save Location</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/set_maintenance.js', v='ipad-enter-next-2') }}"></script>
+    <script src="{{ url_for('static', filename='js/set_maintenance.js', v='set-label-pdf-1') }}"></script>
+    <script src="{{ url_for('static', filename='js/set_list_context.js', v='1') }}"></script>
 
     <!-- Page Loading Control -->
     <script>
@@ -597,13 +465,6 @@
             }
         });
 
-        // Show spinner on navigation away
-        window.addEventListener('beforeunload', function() {
-            const loadingOverlay = document.getElementById('pageLoadingOverlay');
-            if (loadingOverlay) {
-                loadingOverlay.style.display = 'flex';
-            }
-        });
     </script>
 </body>
 </html>

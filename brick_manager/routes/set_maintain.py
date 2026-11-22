@@ -8,10 +8,9 @@ and generating labels for sets and their parts.
 
 # pylint: disable=C0301,W0718
 
-from pathlib import Path
-
 from flask import (
     Blueprint,
+    abort,
     current_app,
     flash,
     jsonify,
@@ -24,8 +23,6 @@ from flask import (
 from models import (
     USER_SET_STATUSES,
     PartStorage,
-    RebrickablePartCategories,
-    RebrickableParts,
     RebrickableSets,
     RebrickableThemes,
     User_Parts,
@@ -35,9 +32,24 @@ from models import (
 )
 from services.collection_quantity_service import parse_integer
 from services.collection_summary_service import set_quantity_totals
+from services.set_label_service import SET_LABEL_SIZES, create_set_label_pdf
+from services.set_maintenance_service import (
+    InvalidSetField,
+    apply_set_edits,
+    completeness_percentage,
+    inventory_details,
+)
+from services.set_navigation_service import (
+    DEFAULT_FILTERS,
+    LIST_ENDPOINT,
+    details_navigation,
+    list_parameters,
+    order_sets,
+    positive_number,
+)
 from sqlalchemy import or_
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
-from werkzeug.utils import secure_filename
 
 set_maintain_bp = Blueprint("set_maintain", __name__)
 
@@ -108,17 +120,15 @@ def set_maintain():
 
     Displays the list of user sets with enhanced information including theme data.
     """
-    search = request.args.get("q", "").strip()
-    box_id = request.args.get("box_id", type=int)
-    status = request.args.get("status", "").strip()
-    theme_name = request.args.get("theme", "").strip()
-    label = request.args.get("label", "").strip()
-    completion = request.args.get("completion", "").strip()
-    group_by = request.args.get("group", "").strip()
-    page = max(request.args.get("page", 1, type=int), 1)
-    per_page = request.args.get("per_page", 50, type=int)
-    if per_page not in {25, 50, 100}:
-        per_page = 50
+    context = list_parameters(request.args)
+    filters = {**DEFAULT_FILTERS, **context}
+    search, box_id, status = filters["q"], filters["box_id"], filters["status"]
+    theme_name, label, completion = (
+        filters["theme"],
+        filters["label"],
+        filters["completion"],
+    )
+    page, per_page = filters["page"], filters["per_page"]
 
     query = User_Set.query.join(User_Set.template_set).options(
         joinedload(User_Set.template_set)
@@ -131,8 +141,9 @@ def set_maintain():
             RebrickableSets.name.ilike(search_pattern),
             RebrickableSets.theme.has(RebrickableThemes.name.ilike(search_pattern)),
         ]
-        if search.isdigit():
-            search_conditions.append(User_Set.id == int(search))
+        search_id = positive_number(search) if search.isdecimal() else None
+        if search_id is not None:
+            search_conditions.append(User_Set.id == search_id)
         query = query.filter(or_(*search_conditions))
     if box_id is not None:
         query = query.filter(User_Set.id == box_id)
@@ -165,15 +176,22 @@ def set_maintain():
     elif completion == "no-parts":
         query = query.filter(~has_owned_parts)
 
-    if group_by == "theme":
-        query = query.join(RebrickableSets.theme).order_by(
-            RebrickableThemes.name.asc(), User_Set.id.desc()
-        )
-    else:
-        query = query.order_by(User_Set.id.desc())
-
-    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    ordered = order_sets(query, filters["sort"], filters["direction"], filters["group"])
+    pagination = ordered.paginate(page=page, per_page=per_page, error_out=False)
+    last_page = max(1, pagination.pages)
+    return_box = positive_number(request.args.get("returned_box"))
+    if page > last_page:
+        context["page"] = last_page
+        if return_box:
+            context.update(returned_box=return_box, _anchor=f"set-box-{return_box}")
+        return redirect(url_for(LIST_ENDPOINT, **context))
     user_sets = pagination.items
+    return_notice = None
+    if return_box and all(user_set.id != return_box for user_set in user_sets):
+        if query.filter(User_Set.id == return_box).first() is None:
+            return_notice = f"Box {return_box} no longer matches these results."
+        else:
+            return_notice = f"Box {return_box} is now on another results page."
 
     theme_summary = (
         db.session.query(
@@ -199,10 +217,6 @@ def set_maintain():
         total_quantity = totals[user_set.id]["required"]
         total_have_quantity = totals[user_set.id]["owned"]
 
-        completeness_percentage = (
-            (total_have_quantity / total_quantity) * 100 if total_quantity > 0 else 0
-        )
-
         # Get theme information
         row_theme_name = "Unknown"
         if user_set.template_set and user_set.template_set.theme:
@@ -216,7 +230,9 @@ def set_maintain():
         sets_with_completeness.append(
             {
                 "user_set": user_set,
-                "completeness_percentage": round(completeness_percentage, 2),
+                "completeness_percentage": completeness_percentage(
+                    total_have_quantity, total_quantity
+                ),
                 "theme_name": row_theme_name,
                 "set_name": set_name,
                 "set_num": (
@@ -244,251 +260,110 @@ def set_maintain():
             .order_by(RebrickableThemes.name)
             .all()
         ],
-        filters={
-            "q": search,
-            "box_id": box_id,
-            "status": status,
-            "theme": theme_name,
-            "label": label,
-            "completion": completion,
-            "group": group_by,
-            "per_page": per_page,
+        filters=filters,
+        list_context_url=url_for(LIST_ENDPOINT, **context),
+        return_notice=return_notice,
+        return_box_id=return_box,
+    )
+
+
+@set_maintain_bp.get("/set_maintain/<int:user_set_id>")
+def get_user_set_details(user_set_id):
+    """Keep the existing JSON representation available to inventory consumers."""
+    return jsonify(inventory_details(User_Set.query.get_or_404(user_set_id)))
+
+
+def _unique_fields(pairs):
+    fields = {}
+    for field, value in pairs:
+        if field in fields:
+            raise InvalidSetField(field, "Jedes Feld darf nur einmal vorkommen.")
+        fields[field] = value
+    return fields
+
+
+def _json_edits():
+    try:
+        fields = current_app.json.loads(
+            request.get_data(), object_pairs_hook=_unique_fields
+        )
+    except InvalidSetField:
+        raise
+    except (ValueError, RecursionError) as error:
+        raise InvalidSetField(
+            None, "Setänderungen müssen ein JSON-Objekt sein."
+        ) from error
+    if not isinstance(fields, dict):
+        raise InvalidSetField(None, "Setänderungen müssen ein JSON-Objekt sein.")
+    return fields
+
+
+@set_maintain_bp.route(
+    "/set_maintain/<int:user_set_id>/details", methods=["GET", "POST"]
+)
+def set_details(user_set_id):
+    """Display or explicitly save a single physical copy and retain the list origin."""
+    if positive_number(user_set_id) is None:
+        abort(404)
+    user_set = User_Set.query.get_or_404(user_set_id)
+    list_url, detail_url = details_navigation(
+        user_set_id, request.args.get("return_to")
+    )
+    drafts, errors, message, code = {}, {}, None, 200
+    if request.method == "POST":
+        try:
+            if request.is_json:
+                drafts = _json_edits()
+            else:
+                drafts = request.form.to_dict()
+                for field, values in request.form.lists():
+                    if len(values) != 1:
+                        raise InvalidSetField(
+                            field, "Jedes Feld darf nur einmal vorkommen."
+                        )
+            confirmed = apply_set_edits(user_set, drafts)
+            if request.is_json:
+                totals = set_quantity_totals([user_set_id])[user_set_id]
+                progress = completeness_percentage(totals["owned"], totals["required"])
+            db.session.commit()
+        except InvalidSetField as error:
+            db.session.rollback()
+            message, code = str(error), 400
+            if error.field:
+                errors[error.field] = message
+        except SQLAlchemyError:
+            db.session.rollback()
+            current_app.logger.error(
+                "Could not save Set Maintenance copy %s", user_set_id
+            )
+            message, code = "Speichern fehlgeschlagen. Bitte erneut versuchen.", 409
+        else:
+            if request.is_json:
+                return jsonify(
+                    success=True,
+                    values=confirmed,
+                    status=confirmed["status"],
+                    completeness_percentage=progress,
+                )
+            flash("Änderungen gespeichert.", "success")
+            return redirect(detail_url, code=303)
+        if request.is_json:
+            return jsonify(success=False, error=message, field_errors=errors), code
+
+    return render_template(
+        "set_detail.html",
+        user_set=user_set,
+        detail_data={
+            **inventory_details(user_set, include_unassigned=True),
+            "user_set_id": user_set.id,
+            "set_num": user_set.set_num,
         },
-    )
-
-
-@set_maintain_bp.route("/set_maintain/<int:user_set_id>", methods=["GET"])
-def get_user_set_details(user_set_id):  # noqa: C901
-    """
-
-    Returns the details of a specific User_Set, including its parts, minifigures, and user minifigure parts.
-    """
-    from models import (
-        RebrickableColors,
-        RebrickableInventories,
-        RebrickableInventoryParts,
-    )
-
-    user_set = User_Set.query.options(
-        joinedload(User_Set.template_set),
-        joinedload(User_Set.parts_in_set),
-        joinedload(User_Set.minifigures_in_set),
-    ).get_or_404(user_set_id)
-
-    user_minifigure_parts = (
-        UserMinifigurePart.query.options(
-            joinedload(UserMinifigurePart.rebrickable_part),
-            joinedload(UserMinifigurePart.rebrickable_color),
-        )
-        .filter_by(user_set_id=user_set_id)
-        .all()
-    )
-
-    total_quantity = sum(part.quantity for part in user_set.parts_in_set)
-    total_have_quantity = sum(part.have_quantity for part in user_set.parts_in_set)
-    total_quantity += sum(part.quantity for part in user_minifigure_parts)
-    total_have_quantity += sum(part.have_quantity for part in user_minifigure_parts)
-
-    completeness_percentage = (
-        (total_have_quantity / total_quantity) * 100 if total_quantity > 0 else 0
-    )
-
-    def enrich_item(part):
-        """
-
-        Enrich a part with additional data from storage and part information.
-
-
-        Args:
-            part: Part object to enrich with storage and color data
-
-        Returns:
-            dict: Enriched part data with storage location, color name, and image URL
-        """
-        storage_data = (
-            db.session.query(PartStorage).filter_by(part_num=part.part_num).first()
-        )
-
-        # Get part info with proper joins to get color and image information
-        part_query = (
-            db.session.query(RebrickableParts, RebrickableColors)
-            .join(RebrickableColors, RebrickableColors.id == part.color_id)
-            .filter(RebrickableParts.part_num == part.part_num)
-            .first()
-        )
-
-        part_info = part_query[0] if part_query else None
-        color_info = part_query[1] if part_query else None
-
-        # Get category information using part_cat_id
-        category_name = "Unknown Category"
-        if part_info and part_info.part_cat_id:
-            category = (
-                db.session.query(RebrickablePartCategories)
-                .filter_by(id=part_info.part_cat_id)
-                .first()
-            )
-            if category:
-                category_name = category.name
-
-        # Try to get inventory-specific image URL for regular parts
-        inventory_img_url = None
-        if user_set.template_set:
-            inventory = RebrickableInventories.query.filter_by(
-                set_num=user_set.template_set.set_num
-            ).first()
-            if inventory:
-                inv_part = RebrickableInventoryParts.query.filter_by(
-                    inventory_id=inventory.id,
-                    part_num=part.part_num,
-                    color_id=part.color_id,
-                ).first()
-                if inv_part and inv_part.img_url:
-                    inventory_img_url = inv_part.img_url
-
-        return {
-            "id": part.id,
-            "part_num": part.part_num,
-            "name": part_info.name if part_info else "Unknown",
-            "category": category_name,
-            "quantity": part.quantity,
-            "have_quantity": part.have_quantity,
-            "color": color_info.name if color_info else "Unknown",
-            "color_rgb": color_info.rgb if color_info else "FFFFFF",
-            "part_img_url": inventory_img_url
-            or (part_info.part_img_url if part_info else ""),
-            "location": f"Location: {storage_data.location if storage_data else 'Unknown'}, "
-            f"Level: {storage_data.level if storage_data else 'Unknown'}, "
-            f"Box: {storage_data.box if storage_data else 'Unknown'}",
-            "status": "Available" if storage_data else "Not Available",
-            "is_spare": getattr(part, "is_spare", False),
-        }
-
-    def enrich_minifigure_part(part):
-        """
-
-        Enrich a minifigure part with additional data from storage and part information.
-
-
-        Args:
-            part: Minifigure part object to enrich with storage and color data
-
-        Returns:
-            dict: Enriched minifigure part data with storage location, color name, and image URL
-        """
-        storage_data = (
-            db.session.query(PartStorage).filter_by(part_num=part.part_num).first()
-        )
-
-        # Use the relationships that should be already loaded
-        part_info = part.rebrickable_part
-        color_info = part.rebrickable_color
-
-        # Get category information using part_cat_id
-        category_name = "Unknown Category"
-        if part_info and part_info.part_cat_id:
-            category = (
-                db.session.query(RebrickablePartCategories)
-                .filter_by(id=part_info.part_cat_id)
-                .first()
-            )
-            if category:
-                category_name = category.name
-
-        # For minifigure parts, first try the simple part image, then look for inventory-specific
-        part_img_url = part_info.part_img_url if part_info else ""
-
-        # Try to find a better image from minifigure inventories
-        if not part_img_url:
-            minifigures_in_set = user_set.minifigures_in_set
-            for minifig in minifigures_in_set:
-                inventory = RebrickableInventories.query.filter_by(
-                    set_num=minifig.fig_num
-                ).first()
-                if inventory:
-                    inv_part = RebrickableInventoryParts.query.filter_by(
-                        inventory_id=inventory.id,
-                        part_num=part.part_num,
-                        color_id=part.color_id,
-                    ).first()
-                    if inv_part and inv_part.img_url:
-                        part_img_url = inv_part.img_url
-                        break  # Found the image, stop looking
-
-        result = {
-            "id": part.id,
-            "part_num": part.part_num,
-            "name": part_info.name if part_info else "Unknown",
-            "category": category_name,
-            "quantity": part.quantity,
-            "have_quantity": part.have_quantity,
-            "color": color_info.name if color_info else "Unknown",
-            "color_rgb": color_info.rgb if color_info else "FFFFFF",
-            "part_img_url": part_img_url,
-            "location": f"Location: {storage_data.location if storage_data else 'Unknown'}, "
-            f"Level: {storage_data.level if storage_data else 'Unknown'}, "
-            f"Box: {storage_data.box if storage_data else 'Unknown'}",
-            "status": "Available" if storage_data else "Not Available",
-            "is_spare": getattr(part, "is_spare", False),
-        }
-
-        # Debug logging for minifigure parts
-        current_app.logger.debug(
-            f"Minifigure part enriched: {part.part_num}, name: {result['name']}, img_url: {result['part_img_url']}"
-        )
-        return result
-
-    parts = [enrich_item(part) for part in user_set.parts_in_set]
-
-    # Sort parts by color, then category, then name
-    parts.sort(key=lambda x: (x["color"], x["category"], x["name"]))
-
-    # Group minifigure parts by minifigure using the new minifigure_id field
-    minifigures_with_parts = []
-    for minifig in user_set.minifigures_in_set:
-        # Get parts for this specific minifigure using the minifigure_id
-        minifig_parts = [
-            part for part in user_minifigure_parts if part.minifigure_id == minifig.id
-        ]
-
-        # Enrich and sort the parts for this minifigure
-        enriched_parts = [enrich_minifigure_part(part) for part in minifig_parts]
-        enriched_parts.sort(key=lambda x: (x["color"], x["category"], x["name"]))
-
-        minifig_data = {
-            "id": minifig.id,
-            "fig_num": minifig.fig_num,
-            "name": (
-                minifig.rebrickable_minifig.name
-                if minifig.rebrickable_minifig
-                else "Unknown"
-            ),
-            "quantity": minifig.quantity,
-            "img_url": (
-                minifig.rebrickable_minifig.img_url
-                if minifig.rebrickable_minifig
-                else ""
-            ),
-            "location": "Not Specified",
-            "status": "Not Available",
-            "parts": enriched_parts,
-        }
-        minifigures_with_parts.append(minifig_data)
-
-    return jsonify(
-        {
-            "set_img_url": (
-                user_set.template_set.img_url
-                if user_set.template_set and user_set.template_set.img_url
-                else "/static/default_image.png"
-            ),
-            "parts": parts,
-            # Now includes parts grouped with each minifig
-            "minifigs": minifigures_with_parts,
-            "status": user_set.status,
-            "completeness_percentage": round(completeness_percentage, 2),
-        }
-    )
+        list_url=list_url,
+        detail_url=detail_url,
+        draft_values=drafts,
+        save_error=message,
+        field_errors=errors,
+    ), code
 
 
 @set_maintain_bp.route("/set_maintain/update_part_quantity", methods=["POST"])
@@ -562,31 +437,10 @@ def update_user_set():
     """
     user_set_id = request.form.get("user_set_id")
 
-    status = request.form.get("status")
     user_set = User_Set.query.get_or_404(user_set_id)
 
     try:
-        for part in user_set.parts_in_set:
-            have_quantity = request.form.get(f"part_id_{part.id}")
-            if have_quantity is not None:
-                part.have_quantity = max(0, min(part.quantity, int(have_quantity)))
-                db.session.add(part)
-
-        user_minifigure_parts = UserMinifigurePart.query.filter_by(
-            user_set_id=user_set_id
-        ).all()
-        for part in user_minifigure_parts:
-            have_quantity = request.form.get(f"minifig_part_id_{part.id}")
-            if have_quantity is not None:
-                part.have_quantity = max(0, min(part.quantity, int(have_quantity)))
-                db.session.add(part)
-
-        if status and status not in USER_SET_STATUSES:
-            raise ValueError("Invalid set status")
-
-        if status:
-            user_set.status = status
-            db.session.add(user_set)
+        apply_set_edits(user_set, request.form, legacy=True)
 
         db.session.commit()
         flash(
@@ -673,14 +527,24 @@ def delete_user_set(user_set_id):
 def generate_label():
     """
 
-    Generate a DrawIO file for a Brick set label and provide it for download.
+    Generate a print-ready PDF for a set's physical box.
     """
-    data = request.get_json(silent=True) or {}
-    set_id = data.get("set_id")
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="Ein JSON-Objekt mit Set und Boxgröße wird benötigt."), 400
+    try:
+        set_id = parse_integer(data.get("set_id"), positive_id=True)
+    except ValueError:
+        return jsonify(error="Eine gültige Box-ID wird benötigt."), 400
     box_size = data.get("box_size")
+    if not isinstance(box_size, str) or box_size not in SET_LABEL_SIZES:
+        return jsonify(
+            error="Unbekannte Boxgröße. Bitte MB-1, MB-4 oder BIG-BOX wählen."
+        ), 400
     current_app.logger.info(
         "Generating label for set %s with box size %s", set_id, box_size
     )
+    response = None
     try:
         user_set = (
             User_Set.query.join(User_Set.template_set)
@@ -690,33 +554,20 @@ def generate_label():
         if not user_set:
             return jsonify({"error": "Set not found in the database"}), 404
 
-        label_data = {
-            "BOX_LONG_TITLE": f"Brick SET - {user_set.template_set.set_num} - {user_set.template_set.name.replace('&', 'and')}",
-            "BOX_SHORT_TITLE": user_set.template_set.set_num,
-            "IMAGE_CONTEXT": user_set.template_set.img_url,
-            "BOX_ID": str(user_set.id),
-        }
-
-        safe_box_size = secure_filename(str(box_size or ""))
-        template_dir = Path(current_app.template_folder).resolve()
-        drawio_template = (template_dir / f"{safe_box_size}.drawio").resolve()
-        if (
-            not safe_box_size
-            or drawio_template.parent != template_dir
-            or not drawio_template.is_file()
-        ):
-            return jsonify({"error": f"DrawIO template {box_size} not found"}), 400
-
-        with open(drawio_template, encoding="utf-8") as template_file:
-            content = template_file.read()
-            for key, value in label_data.items():
-                content = content.replace(key, value)
-
-        output_dir = Path(current_app.config["OUTPUT_FOLDER"]).resolve()
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_file = output_dir / f"{user_set.id}_{safe_box_size}.drawio"
-        with open(output_file, "w", encoding="utf-8") as output:
-            output.write(content)
+        document = create_set_label_pdf(
+            box_id=set_id,
+            set_number=str(user_set.template_set.set_num),
+            set_name=str(user_set.template_set.name or user_set.template_set.set_num),
+            image_url=str(user_set.template_set.img_url or ""),
+            box_size=box_size,
+            output_folder=current_app.config["OUTPUT_FOLDER"],
+            cache_folder=current_app.config.get("CACHE_FOLDER"),
+        )
+        response = send_file(
+            document.path, as_attachment=True, mimetype="application/pdf"
+        )
+        if document.warning:
+            response.headers["X-Label-Warning"] = document.warning
 
         # Automatically mark the label as printed
         user_set.label_printed = True
@@ -725,7 +576,14 @@ def generate_label():
             f"Label automatically marked as printed for set {set_id}"
         )
 
-        return send_file(output_file, as_attachment=True)
+        return response
     except Exception as error:
-        current_app.logger.error("Error generating label: %s", error)
-        return jsonify({"error": "Failed to generate label"}), 500
+        if response is not None:
+            response.close()
+        db.session.rollback()
+        current_app.logger.error(
+            "Error generating set label (%s)", type(error).__name__
+        )
+        return jsonify(
+            error="Etikett konnte nicht erstellt werden. Bitte erneut versuchen."
+        ), 500

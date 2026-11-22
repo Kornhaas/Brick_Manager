@@ -20,11 +20,66 @@ node --test tests/js/quantity_navigation.cjs
 
 Die globale Coverage-Schwelle beträgt derzeit 60 Prozent. Sie ist ein Release-Gate, nicht der Nachweis ausreichender Testtiefe für jede risikoreiche Funktion. Messwerte werden nur nach einem erfolgreichen vollständigen Lauf dokumentiert; historische Messungen stehen unter `docs/history/`.
 
-Letzter erfolgreicher vollständiger Lauf: 21. November 2026, Linux/Python 3.12.16
-mit den gelockten Abhängigkeiten: 611 bestanden, 0 fehlgeschlagen,
-0 übersprungen, 73,22 % Gesamt-Coverage. Der Windows-Lauf desselben Stands
-bestand 609 Tests und scheiterte zweimal an fehlenden Symlinkrechten sowie dem
-unter Windows unzugänglichen Linux-Interpreter der Workspace-Umgebung.
+Letzter erfolgreicher vollständiger Lauf: 22. November 2026, Linux/Python 3.12:
+698 bestanden, 0 fehlgeschlagen,
+0 übersprungen, 75,45 % Gesamt-Coverage. Die bekannten Windows-Grenzen aus dem
+Lauf vom 21. November (Symlinkrechte und Linux-Interpreter im gemeinsamen
+Workspace) bleiben Umgebungsfragen und wurden nicht durch Testskips verdeckt.
+
+## Setdetails und kontexterhaltende Rückkehr
+
+`test_set_detail.py` prüft die direkt adressierbare HTML-Seite, die unveränderte
+Legacy-JSON-Antwort, getrennte physische Kopien und ID-Namensräume, strikt
+validierte und atomare Änderungen, Rücksprungziele, globale Sortierung und
+ungültig gewordene Ergebnisseiten. Auch kopieneigene Minifigurenteile ohne
+passende Figur sowie deren Eigentumsgrenzen werden isoliert geprüft.
+
+```powershell
+poetry run pytest --no-cov -q brick_manager/tests/test_set_detail.py brick_manager/tests/test_ui_contracts.py
+node --test tests/js/*.cjs
+```
+
+Der zusätzliche Browserlauf benötigt Playwright und einen installierten
+Chromium-Browser. Er startet ausschließlich die gemeinsame Testanwendung mit
+temporärer SQLite-Datenbank:
+
+```powershell
+$env:BRICK_BROWSER_CHANNEL = 'msedge' # Optional, sonst Playwright-Chromium
+poetry run python tests/browser/set_detail_smoke.py
+```
+
+Vier umfangreiche Abläufe prüfen Rückkehr von Seite 2 mit Filtern/Sortierung,
+mehrfaches Speichern ohne Seitenwechsel, echte beobachtete BFCache-Rückkehr mit
+aktuellen Werten, Tastatur und 390 Pixel, Netzwerkfehler/Retry, Entwürfe beim
+Verlassen und vollständige Sammeländerungen einschließlich ausgeblendeter
+Minifigurenteile. Der automatisierte Lauf blockiert externe Ressourcen über
+Chromium-Auflösung. Ein zusätzlicher visueller 390-Pixel-Check verwendete die
+echte festgelegte Bootstrap-CSS; auch dort überlief keine Seite den Bildschirm.
+Eine Prüfung auf echtem iPad, Safari oder mit Screenreader wurde nicht ausgeführt.
+
+## PDF-Setetiketten
+
+`test_set_label_contracts.py` und `test_set_label_pdf.py` prüfen 56 Fälle:
+tatsächliche PDFs und Druckstatus, Unabhängigkeit von externen Vorlagen und
+Arbeitsverzeichnis, A4-Seitenzahlen/-größen, Schnittmaße und Seitenränder,
+Sonderzeichen, lange Titel/Boxnummern, eingebettete Bilder mit korrektem Verhältnis,
+Cache, fehlende Bilder und Warnungen, begrenzte/fehlgeschlagene HTTP-Abrufe,
+ungültige Anfragen, fehlende Kopien, Dateifehler und Transaktions-Rollback.
+`pypdf` ist dafür ausschließlich als Entwicklungsabhängigkeit gelockt; die
+Anwendung benötigt weiterhin nur das bereits vorhandene ReportLab/Pillow.
+Alle automatisierten Abrufe sind gemockt, Ausgaben und Datenbanken isoliert.
+
+```powershell
+poetry run pytest --no-cov -q brick_manager/tests/test_set_label_contracts.py brick_manager/tests/test_set_label_pdf.py
+poetry run python tests/browser/set_label_smoke.py
+```
+
+Der Browserlauf benötigt wie der Setdetailtest Playwright und Chromium/Edge.
+Er prüft alle drei echten PDF-Downloads gegen die erzeugten Dateien, Seitenzahlen,
+Bildwarnung, sichtbare Fehlermeldung mit Retry, Druckstatus und unveränderte
+Filteradresse. Externe Ressourcen sind blockiert. Zusätzliche lokale PDFs aller
+drei Formate mit dem Setbild 71486-1 wurden über Poppler gerendert und visuell geprüft. Ein
+physischer Druck wurde nicht ausgeführt.
 
 ## Erwartete Nachweise
 

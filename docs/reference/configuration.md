@@ -24,6 +24,12 @@ Die Desktop-API akzeptiert ausschließlich `Authorization: Bearer <key>`. Sie is
 
 `Config` legt diese Verzeichnisse beim Import an. Uploads dürfen maximal 16 MiB groß sein; erlaubte Endungen sind `png`, `jpg`, `jpeg`, `gif` sowie das historische Kompatibilitätsformat `gi`.
 
+Setetiketten verwenden `OUTPUT_FOLDER` für PDFs und `CACHE_FOLDER/set_labels/`
+für geprüfte, anhand der Bildadresse gehashte PNG-Bilder. Es sind keine
+zusätzlichen Umgebungsvariablen, Konverter oder Vorlagendateien nötig.
+Abrufgrenzen und erlaubte Bildhosts stehen im
+[Softwaredesign](../architecture/software-design.md#pdf-setetiketten).
+
 ## Sichere Inbetriebnahme
 
 1. `.env.example` nach `.env` kopieren und `SECRET_KEY` sowie bei Bedarf die API-Keys durch zufällige Werte ersetzen.

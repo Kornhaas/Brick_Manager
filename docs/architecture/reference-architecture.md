@@ -95,6 +95,18 @@ Nachweise und die getrennten offenen Vor-Ort-Messungen.
 
 ## Schrittweise Altlastenbereinigung
 
+Die Setpflege trennt Sammlungsliste und den eigenen Arbeitsbereich jeder
+physischen Kopie. Der Set-Maintain-Blueprint stellt HTML-Navigation und
+Transaktionsgrenzen bereit; `set_maintenance_service.py` kapselt das gemeinsame
+Inventarlesemodell sowie die vollständige Validierung vor Mengenänderungen.
+`set_navigation_service.py` begrenzt Herkunftsparameter und serverseitige
+Sortierung. `set_label_service.py` kapselt native PDF-Layouts, begrenzte und
+geprüfte Katalogbildabrufe mit Cache sowie atomare Dateiausgabe; HTTP und Druckstatus bleiben im
+Blueprint. Die bisherigen JSON-/Einzelmengenverträge bleiben erhalten; die
+neue Detailseite bestätigt Mengen und Status bewusst in einer Transaktion.
+Rückkehrkontext und Client-Speicherzustände stehen im
+[Softwaredesign](software-design.md#setliste-und-eigener-arbeitsbereich).
+
 Die erste Architektur-/Usability-Welle ergänzt spezialisierte Services für
 Sammlungsmengenidentität, seitenspezifische Mengenübersichten und konsistente
 SQLite-Sicherungen. Routen bleiben HTTP-/Transaktionsgrenze; vorhandene

@@ -186,6 +186,99 @@ fehlende Namensinformationen gelten nicht als Nachweis gelöschter Kategorien.
 
 ## Sammlungsstabilität und skalare Übersichten
 
+### Setliste und eigener Arbeitsbereich
+
+`/set_maintain` stellt die gefilterte und paginierte Sammlung dar. Echte Links
+führen auf `/set_maintain/<user_set_id>/details`; die technische Identität bleibt
+die physische Kopie, nicht die Katalognummer. Diese HTML-Route ergänzt den
+bisherigen JSON-Endpunkt `/set_maintain/<user_set_id>`, dessen Antwortvertrag
+erhalten bleibt. `set_maintenance_service.py:inventory_details` liefert das
+gemeinsame Lesemodell mit gebündelten Katalogbild-/Lagerabfragen. Nur der
+HTML-Arbeitsbereich ergänzt `unassigned_minifig_parts`: zur Kopie gehörende
+Teile ohne passende Figur bleiben bearbeitbar, ohne die Figurenzuordnung zu
+verändern oder den alten JSON-Vertrag zu erweitern.
+
+Die neue Detailseite verwendet ein einheitliches explizites Speichern. Mengen,
+Status und Sammelentwürfe werden gemeinsam an dieselbe kopienbezogene Route
+gesendet. Die Felder `part_id_<id>` und `minifig_part_id_<id>` bleiben getrennt.
+`apply_set_edits` löst alle Ziele innerhalb der Kopie auf und prüft vor einer
+Zuweisung Ganzzahlen, Grenzen und Status. Leere Änderungen, unbekannte oder
+mehrfach genannte Felder und fremde Inhalte werden abgewiesen. Die Route besitzt
+Commit/Rollback. Die neuen strikten Bereichsfehler ersetzen nicht die weiter
+kompatible Begrenzung in den alten Schreibverträgen.
+
+Bei JavaScript-Saves bestätigt JSON die tatsächlich angenommenen Werte und den
+Fortschritt. Der Controller aktualisiert den bestätigten Vergleichsstand,
+überschreibt keine während der Anfrage neu bearbeiteten Werte und meldet nur
+bei vollständig bestätigtem aktuellem Entwurf Erfolg. Nach verlorener Antwort
+gelten betroffene Werte als ungewiss und werden bei Retry erneut explizit
+gesendet. Ohne JavaScript führt ein erfolgreicher Formularsave mit 303 wieder
+auf dieselbe Detailseite; Fehler rendern korrigierbare Eingaben an dieser Stelle.
+Die einzelnen Speichervorgänge sind transaktional; konkurrierende unabhängige
+Browser besitzen weiterhin keinen Versions-/Konfliktschutz.
+
+`set_navigation_service.py` rekonstruiert den `return_to`-Kontext ausschließlich
+für die lokale Setliste aus erlaubten, typisierten Parametern. Suchtext, Box,
+Thema, Status, Inventar, Label, Gruppierung, Seitengröße, Seite und serverseitige
+Sortierung bleiben erhalten. Sortierausdrücke sind fest vorgegeben; Teilmengen
+werden über skalare Summen sortiert. Ungültige Rückziele werden nicht übernommen.
+`returned_box` und ein stabiler Zeilenanker erlauben Fokus-/Positionswiederherstellung.
+Die Liste erklärt nicht mehr vorhandene Treffer und korrigiert ungültig gewordene
+Ergebnisseiten. Beim Browser-Zurück wird ein veralteter Listenstand neu abgefragt.
+Browserlokale Scrollwerte und geöffnete Übersicht sind eine Ergänzung; ohne
+Sitzungsspeicher bleibt die Rückkehr über Link und Zeilenanker nutzbar.
+
+`set_detail.html`, `set_detail.js` und `set_detail.css` enthalten ausschließlich
+den Arbeitsbereich der Kopie. Sammelaktionen und Mengenfilter verwenden die
+fachliche Sollmenge des jeweiligen Eingabefelds statt Tabellenspaltennummern.
+Das gilt auch für den kompatiblen alten Renderer. Ausgeblendete Mengen bleiben
+Teil einer ausdrücklich bestätigten Sammelaktion. HTML-Tabellen scrollen auf
+schmalen Bildschirmen innerhalb ihres Bereichs; beschriftete Mengenfelder,
+Fehlertexte und normale Tab-Navigation erhalten den Tastaturzugriff.
+
+### PDF-Setetiketten
+
+`POST /set_maintain/generate_label` akzeptiert eine positive ganzzahlige `set_id`
+(auch als Zeichenkette) und eines der unterstützten Formate als `box_size`.
+Ungültige Eingaben liefern 400, fehlende Kopien 404, Erzeugungsfehler 500.
+Erlaubte Formate sind `MB-1`, `MB-4` und `BIG-BOX`. Erfolg liefert ausschließlich
+`application/pdf` als `<box_id>_<box_size>.pdf`.
+Auf ausdrücklichen Nutzerwunsch ersetzt dieser Vertrag die frühere XML-Ausgabe;
+deren Vorlagen und Ersetzungscode sind entfernt. Kein Konverter oder zusätzlicher
+Exportprozess bleibt bestehen. `set_label_service.py` rendert mit ReportLab:
+MB-1 als A4-Kreuz auf einer Seite, MB-4 mit Deckelmotiv und vier Seitenstreifen
+auf zwei, Big Box auf drei A4-Querseiten. `BOX_DIMENSIONS_MM` enthält die vom
+Nutzer genannten physischen Maße 160/110/50, 320/225/50 und 305/229/102 mm.
+Etiketten berücksichtigen mindestens 5 mm Abstand pro Kante und das druckbare
+A4-Limit 277 × 190 mm. Lange/kurze Seiten bleiben unterschieden; je nach Höhe
+passen vier oder zwei Streifen auf eine Seite. Schnittmaße stehen in der
+[Benutzeranleitung](../guides/user-guide.md#setetiketten-herunterladen).
+
+Eingebettete Vera-Schriften stammen aus ReportLab, nicht dem Betriebssystem.
+Namen werden als Text mit begrenztem Umbruch/Verkleinerung und nötigenfalls
+Auslassungszeichen gezeichnet; Bilder behalten ihr Seitenverhältnis.
+`PrintScaling=None` und ein Hinweis auf jeder Seite unterstützen 100-%-Druck.
+Bildabrufe erlauben nur HTTPS zu `cdn.rebrickable.com`/`rebrickable.com`, ohne
+Zugangsdaten, Sonderports oder Weiterleitungen. Connect-/Read-Timeout 3/10 Sekunden,
+15-Sekunden-Streamprüfung, höchstens 8 MiB und 25 Millionen dekodierte Pixel;
+PNG/JPEG/WebP werden auf maximal 2600 × 2600 Pixel reduziert und auf Weiß gelegt.
+Ein URL-Hash adressiert den Cache unter `CACHE_FOLDER/set_labels/`; fehlerhafte
+Einträge können neu geladen werden, Schreibfehler im optionalen Cache verhindern
+den Druck nicht. Ohne Bild entsteht ein beschrifteter Platzhalter, angekündigt
+über `X-Label-Warning` und sichtbare Browserrückmeldung.
+
+Eine temporäre Datei in `OUTPUT_FOLDER` ersetzt das PDF-Ziel atomar;
+fehlgeschlagene Ersetzungen erhalten die vorige Datei und entfernen temporäre Reste.
+
+Die Route bereitet den Download vor und bestätigt erst dann den bestehenden
+automatischen `label_printed`-Status. Fehler rollen die Datenbanktransaktion zurück;
+eine bereits erzeugte Datei kann bei einem anschließenden Commitfehler bestehen
+bleiben. Der Status ist kein Nachweis physischen Drucks. Der Browser zeigt
+Fortschritt, Fehler und erneuten Versuch an der Zeile, hält den Listenkontext und
+aktualisiert nach Erfolg Kontrollkästchen und Statusanzeige ohne Neuladen.
+
+### Mengenidentität und Speicherung
+
 `collection_quantity_service.py` behandelt die Identität einer Mengenzeile als
 `(part_type, part_id)`: `regular` und `minifig` haben unabhängige ID-Räume.
 Dashboard-Batches werden vollständig validiert und aufgelöst, bevor eine Menge
@@ -199,8 +292,8 @@ Ziffernstrings, aber keine Booleans, Dezimalwerte oder unbekannten Typen.
 `static/js/detail_quantities.js` ersetzt den alten jQuery-Inline-Autosave in den
 Dashboarddetails. Delegierte Eingaben und eine Batch-Warteschlange erhalten die
 neueste Eingabe, bestätigen konkrete Serverwerte und behalten Fehler bis zum
-sichtbaren Retry. Die Setpflege serialisiert analog pro logischer Teilidentität;
-ein expliziter Formularabschluss wartet auf laufende Mengenänderungen und darf
+sichtbaren Retry. Der kompatible ältere Set-Renderer serialisiert analog pro
+logischer Teilidentität; sein Formularabschluss wartet auf laufende Mengenänderungen und darf
 nach einem Setwechsel kein anderes Formular absenden. Diese Warteschlangen lösen
 keine gleichzeitigen Änderungen durch unabhängige Browser/Sitzungen; eine solche
 Versionsprüfung bleibt ein eigenes Schema-/Vertragsthema.

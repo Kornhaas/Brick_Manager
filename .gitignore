@@ -9,6 +9,8 @@ brick_manager/static/cache/*
 brick_manager/brick_manager.log
 coverage.xml
 .env
+/output/pdf/
+/tmp/pdfs/
 data/*
 brick_manager/logs/brick_manager.log
 brick_manager/coverage.xml
