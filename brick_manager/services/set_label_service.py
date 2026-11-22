@@ -405,22 +405,23 @@ def create_set_label_pdf(
             )
             footer(f"Lid - {lid_width} x {lid_height} mm")
             widths = [long_side, long_side, short_side, short_side]
-            per_page = int((190 + 5) // (side_height + 5))
+            # Shared horizontal edges and one left trim avoid waste strips.
+            per_page = int(190 // side_height)
             for start in range(0, len(widths), per_page):
                 pdf.showPage()
                 current = widths[start : start + per_page]
-                used_height = len(current) * side_height + (len(current) - 1) * 5
+                used_height = len(current) * side_height
                 top = (210 + used_height) / 2 - side_height
                 for index, width in enumerate(current):
                     placed(
-                        (297 - width) / 2,
-                        top - index * (side_height + 5),
+                        10,
+                        top - index * side_height,
                         width,
                         side_height,
                         large=True,
                     )
                 footer(
-                    f"Sides {start + 1}-{start + len(current)} - {long_side}/{short_side} x {side_height} mm"
+                    f"Sides {start + 1}-{start + len(current)} - {long_side}/{short_side} x {side_height} mm - Cut rows, then right edges"
                 )
         pdf.save()
         destination = Path(output_folder).resolve() / f"{box_id}_{box_size}.pdf"

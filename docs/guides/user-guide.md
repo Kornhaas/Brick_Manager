@@ -65,7 +65,18 @@ angegebenen Schachtelmaße. Mindestens 5 mm Abstand pro Kante und maximal
 277 × 190 mm je Etikett lassen alle Bögen auf A4 mit 10 mm Papierabstand drucken.
 Die großen Motive und langen Seitenetiketten bedecken deshalb nicht die gesamte
 Schachtelfläche. Vor einer Serie einen Ausdruck an der tatsächlichen Schachtel
-prüfen. Lange Namen werden
+prüfen.
+
+Die Seitenstreifen von MB-4 und Big Box sind für den Papierschneider ohne
+Zwischenraum untereinander angeordnet und teilen ihre horizontalen Schnittkanten.
+Alle beginnen bündig 10 mm vom linken Papierrand, auch die kürzeren Streifen.
+Zuerst die gemeinsame linke Außenkante und die waagerechten Reihen schneiden,
+danach die rechten Kanten auf die jeweilige Breite kürzen. Gleich breite Paare
+lassen sich gemeinsam ausrichten. MB-4 hat dadurch drei Zwischenstreifen weniger,
+Big Box einen weniger je Seitenbogen; Maße und Seitenzahlen bleiben gleich.
+MB-1 liegt bereits ohne Zwischenräume im Kreuz und behält diese Anordnung.
+
+Lange Namen werden
 umgebrochen und bei Bedarf verkleinert oder mit Auslassungszeichen gekürzt.
 Fehlt das Setbild oder schlägt sein Download fehl, bleibt das PDF druckbar und
 enthält einen beschrifteten Platzhalter; die Zeile zeigt zusätzlich eine Warnung.

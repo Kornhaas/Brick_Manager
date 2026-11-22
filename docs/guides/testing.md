@@ -20,9 +20,9 @@ node --test tests/js/quantity_navigation.cjs
 
 Die globale Coverage-Schwelle beträgt derzeit 60 Prozent. Sie ist ein Release-Gate, nicht der Nachweis ausreichender Testtiefe für jede risikoreiche Funktion. Messwerte werden nur nach einem erfolgreichen vollständigen Lauf dokumentiert; historische Messungen stehen unter `docs/history/`.
 
-Letzter erfolgreicher vollständiger Lauf: 22. November 2026, GitHub Actions/Linux/Python 3.12:
-698 bestanden, 0 fehlgeschlagen,
-0 übersprungen, 75,46 % Gesamt-Coverage. Die bekannten Windows-Grenzen aus dem
+Letzter erfolgreicher vollständiger Lauf: 22. November 2026, lokal im Linux-Devcontainer/Python 3.12:
+700 bestanden, 0 fehlgeschlagen,
+0 übersprungen, 75,45 % Gesamt-Coverage. Die bekannten Windows-Grenzen aus dem
 Lauf vom 21. November (Symlinkrechte und Linux-Interpreter im gemeinsamen
 Workspace) bleiben Umgebungsfragen und wurden nicht durch Testskips verdeckt.
 
@@ -59,12 +59,14 @@ Eine Prüfung auf echtem iPad, Safari oder mit Screenreader wurde nicht ausgefü
 
 ## PDF-Setetiketten
 
-`test_set_label_contracts.py` und `test_set_label_pdf.py` prüfen 56 Fälle:
+`test_set_label_contracts.py` und `test_set_label_pdf.py` prüfen 58 Fälle:
 tatsächliche PDFs und Druckstatus, Unabhängigkeit von externen Vorlagen und
 Arbeitsverzeichnis, A4-Seitenzahlen/-größen, Schnittmaße und Seitenränder,
 Sonderzeichen, lange Titel/Boxnummern, eingebettete Bilder mit korrektem Verhältnis,
 Cache, fehlende Bilder und Warnungen, begrenzte/fehlgeschlagene HTTP-Abrufe,
 ungültige Anfragen, fehlende Kopien, Dateifehler und Transaktions-Rollback.
+Die Schnittregressionen messen gemeinsame horizontale Kanten ohne Zwischenraum
+und eine bündige linke Schnittkante bei 10 mm für alle MB-4-/Big-Box-Seitenbögen.
 `pypdf` ist dafür ausschließlich als Entwicklungsabhängigkeit gelockt; die
 Anwendung benötigt weiterhin nur das bereits vorhandene ReportLab/Pillow.
 Alle automatisierten Abrufe sind gemockt, Ausgaben und Datenbanken isoliert.

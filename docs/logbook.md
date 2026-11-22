@@ -2,6 +2,33 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-22 – Seitenetiketten für den Papierschneider angeordnet
+
+**Ergebnis:** MB-4 und Big Box verwenden keine 5-mm-Stege mehr zwischen den
+Seitenetiketten. Alle Streifen beginnen an derselben linken Schnittkante bei
+10 mm und teilen ihre horizontalen Kanten. Die Reihen können direkt getrennt
+und gleich breite Paare anschließend rechts gemeinsam gekürzt werden; eine
+kurze Schnittfolge steht im PDF-Fußbereich. MB-4 spart drei Zwischenstreifen,
+Big Box einen je Seitenbogen. Maße, Seitenzahlen, Deckel und MB-1-Kreuz bleiben
+erhalten. Es gibt keine Änderung am HTTP-/Druckstatusvertrag oder Datenmodell.
+
+**Verifikation:** Zwei neue PDF-Regressionsfälle scheiterten am Ausgangsstand
+(kürzere MB-4-Streifen links bei 41 statt 10 mm; 5 mm Abstand zwischen den
+Big-Box-Reihen) und bestanden nach der Korrektur. 58 fokussierte Prüfungen auf
+Windows bestanden; vollständige Linux-Suite: 700 bestanden, 0 fehlgeschlagen,
+0 übersprungen, 75,45 % Gesamt-Coverage. Der isolierte Edge-Lauf bestätigte alle
+drei PDF-Downloads, Seitenzahlen, Bildwarnung, Retry, Filter und Druckstatus.
+Die drei veränderten Seiten mit Setbild 71486-1 wurden mit Poppler gerendert
+und visuell geprüft. Ruff, Formatprüfung und BasedPyright für den Dienst bestanden;
+lokale Dokumentationslinks und Whitespace mit CRLF-Berücksichtigung geprüft.
+
+**Dokumentation und Grenzen:** Schnittfolge in der
+[Benutzeranleitung](guides/user-guide.md#setetiketten-herunterladen), Layoutvertrag
+im [Softwaredesign](architecture/software-design.md#pdf-setetiketten) und
+Nachweise in der [Testanleitung](guides/testing.md#pdf-setetiketten) aktualisiert.
+Kein tatsächlicher Papierschneider-/Drucktest und keine Produktivoperation.
+Die Änderung liegt lokal vor; noch kein Commit, Push oder neuer Docker-Build.
+
 ## 2026-11-22 – Setpflege auf main integriert und Docker-Veröffentlichung geprüft
 
 **Integration:** Die 31 offenen Dateien mit eigener Setdetailseite,

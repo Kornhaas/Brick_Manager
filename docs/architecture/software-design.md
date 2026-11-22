@@ -254,6 +254,13 @@ A4-Limit 277 × 190 mm. Lange/kurze Seiten bleiben unterschieden; je nach Höhe
 passen vier oder zwei Streifen auf eine Seite. Schnittmaße stehen in der
 [Benutzeranleitung](../guides/user-guide.md#setetiketten-herunterladen).
 
+Die Seitenbögen verwenden gemeinsame horizontale Schnittkanten ohne Stege:
+Zeilenhöhe entspricht exakt der Etikettenhöhe, alle linken Kanten liegen bei
+10 mm einschließlich kürzerer Streifen. Der gesamte Block ist vertikal zentriert.
+Dadurch können Reihen und gleich breite Paare mit dem Papierschneider getrennt
+werden, ohne zusätzliche Zwischenstreifen auszuschneiden. MB-1 behält sein bereits
+anliegendes Kreuz; Etikettenmaße und PDF-Seitenzahlen ändern sich nicht.
+
 Eingebettete Vera-Schriften stammen aus ReportLab, nicht dem Betriebssystem.
 Namen werden als Text mit begrenztem Umbruch/Verkleinerung und nötigenfalls
 Auslassungszeichen gezeichnet; Bilder behalten ihr Seitenverhältnis.

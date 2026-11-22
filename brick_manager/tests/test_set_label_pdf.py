@@ -111,6 +111,34 @@ def test_pdf_embeds_one_cached_image_for_all_formats(tmp_path, monkeypatch):
     assert len(list((tmp_path / "cache" / "set_labels").glob("*.png"))) == 1
 
 
+@pytest.mark.parametrize("size", ["MB-4", "BIG-BOX"])
+def test_side_labels_share_cut_edges_and_one_left_trim(tmp_path, size):
+    reader = PdfReader(make_pdf(tmp_path, size=size).path)
+    for page in reader.pages[1:]:
+        rectangles = []
+
+        def inspect(operator, operands, cm, _tm, rectangles=rectangles):
+            if operator != b"re":
+                return
+            x, y, width, height = map(float, operands)
+            rectangles.append(
+                (
+                    (cm[0] * x + cm[2] * y + cm[4]) / mm,
+                    (cm[1] * x + cm[3] * y + cm[5]) / mm,
+                    (cm[0] * (x + width) + cm[2] * (y + height) + cm[4]) / mm,
+                    (cm[1] * (x + width) + cm[3] * (y + height) + cm[5]) / mm,
+                )
+            )
+
+        page.extract_text(visitor_operand_before=inspect)
+        assert len(rectangles) in (2, 4)
+        for rectangle in rectangles:
+            assert rectangle[0] == pytest.approx(10, abs=0.01)
+        for upper, lower in zip(rectangles[:-1], rectangles[1:], strict=True):
+            assert upper[1] == pytest.approx(lower[3], abs=0.01)
+        assert "Cut rows, then right edges" in page.extract_text()
+
+
 @pytest.mark.parametrize(
     "url",
     [
