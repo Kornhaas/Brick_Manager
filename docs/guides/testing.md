@@ -20,9 +20,9 @@ node --test tests/js/quantity_navigation.cjs
 
 Die globale Coverage-Schwelle beträgt derzeit 60 Prozent. Sie ist ein Release-Gate, nicht der Nachweis ausreichender Testtiefe für jede risikoreiche Funktion. Messwerte werden nur nach einem erfolgreichen vollständigen Lauf dokumentiert; historische Messungen stehen unter `docs/history/`.
 
-Letzter erfolgreicher vollständiger Lauf: 22. November 2026, Linux/Python 3.12:
+Letzter erfolgreicher vollständiger Lauf: 22. November 2026, GitHub Actions/Linux/Python 3.12:
 698 bestanden, 0 fehlgeschlagen,
-0 übersprungen, 75,45 % Gesamt-Coverage. Die bekannten Windows-Grenzen aus dem
+0 übersprungen, 75,46 % Gesamt-Coverage. Die bekannten Windows-Grenzen aus dem
 Lauf vom 21. November (Symlinkrechte und Linux-Interpreter im gemeinsamen
 Workspace) bleiben Umgebungsfragen und wurden nicht durch Testskips verdeckt.
 

@@ -21,6 +21,32 @@ Alle Poetry-Befehle werden im Repository-Root ausgeführt. Für gewöhnliche Rou
 
 ## Qualitätschecks
 
+### Gemeinsamer Windows-/Linux-Workspace und Git-Hooks
+
+Eine im Devcontainer erzeugte `.venv` ist eine Linux-Umgebung. Windows-Poetry
+darf sie nicht neu anlegen; das gilt auch für indirekte Poetry-Aufrufe aus
+`git commit`-/`git push`-Hooks. Solche Git-Operationen im Devcontainer ausführen,
+damit die Hooks denselben Interpreter und dieselben gelockten Abhängigkeiten
+wie die Linux-Tests verwenden. Die Standard-Hooks nicht zur Umgehung eines
+Umgebungsfehlers deaktivieren.
+
+Für ausdrücklich auf Windows installierte Werkzeuge können nur für den
+aktuellen PowerShell-Prozess folgende Werte gesetzt werden:
+
+```powershell
+$env:POETRY_VIRTUALENVS_IN_PROJECT = 'false'
+$env:POETRY_VIRTUALENVS_CREATE = 'false'
+```
+
+Damit wird die gemeinsame `.venv` nicht angefasst. Es ersetzt keine Installation
+der Werkzeuge in der gewählten Windows-Umgebung. Windows-spezifische Testgrenzen
+bleiben in der [Testanleitung](testing.md) beschrieben. Staging und Hooks sollten
+auch dieselbe Git-Zeilenendenkonfiguration verwenden; reine CRLF-/LF-Differenzen
+sind keine fachlichen Änderungen und dürfen nicht zusätzliche Dateien in einen
+Release-Commit ziehen.
+
+### Werkzeugaufrufe
+
 ```powershell
 poetry run pytest -q brick_manager/tests/test_client_api.py
 poetry run pytest -q

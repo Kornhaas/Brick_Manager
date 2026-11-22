@@ -2,6 +2,48 @@
 
 Das Logbuch dokumentiert abgeschlossene Arbeitsaufträge ab seiner Einführung. Frühere Berichte bleiben unter [Historie](history/README.md); historische Ergebnisse werden nicht nachträglich erfunden. Neuere Einträge stehen oben. Datum, Ergebnis, Grund, betroffene Dokumente, ausgeführte Prüfungen und offene Grenzen festhalten. Bei reinen Detailänderungen ohne Designauswirkung dies kurz begründen.
 
+## 2026-11-22 – Setpflege auf main integriert und Docker-Veröffentlichung geprüft
+
+**Integration:** Die 31 offenen Dateien mit eigener Setdetailseite,
+kontexterhaltender Liste, Minifigurenkorrekturen und PDF-Etiketten einschließlich
+Dokumentation und Lockfile wurden als
+[`9ab2b70`](https://github.com/Kornhaas/Brick_Manager/commit/9ab2b702e3c1078e9dd083609db182af6934f0e5)
+direkt auf dem bereits aktuellen `main` zusammengeführt und gepusht. GitHub
+nahm den direkten Push mit der konfigurierten Adminausnahme an; die erwarteten
+Statusprüfungen wurden anschließend erfolgreich abgeschlossen. Kein Force-Push
+und keine Deaktivierung von Git-Hooks.
+
+**Verifikation:** Commit-Hooks erfolgreich; der Linux-Push-Hook bestätigte
+698 bestandene Tests, 0 fehlgeschlagen/übersprungen und 75,45 % Coverage.
+Der vollständige
+[Docker-Workflow 45037619613](https://github.com/Kornhaas/Brick_Manager/actions/runs/45037619613)
+für diesen Commit endete erfolgreich: 698 CI-Tests (75,46 % Coverage),
+Multiarch-Build/Push, Container-Healthcheck mit `database=connected` und
+`status=healthy`, Trivy/SARIF und Bereitstellungsmitteilung. Auch die separaten
+Python-, Pylint- und Codacy-Läufe bestanden. Die veröffentlichten Plattformen
+`linux/amd64` und `linux/arm64` wurden per Registry-Manifest und Revision-Label
+gegen den Commit geprüft. `main` und `latest` zeigten auf
+`sha256:68ab800c1a48bf9c4d2924d760029aec81e3296d40b1daada92bf02b37e9445d`.
+
+**Umgebungsreparatur:** Der erste Push wurde irrtümlich aus Windows gestartet.
+Sein Hook versuchte die gemeinsame Linux-`.venv` neu anzulegen und scheiterte.
+Die Linux-Umgebung wurde aus dem Lockfile einschließlich Projektinstallation
+wiederhergestellt; der anschließende Hook lief vollständig im Devcontainer.
+Durch gemischte Git-Zeilenenden entstandene scheinbare Arbeitsänderungen wurden
+erst byteweise auf ausschließlich CRLF-/LF-Unterschiede geprüft und dann an den
+Index angeglichen; keine fachlichen Änderungen verworfen.
+
+**Dokumentation und Grenzen:**
+[Entwicklungsanleitung](guides/development.md#gemeinsamer-windows-linux-workspace-und-git-hooks)
+und [Docker-Betrieb](guides/docker.md#build-und-veröffentlichung-auf-github)
+dokumentieren den richtigen Hook-Kontext und die vollständige Build-Abnahme.
+Lokale Markdown-Links und Whitespace mit CRLF-Berücksichtigung geprüft.
+Die Abschlussdokumentation verändert keinen Anwendungscode. Der CI-Job „Deploy“
+ist ausschließlich eine Mitteilung; kein Produktionsserver wurde aktualisiert
+oder neu gestartet. Der Workflow enthält weiterhin nicht blockierende Hinweise
+auf ältere Node-20-Actiondeklarationen, die GitHub auf Node 24 ausführt. ARM64
+wurde gebaut und veröffentlicht, aber nicht separat auf ARM64-Hardware gestartet.
+
 ## 2026-11-22 – PDF-Schachteletiketten für MB-1, MB-4 und Big Box umgesetzt
 
 **Ergebnis:** Die Setliste lädt native ReportLab-PDFs für alle drei Formate.
